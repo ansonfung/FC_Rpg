@@ -1,0 +1,55 @@
+name: FC_Rpg
+main: me.Destro168.FC_Rpg.FC_Rpg
+version: 1.0
+description: Handles RPG aspects of the server.
+commands:
+   rpg:
+      description: Rpg command
+      usage: /rpg [command]
+   server:
+      description: This command gives server information to the sender.
+      usage: /server
+   class:
+      description: Class command
+      usage: /class
+   job:
+      description: Job command
+      usage: /job
+   spell:
+      description: Spell command
+      usage: /spell
+   party:
+      description: Party command
+      usage: /party
+   donator:
+      description: Donator command
+      usage: /donator
+   reset:
+      description: Reset command
+      usage: /reset
+   hat:
+      description: Hat command
+      usage: /hat
+   bigHelp:
+      description: This command displays all the help topics in /help at once.
+      usage: /bigHelp
+   list:
+      description: List command.
+      usage: /list
+   pvp:
+      description: pvp command.
+      usage: /pvp
+   faq:
+      description: faq command.
+      usage: /faq
+   h:
+      description: heal command.
+      usage: /h
+   g:
+      description: Gamemode command.
+      usage: /g
+   dungeon:
+      description: Dungeon command.
+      usage: /dungeon
+softdepend: [Multiverse]
+depend: [WorldEdit, WorldGuard, FC_Suite_Shared]

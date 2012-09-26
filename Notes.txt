@@ -1,0 +1,972 @@
+- Old Prefixes
+
+/*
+//Set color and class letter.
+switch (getCombatClass())
+{
+case 1:
+	classColor += ChatColor.GREEN;
+	break;
+case 2:
+	classColor += ChatColor.DARK_GREEN ;
+	break;
+case 3:
+	classColor += ChatColor.AQUA;
+	break;
+case 4:
+	classColor += ChatColor.DARK_AQUA;
+	break;
+case 5:
+	classColor += ChatColor.LIGHT_PURPLE;
+	break;
+case 6:
+	classColor += ChatColor.DARK_PURPLE;
+	break;
+case 7:
+	classColor += ChatColor.BLUE;
+	break;
+}
+
+//Set job
+prefix = prefix + ChatColor.GRAY + "[";
+
+//Format the prefix.
+if (getClassLevel() >= 100 && getJobRank() >= 6)
+	prefix = prefix + ChatColor.LIGHT_PURPLE + "MAX";
+else
+	prefix = prefix + ChatColor.GREEN + getClassLevel();
+
+prefix = prefix + ChatColor.GRAY + "]";
+*/
+		
+		
+- Old AoE
+
+//Swordman AoE damage
+else if (util.getClassNumber("Swordsman") == rpgAttacker.getCombatClass())
+{
+	if (preventInfiniteSpecial == true)
+		return damage;
+
+	if (classSpecialChance.nextInt(5) == 0)
+	{
+		for (Entity entity_: playerAttacker.getNearbyEntities(7, 7, 7))
+		{
+			//Make sure that infinite aoes don't occur.
+			preventInfiniteSpecial = true;
+			
+			//Create the EDBEE
+			EntityDamageByEntityEvent aoeStrike = new EntityDamageByEntityEvent(
+					playerAttacker, entity_, DamageCause.ENTITY_ATTACK, 0);
+			
+			//Attack all entities
+			entityAttack(aoeStrike);
+		}
+	}
+}
+
+- Old build check WG
+
+private boolean getCanBuild(Block block, Player player, World world)
+{
+	WorldGuardPlugin worldGuard = getWorldGuard();
+	Location pt = block.getLocation(); // This also takes a location
+	LocalPlayer localPlayer = worldGuard.wrapPlayer(player);
+
+	RegionManager regionManager = worldGuard.getRegionManager(world);
+	ApplicableRegionSet set = regionManager.getApplicableRegions(pt);
+
+	return set.canBuild(localPlayer);
+}
+
+- Old item drops for farmers
+
+//If a farmer and is now tier 3, or 4, or 5
+if (job[0] == 3)
+{
+	if (jobRank == 4)
+	{
+		//Pig
+		drops = new ItemStack(Material.MONSTER_EGG, 2, (byte) 90);
+		Bukkit.getWorld(player.getWorld().getName()).dropItem(player.getLocation(), drops);
+		
+		//Sheep
+		drops = new ItemStack(Material.MONSTER_EGG, 2, (byte) 91);
+		Bukkit.getWorld(player.getWorld().getName()).dropItem(player.getLocation(), drops);
+		
+		//Mob Spawner
+		drops = new ItemStack(Material.MOB_SPAWNER);
+		drops.setAmount(4);
+		
+		Bukkit.getWorld(player.getWorld().getName()).dropItem(player.getLocation(), drops);
+	}
+	else if (jobRank == 5)
+	{
+		//Pig
+		drops = new ItemStack(Material.MONSTER_EGG, 3, (byte) 90);
+		Bukkit.getWorld(player.getWorld().getName()).dropItem(player.getLocation(), drops);
+		
+		//Sheep
+		drops = new ItemStack(Material.MONSTER_EGG, 3, (byte) 91);
+		Bukkit.getWorld(player.getWorld().getName()).dropItem(player.getLocation(), drops);
+		
+		//Cow
+		drops = new ItemStack(Material.MONSTER_EGG, 1, (byte) 92);
+		Bukkit.getWorld(player.getWorld().getName()).dropItem(player.getLocation(), drops);
+		
+		//Chicken
+		drops = new ItemStack(Material.MONSTER_EGG, 1, (byte) 93);
+		Bukkit.getWorld(player.getWorld().getName()).dropItem(player.getLocation(), drops);
+		
+		//Mob Spawner
+		drops = new ItemStack(Material.MOB_SPAWNER);
+		drops.setAmount(8);
+		
+		Bukkit.getWorld(player.getWorld().getName()).dropItem(player.getLocation(), drops);
+	}
+	else if (jobRank == 6)
+	{
+		//Given 15 pig spawners, 15 sheep spawners, 4 cow spawners, 4 chicken spawners and 1 mooshroom spawner
+		
+		//Pig
+		drops = new ItemStack(Material.MONSTER_EGG, 15, (byte) 90);
+		Bukkit.getWorld(player.getWorld().getName()).dropItem(player.getLocation(), drops);
+		
+		//Sheep
+		drops = new ItemStack(Material.MONSTER_EGG, 15, (byte) 91);
+		Bukkit.getWorld(player.getWorld().getName()).dropItem(player.getLocation(), drops);
+		
+		//Cow
+		drops = new ItemStack(Material.MONSTER_EGG, 4, (byte) 92);
+		Bukkit.getWorld(player.getWorld().getName()).dropItem(player.getLocation(), drops);
+		
+		//Chicken
+		drops = new ItemStack(Material.MONSTER_EGG, 4, (byte) 93);
+		Bukkit.getWorld(player.getWorld().getName()).dropItem(player.getLocation(), drops);
+		
+		//Mooshroom
+		drops = new ItemStack(Material.MONSTER_EGG, 1, (byte) 96);
+		Bukkit.getWorld(player.getWorld().getName()).dropItem(player.getLocation(), drops);
+		
+		//Mob Spawner
+		drops = new ItemStack(Material.MOB_SPAWNER);
+		drops.setAmount(42);
+		
+		Bukkit.getWorld(player.getWorld().getName()).dropItem(player.getLocation(), drops);
+	}
+}
+
+- Donator Time Logged
+
+public long logTimePlayed()
+{
+	Date now = new Date();
+	
+	if (!(name.equals("")))
+	{
+		config = plugin.getConfig();
+		
+		//Pull out an accurate donator time left from before.
+		donatorTimeLeft = config.getLong("Player." + name + ".donatorTimeLeft");
+		
+		try
+		{
+			donatorTimeLeft = donatorTimeLeft - (now.getTime() - lastCheck.getTime());
+		}
+		catch (NullPointerException e)
+		{
+			donatorTimeLeft = 10;
+		}
+		
+		//If they have no donator time left, then we want to remove their donator status.
+		if (donatorTimeLeft < 1)
+		{
+			if (donatorRank < 6)
+			{
+				//Remove groups
+				switch (donatorRank)
+				{
+				case 1:
+					FC_Rpg.permission.playerRemoveGroup(player, "Novice");
+					break;
+				case 2:
+					FC_Rpg.permission.playerRemoveGroup(player, "Ghost");
+					break;
+				case 3:
+					FC_Rpg.permission.playerRemoveGroup(player, "Skeleton");
+					break;
+				case 4:
+					FC_Rpg.permission.playerRemoveGroup(player, "Zombie");
+					break;
+				case 5:
+					FC_Rpg.permission.playerRemoveGroup(player, "Troll");
+					break;
+				case 6:
+					FC_Rpg.permission.playerRemoveGroup(player, "Behemoth");
+					break;
+				}
+				
+				//Reset donator rank and set time left to 0.
+				donatorRank = 0;
+				donatorTimeLeft = 0;
+				config.set("Player." + name + ".donatorTimeLeft", 0);
+				config.set("Player." + name + ".donatorRank", 0);
+			}
+			else
+				config.set("Player." + name + ".donatorTimeLeft", donatorTimeLeft);
+		}
+		else
+			config.set("Player." + name + ".donatorTimeLeft", donatorTimeLeft);
+
+		//Update the date now.
+		lastCheck = new Date();
+		
+		plugin.saveConfig();
+		
+		return donatorTimeLeft;
+	}
+	
+	return -1;
+}
+
+- Job Prefixes
+
+else
+{
+	//Color for job prefix.
+	switch (jobRank)
+	{
+	case 1:
+		jobLetter += ChatColor.GREEN;
+		break;
+	case 2:
+		jobLetter += ChatColor.YELLOW;
+		break;
+	case 3:
+		jobLetter += ChatColor.LIGHT_PURPLE;
+		break;
+	case 4:
+		jobLetter += ChatColor.AQUA;
+		break;
+	case 5:
+		jobLetter += ChatColor.BLUE;
+		break;
+	case 6:
+		jobLetter += ChatColor.GRAY;
+		break;
+	}
+	
+	switch (job[0])
+	{
+	case 1:
+		jobLetter += "Trader";
+		break;
+	case 2:
+		jobLetter += "Miner";
+		break;
+	case 3:
+		jobLetter += "Farmer";
+		break;
+	case 4:
+		jobLetter += "Builder";
+		break;
+	}
+}
+
+- Death Chest Code
+
+Block deathBlock;
+Location[] loc = new Location[4];
+World world;
+Chest c;
+Inventory ci;
+			
+//Only spawn death chests if the player is on a non-protected block they can build on.
+if (getCanBuild(player.getLocation().getBlock(), player, world) == true)
+{
+	deathBlock = player.getLocation().getBlock();
+	
+	//If there is room for a single chest, then continue.
+	if (deathBlock.getType().equals(Material.AIR))
+	{
+		// If the number of items dropped is less than 27 and greater than 0, do single chest,
+		if (event.getDrops().size() < 28 && event.getDrops().size() > 0)
+		{
+			//Set that block to chest
+			deathBlock.setType(Material.CHEST);
+			
+			//Store the state of the block (chest) and get inventory.
+			c = (Chest) deathBlock.getState();
+			ci = c.getInventory();
+			
+			//Add drops to chest
+			for (ItemStack item: event.getDrops())
+			{
+				ci.addItem(item);
+			}
+			
+			//Remove items from event.
+			event.getDrops().clear();
+		}
+		// else do do double chest stuff.
+		else if (event.getDrops().size() > 27)
+		{
+			//Create first chest
+			deathBlock.setType(Material.CHEST);
+			
+			//Store the state of the block (chest) and get inventory.
+			c = (Chest) deathBlock.getState();
+			ci = c.getInventory();
+			
+			//Add first 27 items to the chest
+			for (int i = 0; i < 27; i++)
+			{
+				ci.addItem(event.getDrops().get(i));
+				event.getDrops().set(i, air);
+			}
+			
+			for (int i = 0; i < 4; i++)
+				loc[i] = deathBlock.getLocation();
+			
+			loc[0].setX(deathBlock.getLocation().getX() - 1);
+			loc[1].setX(deathBlock.getLocation().getX() + 1);
+			loc[2].setY(deathBlock.getLocation().getY() - 1);
+			loc[3].setY(deathBlock.getLocation().getY() + 1);
+			
+			//Look for a second spot to spawn second chest.
+			for (int i = 0; i < 4; i++)
+			{
+				if (world.getBlockAt(loc[i]).getType().equals(Material.AIR))
+				{
+					//Create chest
+					deathBlock = world.getBlockAt(loc[i]);
+					deathBlock.setType(Material.CHEST);
+					
+					//Store the state of the block (chest) and get inventory.
+					c = (Chest) deathBlock.getState();
+					ci = c.getInventory();
+					
+					//Add drops to chest
+					for (ItemStack item: event.getDrops())
+					{
+						ci.addItem(item);
+					}
+				
+					//Remove remaining items from event.
+					event.getDrops().clear();
+					
+					i = 4;
+				}
+			}
+		}
+	}
+	*/
+
+public class foodLevelChange implements Listener
+{
+	@EventHandler
+	public void onFoodLevelChange(FoodLevelChangeEvent event)
+	{
+		if (rpgManager.getPlayerFromId(event.getEntity().getEntityId()) != null)
+		{
+			if (rpgManager.getPlayerFromId(event.getEntity().getEntityId()).isFarmer())
+			{
+				event.setCancelled(true);
+			}
+		}
+		else
+		{
+			event.setCancelled(true);
+		}
+	}
+}
+
+public class blockBreakListener implements Listener
+{
+	@EventHandler
+	public void onBlockBreak(BlockBreakEvent event)
+	{
+		Player player = event.getPlayer();
+		World world = Bukkit.getServer().getWorld(player.getWorld().getName());
+		RpgPlayer rpgPlayer = rpgManager.getPlayerFromId(player.getEntityId());
+		boolean success = true;
+		Random specialSuccess = new Random();
+		Block block = event.getBlock();
+		BlockCheck bc = new BlockCheck(block);
+		
+		//The execution of this function is as follows, if success is ever set to false, then discontinue execution.
+		if (rpgPlayer == null)
+		{
+			event.setCancelled(true);
+			return;
+		}
+		
+		//Make sure they aren't using a tool above their job level.
+		if (rpgPlayer.getJobRank() < 2)
+		{
+			if (player.getItemInHand().getType().equals(Material.STONE_HOE))
+				success = false;
+			else if (player.getItemInHand().getType().equals(Material.STONE_AXE))
+				success = false;
+			else if (player.getItemInHand().getType().equals(Material.STONE_PICKAXE))
+				success = false;
+			else if (player.getItemInHand().getType().equals(Material.STONE_SPADE))
+				success = false;
+		}
+		
+		if (rpgPlayer.getJobRank() < 3)
+		{
+			if (player.getItemInHand().getType().equals(Material.IRON_HOE))
+				success = false;
+			else if (player.getItemInHand().getType().equals(Material.IRON_AXE))
+				success = false;
+			else if (player.getItemInHand().getType().equals(Material.IRON_PICKAXE))
+				success = false;
+			else if (player.getItemInHand().getType().equals(Material.IRON_SPADE))
+				success = false;
+		}
+
+		if (rpgPlayer.getJobRank() < 4)
+		{
+			if (player.getItemInHand().getType().equals(Material.DIAMOND_HOE))
+				success = false;
+			else if (player.getItemInHand().getType().equals(Material.DIAMOND_AXE))
+				success = false;
+			else if (player.getItemInHand().getType().equals(Material.DIAMOND_PICKAXE))
+				success = false;
+			else if (player.getItemInHand().getType().equals(Material.DIAMOND_SPADE))
+				success = false;
+		}
+		
+		if (rpgPlayer.getJobRank() < 5)
+		{
+			if (player.getItemInHand().getType().equals(Material.GOLD_HOE))
+				success = false;
+			else if (player.getItemInHand().getType().equals(Material.GOLD_AXE))
+				success = false;
+			else if (player.getItemInHand().getType().equals(Material.GOLD_PICKAXE))
+				success = false;
+			else if (player.getItemInHand().getType().equals(Material.GOLD_SPADE))
+				success = false;
+		}
+		else
+		{
+			if (player.getItemInHand().getType().equals(Material.GOLD_HOE))
+				player.getItemInHand().setDurability((short) -128);
+			else if (player.getItemInHand().getType().equals(Material.GOLD_AXE))
+				player.getItemInHand().setDurability((short) -128);
+			else if (player.getItemInHand().getType().equals(Material.GOLD_PICKAXE))
+				player.getItemInHand().setDurability((short) -128);
+			else if (player.getItemInHand().getType().equals(Material.GOLD_SPADE))
+				player.getItemInHand().setDurability((short) -128);
+			else
+				success = true;
+		}
+		
+		if (FC_Rpg.permission.has(player, "FC_Rpg.allJobs"))
+		{
+			success = true;
+		}
+		else if (success == false)
+		{
+			player.sendMessage(ChatColor.RED + "You can't use this tool.");
+			event.setCancelled(true);
+			return;
+		}
+		
+		//If the player is using a valid tool, then continue processing.
+		if (success == true)
+		{
+			//Check to see if you can build/break tier 1 stuff.
+			success = bc.canBuildAndBreakOne();
+			
+			if (success == false)
+			{
+				success = bc.canMineOne();
+			}
+			
+			if (success == false)
+			{
+				success = bc.isFarmerOne();
+			}
+			
+			/*************************************************************************************
+			 * 
+			 * Builder Code, Handles specials and allowable block breaks.
+			 *
+			 *************************************************************************************/
+			
+			if ((success == false) && (rpgPlayer.isBuilder() == true))
+			{
+				if (rpgPlayer.getJobRank() == 2)
+					success = bc.canBuildAndBreakTwo();
+				
+				else if (rpgPlayer.getJobRank() == 3)
+					success = bc.canBuildAndBreakThree();
+				
+				else if (rpgPlayer.getJobRank() == 4)
+					success = bc.canBuildAndBreakFour();
+				
+				else if (rpgPlayer.getJobRank() == 5)
+					success = bc.canBuildAndBreakFive();
+				
+				else if (rpgPlayer.getJobRank() == 6)
+					success = true;
+			}
+			
+			/*************************************************************************************
+			 * 
+			 * Miner Code, Handles specials and allowable block breaks.
+			 *
+			 *************************************************************************************/
+			
+			if ((success == false) && (rpgPlayer.isMiner() == true))
+			{
+				if (rpgPlayer.getJobRank() == 2)
+					success = bc.canMineTwo();
+				
+				else if (rpgPlayer.getJobRank() == 3)
+					success = bc.canMineThree();
+				
+				else if (rpgPlayer.getJobRank() == 4)
+					success = bc.canMineFour();
+				
+				else if (rpgPlayer.getJobRank() == 5)
+					success = bc.canMineFive();
+				
+				else if (rpgPlayer.getJobRank() == 6)
+					success = true;
+				
+				if (success == true)
+				{
+					//Make sure that the player has a gold tool
+					if (player.getItemInHand().getType().equals(Material.GOLD_PICKAXE) || player.getItemInHand().getType().equals(Material.GOLD_SPADE)
+							|| player.getItemInHand().getType().equals(Material.GOLD_AXE))
+					{
+						//If the player is rank 6 and is mining allowable blocks then handle highest level special.
+						if (rpgPlayer.getJobRank() == 6)
+						{
+							if(specialSuccess.nextInt(100) < 3)
+							{
+								for (int x = block.getLocation().getBlockX() - 2; x < block.getLocation().getBlockX() + 3; x++)
+								{
+									for (int y = block.getLocation().getBlockY(); y < block.getLocation().getBlockY() + 5; y++)
+									{
+										for (int z = block.getLocation().getBlockZ() - 2; z < block.getLocation().getBlockZ() + 3; z++)
+										{
+											world.getBlockAt(x,y,z).breakNaturally();
+										}
+									}
+								}
+							}
+						}
+						//Else if rank 5 attempt special.
+						else if (rpgPlayer.getJobRank() == 5)
+						{
+							//Make sure that the player has a gold pickaxe
+							if (player.getItemInHand().getType().equals(Material.GOLD_PICKAXE) || player.getItemInHand().getType().equals(Material.GOLD_SPADE)
+									|| player.getItemInHand().getType().equals(Material.GOLD_AXE))
+							{
+								if(specialSuccess.nextInt(100) < 3)
+								{
+									//Then account for 10% chance to break in an AoE
+									for (int x = block.getLocation().getBlockX() - 1; x < block.getLocation().getBlockX() + 2; x++)
+									{
+										for (int y = block.getLocation().getBlockY(); y < block.getLocation().getBlockY() + 3; y++)
+										{
+											for (int z = block.getLocation().getBlockZ() - 1; z < block.getLocation().getBlockZ() + 2; z++)
+											{
+												world.getBlockAt(x,y,z);
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			/*************************************************************************************
+			 * 
+			 * Farmer Code, Handles specials and allowable block breaks.
+			 *
+			 *************************************************************************************/
+			
+			if ((success == false) && (rpgPlayer.isFarmer()))
+			{
+				if (success == false)
+				{
+					if (rpgPlayer.getJobRank() > 1)
+						success = bc.isFarmerTwo();
+				}
+				
+				if (success == false)
+				{
+					if (rpgPlayer.getJobRank() > 2)
+						success = bc.isFarmerThree();
+				}
+				
+				if (success == false)
+				{
+					if (rpgPlayer.getJobRank() > 3)
+						success = bc.isFarmerFour();
+				}
+				
+				if (success == false)
+				{
+					//Waterer
+					if (rpgPlayer.getJobRank() > 4)
+					{
+						if (block.getType().equals(Material.CROPS))
+						{
+							success = true;
+
+							//First handle tool specials
+							if (rpgPlayer.getJobRank() >= 5)
+							{
+								//Make sure that the player has a golden hoe
+								if (player.getItemInHand().getType().equals(Material.GOLD_HOE))
+								{
+									world.dropItem(block.getLocation(), (ItemStack) event.getBlock().getDrops());
+								}
+							}
+							else if (rpgPlayer.getJobRank() >= 4)
+							{
+								//Make sure that the player has a diamond hoe
+								if (player.getItemInHand().getType().equals(Material.DIAMOND_HOE))
+								{
+									if (specialSuccess.nextInt(100) < 50)
+										world.dropItem(block.getLocation(), (ItemStack) event.getBlock().getDrops());
+								}
+							}
+							else if (rpgPlayer.getJobRank() >= 3)
+							{
+								//Make sure that the player has a iron hoe
+								if (player.getItemInHand().getType().equals(Material.IRON_HOE))
+								{
+									if (specialSuccess.nextInt(100) < 25)
+										world.dropItem(block.getLocation(), (ItemStack) event.getBlock().getDrops());
+								}
+							}
+						}
+						else if (block.getType().equals(Material.SUGAR_CANE_BLOCK))
+							success = true;
+					}
+				}
+			}
+			
+			if (FC_Rpg.permission.has(player, "FC_Rpg.allJobs"))
+			{
+				success = true;
+			}
+			
+			if (!(FC_Rpg.permission.has(player, "FC_Rpg.admin")))
+			{
+				if (success == false)
+					event.setCancelled(true);
+			}
+		}
+	}
+}
+	
+/*
+public class blockPlaceListener implements Listener
+{
+	@EventHandler
+	public void onBlockPlace(BlockPlaceEvent event)
+	{
+		//Variable Declarations
+		Player player = event.getPlayer();
+		RpgPlayer rpgPlayer = rpgManager.getPlayerFromId(player.getEntityId());
+		Block block = event.getBlock();
+		boolean success = false;
+		BlockCheck bc = new BlockCheck(block);
+		
+		if (rpgPlayer == null)
+		{
+			event.setCancelled(true);
+			return;
+		}
+		
+		//Attempt a success for anybody to place level one block.
+		success = bc.isAnyClass();
+		
+		if (success == false)
+			success = bc.isFarmerOne();
+		
+		if (success == false)
+			success = bc.canBuildOne();
+		
+		if (success == false && rpgPlayer.isFarmer() == true)
+		{
+			//Handle farmer operations first.
+			if (rpgPlayer.isFarmer())
+			{
+				if (success == false)
+				{
+					if (rpgPlayer.getJobRank() >= 2)
+						success = bc.isFarmerTwo();
+				}
+				
+				if (success == false)
+				{
+					if (rpgPlayer.getJobRank() >= 3)
+						success = bc.isFarmerThree();
+				}
+				
+				if (success == false)
+				{
+					if (rpgPlayer.getJobRank() >= 4)
+						success = bc.isFarmerFour();
+				}
+			}
+		}
+		
+		if (success == false && rpgPlayer.isBuilder() == true)
+		{
+			//Handle builder operations.
+			if (rpgPlayer.isBuilder())
+			{
+				if (success == false)
+				{
+					if (rpgPlayer.getJobRank() == 1)
+						success = bc.canBuildOne();
+				}
+				
+				if (success == false)
+				{
+					if (rpgPlayer.getJobRank() == 2)
+						success = bc.canBuildTwo();
+				}
+				
+				if (success == false)
+				{
+					if (rpgPlayer.getJobRank() == 3)
+						success = bc.canBuildThree();
+				}
+				
+				if (success == false)
+				{
+					if (rpgPlayer.getJobRank() == 4)
+						success = bc.canBuildFour();	
+				}
+				
+				if (success == false)
+				{
+					if (rpgPlayer.getJobRank() == 5)
+						success = bc.canBuildFive();
+				}
+				
+				if (success == false)
+				{
+					if (rpgPlayer.getJobRank() == 6)
+						success = true;
+				}
+			}
+		}
+		
+		if (FC_Rpg.permission.has(player, "FC_Rpg.allJobs"))
+		{
+			success = true;
+		}
+		
+		if (!(FC_Rpg.permission.has(player, "FC_Rpg.admin")))
+		{
+			if (success == false)
+				event.setCancelled(true);
+		}
+	}
+}
+*/
+
+/*
+//Destroy blocks with blast charge
+public class chargeListener implements Listener
+{	
+	@EventHandler
+	public void onBlast(BlockDamageEvent event)
+	{
+		ItemStack newStack = new ItemStack(264);
+		Player eventPlayer = event.getPlayer();
+		config = getConfig();
+		boolean unLogged = true;
+		boolean abort = false;
+		int count = 0;
+		String log = "";
+		Date date = new Date();
+		DateFormat dfm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+		if (eventPlayer.getItemInHand().getType() == newStack.getType())
+		{
+			if (FC_Rpg.permission.has(eventPlayer, "FC_Rpg.blast"))
+			{
+				if ((getCanBuild(event.getBlock(), event.getPlayer(), event.getPlayer().getWorld()) == true) || (event.getPlayer().hasPermission("FC_Rpg.op")))
+				{
+					if (event.getBlock().getType() == Material.BEDROCK)
+					{
+						eventPlayer.sendMessage("You can't break bedrock");
+						event.setCancelled(true);
+						abort = true;
+					}
+					if (event.getBlock().getType() == Material.CHEST)
+					{
+						eventPlayer.sendMessage("You can't break chests");
+						event.setCancelled(true);
+						abort = true;
+					}
+
+					if (abort == false)
+					{
+						if (eventPlayer.getItemInHand().getAmount() == 1)
+						{
+							eventPlayer.setItemInHand(null);
+						}
+						else if (eventPlayer.getItemInHand().getAmount() > 0)
+						{
+							eventPlayer.getItemInHand().setAmount(eventPlayer.getItemInHand().getAmount() - 1);
+						}
+					}
+
+					log = "X:" + String.valueOf(event.getBlock().getLocation().getX()) + " Z:" + String.valueOf(event.getBlock().getLocation().getZ()) + " Y:" +
+							String.valueOf(event.getBlock().getLocation().getY()) + " Date: " + dfm.format(date);
+
+					while (unLogged == true)
+					{
+						if (config.getString(eventPlayer.getName() + "." + Integer.valueOf(count)) == null)
+						{
+							config.set(eventPlayer.getName() + "." + Integer.valueOf(count), log);
+							//config.set(eventPlayer.getName() + "." + Integer.valueOf(count) + ".2", true);
+							unLogged = false;
+						}
+						else
+							count++;
+					}
+				}
+			}
+			else
+			{
+				eventPlayer.sendMessage("You do not have permission to raid.");
+			}
+		}
+
+		saveConfig();
+	}
+}
+*/
+
+/*
+
+This is the berserker math
+
+500 max health
+200 current health = 40% of max health
+
+500 / 100 = 5
+200 / 5 = 40% of your max health
+
+40% of max health = 10% damage bonus
+
+If your damage is 5, a 10% bonus is .5
+
+
+New Math
+//50 / 100 * .01
+//50% health = .5 per health /2 or /4
+//
+//100 - 50 * .25
+//87.5
+
+ */
+
+//Bukkit.getServer().broadcastMessage(String.valueOf(calcHearts(entity[index].getMaxHealth(), entity[index].getCurHealth())));
+
+/*
+Health Updating Algorithm:
+
+100 Max Health;
+
+a = 120;
+b = 120 / 20 = 6;
+c = 60 / 6 = 10
+
+Every 5 is another 1/2 heart.
+50 / 5 = 10 which is equal for 5 full hearts;
+ */
+
+/*
+
+Scale health by distance
+Every 100 out = Increases distanceMultiplier
+Every 10 down = Increases depthMultiplier
+
+ */
+
+//Rain of Items/Entities
+
+/*
+switch (Integer.valueOf(args[1]))
+{
+case 1:
+	8194
+	break;
+case 2:
+	id = 8226;
+	break;
+case 3:
+	id = 8258;
+	break;
+case 4:
+	id = 16386;
+	break;
+case 5:
+	id = 16418;
+	break;
+case 6:
+	id = 16450;
+	break;
+}
+
+16418
+ */
+
+
+/*
+
+
+//Begin the hourly boss fights task
+tid2 = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() 
+{
+	@Override
+	public void run()
+	{
+		boolean notFound = true;
+		int count = 0;
+		Random rand = new Random();
+		int index = 0;
+
+		for (int i = 0; i < MAX_ENTITIES; i++)
+		{
+			if (entity[i].getActive() == true)
+			{
+				count++;
+			}
+		}
+
+		while (notFound == true)
+		{	
+			index = rand.nextInt(count);
+			if (entity[index].isActive == true)
+			{
+				if (entity[index].getMobId() > -1)
+				{
+					notFound = false;
+
+					Bukkit.getServer().broadcastMessage("BOSS MOB SPAWNED AT !");
+				}
+			}
+		}
+	}
+} , 0, 360 * 20); //1 hour
+
+ */
