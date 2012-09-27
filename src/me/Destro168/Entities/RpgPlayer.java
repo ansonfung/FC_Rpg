@@ -257,14 +257,16 @@ public class RpgPlayer extends RpgPlayerFile
 	
 	public void donatorStatUpdate()
 	{
+		ConfigOverlord co = new ConfigOverlord();
+		
 		if (isDonator() == true)
 		{
 			resetTempStats();
 			
-			tempStrength = (int) (getStrength() * FC_Rpg.DONATOR_PERK);
-			tempConstitution = (int) (getConstitution() * FC_Rpg.DONATOR_PERK);
-			tempMagic = (int) (getMagic() * FC_Rpg.DONATOR_PERK);
-			tempIntelligence = (int) (getIntelligence() * FC_Rpg.DONATOR_PERK);
+			tempStrength = (int) (getStrength() * co.getDonatorBonusStatPercent());
+			tempConstitution = (int) (getConstitution() * co.getDonatorBonusStatPercent());
+			tempMagic = (int) (getMagic() * co.getDonatorBonusStatPercent());
+			tempIntelligence = (int) (getIntelligence() * co.getDonatorBonusStatPercent());
 			
 			calcMaxHM();
 		}
@@ -440,26 +442,20 @@ public class RpgPlayer extends RpgPlayerFile
 	
 	public double getPromotionCost()
 	{
-		switch (getJobRank())
-		{
-		case 1:
-			return 3200;
-		case 2:
-			return 20000;
-		case 3:
-			return 55000;
-		case 4:
-			return 105000;
-		case 5:
-			return 175000;
-		}
-		
-		return 0;
+		ConfigOverlord co = new ConfigOverlord();
+		return co.getJobRankCosts().get(getJobRank() - 1);
 	}
 	
 	//Return stat points to a player.
-	public void respec()
+	public void respecAll()
 	{
+		respecStats();
+		respecSkills();
+	}
+	
+	public void respecStats()
+	{
+		//Reset stats
 		int stats = getStats();
 		
 		stats += getStrength();
@@ -473,6 +469,19 @@ public class RpgPlayer extends RpgPlayerFile
 		setIntelligence(0);
 		
 		setStats(stats);
+	}
+	
+	public void respecSkills()
+	{
+		int spellPoints = getSpellPoints();
+		
+		for (int i = 0; i < SpellUtil.CLASS_SPELL_COUNT; i++)
+		{
+			spellPoints += getSpellLevel(i);
+			setSpellLevel(i, 0);
+		}
+		
+		setSpellPoints(spellPoints);
 	}
 	
 	public boolean useStats(int stat, int amount)

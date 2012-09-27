@@ -28,10 +28,10 @@ public class GroupManager
 		config = FC_Rpg.plugin.getConfig();
 		
 		//If a past config wasn't created, create a new one.
-		if (getVersion() < 1.0)
+		if (getVersion() < 0.1)
 		{
 			//Set the version.
-			setVersion(1.0);
+			setVersion(0.1);
 			
 			int totalGroups = 11;
 			

@@ -65,7 +65,7 @@ public class WarpManager
 		config = FC_Rpg.plugin.getConfig();
 		
 		//Create first section if not created.
-		if (getVersion() < 1.0)
+		if (getVersion() < 0.1)
 		{
 			//Variable declaration
 			List<World> worldList = Bukkit.getServer().getWorlds();
@@ -74,7 +74,7 @@ public class WarpManager
 			description.add("This is the second line!");
 			
 			//Update version
-			setVersion(1.0);
+			setVersion(0.1);
 			
 			//Set the warp stuff.
 			for (int i = 0; i < worldList.size(); i++)

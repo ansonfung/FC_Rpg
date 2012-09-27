@@ -52,10 +52,10 @@ public class WorldManager
 		fcp = new FileConfigPlus(config);
 		
 		//Create initial config if no previous versions are found.
-		if (getVersion() < 1.01)
+		if (getVersion() < 0.1)
 		{
 			//Update version.
-			setVersion(1.01);
+			setVersion(0.1);
 			
 			//Set up the rest of the world information.
 			for (World world : Bukkit.getServer().getWorlds())

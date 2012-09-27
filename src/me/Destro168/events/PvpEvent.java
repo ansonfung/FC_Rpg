@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.Destro168.Configs.ConfigOverlord;
 import me.Destro168.Configs.PvpManager;
 import me.Destro168.Configs.WorldManager;
 import me.Destro168.Entities.RpgPlayer;
@@ -15,7 +16,7 @@ import org.bukkit.entity.Player;
 
 public class PvpEvent extends GeneralEvent
 {
-	private final double rewardAmount = 50;
+	private double rewardAmount;
 	
 	private WorldManager wm;
 	private PvpManager pm;
@@ -42,6 +43,9 @@ public class PvpEvent extends GeneralEvent
 		hasLost = new HashMap<Player, Boolean>();
 		redTeam = new ArrayList<Player>();
 		yellowTeam = new ArrayList<Player>();
+		
+		ConfigOverlord co = new ConfigOverlord();
+		rewardAmount = co.getPvpArenaReward();
 	}
 	
 	public boolean addPvper(Player player)

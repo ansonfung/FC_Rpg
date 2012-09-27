@@ -103,8 +103,6 @@ public class FC_Rpg extends JavaPlugin
 	public final static int c_int_wizard = 3;
 	public final static int c_int_berserker = 4;
 	
-	public final static double DONATOR_PERK = .1;
-	public final static double DONATOR_LOOT_BONUS = 1.1;
 	public static int expMultiplier = 1;
 	public static int lootMultiplier = 1;
 	public static int tid3;
@@ -267,8 +265,8 @@ public class FC_Rpg extends JavaPlugin
 			@Override
 			public void run() 
 			{
-				//Start pvp event.
-				pvp.begin();
+				if (co.getPvpArenaReward() > -1)
+					pvp.begin();	//Start pvp event.
 			}
 		}, 100, 36000);
 		

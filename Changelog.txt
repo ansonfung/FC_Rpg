@@ -1,3 +1,7 @@
-Version 1.0
+Version 0.2: (Current Unreleased)
+
+- The donator stat percent now updates properly for /class view.
+
+Version 0.1
 
 - First release of the plugin. Woot.

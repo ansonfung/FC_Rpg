@@ -306,7 +306,7 @@ public class RpgMessageLib extends MessageLib
 			standardMessage("/dungeon","Help for dungeons.");
 			standardMessage("/rpg potion","Help for potions.");
 			standardMessage("/rpg listworld(s)","List all worlds on your server.");
-			standardMessage("/rpg go [u [amount] /d [amount] /(coords)]","Teleport anywhere.");
+			standardMessage("/rpg go [u [amount] | d [amount] | (coords)]","Teleport anywhere.");
 			standardMessage("/rpg tpworld [worldname]","Teleport to a worlds spawn.");
 		}
 		
@@ -317,7 +317,7 @@ public class RpgMessageLib extends MessageLib
 	{
 		if (perms.isOwner())
 		{
-			standardHeader("Destro Only commands");
+			standardHeader("Owner Only commands");
 			standardMessage("/rpg wall","Creates wall with all classes/jobs/start sign.");
 			standardMessage("/rpg spawn [worldname] [x] [y] [z] [yaw] [pitch]","Change a worlds spawn");
 			standardMessage("/rpg spawn here","Change a worlds spawn");

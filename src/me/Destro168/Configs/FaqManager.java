@@ -51,10 +51,10 @@ public class FaqManager
 		config = FC_Rpg.plugin.getConfig();
 		
 		//Create a config  if not created
-		if (getVersion() < 1.0)
+		if (getVersion() < 0.1)
 		{
 			//Update version.
-			setVersion(1.0);
+			setVersion(0.1);
 			
 			//Begin setting defaults.
 			setFaqName(0, "FabledCraft Server Information");

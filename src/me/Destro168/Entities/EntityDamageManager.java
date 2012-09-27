@@ -3,6 +3,7 @@ package me.Destro168.Entities;
 import java.util.Date;
 import java.util.Random;
 
+import me.Destro168.Configs.ConfigOverlord;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.RpgParty;
 import me.Destro168.Messaging.MessageLib;
@@ -259,11 +260,14 @@ public class EntityDamageManager
 				loot = loot * FC_Rpg.lootMultiplier;
 				exp = exp * FC_Rpg.expMultiplier;
 				
+				
 				//Calculate how much loot and experience to aquire by donator
 				if (rpgAttacker.isDonator())
 				{
-					loot = loot * FC_Rpg.DONATOR_LOOT_BONUS;
-					exp = exp * FC_Rpg.DONATOR_LOOT_BONUS;
+					ConfigOverlord co = new ConfigOverlord();
+					
+					loot = loot * (1 + co.getDonatorLootBonusPercent());
+					exp = loot * (1 + co.getDonatorLootBonusPercent());
 				}
 				
 				//If the player is in a party, then...

@@ -2,6 +2,7 @@ package me.Destro168.Commands;
 
 import java.text.DecimalFormat;
 
+import me.Destro168.Configs.ConfigOverlord;
 import me.Destro168.Entities.RpgPlayer;
 import me.Destro168.Entities.RpgPlayerFile;
 import me.Destro168.FC_Rpg.FC_Rpg;
@@ -30,6 +31,7 @@ public class ClassCE implements CommandExecutor
 		RpgPlayerFile rpgPlayerFile = new RpgPlayerFile(player.getName());
         DecimalFormat df = new DecimalFormat("#.#");
 		DateManager dm = new DateManager();
+		ConfigOverlord co = new ConfigOverlord();
         
 		msgLib = new RpgMessageLib(player);
 		
@@ -113,11 +115,12 @@ public class ClassCE implements CommandExecutor
 			msgLib.standardMessage("Stat points",String.valueOf(rpgPlayerFile.getStats()));
 			msgLib.standardMessage("Lifetime Mob Kills",String.valueOf(rpgPlayerFile.getLifetimeMobKills()));
 			
+			
 			if (rpgPlayerFile.isDonator())
-				msgLib.standardHeader("Stats ~ 10% Donator Bonus!");
+				msgLib.standardHeader("Stats ~ " + co.getDonatorBonusStatPercent() * 100 + "% Donator Bonus!");
 			else
 				msgLib.standardHeader("Stats");
-
+			
 			String curHealth = "";
 			String maxHealth = "";
 			String curMana = "";

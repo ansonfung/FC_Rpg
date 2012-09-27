@@ -14,9 +14,9 @@ import me.Destro168.Util.SpellUtil;
 // Handles storing of player data in files.
 public class RpgPlayerFile extends RpgEntity
 {
-	private final int levelCap = 100;
     private final String rpgPrefix = "FC_Rpg.";
 	private SharedPlayerProfileManager sp;
+	private int levelCap;
     protected String name;
     
 	public String getName() { return name; }
@@ -148,11 +148,17 @@ public class RpgPlayerFile extends RpgEntity
 	
 	public RpgPlayerFile(String playerName)
 	{
+		ConfigOverlord co = new ConfigOverlord();
+		
+		//Set the levelcap.
+		levelCap = co.getLevelCap();
+		
 		setPlayerName(playerName);
 	}
 	
 	public void setPlayerName(String playerName)
 	{
+		
 		if (Bukkit.getServer().getPlayer(playerName) != null)
 		{
 			NameMatcher nm = new NameMatcher();

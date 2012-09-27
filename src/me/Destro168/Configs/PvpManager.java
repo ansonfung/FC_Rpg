@@ -43,10 +43,10 @@ public class PvpManager
 		wm = new WorldManager();
 		
 		//Create first section if not created.
-		if (getVersion() < 1.0)
+		if (getVersion() < 0.1)
 		{
 			//Update version
-			setVersion(1.0);
+			setVersion(0.1);
 			
 			//Begin setting default settings.
 			setSpawn1(pvpWorldName, 180,81,106,180,0);

@@ -99,9 +99,9 @@ public class DungeonManager
 		String worldName = wm.getSpawnWorld().getName();
 		int maxIndex;
 		
-		if (getVersion() < 1.0)
+		if (getVersion() < 0.1)
 		{
-			setVersion(1.0);
+			setVersion(0.1);
 			
 			//Default Dungeon 1
 			setName(0,"Grasslands");

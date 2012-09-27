@@ -34,15 +34,14 @@ public class DonatorCE implements CommandExecutor
 			{
 				//Display the players donation information.
 				msgLib.standardHeader("Donator Information");
-				msgLib.standardMessage("- Donation Perks End On: " + ChatColor.YELLOW + FC_Rpg.dfm.format(rpgPlayer.getDonatorTime()));
-				msgLib.standardMessage("- Thank you for donating! <3");
-				msgLib.standardMessage("- If you need anything ask Destro168! :D");
+				msgLib.standardMessage("Thank you for donating!");
+				msgLib.standardMessage("Donation Perks End On: " + ChatColor.YELLOW + FC_Rpg.dfm.format(rpgPlayer.getDonatorTime()));
 				msgLib.helpDonator();
 			}
 			else if (args[0].equals("respecialize"))
 			{
-				rpgPlayer.respec();
-				msgLib.standardMessage("Successfully refunded stat points. Remember to use them!");
+				rpgPlayer.respecAll();
+				msgLib.standardMessage("Successfully refunded stat and spell points. Remember to use them!");
 			}
 		}
 		else
