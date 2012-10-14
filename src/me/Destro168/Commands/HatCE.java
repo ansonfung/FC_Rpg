@@ -44,10 +44,10 @@ public class HatCE implements CommandExecutor
 		}
 		
 		//Only let active players use this command.
-		if (rpgPlayer.getIsActive() == false)
+		if (rpgPlayer.getPlayerConfigFile().getIsActive() == false)
 			return msgLib.errorCreateCharacter();
 		
-		if (rpgPlayer.isDonator() || perms.commandHat())
+		if (rpgPlayer.getPlayerConfigFile().isDonator() || perms.commandHat())
 		{
 			if (player.getInventory().getHelmet() != null)
 				Bukkit.getServer().getWorld(player.getWorld().getName()).dropItem(player.getLocation(), player.getInventory().getHelmet());

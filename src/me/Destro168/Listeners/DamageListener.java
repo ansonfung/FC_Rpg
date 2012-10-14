@@ -1,8 +1,11 @@
 package me.Destro168.Listeners;
 
+import java.util.List;
 import java.util.Random;
 
-import me.Destro168.Configs.WorldManager;
+import me.Destro168.Classes.EffectIDs;
+import me.Destro168.Classes.Spell;
+import me.Destro168.Configs.WorldConfig;
 import me.Destro168.Entities.EntityDamageManager;
 import me.Destro168.Entities.RpgMonster;
 import me.Destro168.Entities.RpgPlayer;
@@ -10,7 +13,6 @@ import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.RpgParty;
 import me.Destro168.Util.DistanceModifierLib;
 import me.Destro168.Util.MobAggressionCheck;
-import me.Destro168.Util.SpellUtil;
 
 import org.bukkit.GameMode;
 import org.bukkit.enchantments.Enchantment;
@@ -67,7 +69,7 @@ public class DamageListener implements Listener
 			return;
 		
 		//Block damage in creative world.
-		WorldManager wm = new WorldManager();
+		WorldConfig wm = new WorldConfig();
 		
 		if (!wm.getIsRpgWorld(event_.getEntity().getWorld().getName()))
 			return;
@@ -95,7 +97,7 @@ public class DamageListener implements Listener
 				Player player = (Player) event.getEntity();
 				
 				//Prevent damage done to already dead players
-				if (FC_Rpg.rpgManager.getRpgPlayer(player).getIsActive() == true);
+				if (FC_Rpg.rpgManager.getRpgPlayer(player).getPlayerConfigFile().getIsActive() == true);
 				{
 					if (FC_Rpg.rpgManager.getRpgPlayer(player).getIsAlive() == false)
 						return;
@@ -266,6 +268,7 @@ public class DamageListener implements Listener
 	{
 		//Variable Declarations/Initializations
 		Arrow arrow = null;
+		List<Spell> spell = null;
 		double damage = 0;
 		rpgMobAttacker = null;
 		
@@ -296,12 +299,20 @@ public class DamageListener implements Listener
 			{
 				if (rpgPlayer.summon_Owns(e.getDamager()))
 				{
+					//Variable Initializations
+					spell = rpgAttacker.getPlayerConfigFile().getRpgClass().getSpellBook();
 					rpgAttacker = rpgPlayer;
 					damageType = 2;
 					
-					SpellUtil spellUtil = new SpellUtil();
-					
-					damage = spellUtil.getSpellMagnitude(rpgAttacker.getCombatClass(), 3, 2);
+					//TODO, check to see if this shit works, cause it seriously might not.
+					for (int i = 0; i < spell.size(); i++)
+					{
+						if (spell.get(i).getEffectID() == EffectIDs.FIREBALL)
+						{
+							damage = spell.get(i).getMagicMagnitude().get(rpgAttacker.getPlayerConfigFile().getSpellLevel(i));
+							break;
+						}
+					}
 					
 					success = true;
 					break;
@@ -333,7 +344,7 @@ public class DamageListener implements Listener
 				rpgAttacker = FC_Rpg.rpgManager.getRpgPlayer(playerAttacker);
 				
 				//Halve the damage of arrows.
-				damage = rpgAttacker.getStrength();
+				damage = rpgAttacker.getPlayerConfigFile().getAttack();
 			}
 			else
 			{
@@ -367,10 +378,10 @@ public class DamageListener implements Listener
 				return -1;
 			
 			//Get base damage.
-			damage = rpgAttacker.getTotalStrength();
+			damage = rpgAttacker.getTotalAttack();
 			
 			//Add weapon Bonus
-			damage = damage * rpgAttacker.getWeaponModifier(playerAttacker.getItemInHand().getType(), rpgAttacker.getTotalStrength());
+			damage = damage * rpgAttacker.getWeaponModifier(playerAttacker.getItemInHand().getType(), rpgAttacker.getTotalAttack());
 		}
 		
 		//Regular mob damage gets set to mob damage.
@@ -404,7 +415,7 @@ public class DamageListener implements Listener
 		if (rpgAttacker != null)
 		{
 			//If disabled cancel attack
-			if (rpgAttacker.getStatusIsActive(rpgAttacker.getStatusDisabled()))
+			if (rpgAttacker.getStatusIsActive(rpgAttacker.getPlayerConfigFile().getStatusDuration(EffectIDs.DISABLED)))
 			{
 				cancelRpgDamage = true;
 				return 0;

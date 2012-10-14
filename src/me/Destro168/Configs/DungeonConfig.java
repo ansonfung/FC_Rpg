@@ -1,23 +1,18 @@
 package me.Destro168.Configs;
 
 import me.Destro168.ConfigManagers.FileConfigPlus;
-import me.Destro168.FC_Rpg.FC_Rpg;
 
 import org.bukkit.Location;
-import org.bukkit.configuration.file.FileConfiguration;
 
-public class DungeonManager 
+public class DungeonConfig extends ConfigGod
 {
-	private FileConfiguration config;
-	private final String dungeonPrefix = "Dungeons.";
-	private WorldManager wm;
+	private WorldConfig wm;
 	
-	private void setVersion(double x) { config.set(dungeonPrefix + "version", x); }
-	private void setName(int dNum, String x) { config.set(getDP(dNum) + "name", x); }
-	private void setCost(int dNum, double x) { config.set(getDP(dNum) + "cost", x); }
-	private void setSpawnCount(int dNum, int x) { config.set(getDP(dNum) + "spawnCount", x); }
-	private void setLevelMin(int dNum, int x) { config.set(getDP(dNum) + "levelMin", x); }
-	private void setLevelMax(int dNum, int x) { config.set(getDP(dNum) + "levelMax", x); }
+	private void setName(int dNum, String x) { ccm.set(getDP(dNum) + "name", x); }
+	private void setCost(int dNum, double x) { ccm.set(getDP(dNum) + "cost", x); }
+	private void setSpawnCount(int dNum, int x) { ccm.set(getDP(dNum) + "spawnCount", x); }
+	private void setLevelMin(int dNum, int x) { ccm.set(getDP(dNum) + "levelMin", x); }
+	private void setLevelMax(int dNum, int x) { ccm.set(getDP(dNum) + "levelMax", x); }
 	private void setLobby(int dNum, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"lobby",world,x,y,z,a,b); }
 	private void setStart(int dNum, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"start",world,x,y,z,a,b); }
 	private void setExit(int dNum, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"exit",world,x,y,z,a,b); }
@@ -56,15 +51,14 @@ public class DungeonManager
 	}
 	private void setSpawnChance(int dNum, int index, int x) //The index is acquired from setRange1()
 	{
-		config.set(getDP(dNum) + "spawnChance." + index, x);
+		ccm.set(getDP(dNum) + "spawnChance." + index, x);
 	}
 	
-	public double getVersion() { return config.getDouble(dungeonPrefix + "version"); }
-	public String getName(int dNum) { return config.getString(getDP(dNum) + "name"); }
-	public double getCost(int dNum) { return config.getDouble(getDP(dNum) + "cost"); }
-	public int getSpawnCount(int dNum) { return config.getInt(getDP(dNum) + "spawnCount"); }
-	public int getLevelMin(int dNum) { return config.getInt(getDP(dNum) + "levelMin"); }
-	public int getLevelMax(int dNum) { return config.getInt(getDP(dNum) + "levelMax"); }
+	public String getName(int dNum) { return ccm.getString(getDP(dNum) + "name"); }
+	public double getCost(int dNum) { return ccm.getDouble(getDP(dNum) + "cost"); }
+	public int getSpawnCount(int dNum) { return ccm.getInt(getDP(dNum) + "spawnCount"); }
+	public int getLevelMin(int dNum) { return ccm.getInt(getDP(dNum) + "levelMin"); }
+	public int getLevelMax(int dNum) { return ccm.getInt(getDP(dNum) + "levelMax"); }
 	public Location getLobby(int dNum) { return getLocation(dNum,"lobby"); }
 	public Location getStart(int dNum) { return getLocation(dNum,"start"); }
 	public Location getExit(int dNum) { return getLocation(dNum,"exit"); }
@@ -72,29 +66,27 @@ public class DungeonManager
 	public Location getTreasureChest(int dNum) { return getLocation(dNum,"treasure"); }
 	public Location getRange1(int dNum, int index) { return getLocation(dNum,"range1." + index); }
 	public Location getRange2(int dNum, int index) { return getLocation(dNum,"range2." + index); }
-	public int getSpawnChance(int dNum, int index) { return config.getInt(getDP(dNum) + "spawnChance." + index); }
+	public int getSpawnChance(int dNum, int index) { return ccm.getInt(getDP(dNum) + "spawnChance." + index); }
 	private void setLocation(int dNum, String field, String world, double x, double y, double z, float a, float b)
 	{
-		FileConfigPlus fcp = new FileConfigPlus(config);
+		FileConfigPlus fcp = new FileConfigPlus(ccm.getConfig());
 		fcp.setLocation(getDP(dNum) + field, world, x, y, z, a, b);
 	}
 	private Location getLocation(int dNum, String field)
 	{
-		FileConfigPlus fcp = new FileConfigPlus(config);
+		FileConfigPlus fcp = new FileConfigPlus(ccm.getConfig());
 		return fcp.getLocation(getDP(dNum) + field);
 	}
 	
-	public DungeonManager()
+	public DungeonConfig()
 	{
+		super("Dungeons");
 		handleUpdates();
 	}
 	
 	private void handleUpdates()
 	{
-		//Variable Declarations
-		config = FC_Rpg.plugin.getConfig();
-		
-		wm = new WorldManager();
+		wm = new WorldConfig();
 		
 		String worldName = wm.getSpawnWorld().getName();
 		int maxIndex;
@@ -138,14 +130,12 @@ public class DungeonManager
 			setRange2(1,maxIndex,worldName,146,100,-21,0,0);
 			setSpawnChance(1,maxIndex,100);
 		}
-		
-		FC_Rpg.plugin.saveConfig();
 	}
 	
 	//Get Dungeon Prefix
 	private String getDP(int dNum)
 	{
-		return dungeonPrefix + dNum + ".";
+		return prefix + dNum + ".";
 	}
 	
 	public int getSpawnRangeCount(int dungeonNumber)

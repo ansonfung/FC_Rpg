@@ -2,9 +2,9 @@ package me.Destro168.Commands;
 
 import java.text.DecimalFormat;
 
-import me.Destro168.Configs.ConfigOverlord;
+import me.Destro168.Configs.GeneralConfig;
+import me.Destro168.Configs.PlayerFileConfig;
 import me.Destro168.Entities.RpgPlayer;
-import me.Destro168.Entities.RpgPlayerFile;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Suite_Shared.ArgParser;
 import me.Destro168.TimeUtils.DateManager;
@@ -28,15 +28,15 @@ public class ClassCE implements CommandExecutor
 		ArgParser ap = new ArgParser(args2);
 		String[] args = ap.getArgs();
 		RpgPlayer rpgPlayer = FC_Rpg.rpgManager.getRpgPlayer(player);
-		RpgPlayerFile rpgPlayerFile = new RpgPlayerFile(player.getName());
+		PlayerFileConfig rpgPlayerFile = new PlayerFileConfig(player.getName());
         DecimalFormat df = new DecimalFormat("#.#");
 		DateManager dm = new DateManager();
-		ConfigOverlord co = new ConfigOverlord();
+		GeneralConfig co = new GeneralConfig();
         
 		msgLib = new RpgMessageLib(player);
 		
 		//Only let active players use this command.
-		if (rpgPlayer.getIsActive() == false)
+		if (rpgPlayer.getPlayerConfigFile().getIsActive() == false)
 			return msgLib.errorCreateCharacter();
 		
 		if (args[0].equals(""))
@@ -89,7 +89,7 @@ public class ClassCE implements CommandExecutor
 			if (!args[1].equals(""))
 			{
 				//If so load the file
-				rpgPlayerFile = new RpgPlayerFile(args[1]);
+				rpgPlayerFile = new PlayerFileConfig(args[1]);
 				
 				//Also set the rpgPlayer.
 				if (Bukkit.getServer().getPlayer(args[1]) != null)
@@ -107,7 +107,7 @@ public class ClassCE implements CommandExecutor
 			
 			msgLib.standardMessage("Name",rpgPlayerFile.getName());
 			msgLib.standardMessage("Time Played",String.valueOf(dm.getTimeStringFromTimeInteger(rpgPlayerFile.getSecondsPlayed())));
-			msgLib.standardMessage("Class",FC_Rpg.c_classes[rpgPlayerFile.getCombatClass()]);
+			msgLib.standardMessage("Class",FC_Rpg.classManager.getRpgClass(rpgPlayerFile.getCombatClass()).getName());
 			msgLib.standardMessage("Class Level",String.valueOf(rpgPlayerFile.getClassLevel()));
 			msgLib.standardMessage("Class Experience",df.format(rpgPlayerFile.getClassExperience()) +
 					" of " + df.format(rpgPlayerFile.getLevelUpAmount()) +
@@ -129,7 +129,7 @@ public class ClassCE implements CommandExecutor
 			//Begin formulating the stat display message.
 			if (rpgPlayer == null)
 			{
-				msgLib.standardMessage(getMessageArray("[Attack] Base: ", rpgPlayerFile.getStrength()));
+				msgLib.standardMessage(getMessageArray("[Attack] Base: ", rpgPlayerFile.getAttack()));
 				msgLib.standardMessage(getMessageArray("[Constitution] Base: ", rpgPlayerFile.getConstitution()));
 				msgLib.standardMessage(getMessageArray("[Magic] Base: ", rpgPlayerFile.getMagic()));
 				msgLib.standardMessage(getMessageArray("[Intelligence] Base: ", rpgPlayerFile.getIntelligence()));
@@ -141,7 +141,7 @@ public class ClassCE implements CommandExecutor
 			}
 			else
 			{
-				msgLib.standardMessage(getMessageArray("[Attack] Base: ", rpgPlayerFile.getStrength(), " Total: ", rpgPlayer.getTotalStrength()));
+				msgLib.standardMessage(getMessageArray("[Attack] Base: ", rpgPlayerFile.getAttack(), " Total: ", rpgPlayer.getTotalAttack()));
 				msgLib.standardMessage(getMessageArray("[Constitution] Base: ", rpgPlayerFile.getConstitution(), " Total: ", rpgPlayer.getTotalConstitution()));
 				msgLib.standardMessage(getMessageArray("[Magic] Base: ", rpgPlayerFile.getMagic(), " Total: ", rpgPlayer.getTotalMagic()));
 				msgLib.standardMessage(getMessageArray("[Intelligence] Base: ", rpgPlayerFile.getIntelligence(), " Total: ", rpgPlayer.getTotalIntelligence()));
@@ -170,27 +170,27 @@ public class ClassCE implements CommandExecutor
 				if (args[1].equalsIgnoreCase("on"))
 				{
 					msgLib.standardMessage("Auto stat allocation enabled.");
-					rpgPlayer.setAutomaticAllocation(false);
+					rpgPlayer.getPlayerConfigFile().setAutomaticAllocation(false);
 					return true;
 				}
 				else if (args[1].equalsIgnoreCase("off"))
 				{
 					msgLib.standardMessage("Auto stat allocation disabled.");
-					rpgPlayer.setAutomaticAllocation(true);
+					rpgPlayer.getPlayerConfigFile().setAutomaticAllocation(true);
 					return true;
 				}
 			}
 			
-			if (rpgPlayer.getManualAllocation() == true)
+			if (rpgPlayer.getPlayerConfigFile().getManualAllocation() == true)
 			{
 				msgLib.standardMessage("Auto stat allocation enabled.");
-				rpgPlayer.setAutomaticAllocation(false);
+				rpgPlayer.getPlayerConfigFile().setAutomaticAllocation(false);
 				return true;
 			}
 			else
 			{
 				msgLib.standardMessage("Auto stat allocation disabled.");
-				rpgPlayer.setAutomaticAllocation(true);
+				rpgPlayer.getPlayerConfigFile().setAutomaticAllocation(true);
 				return true;
 			}
 		}
@@ -214,14 +214,14 @@ public class ClassCE implements CommandExecutor
 			}
 			
 			//Make sure the new class is different from current class.
-			if (rpgPlayer.getCombatClass() == classNumber)
+			if (rpgPlayer.getPlayerConfigFile().getCombatClass() == classNumber)
 			{
 				msgLib.standardMessage("You can't switch to the class you are already in.");
 				return true;
 			}
 			
 			//Make sure that the user is only picking from 0-4 (remember getClassNumber returns proper version).
-			if (classNumber == -1 || classNumber > 4)
+			if (classNumber == -1 || classNumber > FC_Rpg.classManager.getRpgClasses().length)
 				return msgLib.errorInvalidCommand();
 			
 			//Put in class number minus one to prevent anomolies.

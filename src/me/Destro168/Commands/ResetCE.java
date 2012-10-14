@@ -1,8 +1,8 @@
 package me.Destro168.Commands;
 
-import me.Destro168.Configs.ConfigOverlord;
+import me.Destro168.Configs.GeneralConfig;
+import me.Destro168.Configs.PlayerFileConfig;
 import me.Destro168.Entities.RpgPlayer;
-import me.Destro168.Entities.RpgPlayerFile;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Suite_Shared.ArgParser;
 import me.Destro168.Util.FC_RpgPermissions;
@@ -26,14 +26,14 @@ public class ResetCE implements CommandExecutor
 		ArgParser ap = new ArgParser(args2);
 		String[] args = ap.getArgs();
 		FC_RpgPermissions perms = new FC_RpgPermissions(player);
-		RpgPlayerFile rpgPlayerFile;
+		PlayerFileConfig rpgPlayerFile;
 		RpgPlayer rpgPlayer = FC_Rpg.rpgManager.getRpgPlayer(player);
 		Player target;
 		
 		if (args[0].equals(""))
 			args[0] = player.getName();
 		
-		rpgPlayerFile = new RpgPlayerFile(args[0]);
+		rpgPlayerFile = new PlayerFileConfig(args[0]);
 		
 		//Only let active players use this command.
 		if (rpgPlayerFile.getIsActive() == false)
@@ -47,13 +47,13 @@ public class ResetCE implements CommandExecutor
 			final RpgPlayer rpgPlayer2 = rpgPlayer;
 			
 			//Set to inactive
-			rpgPlayer.setDefaults();
+			rpgPlayer.getPlayerConfigFile().setDefaults();
 			
 			//Stop the players tasks.
 			FC_Rpg.rpgManager.unregisterRpgPlayer(player);
 			
 			//Send confirmation message.
-			msgLib.standardMessage("Successfully reset",rpgPlayer.getName());
+			msgLib.standardMessage("Successfully reset",rpgPlayer.getPlayerConfigFile().getName());
 			
 			if (target != null)
 			{
@@ -65,8 +65,8 @@ public class ResetCE implements CommandExecutor
 					@Override
 					public void run() 
 					{
-						ConfigOverlord co = new ConfigOverlord();
-						Bukkit.getServer().getPlayer(rpgPlayer2.getName()).teleport(co.getResetLocation());
+						GeneralConfig co = new GeneralConfig();
+						Bukkit.getServer().getPlayer(rpgPlayer2.getPlayerConfigFile().getName()).teleport(co.getResetLocation());
 					}
 				}, 20);
 			}
@@ -92,7 +92,7 @@ public class ResetCE implements CommandExecutor
 				@Override
 				public void run() 
 				{
-					ConfigOverlord co = new ConfigOverlord();
+					GeneralConfig co = new GeneralConfig();
 					player.teleport(co.getResetLocation());
 				}
 			}, 20);

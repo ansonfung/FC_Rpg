@@ -1,6 +1,6 @@
 package me.Destro168.Commands;
 
-import me.Destro168.Configs.FaqManager;
+import me.Destro168.Configs.FaqConfig;
 import me.Destro168.FC_Suite_Shared.ArgParser;
 import me.Destro168.Util.RpgMessageLib;
 
@@ -18,7 +18,7 @@ public class FaqCE implements CommandExecutor
 		Player player = (Player) sender;
 		RpgMessageLib msgLib = new RpgMessageLib(player);
 		ArgParser ap = new ArgParser(args);
-		FaqManager fm = new FaqManager();
+		FaqConfig fm = new FaqConfig();
 		String tag = "";
 		String faqFirstHalf = "";
 		String faqSecondHalf = "";

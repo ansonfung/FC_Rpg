@@ -1,41 +1,33 @@
 package me.Destro168.Configs;
 
-import me.Destro168.ConfigManagers.FileConfigPlus;
 import me.Destro168.FC_Rpg.FC_Rpg;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.configuration.file.FileConfiguration;
 
-public class WorldManager 
+public class WorldConfig extends ConfigGod
 {
-	private FileConfiguration config;
-	private final String worldPrefix = "Worlds.";
-	private FileConfigPlus fcp;
-	
-	private void setVersion(double x) { config.set(worldPrefix + "version", x); }
-	private double getVersion() { return config.getDouble(worldPrefix + "version"); }
-	
-	public void setWorldSpawn(String worldName, double x, double y, double z, float a, float b) { fcp.setLocation(worldPrefix + worldName + ".spawn", worldName, x, y, z, a, b); }
+	public void setWorldSpawn(String worldName, double x, double y, double z, float a, float b) { ccm.setLocation(prefix + worldName + ".spawn", worldName, x, y, z, a, b); }
 	public void setWorldSpawn(Location loc) { setWorldSpawn(loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch()); }
-	private void setWorldType(String name, int x) { config.set(worldPrefix + name + ".worldType", x); }	//0 - Vanilla/1 - Creative/Nether/End/Other
-	private void setIsRpg(String name, boolean x) { config.set(worldPrefix + name + ".isRpg", x); }	//Vanilla or Rpg
-	private void setIsPvp(String name, boolean x) { config.set(worldPrefix + name + ".isPvp", x); }	//Pvp
-	private void setIsSpawn(String name, boolean x) { config.set(worldPrefix + name + ".isSpawn", x); }	//Pvp
-	private void setIsAoEWorld(String name, boolean x) { config.set(worldPrefix + name + ".isAoEWorld", x); }	//Pvp
-	private void setIsMobWorld(String name, boolean x) { config.set(worldPrefix + name + ".isMobWorld", x); }	//Pvp
+	private void setWorldType(String name, int x) { ccm.set(prefix + name + ".worldType", x); }	//0 - Vanilla/1 - Creative/Nether/End/Other
+	private void setIsRpg(String name, boolean x) { ccm.set(prefix + name + ".isRpg", x); }	//Vanilla or Rpg
+	private void setIsPvp(String name, boolean x) { ccm.set(prefix + name + ".isPvp", x); }	//Pvp
+	private void setIsSpawn(String name, boolean x) { ccm.set(prefix + name + ".isSpawn", x); }	//Pvp
+	private void setIsAoEWorld(String name, boolean x) { ccm.set(prefix + name + ".isAoEWorld", x); }	//Pvp
+	private void setIsMobWorld(String name, boolean x) { ccm.set(prefix + name + ".isMobWorld", x); }	//Pvp
 	
-	public Location getWorldSpawn(String worldName) { return fcp.getLocation(worldPrefix + worldName + ".spawn"); }
-	public int getWorldType(String name) { return config.getInt(worldPrefix + name + ".worldType"); }
-	public boolean getIsRpg(String name) { return config.getBoolean(worldPrefix + name + ".isRpg"); }
-	public boolean getIsPvp(String name) { return config.getBoolean(worldPrefix + name + ".isPvp"); }
-	public boolean getIsSpawn(String name) { return config.getBoolean(worldPrefix + name + ".isSpawn"); }
-	public boolean getIsAoEWorld(String name) { return config.getBoolean(worldPrefix + name + ".isAoEWorld"); }
-	public boolean getIsMobWorld(String name) { return config.getBoolean(worldPrefix + name + ".isMobWorld"); }
+	public Location getWorldSpawn(String worldName) { return ccm.getLocation(prefix + worldName + ".spawn"); }
+	public int getWorldType(String name) { return ccm.getInt(prefix + name + ".worldType"); }
+	public boolean getIsRpg(String name) { return ccm.getBoolean(prefix + name + ".isRpg"); }
+	public boolean getIsPvp(String name) { return ccm.getBoolean(prefix + name + ".isPvp"); }
+	public boolean getIsSpawn(String name) { return ccm.getBoolean(prefix + name + ".isSpawn"); }
+	public boolean getIsAoEWorld(String name) { return ccm.getBoolean(prefix + name + ".isAoEWorld"); }
+	public boolean getIsMobWorld(String name) { return ccm.getBoolean(prefix + name + ".isMobWorld"); }
 	
-	public WorldManager()
+	public WorldConfig()
 	{
+		super("Worlds");
 		handleUpdates();
 	}
 	
@@ -44,12 +36,6 @@ public class WorldManager
 		//Variable Declarations
 		String worldName = "";
 		boolean oneRun = false;
-		
-		//Load the config.
-		config = FC_Rpg.plugin.getConfig();
-		
-		//Update the fcp
-		fcp = new FileConfigPlus(config);
 		
 		//Create initial config if no previous versions are found.
 		if (getVersion() < 0.1)
@@ -89,7 +75,7 @@ public class WorldManager
 				//Set the worlds spawn last, makes config look nice. :)
 				setWorldSpawn(worldName,0,110,0,0,0);
 			}
-
+			
 			//Save the config.
 			FC_Rpg.plugin.saveConfig();
 		}

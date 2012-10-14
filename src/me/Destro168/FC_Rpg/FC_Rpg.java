@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import me.Destro168.Classes.RpgClass;
 import me.Destro168.Commands.BigHelpCE;
 import me.Destro168.Commands.ClassCE;
 import me.Destro168.Commands.DonatorCE;
@@ -22,12 +23,13 @@ import me.Destro168.Commands.PvpCE;
 import me.Destro168.Commands.ResetCE;
 import me.Destro168.Commands.RpgCE;
 import me.Destro168.Commands.SpellCE;
-import me.Destro168.Configs.ConfigOverlord;
-import me.Destro168.Configs.DungeonManager;
-import me.Destro168.Configs.WorldManager;
+import me.Destro168.Configs.ClassConfig;
+import me.Destro168.Configs.GeneralConfig;
+import me.Destro168.Configs.DungeonConfig;
+import me.Destro168.Configs.SpellConfig;
+import me.Destro168.Configs.WorldConfig;
 import me.Destro168.Entities.RpgManager;
 import me.Destro168.Entities.RpgPlayer;
-import me.Destro168.Entities.RpgPlayerFile;
 import me.Destro168.FC_Suite_Shared.ColorLib;
 import me.Destro168.Listeners.DamageListener;
 import me.Destro168.Listeners.PlayerInteractionListener;
@@ -89,19 +91,15 @@ public class FC_Rpg extends JavaPlugin
 	public static FC_Rpg plugin;
 	public static RpgManager rpgManager;
 	public static PartyManager partyManager;
+	public static SpellConfig spellManager;
+	public static ClassConfig classManager;
+	
 	public static ColorLib cl = new ColorLib();
 	public static PvpEvent pvp;
 	public static BroadcastLib bLib;
-	public static WorldManager wm;
+	public static WorldConfig wm;
 	public static Economy economy = null;
 	public static DungeonEvent[] dungeon;
-	public static String[] c_classes;
-	
-	public final static int c_int_swordsman = 0;
-	public final static int c_int_assassin = 1;
-	public final static int c_int_defender = 2;
-	public final static int c_int_wizard = 3;
-	public final static int c_int_berserker = 4;
 	
 	public static int expMultiplier = 1;
 	public static int lootMultiplier = 1;
@@ -131,7 +129,7 @@ public class FC_Rpg extends JavaPlugin
 	private GamemodeCE gamemodeCE;
 	private DungeonCE dungeonCE;
 	
-	private ConfigOverlord co;
+	private GeneralConfig co;
 	
 	@Override
 	public void onDisable() 
@@ -159,40 +157,22 @@ public class FC_Rpg extends JavaPlugin
 		plugin = this;
 		
 		//Handle the CONFIGURATION OVERLORD. HAIL!
-		co = new ConfigOverlord();
+		co = new GeneralConfig();
 		
 		//World manager = new world manager;
 		rpgManager = new RpgManager();
-		wm = new WorldManager();
+		wm = new WorldConfig();
 		bLib = new BroadcastLib();
 		partyManager = new PartyManager();
 		pvp = new PvpEvent();
-		c_classes = new String[5];
-		
-		c_classes[0] = "Swordsman";
-		c_classes[1] = "Assassin";
-		c_classes[2] = "Defender";
-		c_classes[3] = "Wizard";
-		c_classes[4] = "Berserker";
+		spellManager = new SpellConfig();
+		classManager = new ClassConfig();
 		
 		//Set up the economy.
 		setupEconomy();
 		
 		//Initialize dungeons.
 		initializeDungeons();
-		
-		for (Player player : Bukkit.getServer().getOnlinePlayers())
-		{
-    		//Get the rpgPlayer.
-    		RpgPlayer rpgPlayer = new RpgPlayer(player);
-    		
-			//If they aren't active, then we want to make them active by creating their rpg player.
-			if (rpgPlayer.getIsActive() == false)
-				rpgManager.setPlayerStart("Swordsman", player, false);	//Store the player as a new player.
-			
-			//Update the player file.
-			rpgPlayer.handleUpdates();
-		}
 		
 		//Register Listeners
 		getServer().getPluginManager().registerEvents(new FishingListener(), plugin);
@@ -265,10 +245,16 @@ public class FC_Rpg extends JavaPlugin
 			@Override
 			public void run() 
 			{
-				if (co.getPvpArenaReward() > -1)
-					pvp.begin();	//Start pvp event.
+				pvp.begin();	//Start pvp event.
 			}
 		}, 100, 36000);
+		
+		//Update player information.
+		for (Player player : Bukkit.getServer().getOnlinePlayers())
+		{
+			//Check player registration.
+			FC_Rpg.rpgManager.checkPlayerRegistration(player);
+		}
 		
 		//We want to delete records of all players that haven't logged on in a while.
 		rpgManager.clearOldPlayerData();
@@ -280,7 +266,7 @@ public class FC_Rpg extends JavaPlugin
 	private void initializeDungeons()
 	{
 		//Variable Declarations/Initializations
-		DungeonManager dm = new DungeonManager();
+		DungeonConfig dm = new DungeonConfig();
 		String ref = "";
 		int count = 0;
 		trueDungeonNumbers = new HashMap<Integer, Integer>();
@@ -717,15 +703,8 @@ public class FC_Rpg extends JavaPlugin
 			if (player == null)
 				return;
 			
-			//Get the players file.
-			RpgPlayerFile playerFile = new RpgPlayerFile(player.getName());
-			
-			//If they aren't active, then we want to make them active by creating their rpg player.
-			if (playerFile.getIsActive() == false)
-				FC_Rpg.rpgManager.setPlayerStart("Swordsman", player, false);	//Store the player as a new player.
-			
-			//Update the player file.
-			playerFile.handleUpdates();
+			//Register the player if needed.
+			FC_Rpg.rpgManager.checkPlayerRegistration(player);
 		}
 	}
 	
@@ -781,7 +760,7 @@ public class FC_Rpg extends JavaPlugin
 					
 					//Reset rpg player stuff.
 					rpgPlayer.setIsAlive(true);
-					rpgPlayer.setHunterCanKit(true);
+					rpgPlayer.getPlayerConfigFile().setHunterCanKit(true);
 					rpgPlayer.healFull();
 				}
 			}, 1L);
@@ -800,7 +779,7 @@ public class FC_Rpg extends JavaPlugin
 			DistanceModifierLib dmm = null;
 			HealthConverter hc = null;
 			RpgPlayer rpgPlayer;
-			WorldManager wm = new WorldManager();
+			WorldConfig wm = new WorldConfig();
 			
 			if (wm.getIsRpgWorld(entity.getWorld().getName()))
 				return;
@@ -906,7 +885,7 @@ public class FC_Rpg extends JavaPlugin
 			}
 			
 			//Set the message format.
-			event.setFormat(messageColor + timeStamp.format(now) + " " + rpgPlayer.updatePrefix() + messageColor + rpgPlayer.getName() + secondaryColor + ": " + "%2$s");
+			event.setFormat(messageColor + timeStamp.format(now) + " " + rpgPlayer.updatePrefix() + messageColor + rpgPlayer.getPlayerConfigFile().getName() + secondaryColor + ": " + "%2$s");
 		}
 	}
 	
@@ -984,9 +963,10 @@ public class FC_Rpg extends JavaPlugin
 			if (!wm.getIsRpgWorld(event.getEntity().getWorld().getName()))
 				return;
 			
-			//Get the arrow from the event.
+			//Variable Declarations
 			final Arrow arrow = (Arrow) event.getProjectile();
 			Vector speed;
+			RpgClass rpgClass = FC_Rpg.classManager.getClassWithPassive(ClassConfig.passive_ScalingArrows);
 			
 			//Make it so that arrows don't bounce.
 			arrow.setBounce(false);
@@ -1007,15 +987,19 @@ public class FC_Rpg extends JavaPlugin
 			//Get rpgPlayer.
 			RpgPlayer rpgPlayer = FC_Rpg.rpgManager.getRpgPlayer((Player) event.getEntity());
 			
-			//Assassins shoot arrows faster passively.
-			if (rpgPlayer.getCombatClass() == FC_Rpg.c_int_assassin)
+			//If the player has a class with the faster arrows passive, then give faster arrows.
+			
+			if (rpgClass != null)
 			{
-				speed = arrow.getVelocity().multiply((rpgPlayer.getClassLevel() / 28) + 1);
-				arrow.setVelocity(speed);
+				if (rpgClass.getName().equals(rpgPlayer.getPlayerConfigFile().getCombatClass()))
+				{
+					speed = arrow.getVelocity().multiply((rpgPlayer.getPlayerConfigFile().getClassLevel() / 28) + 1);
+					arrow.setVelocity(speed);
+				}
 			}
 			
 			//If auto-cast is enabled.
-			if (rpgPlayer.getAutoCast() == true)
+			if (rpgPlayer.getPlayerConfigFile().getAutoCast() == true)
 				rpgPlayer.prepareSpell(false);	//Prepare the spell.
 		}
 	}

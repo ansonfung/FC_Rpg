@@ -1,6 +1,6 @@
 name: FC_Rpg
 main: me.Destro168.FC_Rpg.FC_Rpg
-version: 0.1
+version: 0.2
 description: Handles RPG aspects of the server.
 commands:
    rpg:

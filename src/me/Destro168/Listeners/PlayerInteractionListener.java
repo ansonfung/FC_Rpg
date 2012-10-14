@@ -1,8 +1,8 @@
 package me.Destro168.Listeners;
 
-import me.Destro168.Configs.DungeonManager;
-import me.Destro168.Configs.WarpManager;
-import me.Destro168.Configs.WorldManager;
+import me.Destro168.Configs.DungeonConfig;
+import me.Destro168.Configs.WarpConfig;
+import me.Destro168.Configs.WorldConfig;
 import me.Destro168.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Suite_Shared.ColorLib;
@@ -24,7 +24,7 @@ public class PlayerInteractionListener implements Listener
 {
 	Player player;
 	RpgMessageLib msgLib;
-	WorldManager wm;
+	WorldConfig wm;
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onLeftClick(PlayerInteractEvent event)
@@ -34,7 +34,7 @@ public class PlayerInteractionListener implements Listener
 		Block block;
 		FC_RpgPermissions perms = new FC_RpgPermissions(player);
 		Boolean allowUse = true;
-		wm = new WorldManager();
+		wm = new WorldConfig();
 		
 		player = event.getPlayer();
 		msgLib = new RpgMessageLib(player);
@@ -105,7 +105,7 @@ public class PlayerInteractionListener implements Listener
 		if (leftClick == true)
 		{
 			//If auto-cast is enabled, we cast the spell.
-			if (rp.getAutoCast() == true)
+			if (rp.getPlayerConfigFile().getAutoCast() == true)
 			{
 				//Then set active spell.
 				rp.prepareSpell(false);
@@ -114,10 +114,10 @@ public class PlayerInteractionListener implements Listener
 				rp.castSpell(null, 0, 0);
 			}
 			
-			else if (rp.getActiveSpell() != null)
+			else if (rp.getPlayerConfigFile().getActiveSpell() != null)
 			{
 				//If a spell is ready to be cast, then...
-				if (!rp.getActiveSpell().equals("none"))
+				if (!rp.getPlayerConfigFile().getActiveSpell().equals("none"))
 				{
 					//Then set active spell.
 					rp.prepareSpell(false);
@@ -153,9 +153,9 @@ public class PlayerInteractionListener implements Listener
 				pickedClass = cl.removeColors(sign.getLine(1));
 				
 				//If the sign was proper, then 
-				for (int i = 0; i < FC_Rpg.c_classes.length; i++)
+				for (int i = 0; i < FC_Rpg.classManager.getRpgClasses().length; i++)
 				{
-					if (pickedClass.equals(FC_Rpg.c_classes[i]))
+					if (pickedClass.equals(FC_Rpg.classManager.getRpgClass(i).getName()))
 					{
 						//Send the player a confirmation message.
 						msgLib.standardMessage("You have selected the " + pickedClass + " class.");
@@ -177,7 +177,7 @@ public class PlayerInteractionListener implements Listener
 					//Prevent players from picking a job/class again without respecing.
 					if (FC_Rpg.rpgManager.getRpgPlayer(player) != null)
 					{
-						if (FC_Rpg.rpgManager.getRpgPlayer(player).getIsActive() == true)
+						if (FC_Rpg.rpgManager.getRpgPlayer(player).getPlayerConfigFile().getIsActive() == true)
 						{
 							msgLib.standardMessage("You have to use /reset first.");
 							return;
@@ -226,7 +226,7 @@ public class PlayerInteractionListener implements Listener
 		//Variable declarations
 		rpgPlayer = FC_Rpg.rpgManager.getRpgPlayer(player);
 		FC_RpgPermissions perms = new FC_RpgPermissions(player);
-		WarpManager warpManager = new WarpManager();
+		WarpConfig warpManager = new WarpConfig();
 		int breakLimit = 0;
 		
 		//Go through all potential warps.
@@ -326,7 +326,7 @@ public class PlayerInteractionListener implements Listener
 	private void dungeonTeleport(String text, int dNumber)
 	{
 		//Dungeon lobby
-		DungeonManager dm = new DungeonManager();
+		DungeonConfig dm = new DungeonConfig();
 		
 		//If we have a dungeon exit symbol, then,
 		if (text.contains("-"))

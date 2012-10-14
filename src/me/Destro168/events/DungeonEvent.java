@@ -17,7 +17,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import me.Destro168.Configs.DungeonManager;
+import me.Destro168.Configs.DungeonConfig;
 import me.Destro168.Entities.RandomTreasureGenerator;
 import me.Destro168.Entities.RpgMonster;
 import me.Destro168.FC_Rpg.FC_Rpg;
@@ -32,7 +32,7 @@ public class DungeonEvent extends GeneralEvent
 	private World dungeonWorld;
 	private LivingEntity[] spawnedMobs;
 	private int lowestLevel;
-	private DungeonManager dm;
+	private DungeonConfig dm;
 	
 	public String getDungeonName() { return dungeonName; }
 	public int getLowestLevel() { updateLowestLevel(); return lowestLevel; }
@@ -58,14 +58,14 @@ public class DungeonEvent extends GeneralEvent
 		dungeonNumber = -1;
 		lowestLevel = 999999;
 		dungeonWorld = null;
-		dm = new DungeonManager();
+		dm = new DungeonConfig();
 	}
 	
 	public boolean addDungeoneer(Player player, int dungeonNumber)
 	{
 		//Variable declarations.
 		RpgMessageLib msgLib = new RpgMessageLib(player);
-		int level = FC_Rpg.rpgManager.getRpgPlayer(player).getClassLevel();
+		int level = FC_Rpg.rpgManager.getRpgPlayer(player).getPlayerConfigFile().getClassLevel();
 		
 		//Update the dungeonNumber
 		setDungeonNumber(dungeonNumber);
@@ -267,7 +267,7 @@ public class DungeonEvent extends GeneralEvent
 		{
 			if (player != null)
 			{
-				level = FC_Rpg.rpgManager.getRpgPlayer(player).getClassLevel();
+				level = FC_Rpg.rpgManager.getRpgPlayer(player).getPlayerConfigFile().getClassLevel();
 				
 				if (level < lowestLevel)
 					lowestLevel = level;
@@ -282,7 +282,7 @@ public class DungeonEvent extends GeneralEvent
 		{
 			if (player != null)
 			{
-				if (FC_Rpg.rpgManager.getRpgPlayer(player).getClassLevel() > lowestLevel + 5)
+				if (FC_Rpg.rpgManager.getRpgPlayer(player).getPlayerConfigFile().getClassLevel() > lowestLevel + 5)
 				{
 					//Refund players
 					FC_Rpg.economy.depositPlayer(player.getName(), dm.getCost(dungeonNumber));

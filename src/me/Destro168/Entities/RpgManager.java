@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.Destro168.Configs.PlayerFileConfig;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.RpgParty;
 import me.Destro168.Messaging.BroadcastLib;
@@ -34,9 +35,9 @@ public class RpgManager
 		public void setManaTask(int x) { manaTask = x; }
 		public void setUpdateTask(int x) { updateTask = x; }
 		
-		public PlayerInformation(Player player)
+		public PlayerInformation(RpgPlayer rpgPlayer_)
 		{
-			rpgPlayer = new RpgPlayer(player);
+			rpgPlayer = rpgPlayer_;
 		}
 		
 		private void startPlayerUpdates()
@@ -44,7 +45,7 @@ public class RpgManager
 			//Cancel past player updates.
 			stopPlayerUpdates();
 			
-			if (rpgPlayer.getIsActive() == false)
+			if (rpgPlayer.getPlayerConfigFile().getIsActive() == false)
 				return;
 			
 			updateTask = Bukkit.getScheduler().scheduleAsyncRepeatingTask(FC_Rpg.plugin, new Runnable()
@@ -71,7 +72,7 @@ public class RpgManager
 			//Cancel any past mana regenerations.
 			cancelManaRegen();
 			
-			if (rpgPlayer.getIsActive() == false)
+			if (rpgPlayer.getPlayerConfigFile().getIsActive() == false)
 				return;
 			
 			//Start a new mana regeneration.
@@ -155,13 +156,20 @@ public class RpgManager
 	}
 	
     //Functions
-    private void checkPlayerRegistration(Player player)
+    public void checkPlayerRegistration(Player player)
     {
+    	//Variable Decalrations
+    	RpgPlayer rpgPlayer = new RpgPlayer(player);
+    	
+    	//If they aren't active, then we want to make them active by creating their rpg player.
+		if (rpgPlayer.getPlayerConfigFile().getIsActive() == false)
+			setPlayerStart("Swordsman", player, false);	//Store the player as a new player.
+		
     	//If the player information isn't stored, then store.
     	if (!(piMap.containsKey(player)))
     	{
     		//We get the rpgPlayer.
-    		PlayerInformation pi = new PlayerInformation(player);
+    		PlayerInformation pi = new PlayerInformation(rpgPlayer);
     		piMap.put(player, pi);
     		piMap.get(player).startTasks();
     	}
@@ -192,9 +200,7 @@ public class RpgManager
     	if (!(miMap.containsKey(entity)))
     	{
     		RpgMonster mob = new RpgMonster(entity, levelBonus);
-    		
     		miMap.put(entity, mob);
-    		
     		return miMap.get(entity);
     	}
     	
@@ -217,7 +223,7 @@ public class RpgManager
     	{
     		piMap.get(player).stopTasks();
     		piMap.get(player).getRpgPlayer().updateTimePlayed();
-    		piMap.get(player).getRpgPlayer().dumpHM();
+    		piMap.get(player).getRpgPlayer().dumpCriticalInformation();
     		piMap.remove(player);
     	}
     }
@@ -238,9 +244,9 @@ public class RpgManager
     	FC_Rpg.bLib.standardBroadcast("Welcome " + player.getName() + ", the " + classSelection + "!");
 		
     	//Convert stringClass to real class number.
-    	for (int i = 0; i < FC_Rpg.c_classes.length; i++)
+    	for (int i = 0; i < FC_Rpg.classManager.getRpgClasses().length; i++)
     	{
-    		if (classSelection.equals(FC_Rpg.c_classes[i]))
+    		if (classSelection.equals(FC_Rpg.classManager.getRpgClass(i).getName()))
     		{
     			intClass = i;
     			break;
@@ -271,7 +277,7 @@ public class RpgManager
 		//Attempt to delete player data if older than 14 days.
 		for (OfflinePlayer player : Bukkit.getOfflinePlayers())
 		{
-			RpgPlayerFile file = new RpgPlayerFile(player.getName());
+			PlayerFileConfig file = new PlayerFileConfig(player.getName());
 			
 			if (player.isOnline() == true)
 				return;

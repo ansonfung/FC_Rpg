@@ -1,6 +1,5 @@
 package me.Destro168.Commands;
 
-import me.Destro168.Configs.ConfigOverlord;
 import me.Destro168.FC_Suite_Shared.ArgParser;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.Util.FC_RpgPermissions;
@@ -33,12 +32,7 @@ public class PvpCE implements CommandExecutor
 			if (isHappening == true)
 				endPvpEvent();
 			
-			ConfigOverlord co = new ConfigOverlord();
-			
-			if (co.getPvpArenaReward() > -1)
-				FC_Rpg.pvp.begin();	//Start a new one.
-			else
-				msgLib.standardMessage("You must set the pvp configuration up as well as put the reward at 0 or more first.");
+			FC_Rpg.pvp.begin();	//Start a new one.
 			
 			return true;
 		}

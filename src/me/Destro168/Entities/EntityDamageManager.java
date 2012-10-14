@@ -3,7 +3,10 @@ package me.Destro168.Entities;
 import java.util.Date;
 import java.util.Random;
 
-import me.Destro168.Configs.ConfigOverlord;
+import me.Destro168.Classes.EffectIDs;
+import me.Destro168.Classes.RpgClass;
+import me.Destro168.Configs.ClassConfig;
+import me.Destro168.Configs.GeneralConfig;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.RpgParty;
 import me.Destro168.Messaging.MessageLib;
@@ -41,12 +44,19 @@ public class EntityDamageManager
 		if (canAttack(rpgDefender.getLastDamagedLong(), memberCount) == false)
 			return;
 		
+		//Handle immortality effect first.
+		if (rpgDefender.getStatusIsActive(rpgDefender.getPlayerConfigFile().getStatusDuration(EffectIDs.IMMORTAL)))
+		{
+			rpgDefender.attemptDamageAvoidNotification(true);
+			return;
+		}
+		
 		//Check if the player has dodge status on them.
-		if (rpgDefender.getStatusIsActive(rpgDefender.getStatusDodge()))
+		if (rpgDefender.getStatusIsActive(rpgDefender.getPlayerConfigFile().getStatusDuration(EffectIDs.DODGE)))
 		{
 			Random rand = new Random();
 			
-			if (rand.nextInt(100) <= rpgDefender.getStatusDodgeStrength())
+			if (rand.nextInt(100) <= rpgDefender.getPlayerConfigFile().getStatusStrength(EffectIDs.DODGE))
 			{
 				rpgDefender.attemptDamageAvoidNotification(false);
 				return;
@@ -54,14 +64,7 @@ public class EntityDamageManager
 		}
 		
 		//Deal thorns damage before anything is calculated.
-		if (rpgDefender.getStatusIsActive(rpgDefender.getStatusImmortal()))
-		{
-			rpgDefender.attemptDamageAvoidNotification(true);
-			return;
-		}
-		
-		//Deal thorns damage before anything is calculated.
-		if (rpgDefender.getStatusIsActive(rpgDefender.getStatusThorns()))
+		if (rpgDefender.getStatusIsActive(rpgDefender.getPlayerConfigFile().getStatusDuration(EffectIDs.THORNS)))
 		{
 			if (rpgAttacker != null)
 				rpgAttacker.dealDamage(damage);
@@ -78,15 +81,26 @@ public class EntityDamageManager
 		//Handle block.
 		if (playerDefender.isBlocking() == true)
 		{
-			if (rpgDefender.getCombatClass() == FC_Rpg.c_int_defender)
-				damage = damage * .75; //25% damage reduction for blocking as defender.
+			//Variable Declaration.
+			RpgClass rpgClass = FC_Rpg.classManager.getClassWithPassive(ClassConfig.passive_StrongerParry);
+			
+			if (rpgClass != null)
+			{
+				if (rpgClass.getName().equals(rpgAttacker.getPlayerConfigFile().getCombatClass()))
+					damage = damage * .75; //25% damage reduction for blocking as defender.
+				else
+					damage = damage * .9; //10% damage reduction for blocking.
+			}
 			else
 				damage = damage * .9; //10% damage reduction for blocking.
 		}
 		
 		//If taunt status is active, then...
-		if (rpgDefender.getStatusIsActive(rpgDefender.getStatusTaunt()) == true)
-			damage = damage * .9;	//10% damage reduction from taunt.
+		if (rpgDefender.getStatusIsActive(rpgDefender.getPlayerConfigFile().getStatusDuration(EffectIDs.TAUNT)) == true)
+		{
+			//Apply taunt damage reduction.
+			damage = damage * rpgDefender.getPlayerConfigFile().getStatusStrength(EffectIDs.TAUNT);
+		}
 		
 		//Deal damage greater than 0.
 		if (damage < 0.1)
@@ -142,6 +156,7 @@ public class EntityDamageManager
 		double bonusPercent = 0;
 		int level1 = 0;
 		int level2 = 0;
+		int fireUses = rpgAttacker.getPlayerConfigFile().getStatusUses(EffectIDs.FIRE_ARROW);
 		boolean playerLevelHigher = false;
 		boolean disableDrops = false;
 		
@@ -155,7 +170,7 @@ public class EntityDamageManager
 		}
 		
 		//If the player has the fire arrow status, then...
-		if (rpgAttacker.getStatusIsActive(rpgAttacker.getStatusFireArrow()))
+		if (fireUses > 0)
 		{
 			//If the mob is alive...
 			if (rpgMobDefender.getIsAlive() == true)
@@ -163,20 +178,23 @@ public class EntityDamageManager
 				//Put mob on fire
 				((LivingEntity) entityDefender).setFireTicks(20);	 //set the mob on fire!
 				
+				//Remove a fire arrow use.
+				rpgAttacker.getPlayerConfigFile().setStatusUses(EffectIDs.FIRE_ARROW, fireUses - 1);
+				
 				//Then return
 				return;
 			}
 		}
 		
 		//If the player has the fire arrow status, then...
-		if (rpgAttacker.getStatusIsActive(rpgAttacker.getStatusMorale()))
+		if (rpgAttacker.getStatusIsActive(rpgAttacker.getPlayerConfigFile().getStatusDuration(EffectIDs.ATTACK)))
 		{
 			//If they have the morale buff, then increase damage by it.
-			damage = damage * rpgAttacker.getStatusMoraleStrength();
+			damage = damage * rpgAttacker.getPlayerConfigFile().getStatusStrength(EffectIDs.ATTACK);
 		}
 		
 		damage = damage * rpgAttacker.getEnchantmentOffensiveBonuses(Enchantment.DAMAGE_ALL);
-	
+		
 		if (entityDefender.getType() == EntityType.SPIDER || entityDefender.getType() == EntityType.CAVE_SPIDER)
 			damage = damage * rpgAttacker.getEnchantmentOffensiveBonuses(Enchantment.DAMAGE_ARTHROPODS);
 		else if (entityDefender.getType() == EntityType.ZOMBIE || entityDefender.getType() == EntityType.PIG_ZOMBIE || entityDefender.getType() == EntityType.ZOMBIE || entityDefender.getType() == EntityType.SKELETON)
@@ -211,19 +229,19 @@ public class EntityDamageManager
 			if (rpgMobDefender.getMobAggressionCheck().isHostile() == true)
 			{
 				//Give the attacker a mob kill
-				rpgAttacker.setLifetimeMobKills(rpgAttacker.getLifetimeMobKills() + 1);
+				rpgAttacker.getPlayerConfigFile().setLifetimeMobKills(rpgAttacker.getPlayerConfigFile().getLifetimeMobKills() + 1);
 				
 				//5 mob defender level, 1 player defender, that's 5 - 1 = 4, that's 4 levels up, gives (20 * 4)
 				//Level 1 mob and level 5 player, that's 1 - 5, which is -4, give -20 * 4
-				if (rpgMobDefender.getLevel() > rpgAttacker.getClassLevel())
+				if (rpgMobDefender.getLevel() > rpgAttacker.getPlayerConfigFile().getClassLevel())
 				{
 					level1 = rpgMobDefender.getLevel();
-					level2 = rpgAttacker.getClassLevel();
+					level2 = rpgAttacker.getPlayerConfigFile().getClassLevel();
 					playerLevelHigher = false;
 				}
 				else
 				{
-					level1 = rpgAttacker.getClassLevel();
+					level1 = rpgAttacker.getPlayerConfigFile().getClassLevel();
 					level2 = rpgMobDefender.getLevel();
 					playerLevelHigher = true;
 				}
@@ -262,9 +280,9 @@ public class EntityDamageManager
 				
 				
 				//Calculate how much loot and experience to aquire by donator
-				if (rpgAttacker.isDonator())
+				if (rpgAttacker.getPlayerConfigFile().isDonator())
 				{
-					ConfigOverlord co = new ConfigOverlord();
+					GeneralConfig co = new GeneralConfig();
 					
 					loot = loot * (1 + co.getDonatorLootBonusPercent());
 					exp = loot * (1 + co.getDonatorLootBonusPercent());
@@ -402,7 +420,7 @@ public class EntityDamageManager
 	{
 		Player playerDefender = rpgDefender.getPlayer();
 		double armorBonus = 1;
-		int constitution = rpgDefender.getConstitution();
+		int constitution = rpgDefender.getPlayerConfigFile().getConstitution();
 		
 		if (playerDefender.getInventory().getHelmet() != null)
 			armorBonus = armorBonus + calcArmorModifier(playerDefender.getInventory().getHelmet().getType(), constitution);
@@ -424,37 +442,49 @@ public class EntityDamageManager
 	{
 		//Variable Declarations
 		Random rand = new Random();
+		RpgClass rpgClass = FC_Rpg.classManager.getClassWithPassive(ClassConfig.passive_CounterAttack);
 		
-		if (rpgDefender.getCombatClass() == FC_Rpg.c_int_swordsman)
+		if (rpgClass != null)
 		{
-			//10% chance for counter-attack.
-			if (rand.nextInt(10) == 0)
-				entityAttacker.damage(1, rpgDefender.getPlayer());
+			if (rpgClass.getName().equals(rpgDefender.getPlayerConfigFile().getCombatClass()))
+			{
+				//10% chance for counter-attack.
+				if (rand.nextInt(10) == 0)
+					entityAttacker.damage(1, rpgDefender.getPlayer());
+			}
 		}
 	}
 	
 	//Handle player offense skills.
 	private double handlePlayerOffensePassives(double damage, RpgPlayer rpgAttacker, LivingEntity entityDefender)
 	{
-		if (rpgAttacker.getCombatClass() == FC_Rpg.c_int_berserker)
-			damage = damage * (1 + rpgAttacker.getMissingHealthDecimal() * .4); //Scale damage by 1/4th
+		//Variable Declaration.
+		RpgClass rpgClass = FC_Rpg.classManager.getClassWithPassive(ClassConfig.passive_BattleLust);
+		
+		if (rpgClass != null)
+		{
+			if (rpgClass.getName().equals(rpgAttacker.getPlayerConfigFile().getCombatClass()))
+			{
+				//Scale damage by 1/4th
+				damage = damage * (1 + rpgAttacker.getMissingHealthDecimal() * .4);
+			}
+		}
 		
 		return damage;
 	}
 	
 	private void handleBerserkerSpells(RpgPlayer caster, LivingEntity defender, double damage)
 	{
-		if (caster.getCombatClass() != FC_Rpg.c_int_berserker)
-			return;
+		if (caster.getStatusIsActive(caster.getPlayerConfigFile().getStatusDuration(EffectIDs.LIFESTEAL)))
+			caster.heal(damage * caster.getPlayerConfigFile().getStatusStrength(EffectIDs.LIFESTEAL));
 		
-		if (caster.getStatusIsActive(caster.getStatusBloodthirst()))
-			caster.heal(damage * caster.getStatusBloodthirstStrength());
-		
+		/* TODO - readd
 		if (caster.getStatusIsActive(caster.getStatusFerocity()))
 		{
 			EntityLocationLib ell = new EntityLocationLib();
 			caster.getPlayer().teleport(ell.getLocationBehindEntity(defender.getLocation()));
 		}
+		*/
 	}
 	
 	public boolean canAttack(long time, int partySize)

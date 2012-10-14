@@ -1,7 +1,8 @@
 package me.Destro168.Util;
 
+import me.Destro168.Configs.WorldConfig;
+
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
 
 public class DistanceModifierLib 
 {
@@ -35,7 +36,14 @@ public class DistanceModifierLib
 		z = (int) loc.getZ();
 	}
 	
-	private void calculateXYZModifier()
+	public void setShiftByLocation(Location shiftLocation)
+	{
+		xShiftAmount = (int) shiftLocation.getX();
+		yShiftAmount = (int) shiftLocation.getY();
+		zShiftAmount = (int) shiftLocation.getZ();
+	}
+	
+	private int calculateXYZModifier()
 	{
 		x = x - xShiftAmount;
 		y = y - yShiftAmount;
@@ -65,9 +73,26 @@ public class DistanceModifierLib
 			distanceModifier = (1)*y;
 		else
 			distanceModifier = (x+z)*y;
+		
+		return distanceModifier;
 	}
 	
-	private void calculateXYModifier()
+	public int getWorldDML(Location entityLoc)
+	{
+		//Variable Declarations
+		WorldConfig wm = new WorldConfig();
+		
+		//Set base coords and shift amount for the distance modifier.
+		setBaseCoordsByLocation(entityLoc);
+		setShiftByLocation(wm.getWorldSpawn(entityLoc.getWorld().getName()));
+		
+		//Return a pure distance modifier that is exactly corrolated to distance.
+		return calculateXYZModifier();
+	}
+	
+	/* - Outdated.
+	
+	private int calculateXYModifier()
 	{
 		x = x - xShiftAmount;
 		y = y - yShiftAmount;
@@ -87,6 +112,8 @@ public class DistanceModifierLib
 			x = x * -1;
 
 		distanceModifier = x*y;
+		
+		return distanceModifier;
 	}
 	
 	private void calculateZYModifier()
@@ -110,24 +137,9 @@ public class DistanceModifierLib
 		
 		distanceModifier = z*y;
 	}
-	
-	public int getWorldDML(Location loc)
-	{
-		//Return a pure distance modifier that is exactly corrolated to distance.
-		setBaseCoordsByLocation(loc);
-		
-		calculateXYZModifier();
-		
-		return distanceModifier;
-	}
-	
 	public int getDungeonDML(Entity entity, boolean dungeonTravelsXDirection, int xShift, int yShift, int zShift)
 	{
 		setBaseCoordsByLocation(entity.getLocation());
-		
-		xShiftAmount = xShift;
-		yShiftAmount = yShift;
-		zShiftAmount = zShift;
 		
 		if (dungeonTravelsXDirection == true)
 			calculateXYModifier();
@@ -136,6 +148,7 @@ public class DistanceModifierLib
 		
 		return distanceModifier;
 	}
+	*/
 }
 
 //Adjust to account for world spawn.

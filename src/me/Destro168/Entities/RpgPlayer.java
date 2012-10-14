@@ -7,11 +7,12 @@ import me.Destro168.Messaging.MessageLib;
 import me.Destro168.Util.FC_RpgPermissions;
 import me.Destro168.Util.HealthConverter;
 import me.Destro168.Util.RpgMessageLib;
-import me.Destro168.Util.SpellUtil;
-import me.Destro168.Configs.ConfigOverlord;
+import me.Destro168.Classes.SpellCaster;
+import me.Destro168.Configs.GeneralConfig;
 import me.Destro168.Configs.Group;
-import me.Destro168.Configs.GroupManager;
-import me.Destro168.Configs.WorldManager;
+import me.Destro168.Configs.GroupConfig;
+import me.Destro168.Configs.PlayerFileConfig;
+import me.Destro168.Configs.WorldConfig;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Suite_Shared.ColorLib;
 
@@ -26,15 +27,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-public class RpgPlayer extends RpgPlayerFile
+public class RpgPlayer extends RpgEntity
 {
 	private MessageLib msgLib;
 	private ItemStack air;
-	private SpellUtil util;
 	private Player player;
+	private PlayerFileConfig playerConfigFile;
 	private String prefix = "";
+	private String name = "";
 	private boolean isSupportBuffed;
-	private int tempStrength;
+	private int tempAttack;
 	private int tempConstitution;
 	private int tempMagic;
 	private int tempIntelligence;
@@ -47,6 +49,7 @@ public class RpgPlayer extends RpgPlayerFile
 	
 	//Gets
 	public Player getPlayer() { return player; }
+	public PlayerFileConfig getPlayerConfigFile() { return playerConfigFile; }
 	
 	//Only call twice, one when player is loaded, once when player deloads.
 	public double getCurHealth() { return curHealth; }
@@ -55,39 +58,42 @@ public class RpgPlayer extends RpgPlayerFile
 	public double getMaxMana() { return maxMana; }
 	
 	//Functions that rely on file get/sets
-	public int getTotalStrength() { return getStrength() + tempStrength; }
-	public int getTotalConstitution() { return getConstitution() + tempConstitution; }
-	public int getTotalMagic() { return getMagic() + tempMagic; }
-	public int getTotalIntelligence() { return getIntelligence() + tempIntelligence; }
+	public int getTotalAttack() { return playerConfigFile.getAttack() + tempAttack; }
+	public int getTotalConstitution() { return playerConfigFile.getConstitution() + tempConstitution; }
+	public int getTotalMagic() { return playerConfigFile.getMagic() + tempMagic; }
+	public int getTotalIntelligence() { return playerConfigFile.getIntelligence() + tempIntelligence; }
 	
 	//Constructor
 	public RpgPlayer()
 	{
+		//Set default player information.
 		setPlayerDefaults();
 	}
 	
 	public RpgPlayer(Player player)
 	{
-		super(player.getName());
-		
-		//We want to set the player to the 'name', which will be matched by RpgPlayerFile
-		setPlayer(Bukkit.getServer().getPlayer(name));
+		//Set the player information based on name.
+		setPlayer(player);
 	}
 	
 	public void setPlayerDefaults()
 	{
-		util = new SpellUtil();
+		msgLib = null;
 		air = new ItemStack(Material.AIR);
 		player = null;
+		playerConfigFile = null;
 		prefix = "";
 		isSupportBuffed = false;
-		tempStrength = 0;
+		tempAttack = 0;
 		tempConstitution = 0;
 		tempMagic = 0;
 		tempIntelligence = 0;
 		lastDodgeNotification = new Date();
 		logonDate = new Date();
-		air = new ItemStack(Material.AIR);
+		curHealth = 0;
+		maxHealth = 0;
+		curMana = 0;
+		maxMana = 0;
 	}
     
 	public void setPlayer(Player player_)
@@ -99,41 +105,43 @@ public class RpgPlayer extends RpgPlayerFile
 		player = player_;
 		
 		//Create the message lib.
-		msgLib = new MessageLib(player_);
+		msgLib = new MessageLib(player);
+		
+		//Create the player config
+		playerConfigFile = new PlayerFileConfig(player.getName());
+		
+    	//Update player health hud.
+		loadCriticalInformation();
 		
 		//Update the prefix.
 		updatePrefix();
 		
-		//Set the name for the player name.
-		setPlayerName(player_.getName());
-		
-    	//Update player health hud.
-		loadHM();
     	HealthConverter hc = new HealthConverter(maxHealth, curHealth);
     	
-    	WorldManager wm = new WorldManager();
+    	WorldConfig wm = new WorldConfig();
     	
-    	if (wm.getIsRpgWorld(player_.getWorld().getName()) == true)
+    	if (wm.getIsRpgWorld(name) == true)
     		player_.setHealth(hc.getMinecraftHearts());
 		
 		//Check and apply donator bonuses
 		donatorStatUpdate();
 	}
 	
-	public void loadHM()
+	public void loadCriticalInformation()
 	{
-		curMana = getCurManaFile();
-		maxMana = getMaxManaFile();
-		curHealth = getCurHealthFile();
-		maxHealth = getMaxHealthFile();
+		curMana = playerConfigFile.getCurManaFile();
+		maxMana = playerConfigFile.getMaxManaFile();
+		curHealth = playerConfigFile.getCurHealthFile();
+		maxHealth = playerConfigFile.getMaxHealthFile();
+		name = playerConfigFile.getName();
 	}
 	
-	public void dumpHM()
+	public void dumpCriticalInformation()
 	{
-		setCurManaFile(curMana);
-		setMaxManaFile(maxMana);
-		setCurHealthFile(curHealth);
-		setMaxHealthFile(maxHealth);
+		playerConfigFile.setCurManaFile(curMana);
+		playerConfigFile.setMaxManaFile(maxMana);
+		playerConfigFile.setCurHealthFile(curHealth);
+		playerConfigFile.setMaxHealthFile(maxHealth);
 	}
 	
 	public void createPlayerRecord(Player player_, int pickedClass, boolean manualDistribution)
@@ -142,7 +150,7 @@ public class RpgPlayer extends RpgPlayerFile
 		setPlayer(player_);
 		
 		//Set the files defaults.
-		setPlayerDefaults(pickedClass, manualDistribution);
+		playerConfigFile.setPlayerDefaults(pickedClass, manualDistribution);
 		
 		//Update health and mana based on stats.
 		calcMaxHM();
@@ -170,25 +178,25 @@ public class RpgPlayer extends RpgPlayerFile
 	{
 		//Variable Declarations
 		ColorLib cl = new ColorLib();
-		ConfigOverlord co = new ConfigOverlord();
+		GeneralConfig co = new GeneralConfig();
 		FC_RpgPermissions perms = new FC_RpgPermissions(player);
-		GroupManager gm = new GroupManager();
+		GroupConfig gm = new GroupConfig();
 		
 		String[] playerGroups;
-		String customPrefix = getCustomPrefix();
+		String customPrefix = playerConfigFile.getCustomPrefix();
 		String defaultPrefix = co.getDefaultPrefix();
 		String parsedDefault = cl.parseColors(defaultPrefix);
 		
 		//Check the customPrefix first.
 		if (customPrefix == null)
 		{
-			setCustomPrefix(defaultPrefix);
+			playerConfigFile.setCustomPrefix(defaultPrefix);
 			prefix = parsedDefault;
 			return prefix;
 		}
 		else if (customPrefix.equals(""))
 		{
-			setCustomPrefix(defaultPrefix);
+			playerConfigFile.setCustomPrefix(defaultPrefix);
 			prefix = parsedDefault;
 			return prefix;
 		}
@@ -220,15 +228,15 @@ public class RpgPlayer extends RpgPlayerFile
 		}
 		
 		//If a donator set them to donator tag.
-		if (isDonator() == true)
+		if (playerConfigFile.isDonator() == true)
 			prefix = ChatColor.WHITE + "["+ ChatColor.YELLOW + "Donator" + ChatColor.WHITE + "]";
 		
 		//If a hunter add hunter tag.
-		if (getHunterLevel() == 1)
+		if (playerConfigFile.getHunterLevel() == 1)
 			prefix += "["+ ChatColor.BLUE + "Hunter" + ChatColor.WHITE + "]";
-		else if (getHunterLevel() == 2)
+		else if (playerConfigFile.getHunterLevel() == 2)
 			prefix += "["+ ChatColor.DARK_BLUE + "Predator" + ChatColor.WHITE + "]";
-		else if (getHunterLevel() == 3)
+		else if (playerConfigFile.getHunterLevel() == 3)
 			prefix += "["+ ChatColor.BLACK + "Terror" + ChatColor.WHITE + "]";
 		
 		return prefix;
@@ -236,7 +244,7 @@ public class RpgPlayer extends RpgPlayerFile
 	
 	public void setDonator(int periods)
 	{
-		offlineSetDonator(periods);
+		playerConfigFile.offlineSetDonator(periods);
 		
 		//Update stats to account for new bonuses if a donator.
 		donatorStatUpdate();
@@ -245,28 +253,28 @@ public class RpgPlayer extends RpgPlayerFile
 	public void addClassExperience(double x, boolean displayLevelUpMessage)
 	{
 		//Add the class experience
-		addOfflineClassExperience(x, displayLevelUpMessage);
+		playerConfigFile.addOfflineClassExperience(x, displayLevelUpMessage);
 		
 		//Update Donator Stats
 		donatorStatUpdate();
 		
 		//Message the player a reminder to use stat points.
-		if (getManualAllocation() == false)
+		if (playerConfigFile.getManualAllocation() == false)
 			msgLib.standardMessage("Remember to assign stat points. Use /class for help!");
 	}
 	
 	public void donatorStatUpdate()
 	{
-		ConfigOverlord co = new ConfigOverlord();
+		GeneralConfig co = new GeneralConfig();
 		
-		if (isDonator() == true)
+		if (playerConfigFile.isDonator() == true)
 		{
 			resetTempStats();
 			
-			tempStrength = (int) (getStrength() * co.getDonatorBonusStatPercent());
-			tempConstitution = (int) (getConstitution() * co.getDonatorBonusStatPercent());
-			tempMagic = (int) (getMagic() * co.getDonatorBonusStatPercent());
-			tempIntelligence = (int) (getIntelligence() * co.getDonatorBonusStatPercent());
+			tempAttack = (int) (playerConfigFile.getAttack() * co.getDonatorBonusStatPercent());
+			tempConstitution = (int) (playerConfigFile.getConstitution() * co.getDonatorBonusStatPercent());
+			tempMagic = (int) (playerConfigFile.getMagic() * co.getDonatorBonusStatPercent());
+			tempIntelligence = (int) (playerConfigFile.getIntelligence() * co.getDonatorBonusStatPercent());
 			
 			calcMaxHM();
 		}
@@ -275,7 +283,7 @@ public class RpgPlayer extends RpgPlayerFile
 	public void resetTempStats()
 	{
 		//Reset temp stats.
-		tempStrength = 0;
+		tempAttack = 0;
 		tempConstitution = 0;
 		tempMagic = 0;
 		tempIntelligence = 0;
@@ -284,7 +292,7 @@ public class RpgPlayer extends RpgPlayerFile
 	public boolean hasClassChangeTicket()
 	{
 		//If they have no more tickets, return false.
-		if (getClassChangeTickets() == 0)
+		if (playerConfigFile.getClassChangeTickets() == 0)
 			return false;
 		
 		return true;
@@ -292,10 +300,10 @@ public class RpgPlayer extends RpgPlayerFile
 	
 	public void switchClass(int combatClass)
 	{
-		setCombatClass(combatClass);
+		playerConfigFile.setCombatClass(combatClass);
 		
 		//Else we decrease tickets and return true.
-		setClassChangeTickets(getClassChangeTickets() - 1);
+		playerConfigFile.setClassChangeTickets(playerConfigFile.getClassChangeTickets() - 1);
 	}
 	
 	public void addSupportBuff(double buffStrength)
@@ -310,13 +318,13 @@ public class RpgPlayer extends RpgPlayerFile
 		isSupportBuffed = true;
 		
 		//Store old buffs.
-		base[0] = tempStrength;
+		base[0] = tempAttack;
 		base[1] = tempMagic;
 		base[2] = tempConstitution;
 		base[3] = tempIntelligence;
 		
 		//Update them.
-		tempStrength = (int) (getTotalStrength() * buffStrength);
+		tempAttack = (int) (getTotalAttack() * buffStrength);
 		tempMagic = (int) (getTotalMagic() * buffStrength);
 		tempConstitution = (int) (getTotalConstitution() * buffStrength);
 		tempIntelligence = (int) (getTotalIntelligence() * buffStrength);
@@ -333,7 +341,7 @@ public class RpgPlayer extends RpgPlayerFile
 			public void run()
 			{
 				//Revert player stats.
-				tempStrength = base[0];
+				tempAttack = base[0];
 				tempMagic = base[1];
 				tempConstitution = base[2];
 				tempIntelligence = base[3];
@@ -387,14 +395,14 @@ public class RpgPlayer extends RpgPlayerFile
 		return curHealth;
 	}
 	
-	private boolean drainMana(int amount)
+	private boolean drainMana(double d)
 	{
 		//Update health and mana.
 		calcMaxHM();
 		
-		if (curMana >= amount)
+		if (curMana >= d)
 		{
-			curMana -= amount;
+			curMana -= d;
 			return true;
 		}
 		else
@@ -442,8 +450,8 @@ public class RpgPlayer extends RpgPlayerFile
 	
 	public double getPromotionCost()
 	{
-		ConfigOverlord co = new ConfigOverlord();
-		return co.getJobRankCosts().get(getJobRank() - 1);
+		GeneralConfig co = new GeneralConfig();
+		return co.getJobRankCosts().get(playerConfigFile.getJobRank() - 1);
 	}
 	
 	//Return stat points to a player.
@@ -456,59 +464,59 @@ public class RpgPlayer extends RpgPlayerFile
 	public void respecStats()
 	{
 		//Reset stats
-		int stats = getStats();
+		int stats = playerConfigFile.getStats();
 		
-		stats += getStrength();
-		stats += getConstitution();
-		stats += getMagic();
-		stats += getIntelligence();
+		stats += playerConfigFile.getAttack();
+		stats += playerConfigFile.getConstitution();
+		stats += playerConfigFile.getMagic();
+		stats += playerConfigFile.getIntelligence();
 		
-		setStrength(0);
-		setConstitution(0);
-		setMagic(0);
-		setIntelligence(0);
+		playerConfigFile.setAttack(0);
+		playerConfigFile.setConstitution(0);
+		playerConfigFile.setMagic(0);
+		playerConfigFile.setIntelligence(0);
 		
-		setStats(stats);
+		playerConfigFile.setStats(stats);
 	}
 	
 	public void respecSkills()
 	{
-		int spellPoints = getSpellPoints();
+		int spellPoints = playerConfigFile.getSpellPoints();
 		
-		for (int i = 0; i < SpellUtil.CLASS_SPELL_COUNT; i++)
+		for (int i = 0; i < playerConfigFile.getRpgClass().getSpellBook().size(); i++)
 		{
-			spellPoints += getSpellLevel(i);
-			setSpellLevel(i, 0);
+			spellPoints += playerConfigFile.getSpellLevel(i);
+			playerConfigFile.setSpellLevel(i, 0);
 		}
 		
-		setSpellPoints(spellPoints);
+		playerConfigFile.setSpellPoints(spellPoints);
 	}
 	
 	public boolean useStats(int stat, int amount)
 	{
 		//We make sure first that the player isn't trying to use more stats than they have.
 		//if they are fine, then we subtract the amount from the amount of stats that the player has.
-		if (amount > getStats() || amount < 1)
+		if (amount > playerConfigFile.getStats() || amount < 1)
 		{
 			return false;
 		}
 		
-		setStats(getStats() - amount);
+		playerConfigFile.setStats(playerConfigFile.getStats() - amount);
 		
 		//Then we add the stat points to the player.
 		switch (stat)
 		{
 			case 1:
-				setStrength(getStrength() + amount);
+				playerConfigFile.setAttack(playerConfigFile.getAttack() + amount);
 				break;
 			case 2:
-				setConstitution(getConstitution() + amount);
+				playerConfigFile.setConstitution(playerConfigFile.getConstitution() + amount);
 				break;
 			case 3:
-				setMagic(getMagic() + amount);
+				playerConfigFile.setMagic(playerConfigFile.getMagic() + amount);
 				break;
 			case 4:
-				setIntelligence(getIntelligence() + amount);
+				playerConfigFile.setIntelligence(playerConfigFile.getIntelligence() + amount);
 				break;
 		}
 		
@@ -636,8 +644,8 @@ public class RpgPlayer extends RpgPlayerFile
 		Date now = new Date();
 		boolean addToInventory = false;
 		ItemStack steak = new ItemStack(Material.COOKED_BEEF, 5);
-		WorldManager wm = new WorldManager();
-		ConfigOverlord co = new ConfigOverlord();
+		WorldConfig wm = new WorldConfig();
+		GeneralConfig co = new GeneralConfig();
 		
 		//If hourly steak is disabled don't feed hourly steak.
 		if (co.getHourlySteak() == false)
@@ -648,7 +656,7 @@ public class RpgPlayer extends RpgPlayerFile
 			return;
 		
 		//Wait an hour before giving steak again.
-		if (now.getTime() - getLastAte() > 3600000)
+		if (now.getTime() - playerConfigFile.getLastAte() > 3600000)
 		{
 			//We want to determine whether to drop the steak or to not.
 			for (ItemStack item : player.getInventory())
@@ -687,7 +695,7 @@ public class RpgPlayer extends RpgPlayerFile
 			}
 			
 			//Update last ate time.
-			setLastAte(now.getTime());
+			playerConfigFile.setLastAte(now.getTime());
 		}
 	}
 	
@@ -696,29 +704,29 @@ public class RpgPlayer extends RpgPlayerFile
 		Date now = new Date();
 		
 		//If it isn't time yet, don't pay them.
-		if (now.getTime() - getHunterLastPay() < 3600000)
+		if (now.getTime() - playerConfigFile.getHunterLastPay() < 3600000)
 			return;
 		
 		//Else we want to give them money as well as experience.
-		if (getHunterLevel() == 1)
+		if (playerConfigFile.getHunterLevel() == 1)
 		{
-			FC_Rpg.economy.depositPlayer(name, 200 * getJobRank());
-			addClassExperience(100 * getJobRank(), true);
+			FC_Rpg.economy.depositPlayer(name, 200 * playerConfigFile.getJobRank());
+			addClassExperience(100 * playerConfigFile.getJobRank(), true);
 			msgLib.standardMessage("You have just recieved your Hunter pay.");
 		}
-		else if (getHunterLevel() == 2)
+		else if (playerConfigFile.getHunterLevel() == 2)
 		{
-			FC_Rpg.economy.depositPlayer(name, 500 * getJobRank());
-			addClassExperience(200 * getJobRank(), true);
+			FC_Rpg.economy.depositPlayer(name, 500 * playerConfigFile.getJobRank());
+			addClassExperience(200 * playerConfigFile.getJobRank(), true);
 			msgLib.standardMessage("You have just recieved your Predator pay.");
 		}
-		else if (getHunterLevel() == 3)
+		else if (playerConfigFile.getHunterLevel() == 3)
 		{
 			FC_Rpg.economy.depositPlayer(name, 5000);
 			msgLib.standardMessage("You have just recieved your Terror pay.");
 		}
 		
-		setHunterLastPay(now.getTime());
+		playerConfigFile.setHunterLastPay(now.getTime());
 	}
 	
 	public void swordCheck()
@@ -746,7 +754,7 @@ public class RpgPlayer extends RpgPlayerFile
 			if (player.getItemInHand().getDurability() >= 128)
 				player.getInventory().getItem(player.getInventory().getHeldItemSlot()).setDurability((short) 0);
 			
-			if (getStrength() < 125)
+			if (playerConfigFile.getAttack() < 125)
 			{
 				success = false;
 				msgLib.standardMessage("Without 125+ Attack, Stone Swords Are USELESS TO YOU!");
@@ -758,7 +766,7 @@ public class RpgPlayer extends RpgPlayerFile
 			if (player.getItemInHand().getDurability() >= 247)
 				player.getInventory().getItem(player.getInventory().getHeldItemSlot()).setDurability((short) 0);
 			
-			if (getStrength() < 250)
+			if (playerConfigFile.getAttack() < 250)
 			{
 				success = false;
 				msgLib.standardMessage("Without 250+ Attack, Iron Swords Are USELESS TO YOU!");
@@ -770,7 +778,7 @@ public class RpgPlayer extends RpgPlayerFile
 			if (player.getItemInHand().getDurability() >= 1558)
 				player.getInventory().getItem(player.getInventory().getHeldItemSlot()).setDurability((short) 0);
 			
-			if (getStrength() < 375)
+			if (playerConfigFile.getAttack() < 375)
 			{
 				success = false;
 				msgLib.standardMessage("Without 375+ Attack, Diamond Swords Are USELESS TO YOU!");
@@ -782,7 +790,7 @@ public class RpgPlayer extends RpgPlayerFile
 			if (player.getItemInHand().getDurability() >= 27)
 				player.getInventory().getItem(player.getInventory().getHeldItemSlot()).setDurability((short) 0);
 			
-			if (getStrength() < 500)
+			if (playerConfigFile.getAttack() < 500)
 			{
 				success = false;
 				msgLib.standardMessage("Without 500+ Attack, Gold Swords Are USELESS TO YOU!");
@@ -815,7 +823,7 @@ public class RpgPlayer extends RpgPlayerFile
 		else
 			headType = helmet.getType();
 		
-		if (getConstitution() < 125)
+		if (playerConfigFile.getConstitution() < 125)
 		{
 			if (headType == Material.CHAINMAIL_HELMET)
 			{
@@ -824,7 +832,7 @@ public class RpgPlayer extends RpgPlayerFile
 			}
 		}
 		
-		if (getConstitution() < 250)
+		if (playerConfigFile.getConstitution() < 250)
 		{
 			if (headType == Material.IRON_HELMET)
 			{
@@ -833,7 +841,7 @@ public class RpgPlayer extends RpgPlayerFile
 			}
 		}
 		
-		if (getConstitution() < 375)
+		if (playerConfigFile.getConstitution() < 375)
 		{
 			if (headType == Material.DIAMOND_HELMET)
 			{
@@ -842,7 +850,7 @@ public class RpgPlayer extends RpgPlayerFile
 			}
 		}
 		
-		if (getConstitution() < 500)
+		if (playerConfigFile.getConstitution() < 500)
 		{
 			if (headType == Material.GOLD_HELMET)
 			{
@@ -871,7 +879,7 @@ public class RpgPlayer extends RpgPlayerFile
 		else
 			chestType = chest.getType();
 		
-		if (getConstitution() < 125)
+		if (playerConfigFile.getConstitution() < 125)
 		{
 			if (chestType == Material.CHAINMAIL_CHESTPLATE)
 			{
@@ -880,7 +888,7 @@ public class RpgPlayer extends RpgPlayerFile
 			}
 		}
 		
-		if (getConstitution() < 250)
+		if (playerConfigFile.getConstitution() < 250)
 		{
 			if (chestType == Material.IRON_CHESTPLATE)
 			{
@@ -889,7 +897,7 @@ public class RpgPlayer extends RpgPlayerFile
 			}
 		}
 		
-		if (getConstitution() < 375)
+		if (playerConfigFile.getConstitution() < 375)
 		{
 			if (chestType == Material.DIAMOND_CHESTPLATE)
 			{
@@ -898,7 +906,7 @@ public class RpgPlayer extends RpgPlayerFile
 			}
 		}
 		
-		if (getConstitution() < 500)
+		if (playerConfigFile.getConstitution() < 500)
 		{
 			if (chestType == Material.GOLD_CHESTPLATE)
 			{
@@ -927,7 +935,7 @@ public class RpgPlayer extends RpgPlayerFile
 		else
 			leggingsType = leggings.getType();
 		
-		if (getConstitution() < 125)
+		if (playerConfigFile.getConstitution() < 125)
 		{
 			if (leggingsType == Material.CHAINMAIL_LEGGINGS)
 			{
@@ -936,7 +944,7 @@ public class RpgPlayer extends RpgPlayerFile
 			}
 		}
 		
-		if (getConstitution() < 250)
+		if (playerConfigFile.getConstitution() < 250)
 		{
 			if (leggingsType == Material.IRON_LEGGINGS)
 			{
@@ -945,7 +953,7 @@ public class RpgPlayer extends RpgPlayerFile
 			}
 		}
 		
-		if (getConstitution() < 375)
+		if (playerConfigFile.getConstitution() < 375)
 		{
 			if (leggingsType == Material.DIAMOND_LEGGINGS)
 			{
@@ -954,7 +962,7 @@ public class RpgPlayer extends RpgPlayerFile
 			}
 		}
 		
-		if (getConstitution() < 500)
+		if (playerConfigFile.getConstitution() < 500)
 		{
 			if (leggingsType == Material.GOLD_LEGGINGS)
 			{
@@ -983,7 +991,7 @@ public class RpgPlayer extends RpgPlayerFile
 		else
 			bootsType = boots.getType();
 		
-		if (getConstitution() < 125)
+		if (playerConfigFile.getConstitution() < 125)
 		{
 			if (bootsType == Material.CHAINMAIL_BOOTS)
 			{
@@ -992,7 +1000,7 @@ public class RpgPlayer extends RpgPlayerFile
 			}
 		}
 		
-		if (getConstitution() < 250)
+		if (playerConfigFile.getConstitution() < 250)
 		{
 			if (bootsType == Material.IRON_BOOTS)
 			{
@@ -1001,7 +1009,7 @@ public class RpgPlayer extends RpgPlayerFile
 			}
 		}
 		
-		if (getConstitution() < 375)
+		if (playerConfigFile.getConstitution() < 375)
 		{
 			if (bootsType == Material.DIAMOND_BOOTS)
 			{
@@ -1009,7 +1017,7 @@ public class RpgPlayer extends RpgPlayerFile
 				success = false;
 			}
 		}
-		if (getConstitution() < 500)
+		if (playerConfigFile.getConstitution() < 500)
 		{
 			if (bootsType == Material.GOLD_BOOTS)
 			{
@@ -1033,13 +1041,13 @@ public class RpgPlayer extends RpgPlayerFile
 		Date now = new Date();
 		Long timeDifference;
 		int intDifference;
-		int timePlayedInSeconds = getSecondsPlayed();
+		int timePlayedInSeconds = playerConfigFile.getSecondsPlayed();
 		
 		//We want to first set how long we have played in the configuration file.
 		timeDifference = now.getTime() - logonDate.getTime(); //Calulate how long we have been online.
 		intDifference = (int) (timeDifference / 1000); //Convert that time to seconds.
 		timePlayedInSeconds = timePlayedInSeconds + intDifference;	//Update time played.
-		setSecondsPlayed(timePlayedInSeconds); //Store it
+		playerConfigFile.setSecondsPlayed(timePlayedInSeconds); //Store it
 		
 		//Update the logon date to now.
 		logonDate = new Date(); //Update for future time player updates.
@@ -1054,13 +1062,13 @@ public class RpgPlayer extends RpgPlayerFile
 		String newGroup = "";
 		FC_RpgPermissions perms = new FC_RpgPermissions(player);
 		String[] playerGroups = perms.getPlayerGroups();
-		GroupManager gm = new GroupManager();
+		GroupConfig gm = new GroupConfig();
 		int jobReq = 0;
 		
-		if (getIsActive() == false)
+		if (playerConfigFile.getIsActive() == false)
 			return;
 		
-		if (getRankFreeze() == true)
+		if (playerConfigFile.getRankFreeze() == true)
 			return;
 		
 		//If they have no group, make them a guest and return null.
@@ -1079,7 +1087,7 @@ public class RpgPlayer extends RpgPlayerFile
 			if (jobReq > -1)
 			{
 				//If they meet the time played requirements and the job rank requirements, promote them.
-				if ((timePlayedInSeconds >= group.getTimeReq()) && (getJobRank() >= jobReq))
+				if ((timePlayedInSeconds >= group.getTimeReq()) && (playerConfigFile.getJobRank() >= jobReq))
 				{
 					newGroup = group.getName();
 					break;
@@ -1102,7 +1110,7 @@ public class RpgPlayer extends RpgPlayerFile
 	{
 		FC_RpgPermissions perms = new FC_RpgPermissions(player);
 		
-		if (isDonator() == true)
+		if (playerConfigFile.isDonator() == true)
 			return true;
 		
 		if (perms.isAdmin() == true)
@@ -1115,7 +1123,7 @@ public class RpgPlayer extends RpgPlayerFile
 	{
 		FC_RpgPermissions perms = new FC_RpgPermissions(player);
 		
-		if (getHunterLevel() > 0)
+		if (playerConfigFile.getHunterLevel() > 0)
 			return true;
 		
 		if (perms.isAdmin() == true)
@@ -1126,13 +1134,13 @@ public class RpgPlayer extends RpgPlayerFile
 	
 	public boolean prepareSpell(boolean displaySuccess)
 	{
+		//Variable Declarations and initializations
 		int spellNumber = -1;
-		int spellLevel;
 		
 		//Make sure spell is valid.
-		for (int i = 0; i < SpellUtil.TOTAL_SPELL_COUNT; i++)
+		for (int i = 0; i < FC_Rpg.spellManager.getSpellCount(); i++)
 		{
-			if (getSpellBind(i) == player.getItemInHand().getTypeId())
+			if (playerConfigFile.getSpellBind(i) == player.getItemInHand().getTypeId())
 			{
 				spellNumber = i;
 				break;
@@ -1143,18 +1151,15 @@ public class RpgPlayer extends RpgPlayerFile
 		if (spellNumber == -1)
 			return false;
 		
-		//Set the spell tier
-		spellLevel = getSpellLevel(spellNumber);
-		
 		//We want to return if they don't have any points in the skill.
-		if (spellLevel < 1)
+		if (playerConfigFile.getSpellLevel(spellNumber) < 1)
 		{
 			msgLib.standardError("You must levelup the spell once before you can use it.");
 			return false;
 		}
 		
 		//Set the active spell.
-		setActiveSpell(util.getSpellName(getCombatClass(), spellNumber));
+		playerConfigFile.setActiveSpell(playerConfigFile.getRpgClass().getSpell(spellNumber).getName());
 		
 		if (displaySuccess == true)
 			msgLib.standardMessage("Successfully prepared spell.");
@@ -1164,7 +1169,7 @@ public class RpgPlayer extends RpgPlayerFile
 	
 	public boolean hasEnoughMana(int spellNumber, int spellLevel)
 	{
-		if (curMana > util.getSpellManaCost(getCombatClass(), spellNumber, spellLevel))
+		if (curMana > playerConfigFile.getRpgClass().getSpell(spellNumber).getManaCost().get(spellLevel))
 			return true;
 		
 		return false;
@@ -1174,7 +1179,7 @@ public class RpgPlayer extends RpgPlayerFile
 	{
 		RpgMessageLib rpgLib = new RpgMessageLib(player);
 		
-		drainMana(util.getSpellManaCost(getCombatClass(), spellNumber, spellLevel));
+		drainMana(playerConfigFile.getRpgClass().getSpell(spellNumber).getManaCost().get(spellLevel));
 		
 		rpgLib.errorOutOfMana();
 	}
@@ -1296,25 +1301,15 @@ public class RpgPlayer extends RpgPlayerFile
 	public double castSpell(LivingEntity target, double damage, int damageType)
 	{
 		//Variable Declarations
-		SpellCastManager scm = new SpellCastManager();
-		int combatClass = getCombatClass();
+		SpellCaster scm = new SpellCaster();
 		boolean success = false;
 		
 		//Initiates the spell cast.
 		if (scm.init_spellCast(this, target, damage, damageType) == false)
 			return damage;
 		
-		//Handle spells for each class based on class.
-		if (combatClass == FC_Rpg.c_int_swordsman)
-			success = scm.cast_Swordsman();
-		else if (combatClass == FC_Rpg.c_int_assassin)
-			success = scm.cast_Assassin();
-		else if (combatClass == FC_Rpg.c_int_defender)
-			success = scm.cast_Defender();
-		else if (combatClass == FC_Rpg.c_int_wizard)
-			success = scm.cast_Wizard();
-		else if (combatClass == FC_Rpg.c_int_wizard)
-			success = scm.cast_Berserker();
+		//Get the success.
+		success = scm.handleEffects();
 		
 		//Show effects on spells when requested.
 		if (success == true)

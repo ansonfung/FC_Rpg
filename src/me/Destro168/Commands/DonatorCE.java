@@ -25,17 +25,17 @@ public class DonatorCE implements CommandExecutor
 		String[] args = ap.getArgs();
 		
 		//Only let active players use this command.
-		if (rpgPlayer.getIsActive() == false)
+		if (rpgPlayer.getPlayerConfigFile().getIsActive() == false)
 			return msgLib.errorCreateCharacter();
 		
-		if (rpgPlayer.isDonator())
+		if (rpgPlayer.getPlayerConfigFile().isDonator())
 		{
 			if (args[0].equals(""))
 			{
 				//Display the players donation information.
 				msgLib.standardHeader("Donator Information");
 				msgLib.standardMessage("Thank you for donating!");
-				msgLib.standardMessage("Donation Perks End On: " + ChatColor.YELLOW + FC_Rpg.dfm.format(rpgPlayer.getDonatorTime()));
+				msgLib.standardMessage("Donation Perks End On: " + ChatColor.YELLOW + FC_Rpg.dfm.format(rpgPlayer.getPlayerConfigFile().getDonatorTime()));
 				msgLib.helpDonator();
 			}
 			else if (args[0].equals("respecialize"))

@@ -1,7 +1,7 @@
 package me.Destro168.Commands;
 
-import me.Destro168.Configs.WorldManager;
-import me.Destro168.Entities.RpgPlayerFile;
+import me.Destro168.Configs.PlayerFileConfig;
+import me.Destro168.Configs.WorldConfig;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Suite_Shared.ArgParser;
 import me.Destro168.FC_Suite_Shared.NameMatcher;
@@ -27,7 +27,7 @@ import org.bukkit.potion.PotionType;
 public class RpgCE implements CommandExecutor 
 {
 	Player player = null;
-	RpgPlayerFile playerFile;
+	PlayerFileConfig playerFile;
 	RpgMessageLib msgLib;
 	FC_RpgPermissions perms;
 	
@@ -37,7 +37,7 @@ public class RpgCE implements CommandExecutor
     {
 		//Variable declarations.
 		player = (Player) sender;
-		playerFile = FC_Rpg.rpgManager.getRpgPlayer(player);
+		playerFile = FC_Rpg.rpgManager.getRpgPlayer(player).getPlayerConfigFile();
 		msgLib = new RpgMessageLib(player);
 		RpgMessageLib msgLib;
 		ArgParser ap = new ArgParser(args2);
@@ -105,7 +105,7 @@ public class RpgCE implements CommandExecutor
 			
 			if (cont == true)
 			{
-				playerFile = FC_Rpg.rpgManager.getRpgPlayer(Bukkit.getServer().getPlayer(name));
+				playerFile = FC_Rpg.rpgManager.getRpgPlayer(Bukkit.getServer().getPlayer(name)).getPlayerConfigFile();
 				
 				if (playerFile == null)
 					return msgLib.errorPlayerNotFound();
@@ -113,7 +113,7 @@ public class RpgCE implements CommandExecutor
 				try
 				{
 					if (args[2].equalsIgnoreCase("strength") || args[2].equalsIgnoreCase("attack"))
-						playerFile.setStrength(Integer.valueOf(args[3]));
+						playerFile.setAttack(Integer.valueOf(args[3]));
 					else if (args[2].equalsIgnoreCase("magic"))
 						playerFile.setMagic(Integer.valueOf(args[3]));
 					else if (args[2].equalsIgnoreCase("constitution") || args[2].equalsIgnoreCase("health"))
@@ -132,7 +132,7 @@ public class RpgCE implements CommandExecutor
 					{
 						int intArg3 = Integer.valueOf(args[3]);
 						
-						if (intArg3 >= 0 && intArg3 < FC_Rpg.c_classes.length)
+						if (intArg3 >= 0 && intArg3 < FC_Rpg.classManager.getRpgClasses().length)
 							playerFile.setCombatClass(intArg3);
 					}
 					else if (args[2].equalsIgnoreCase("tickets"))
@@ -151,7 +151,7 @@ public class RpgCE implements CommandExecutor
 					{
 						int intArg3 = Integer.valueOf(args[3]);
 						
-						playerFile.setStrength(intArg3);
+						playerFile.setAttack(intArg3);
 						playerFile.setMagic(intArg3);
 						playerFile.setConstitution(intArg3);
 						playerFile.setIntelligence(intArg3);
@@ -256,7 +256,7 @@ public class RpgCE implements CommandExecutor
 			}
 			
 			//If the player is found, get the rpg player.
-			playerFile = FC_Rpg.rpgManager.getRpgPlayer(Bukkit.getServer().getPlayer(args[1]));
+			playerFile = FC_Rpg.rpgManager.getRpgPlayer(Bukkit.getServer().getPlayer(args[1])).getPlayerConfigFile();
 			
 			//If they haven't picked a class/job, don't promote.
 			if (playerFile.getIsActive() != true)
@@ -328,7 +328,7 @@ public class RpgCE implements CommandExecutor
 			}
 			
 			//Set new rpgPlayer.
-			playerFile = FC_Rpg.rpgManager.getRpgPlayer(Bukkit.getServer().getPlayer(args[1]));
+			playerFile = FC_Rpg.rpgManager.getRpgPlayer(Bukkit.getServer().getPlayer(args[1])).getPlayerConfigFile();
 			
 			//Add the classChangeTickets.
 			playerFile.setClassChangeTickets(playerFile.getClassChangeTickets() + Integer.valueOf(args[2]));
@@ -395,7 +395,7 @@ public class RpgCE implements CommandExecutor
 		{
 			if (perms.isOwner())
 			{
-				WorldManager wm = new WorldManager();
+				WorldConfig wm = new WorldConfig();
 				
 				if (args[1].equals("here"))
 				{
@@ -688,7 +688,7 @@ public class RpgCE implements CommandExecutor
 						
 						try
 						{
-							sign.setLine(1, ChatColor.DARK_BLUE + FC_Rpg.c_classes[i]);
+							sign.setLine(1, ChatColor.DARK_BLUE + FC_Rpg.classManager.getRpgClass(i).getName());
 						}
 						catch (ArrayIndexOutOfBoundsException e)
 						{

@@ -2,6 +2,7 @@ package me.Destro168.Commands;
 
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Suite_Shared.ArgParser;
+import me.Destro168.Util.FC_RpgPermissions;
 import me.Destro168.Util.RpgMessageLib;
 
 import org.bukkit.Bukkit;
@@ -16,8 +17,12 @@ public class HealCE implements CommandExecutor
     {
 		Player player = (Player) sender;
 		RpgMessageLib msgLib = new RpgMessageLib(player);
+		FC_RpgPermissions perms = new FC_RpgPermissions(player);
 		ArgParser ap = new ArgParser(args2);
 		String[] args = ap.getArgs();
+		
+		if (perms.isAdmin() == false)
+			return msgLib.errorNoPermission();
 		
 		if (args[0].equals(""))
 			args[0] = player.getName();

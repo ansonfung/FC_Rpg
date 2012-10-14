@@ -25,7 +25,7 @@ public class PartyCE implements CommandExecutor
 		boolean success = true;
 		
 		//Only let active players use this command.
-		if (rpgPlayer.getIsActive() == false)
+		if (rpgPlayer.getPlayerConfigFile().getIsActive() == false)
 			return msgLib.errorCreateCharacter();
 		
 		if (args[0].equals(""))

@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.Destro168.Configs.ConfigOverlord;
-import me.Destro168.Configs.PvpManager;
-import me.Destro168.Configs.WorldManager;
+import me.Destro168.Configs.GeneralConfig;
+import me.Destro168.Configs.PvpConfig;
+import me.Destro168.Configs.WorldConfig;
 import me.Destro168.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.FC_Rpg;
 
@@ -18,8 +18,10 @@ public class PvpEvent extends GeneralEvent
 {
 	private double rewardAmount;
 	
-	private WorldManager wm;
-	private PvpManager pm;
+	private WorldConfig wm;
+	private GeneralConfig co;
+	private PvpConfig pm;
+	
 	private Map<Player, Boolean> hasLost;
 	private List<Player> redTeam;
 	private List<Player>  yellowTeam;
@@ -37,14 +39,20 @@ public class PvpEvent extends GeneralEvent
 		//Set super defaults.
 		super.setDefaults();
 		
+		//Check if pvp arena is setup or not.
+		co = new GeneralConfig();
+		
+		if (co.getPvpArenaReward() == -1)
+			return;
+		
 		//Initialize globals.
-		wm = new WorldManager();
-		pm = new PvpManager();
+		wm = new WorldConfig();
+		pm = new PvpConfig();
+		
 		hasLost = new HashMap<Player, Boolean>();
 		redTeam = new ArrayList<Player>();
 		yellowTeam = new ArrayList<Player>();
 		
-		ConfigOverlord co = new ConfigOverlord();
 		rewardAmount = co.getPvpArenaReward();
 	}
 	
@@ -115,6 +123,10 @@ public class PvpEvent extends GeneralEvent
 	
 	public void begin()
 	{
+		//If the pvp arena isn't setup, then return.
+		if (co.getPvpArenaReward() == -1)
+			return;
+		
 		//Set pvp defaults.
 		setPvpDefaults();
 		
@@ -364,7 +376,7 @@ public class PvpEvent extends GeneralEvent
 				bLib.standardBroadcast(participant[winnerSlot].getName() + " Is The New Pvp Champion And Has Won $" + rewardAmount + "!");
 				
 				//Give the reward
-				FC_Rpg.economy.bankDeposit(participant[winnerSlot].getName(), rewardAmount);
+				FC_Rpg.economy.depositPlayer(participant[winnerSlot].getName(), rewardAmount);
 			}
 		}
 		

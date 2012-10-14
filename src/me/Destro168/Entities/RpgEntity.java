@@ -21,6 +21,7 @@ public class RpgEntity
 	private Map<Entity, Integer> summonTIDMap;
 	private List<Entity> summon;
 	
+	public Date getLastDamage() { return lastDamaged; }
 	public long getLastDamagedLong() { return lastDamaged.getTime(); }
 	public long getLastAttackNotificationLong() { return lastAttackNotification.getTime(); }
 	public long getLastDefenseNotificationLong() { return lastDefenseNotification.getTime(); }
@@ -40,15 +41,11 @@ public class RpgEntity
 		isAlive = true;
 	}
 	
-	protected long getFutureDate(double x)
-	{
-		Date now = new Date();
-		return (long) (now.getTime() + (x * 1000));
-	}
-	
 	public boolean getStatusIsActive(Long statusExpirationDate)
 	{
 		Date now = new Date();
+		
+		FC_Rpg.plugin.getLogger().info("A: " + now + " then: " + statusExpirationDate);
 		
 		if (now.getTime() < statusExpirationDate)
 			return true;

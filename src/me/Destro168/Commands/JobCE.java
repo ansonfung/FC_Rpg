@@ -32,7 +32,7 @@ public class JobCE implements CommandExecutor
 		msgLib = new RpgMessageLib(player);
 		
 		//Only let active players use this command.
-		if (rpgPlayer.getIsActive() == false)
+		if (rpgPlayer.getPlayerConfigFile().getIsActive() == false)
 			return msgLib.errorCreateCharacter();
 		
 		if (args[0].equals(""))
@@ -55,47 +55,47 @@ public class JobCE implements CommandExecutor
 					msgLib.standardError("Couldn't find player to view job.");
 			}
 			
-			msgLib.standardMessage("Name",rpgPlayer.getName());
-			msgLib.standardMessage("Job Rank",String.valueOf(rpgPlayer.getJobRank()));
+			msgLib.standardMessage("Name", rpgPlayer.getPlayerConfigFile().getName());
+			msgLib.standardMessage("Job Rank",String.valueOf(rpgPlayer.getPlayerConfigFile().getJobRank()));
 			msgLib.standardMessage("Job Promotion Cost",String.valueOf(rpgPlayer.getPromotionCost()));
 			
-			if (rpgPlayer.getHunterLevel() > 0)
-				msgLib.standardMessage("Hunter Level",String.valueOf(rpgPlayer.getHunterLevel()));
+			if (rpgPlayer.getPlayerConfigFile().getHunterLevel() > 0)
+				msgLib.standardMessage("Hunter Level",String.valueOf(rpgPlayer.getPlayerConfigFile().getHunterLevel()));
 		}
 		else if (args[0].equalsIgnoreCase("promote"))
 		{
 			//Make sure the player isn't max job rank first
-			if (rpgPlayer.getJobRank() < 6)
+			if (rpgPlayer.getPlayerConfigFile().getJobRank() < 6)
 			{
 				//Defenders have to be prevented from promoting themselves.
-				if (rpgPlayer.getHunterLevel() > 0)
+				if (rpgPlayer.getPlayerConfigFile().getHunterLevel() > 0)
 				{
 					msgLib.standardError("You can't promote yourself as you are a hunter");
 					return true;
 				}
 				
 				//Make sure that players can only be promoted with the proper job rank.
-				if (rpgPlayer.getClassLevel() < 20 && rpgPlayer.getJobRank() == 1)
+				if (rpgPlayer.getPlayerConfigFile().getClassLevel() < 20 && rpgPlayer.getPlayerConfigFile().getJobRank() == 1)
 				{
 					msgLib.standardError("You need level 20+ for promotion.");
 					return true;
 				}
-				else if (rpgPlayer.getClassLevel() < 40 && rpgPlayer.getJobRank() == 2)
+				else if (rpgPlayer.getPlayerConfigFile().getClassLevel() < 40 && rpgPlayer.getPlayerConfigFile().getJobRank() == 2)
 				{
 					msgLib.standardError("You need level 40+ for promotion.");
 					return true;
 				}
-				else if (rpgPlayer.getClassLevel() < 60 && rpgPlayer.getJobRank() == 3)
+				else if (rpgPlayer.getPlayerConfigFile().getClassLevel() < 60 && rpgPlayer.getPlayerConfigFile().getJobRank() == 3)
 				{
 					msgLib.standardError("You need level 60+ for promotion.");
 					return true;
 				}
-				else if (rpgPlayer.getClassLevel() < 80 && rpgPlayer.getJobRank() == 4)
+				else if (rpgPlayer.getPlayerConfigFile().getClassLevel() < 80 && rpgPlayer.getPlayerConfigFile().getJobRank() == 4)
 				{
 					msgLib.standardError("You need level 80+ for promotion.");
 					return true;
 				}
-				else if (rpgPlayer.getClassLevel() < 100 && rpgPlayer.getJobRank() == 5)
+				else if (rpgPlayer.getPlayerConfigFile().getClassLevel() < 100 && rpgPlayer.getPlayerConfigFile().getJobRank() == 5)
 				{
 					msgLib.standardError("You need level 100 for the final promotion. Good luck :)");
 					return true;
@@ -108,10 +108,10 @@ public class JobCE implements CommandExecutor
 					FC_Rpg.economy.bankWithdraw(player.getName(), rpgPlayer.getPromotionCost());
 					
 					//Give them the promotion
-					rpgPlayer.setJobRank(rpgPlayer.getJobRank() + 1);
+					rpgPlayer.getPlayerConfigFile().setJobRank(rpgPlayer.getPlayerConfigFile().getJobRank() + 1);
 					
 					//Announce the promotion
-					FC_Rpg.bLib.standardBroadcast(player.getName() + " is now Job Rank [" + rpgPlayer.getJobRank() + "]");
+					FC_Rpg.bLib.standardBroadcast(player.getName() + " is now Job Rank [" + rpgPlayer.getPlayerConfigFile().getJobRank() + "]");
 				}
 				else
 				{
@@ -130,7 +130,7 @@ public class JobCE implements CommandExecutor
 				return msgLib.errorNoPermission();
 			
 			//Prevent kit spam.
-			if (rpgPlayer.getHunterCanKit() == false)
+			if (rpgPlayer.getPlayerConfigFile().getHunterCanKit() == false)
 			{
 				msgLib.standardError("You must die before using your kit again!");
 				return true;
@@ -156,11 +156,11 @@ public class JobCE implements CommandExecutor
 		ItemStack chest;
 		ItemStack helmet;
 		ItemStack legs;
-		int strength = rpgPlayer.getStrength();
-		int constitution = rpgPlayer.getConstitution();
+		int strength = rpgPlayer.getPlayerConfigFile().getAttack();
+		int constitution = rpgPlayer.getPlayerConfigFile().getConstitution();
 		
 		//Remove hunter ability to kit until he dies.
-		rpgPlayer.setHunterCanKit(false);
+		rpgPlayer.getPlayerConfigFile().setHunterCanKit(false);
 		
 		//Set the items that the hunter will get.
 		bow = new ItemStack(Material.BOW, 5);

@@ -20,7 +20,7 @@ public class BigHelpCE implements CommandExecutor
 		RpgPlayer rpgPlayer = FC_Rpg.rpgManager.getRpgPlayer(player);
 		
 		//Only let active players use this command.
-		if (rpgPlayer.getIsActive() == false)
+		if (rpgPlayer.getPlayerConfigFile().getIsActive() == false)
 			return msgLib.errorCreateCharacter();
 		
 		return msgLib.bigHelp();

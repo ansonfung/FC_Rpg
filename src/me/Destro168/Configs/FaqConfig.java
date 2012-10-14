@@ -3,27 +3,17 @@ package me.Destro168.Configs;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.Destro168.FC_Rpg.FC_Rpg;
-
-import org.bukkit.configuration.file.FileConfiguration;
-
-public class FaqManager 
+public class FaqConfig extends ConfigGod
 {
-	private FileConfiguration config;
-	private final String faqPrefix = "Faqs.";
+	private void setFaqName(int i, String x) { ccm.set(prefix + i + ".name", x); }
+	private void setFaqTag(int i, String x) { ccm.set(prefix + i + ".tag", x); }
+	private void setFaq1(int i, List<String> x) { ccm.setList(prefix + i + ".faq1", x); }
+	private void setFaq2(int i, List<String> x) { ccm.setList(prefix + i + ".faq2", x); }
 	
-	public void setVersion(double x) { config.set(faqPrefix + "version", x); }
-	public double getVersion() { return config.getDouble(faqPrefix + "version"); }
-	
-	private void setFaqName(int i, String x) { config.set(faqPrefix + i + ".name", x); }
-	private void setFaqTag(int i, String x) { config.set(faqPrefix + i + ".tag", x); }
-	private void setFaq1(int i, List<String> x) { config.set(faqPrefix + i + ".faq1", x); }
-	private void setFaq2(int i, List<String> x) { config.set(faqPrefix + i + ".faq2", x); }
-	
-	public String getFaqName(int i) { return config.getString(faqPrefix + i + ".name"); }
-	public String getFaqTag(int i) { return config.getString(faqPrefix + i + ".tag"); }
-	public List<String> getFaq1(int i) { return config.getStringList(faqPrefix + i + ".faq1"); }
-	public List<String> getFaq2(int i) { return config.getStringList(faqPrefix + i + ".faq2"); }
+	public String getFaqName(int i) { return ccm.getString(prefix + i + ".name"); }
+	public String getFaqTag(int i) { return ccm.getString(prefix + i + ".tag"); }
+	public List<String> getFaq1(int i) { return ccm.getStringList(prefix + i + ".faq1"); }
+	public List<String> getFaq2(int i) { return ccm.getStringList(prefix + i + ".faq2"); }
 	
 	public void addNewFaq(List<String> x, List<String> y)
 	{
@@ -41,15 +31,14 @@ public class FaqManager
 		}
 	}
 	
-	public FaqManager()
+	public FaqConfig()
 	{
+		super("Faqs");
 		handleConfig();
 	}
 	
 	public void handleConfig()
 	{
-		config = FC_Rpg.plugin.getConfig();
-		
 		//Create a config  if not created
 		if (getVersion() < 0.1)
 		{
@@ -84,9 +73,6 @@ public class FaqManager
 			
 			//Set second half of faqs.
 			setFaq2(0, faqs2);
-			
-			//Save default faqs
-			FC_Rpg.plugin.saveConfig();
 		}
 	}
 }

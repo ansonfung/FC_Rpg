@@ -5,28 +5,20 @@ import java.util.List;
 
 import me.Destro168.FC_Rpg.FC_Rpg;
 
-import org.bukkit.configuration.file.FileConfiguration;
-
-public class GroupManager 
+public class GroupConfig extends ConfigGod
 {
-	private FileConfiguration config;
-	private final String groupPrefix = "Groups.";
 	private List<Group> groupList;
-	
-	private void setVersion(double x) { config.set(groupPrefix + "version", x); }
-	public double getVersion() { return config.getDouble(groupPrefix + "version"); }
 	
 	public List<Group> getGroups() { return groupList; }
 	
-	public GroupManager()
+	public GroupConfig()
 	{
+		super("Groups");
 		handleUpdates();
 	}
 	
 	public void handleUpdates()
 	{
-		config = FC_Rpg.plugin.getConfig();
-		
 		//If a past config wasn't created, create a new one.
 		if (getVersion() < 0.1)
 		{
@@ -95,7 +87,7 @@ public class GroupManager
 			jobReqs[10] = 1;
 			
 			for (int i = 0; i < totalGroups; i++)
-				config.set(groupPrefix + "GroupString." + i, groups[i] + "," + groupsFormats[i] + "," + timeReqs[i] + "," + jobReqs[i]);
+				ccm.set(prefix + "GroupString." + i, groups[i] + "," + groupsFormats[i] + "," + timeReqs[i] + "," + jobReqs[i]);
 			
 			//Save group defaults
 			FC_Rpg.plugin.saveConfig();
@@ -115,7 +107,7 @@ public class GroupManager
 		{
 			try
 			{
-				groupString = config.getString(groupPrefix + "GroupString." + i);
+				groupString = ccm.getString(prefix + "GroupString." + i);
 				group = new Group(groupString);
 				groupList.add(group);
 			}

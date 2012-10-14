@@ -1,5 +1,7 @@
 package me.Destro168.Configs;
 
+import me.Destro168.Conversions.StringToY;
+
 public class Group 
 {
 	String name;
@@ -17,33 +19,24 @@ public class Group
 		char[] c = parsable.toCharArray();
 		int lastReadCounter = 0;
 		int lastPos = 0;
+		StringToY y = new StringToY();
 		
 		for (int i = 0; i < c.length; i++)
 		{
 			if (c[i] == ',')
 			{
 				if (lastReadCounter == 0)
-					name = returnMergedCharacters(lastPos, i, c);
+					name = y.returnMergedCharacters(lastPos, i, c);
 				else if (lastReadCounter == 1)
-					display = returnMergedCharacters(lastPos, i, c);
+					display = y.returnMergedCharacters(lastPos, i, c);
 				else if (lastReadCounter == 2)
-					timeReq = Integer.valueOf(returnMergedCharacters(lastPos, i, c));
+					timeReq = Integer.valueOf(y.returnMergedCharacters(lastPos, i, c));
 				else if (lastReadCounter == 3)
-					jobReq = Integer.valueOf(returnMergedCharacters(lastPos, i, c));
+					jobReq = Integer.valueOf(y.returnMergedCharacters(lastPos, i, c));
 				
 				lastPos = i + 1;
 				lastReadCounter++;
 			}
 		}
-	}
-	
-	private String returnMergedCharacters(int startPosition, int endPosition, char[] c)
-	{
-		String finalString = "";
-		
-		for (int j = startPosition; j < endPosition; j++)
-			finalString = finalString + c[j];
-		
-		return finalString;
 	}
 }

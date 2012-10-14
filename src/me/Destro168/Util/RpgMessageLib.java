@@ -1,6 +1,6 @@
 package me.Destro168.Util;
 
-import me.Destro168.Configs.FaqManager;
+import me.Destro168.Configs.FaqConfig;
 import me.Destro168.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.Messaging.MessageLib;
@@ -117,7 +117,7 @@ public class RpgMessageLib extends MessageLib
 	
 	public boolean helpFaq()
 	{
-		FaqManager fm = new FaqManager();
+		FaqConfig fm = new FaqConfig();
 		String faq;
 		String topics = "";
 		int breakPoint = 0;
@@ -239,7 +239,7 @@ public class RpgMessageLib extends MessageLib
 		if (rpgPlayer.hasClassChangeTicket() == true)
 		{
 			standardMessage("/class switch [new class name]","Use a class ticket to switch class.");
-			standardMessage("- You have [" + ChatColor.WHITE + rpgPlayer.getClassChangeTickets() + ChatColor.GRAY + "] tickets remaining.");
+			standardMessage("- You have " + rpgPlayer.getPlayerConfigFile().getClassChangeTickets() + " tickets remaining.");
 		}
 		
 		return true;

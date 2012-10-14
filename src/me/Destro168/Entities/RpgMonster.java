@@ -4,9 +4,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import me.Destro168.Configs.WorldManager;
+import me.Destro168.Configs.WorldConfig;
 import me.Destro168.FC_Suite_Shared.LocationInsideAreaCheck;
 import me.Destro168.FC_Rpg.FC_Rpg;
+import me.Destro168.TimeUtils.DateManager;
 import me.Destro168.Util.DistanceModifierLib;
 import me.Destro168.Util.MobAggressionCheck;
 
@@ -52,7 +53,11 @@ public class RpgMonster extends RpgEntity
 	public void setLevel(int x) { level = x; }
 	public void setIsBoss(boolean x) { isBoss = x; }
 	public void setIsWeak(boolean x) { isWeak = x; }
-	public void setStatusDisabled(double x) { statusDisabled = getFutureDate(x); }
+	public void setStatusDisabled(double x) 
+	{ 
+		DateManager dm = new DateManager();
+		statusDisabled = dm.getFutureDate_Seconds(x); 
+	}
 	
 	public boolean isCreated() { return mobId > -1; } 
 	
@@ -167,7 +172,7 @@ public class RpgMonster extends RpgEntity
 	public void setModifierByArea()
 	{
 		DistanceModifierLib dml = new DistanceModifierLib();
-		WorldManager wm = new WorldManager();
+		WorldConfig wm = new WorldConfig();
 		
 		if (!wm.getIsRpgWorld(entity.getWorld().getName()))
 			return;
