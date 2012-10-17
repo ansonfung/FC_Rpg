@@ -153,9 +153,9 @@ public class PlayerInteractionListener implements Listener
 				pickedClass = cl.removeColors(sign.getLine(1));
 				
 				//If the sign was proper, then 
-				for (int i = 0; i < FC_Rpg.classManager.getRpgClasses().length; i++)
+				for (int i = 0; i < FC_Rpg.classConfig.getRpgClasses().length; i++)
 				{
-					if (pickedClass.equals(FC_Rpg.classManager.getRpgClass(i).getName()))
+					if (pickedClass.equals(FC_Rpg.classConfig.getRpgClass(i).getName()))
 					{
 						//Send the player a confirmation message.
 						msgLib.standardMessage("You have selected the " + pickedClass + " class.");

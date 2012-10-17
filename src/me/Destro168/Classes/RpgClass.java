@@ -45,7 +45,7 @@ public class RpgClass
 		//Load up spells and store them inside of the spell list.
 		for (int i : spellArray)
 		{
-			spell = FC_Rpg.spellManager.getSpell(i);
+			spell = FC_Rpg.spellConfig.getSpell(i);
 			
 			//Add all non-null spells.
 			if (spell != null)

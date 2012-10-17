@@ -66,9 +66,6 @@ public class SpellCE implements CommandExecutor
 			//Set the spell bind.
 			rpgPlayer.getPlayerConfigFile().setSpellBind(intArg1, player.getItemInHand().getTypeId());
 			
-			//TODO - check over code.
-			//util.getSpellName(rpgPlayer.getCombatClass(), intArg1)
-			
 			//Send a success message to the player.
 			msgLib.standardMessage("Successfully bound " + rpgPlayer.getPlayerConfigFile().getRpgClass().getSpell(intArg1).getName() + " to item: " + player.getItemInHand().getType());
 		}
@@ -80,29 +77,31 @@ public class SpellCE implements CommandExecutor
 			
 			msgLib.standardMessage("Current Spell Points",String.valueOf(rpgPlayer.getPlayerConfigFile().getSpellPoints()));
 			
-			String[] msg = new String[6];
+			String[] msg = new String[8];
 			
 			for (int i = 0; i < rpgPlayer.getPlayerConfigFile().getRpgClass().getSpellBook().size(); i++)
 			{
-				msg[0] = "Spell Name: ";
+				msg[0] = "[N]: ";
 				msg[1] = rpgPlayer.getPlayerConfigFile().getRpgClass().getSpell(i).getName();
 				
-				msg[2] = " - Level: ";
+				msg[2] = " [L]: ";
 				msg[3] = String.valueOf(rpgPlayer.getPlayerConfigFile().getSpellLevel(i));
 				
 				if (rpgPlayer.getPlayerConfigFile().getSpellLevel(i) > 0)
 				{
-					msg[4] = " - Mana Cost: ";
-					msg[5] = String.valueOf(rpgPlayer.getPlayerConfigFile().getRpgClass().getSpell(i).getManaCost());
+					msg[4] = " [MC]: ";
+					msg[5] = String.valueOf(rpgPlayer.getPlayerConfigFile().getRpgClass().getSpell(i).getManaCost().get(i));
 				}
 				else
 				{
-					msg[4] = " - Mana Cost: ";
+					msg[4] = " [MC]: ";
 					msg[5] = "0";
 				}
 				
+				msg[6] = " [D]: ";
+				msg[7] = rpgPlayer.getPlayerConfigFile().getRpgClass().getSpell(i).getDescription();
+				
 				msgLib.standardMessage(msg);
-				msgLib.standardMessage(rpgPlayer.getPlayerConfigFile().getRpgClass().getSpell(i).getName(), rpgPlayer.getPlayerConfigFile().getRpgClass().getSpell(i).getDescription());
 			}
 		}
 		

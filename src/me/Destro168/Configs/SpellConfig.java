@@ -25,7 +25,7 @@ public class SpellConfig extends ConfigGod
 	public void setDescription(int i, String x) { ccm.set(prefix + i + ".description", x); }
 	public void setManaCost(int i, double a, double b, double c, double d, double e) { ccm.set(prefix + i + ".manaCost", a + "," + b + "," + c + "," + d + "," + e); }
 	
-	public void setDuration(int i, double a, double b, double c, double d, double e) { ccm.set(prefix + i + ".duration", a + "," + b + "," + c + "," + d + "," + e); }
+	public void setDuration(int i, int a, int b, int c, int d, int e) { ccm.set(prefix + i + ".duration", a + "," + b + "," + c + "," + d + "," + e); }
 	public void setConstantMagnitude(int i, double a, double b, double c, double d, double e) { ccm.set(prefix + i + ".constantMagnitude", a + "," + b + "," + c + "," + d + "," + e); }
 	public void setAttackMagnitude(int i, double a, double b, double c, double d, double e) { ccm.set(prefix + i + ".attackMagnitude", a + "," + b + "," + c + "," + d + "," + e); }
 	public void setMagicMagnitude(int i, double a, double b, double c, double d, double e) { ccm.set(prefix + i + ".magicMagnitude", a + "," + b + "," + c + "," + d + "," + e); }
@@ -42,7 +42,7 @@ public class SpellConfig extends ConfigGod
 	public String getDescription(int i) { return ccm.getString(prefix + i + ".description"); }
 	public List<Double> getManaCost(int i) { return converter.getDoubleListFromString(ccm.getString(prefix + i + ".manaCost")); }
 	
-	public List<Double> getDuration(int i) { try { return converter.getDoubleListFromString(ccm.getString(prefix + i + ".duration")); } catch (NullPointerException e) { return null; } }
+	public List<Integer> getDuration(int i) { try { return converter.getIntegerListFromString(ccm.getString(prefix + i + ".duration")); } catch (NullPointerException e) { return null; } }
 	public List<Double> getConstantMagnitude(int i) { try { return converter.getDoubleListFromString(ccm.getString(prefix + i + ".constantMagnitude")); } catch (NullPointerException e) { return null; } }
 	public List<Double> getAttackMagnitude(int i) { try { return converter.getDoubleListFromString(ccm.getString(prefix + i + ".attackMagnitude")); } catch (NullPointerException e) { return null; } }
 	public List<Double> getMagicMagnitude(int i) { try { return converter.getDoubleListFromString(ccm.getString(prefix + i + ".magicMagnitude")); } catch (NullPointerException e) { return null; } }
@@ -96,7 +96,7 @@ public class SpellConfig extends ConfigGod
 	
 	private void setBuffStats(int i)
 	{
-		setDuration(i, 10, 10, 10, 10, 10);
+		setDuration(i, 10000, 10000, 10000, 10000, 10000);
 		setManaCost(i, 10, 15, 20, 25, 30);
 		setRestricted(i, false);
 	}
@@ -123,13 +123,13 @@ public class SpellConfig extends ConfigGod
 		setName(1, "Morale");
 		setDescription(1, "Apply a (x)% damage boost to your entire party for 10 seconds.");
 		setBuffStats(1);
-		setConstantMagnitude(0, 4, 8, 12, 16, 20);
+		setConstantMagnitude(1, 1.04, 1.08, 1.12, 1.16, 1.20);
 		
 		setEffectID(2, EffectIDs.DAMAGE_BOOST);
 		setName(2, "Empower");
-		setDescription(2, "Empowers your next attack to deal (x) bonus damage.");
+		setDescription(2, "Empowers your next attack to deal (x)% bonus damage.");
 		setD1Stats(2);
-		setConstantMagnitude(2, .2, .4, .6, .8, 1);
+		setConstantMagnitude(2, 1.2, 1.4, 1.6, 1.8, 2);
 		
 		setEffectID(3, EffectIDs.BLEED);
 		setName(3, "Slice");
@@ -164,7 +164,7 @@ public class SpellConfig extends ConfigGod
 		setName(7, "Force");
 		setDescription(7, "Strengthens your next arrow to deal (x)% bonus damage.");
 		setD1Stats(7);
-		setConstantMagnitude(7, .2, .4, .6, .8, 1);
+		setConstantMagnitude(7, 1.2, 1.4, 1.6, 1.8, 2);
 		
 		setEffectID(8, EffectIDs.POISON);
 		setName(8, "Poison");
@@ -188,13 +188,13 @@ public class SpellConfig extends ConfigGod
 		setName(10, "Taunt");
 		setDescription(10, "Teleport and set aggro of all monsters in 12 block radius to you. Increases party defense by (x)% for 10 seconds.");
 		setBuffStats(10);
-		setConstantMagnitude(10, 1, 2, 3, 4, 5);
+		setConstantMagnitude(10, .96, .92, .88, .84, .80);
 		
 		setEffectID(11, EffectIDs.THORNS);
 		setName(11, "Thorns");
 		setDescription(11, "All attacks against you return (x)% of damage. Lasts for 10 seconds.");
 		setBuffStats(11);
-		setConstantMagnitude(10, 4, 8, 12, 16, 20);
+		setConstantMagnitude(11, .04, .08, .12, .16, .20);
 		
 		setEffectID(12, EffectIDs.HEAL_SELF);
 		setName(12, "Undefeated");
@@ -214,7 +214,7 @@ public class SpellConfig extends ConfigGod
 		setName(14, "Bash");
 		setDescription(14, "Disables your targets ability to attack for (x) seconds.");
 		setManaCost(14, 3, 6, 9, 12, 15);
-		setConstantMagnitude(14, .5, 1, 1.5, 2, 2.5);
+		setConstantMagnitude(14, 500, 1000, 1500, 2000, 2500);
 		setRestricted(14, true);
 		
 		/*******************************************
@@ -243,7 +243,7 @@ public class SpellConfig extends ConfigGod
 		setManaCost(17, 1, 2, 3, 4, 5);
 		setConstantMagnitude(17, 1, 1, 1, 1, 1);
 		setMagicMagnitude(17, 1, 1.25, 1.5, 1.75, 2);
-		setRestricted(17, false);
+		setRestricted(17, true);
 		
 		setEffectID(18, EffectIDs.HEAL_OTHER);
 		setName(18, "Remedy");
@@ -251,7 +251,7 @@ public class SpellConfig extends ConfigGod
 		setManaCost(18, 4, 8, 12, 16, 20);
 		setConstantMagnitude(18, 1, 1, 1, 1, 1);
 		setMagicMagnitude(18, 1, 1.25, 1.5, 1.75, 2);
-		setRestricted(18, false);
+		setRestricted(18, true);
 		
 		setEffectID(19, EffectIDs.BOOST_STATS);
 		setName(19, "Invigorate");
@@ -268,18 +268,14 @@ public class SpellConfig extends ConfigGod
 		setEffectID(20, EffectIDs.LIFESTEAL);
 		setName(20, "Bloodthirst");
 		setDescription(20, "Steal (x)% life from all damage for 10 seconds.");
-		setDuration(20, 10, 10, 10, 10, 10);
-		setManaCost(20, 10, 20, 30, 40, 50);
-		setConstantMagnitude(20, 4, 8, 12, 16, 20);
-		setRestricted(20, false);
+		setBuffStats(20);
+		setConstantMagnitude(20, .04, .08, .12, .16, .20);
 		
 		setEffectID(21, EffectIDs.IMMORTAL);
 		setName(21, "Undying");
 		setDescription(21, "Become immune to death for (x) seconds.");
-		setDuration(21, 10, 10, 10, 10, 10);
-		setManaCost(21, 10, 15, 20, 25, 30);
+		setBuffStats(21);
 		setConstantMagnitude(21, 1, 1, 1, 1, 1);
-		setRestricted(21, false);
 		
 		setEffectID(22, EffectIDs.TELEPORT_STRIKE);
 		setName(22, "Ferocity");
@@ -288,15 +284,15 @@ public class SpellConfig extends ConfigGod
 		setConstantMagnitude(22, 3, 3.5, 4, 4.5, 5);
 		
 		setEffectID(23, EffectIDs.DAMAGE_BY_MISSING_HEALTH);
-		setName(23, "Ferocity");
+		setName(23, "Unbalanced");
 		setDescription(23, "Deal missing health as (x)% instant bonus damage.");
-		setBuffStats(23);
+		setD1Stats(23);
 		setConstantMagnitude(23, 3, 3.5, 4, 4.5, 5);
 		
 		setEffectID(24, EffectIDs.SACRIFICE_HEALTH_FOR_DAMAGE);
 		setName(24, "Reckless");
 		setDescription(24, "Sacrifice 20% of your current hp for (x)% instant bonus damage.");
-		setBuffStats(24);
+		setD1Stats(24);
 		setConstantMagnitude(24, 1.6, 3.2, 4.8, 6.2, 8.0);
 	}
 }

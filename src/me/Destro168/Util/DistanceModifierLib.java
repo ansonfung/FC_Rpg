@@ -45,9 +45,9 @@ public class DistanceModifierLib
 	
 	private int calculateXYZModifier()
 	{
-		x = x - xShiftAmount;
-		y = y - yShiftAmount;
-		z = z - zShiftAmount;
+		x = x + xShiftAmount;
+		y = y + yShiftAmount;
+		z = z + zShiftAmount;
 		
 		//Every 20 out equals 1 distance Modifier.
 		if (x < 20 && x > -20) x = 0; //At least 1
@@ -64,10 +64,10 @@ public class DistanceModifierLib
 		else y = 1;
 		
 		if (x < 0)
-			x = x - x - x;
+			x = x * -1;
 
 		if (z < 0)
-			z = z - z - z;
+			z = z * -1;
 		
 		if ((x+z) < 1)
 			distanceModifier = (1)*y;
@@ -84,71 +84,13 @@ public class DistanceModifierLib
 		
 		//Set base coords and shift amount for the distance modifier.
 		setBaseCoordsByLocation(entityLoc);
+		
+		//Set shift location.
 		setShiftByLocation(wm.getWorldSpawn(entityLoc.getWorld().getName()));
 		
 		//Return a pure distance modifier that is exactly corrolated to distance.
 		return calculateXYZModifier();
 	}
-	
-	/* - Outdated.
-	
-	private int calculateXYModifier()
-	{
-		x = x - xShiftAmount;
-		y = y - yShiftAmount;
-		
-		//Every 20 out equals 1 distance Modifier.
-		if (x < 10 && x > -10) x = 1; //At least 1
-		else x = x / 10;
-
-		if (y < 10) y = 10;
-		else if (y < 20) y = 8;
-		else if (y < 30) y = 6;
-		else if (y < 40) y = 4;
-		else if (y < 50) y = 2;
-		else y = 1;
-
-		if (x < 0)
-			x = x * -1;
-
-		distanceModifier = x*y;
-		
-		return distanceModifier;
-	}
-	
-	private void calculateZYModifier()
-	{
-		z = z - zShiftAmount;
-		y = y - yShiftAmount;
-		
-		//Every 20 out equals 1 distance Modifier.
-		if (z < 10 && z > -10) z = 1; //At least 1
-		else z = z / 10;
-
-		if (y < 10) y = 10;
-		else if (y < 20) y = 8;
-		else if (y < 30) y = 6;
-		else if (y < 40) y = 4;
-		else if (y < 50) y = 2;
-		else y = 1;
-
-		if (z < 0)
-			z = z * -1;
-		
-		distanceModifier = z*y;
-	}
-	public int getDungeonDML(Entity entity, boolean dungeonTravelsXDirection, int xShift, int yShift, int zShift)
-	{
-		setBaseCoordsByLocation(entity.getLocation());
-		
-		if (dungeonTravelsXDirection == true)
-			calculateXYModifier();
-		else
-			calculateZYModifier();
-		
-		return distanceModifier;
-	}
-	*/
 }
 
 //Adjust to account for world spawn.

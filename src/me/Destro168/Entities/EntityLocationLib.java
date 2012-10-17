@@ -1,15 +1,14 @@
 package me.Destro168.Entities;
 
+import me.Destro168.FC_Rpg.FC_Rpg;
+
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 
 public class EntityLocationLib 
 {
-	public EntityLocationLib()
-	{
-		
-	}
+	public EntityLocationLib() { }
 	
 	//Compares two players to each other
 	//Returns true if the second index is close to the first one.
@@ -53,14 +52,16 @@ public class EntityLocationLib
 		return true;
 	}
 	
-	public Location getLocationBehindEntity(Location entityLocation)
+	public Location getLocationBehindEntity(Location entityLoc)
 	{
 		//Variable Declarations
-		World world = entityLocation.getWorld();
-		Float yaw = entityLocation.getYaw();
+		World world = entityLoc.getWorld();
+		Float yaw = entityLoc.getYaw();
 		int damageTypeTeleportDistance = 2;
 		Location tpLoc;
-		double height = entityLocation.getY() + .5;
+		double x;
+		double z;
+		double y = entityLoc.getY() + .2;
 		
 		//Make non-negative
 		if (yaw < 0)
@@ -73,67 +74,38 @@ public class EntityLocationLib
 		//Determine location to move the player in based on the location of the facing direction of the monster.
 		if (yaw >= 315 || yaw < 45)
 		{
-			tpLoc = new Location(world, entityLocation.getX(), height, entityLocation.getZ() - damageTypeTeleportDistance);
+			x = entityLoc.getX();
+			z = entityLoc.getZ() - damageTypeTeleportDistance;
+			yaw = 0.0F;
 		}
 		else if (yaw >= 45 && yaw < 135)
 		{
-			tpLoc = new Location(world, entityLocation.getX() + damageTypeTeleportDistance, entityLocation.getY() + .5, entityLocation.getZ());
+			x = entityLoc.getX() - damageTypeTeleportDistance;
+			z = entityLoc.getZ();
+			yaw = 270.0F;
 		}
 		else if (yaw >= 135 && yaw < 225)
 		{
-			tpLoc = new Location(world, entityLocation.getX(), entityLocation.getY() + .5, entityLocation.getZ() + damageTypeTeleportDistance);
+			x = entityLoc.getX();
+			z = entityLoc.getZ() + damageTypeTeleportDistance;
+			yaw = 180.0F;
 		}
 		else if (yaw >= 225 && yaw < 315)
 		{
-			tpLoc = new Location(world, entityLocation.getX() - damageTypeTeleportDistance, entityLocation.getY() + .5, entityLocation.getZ());
+			x = entityLoc.getX() + damageTypeTeleportDistance;
+			z = entityLoc.getZ();
+			yaw = 90.0F;
 		}
 		else
 		{
-			return entityLocation;
+			FC_Rpg.plugin.getLogger().info("Error with yaw being out of range.");
+			return entityLoc;
 		}
+		
+		//Set the tpLoc.
+		tpLoc = new Location(world, x, y, z, yaw, 30.0F);
 		
 		return tpLoc;
-	}
-	
-	public Location getLocationInFrontOfEntity(Location entityLocation)
-	{
-		Location inFrontLoc;
-		World world = entityLocation.getWorld();
-		Float yaw = entityLocation.getYaw();
-		int damageTypeTeleportDistance = 2;
-		double height = entityLocation.getY() + .5;
-		
-		//Make non-negative
-		if (yaw < 0)
-			yaw = yaw * -1;
-		
-		//Cut by 360 until within 0-360
-		while (yaw >= 360)
-			yaw = yaw - 360;
-		
-		//Determine location to move the player in based on the location of the facing direction of the monster.
-		if (yaw >= 315 || yaw < 45)
-		{
-			inFrontLoc = new Location(world, entityLocation.getX(), height, entityLocation.getZ() + damageTypeTeleportDistance);
-		}
-		else if (yaw >= 45 && yaw < 135)
-		{
-			inFrontLoc = new Location(world, entityLocation.getX() - damageTypeTeleportDistance, entityLocation.getY() + .5, entityLocation.getZ());
-		}
-		else if (yaw >= 135 && yaw < 225)
-		{
-			inFrontLoc = new Location(world, entityLocation.getX(), entityLocation.getY() + .5, entityLocation.getZ() - damageTypeTeleportDistance);
-		}
-		else if (yaw >= 225 && yaw < 315)
-		{
-			inFrontLoc = new Location(world, entityLocation.getX() + damageTypeTeleportDistance, entityLocation.getY() + .5, entityLocation.getZ());
-		}
-		else
-		{
-			return entityLocation;
-		}
-		
-		return inFrontLoc;
 	}
 }
 

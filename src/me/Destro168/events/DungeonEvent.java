@@ -18,7 +18,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import me.Destro168.Configs.DungeonConfig;
-import me.Destro168.Entities.RandomTreasureGenerator;
+import me.Destro168.Configs.TreasureConfig;
 import me.Destro168.Entities.RpgMonster;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.Util.RpgMessageLib;
@@ -442,9 +442,9 @@ public class DungeonEvent extends GeneralEvent
 	{
 		//Variable Declarations
 		Location chestLocation = null;
-		RandomTreasureGenerator rtg = new RandomTreasureGenerator();
+		TreasureConfig rtg = new TreasureConfig();
 		Random rand = new Random();
-		ItemStack[] drops = null;
+		List<ItemStack> drops = null;
 		Block chestBlock;
 		Chest chest;
 		
@@ -464,7 +464,7 @@ public class DungeonEvent extends GeneralEvent
 		chest.getInventory().addItem(getRandomTreasure());
 		
 		//Get the list of random treasure.
-		drops = rtg.getRandomItemArray(rand.nextInt(5) + 1, lowestLevel);
+		drops = rtg.getRandomTreasure(rand.nextInt(5) + 1, lowestLevel);
 		
 		//Add items to the inventory.
 		for (ItemStack drop : drops)

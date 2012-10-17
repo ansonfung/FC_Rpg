@@ -132,7 +132,7 @@ public class RpgCE implements CommandExecutor
 					{
 						int intArg3 = Integer.valueOf(args[3]);
 						
-						if (intArg3 >= 0 && intArg3 < FC_Rpg.classManager.getRpgClasses().length)
+						if (intArg3 >= 0 && intArg3 < FC_Rpg.classConfig.getRpgClasses().length)
 							playerFile.setCombatClass(intArg3);
 					}
 					else if (args[2].equalsIgnoreCase("tickets"))
@@ -688,7 +688,7 @@ public class RpgCE implements CommandExecutor
 						
 						try
 						{
-							sign.setLine(1, ChatColor.DARK_BLUE + FC_Rpg.classManager.getRpgClass(i).getName());
+							sign.setLine(1, ChatColor.DARK_BLUE + FC_Rpg.classConfig.getRpgClass(i).getName());
 						}
 						catch (ArrayIndexOutOfBoundsException e)
 						{

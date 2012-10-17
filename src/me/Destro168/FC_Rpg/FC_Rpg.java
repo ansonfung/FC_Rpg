@@ -91,8 +91,8 @@ public class FC_Rpg extends JavaPlugin
 	public static FC_Rpg plugin;
 	public static RpgManager rpgManager;
 	public static PartyManager partyManager;
-	public static SpellConfig spellManager;
-	public static ClassConfig classManager;
+	public static SpellConfig spellConfig;
+	public static ClassConfig classConfig;
 	
 	public static ColorLib cl = new ColorLib();
 	public static PvpEvent pvp;
@@ -129,7 +129,7 @@ public class FC_Rpg extends JavaPlugin
 	private GamemodeCE gamemodeCE;
 	private DungeonCE dungeonCE;
 	
-	private GeneralConfig co;
+	private GeneralConfig generalConfig;
 	
 	@Override
 	public void onDisable() 
@@ -156,17 +156,16 @@ public class FC_Rpg extends JavaPlugin
 		//Derp
 		plugin = this;
 		
-		//Handle the CONFIGURATION OVERLORD. HAIL!
-		co = new GeneralConfig();
+		//Start up the general config.
+		generalConfig = new GeneralConfig();
 		
 		//World manager = new world manager;
-		rpgManager = new RpgManager();
 		wm = new WorldConfig();
 		bLib = new BroadcastLib();
 		partyManager = new PartyManager();
 		pvp = new PvpEvent();
-		spellManager = new SpellConfig();
-		classManager = new ClassConfig();
+		spellConfig = new SpellConfig();
+		classConfig = new ClassConfig();
 		
 		//Set up the economy.
 		setupEconomy();
@@ -249,12 +248,8 @@ public class FC_Rpg extends JavaPlugin
 			}
 		}, 100, 36000);
 		
-		//Update player information.
-		for (Player player : Bukkit.getServer().getOnlinePlayers())
-		{
-			//Check player registration.
-			FC_Rpg.rpgManager.checkPlayerRegistration(player);
-		}
+		//Start an rpg manager.
+		rpgManager = new RpgManager();
 		
 		//We want to delete records of all players that haven't logged on in a while.
 		rpgManager.clearOldPlayerData();
@@ -310,7 +305,7 @@ public class FC_Rpg extends JavaPlugin
 			//Prevent breaking of sponge blocks.
 			if (event.getBlock().getType() == Material.SPONGE)
 			{
-				if (co.getPreventSpongeBreak() == true)
+				if (generalConfig.getPreventSpongeBreak() == true)
 				{
 					if (!perms.isAdmin())
 						event.setCancelled(true);
@@ -354,11 +349,11 @@ public class FC_Rpg extends JavaPlugin
 				return;
 			
 			//If exp drops are globally cancelled.
-			if (co.getExpCancelled() == true)
+			if (generalConfig.getExpCancelled() == true)
 				event.setExpToDrop(0);	//Cancel experience drops.
 			
 			//Handle perfect wheat if enabled.
-			if (co.getPerfectWheat() == true)
+			if (generalConfig.getPerfectWheat() == true)
 			{
 				if (event.getBlock().getType().equals(Material.CROPS))
 				{
@@ -384,7 +379,7 @@ public class FC_Rpg extends JavaPlugin
 			}
 			
 			//If infinite gold is enabled
-			if (co.getInfiniteGold() == true)
+			if (generalConfig.getInfiniteGold() == true)
 			{
 				//Prevent gold tools from breaking.
 				if (handItemType == Material.GOLD_PICKAXE && handItem.getDurability() == 29)
@@ -398,7 +393,7 @@ public class FC_Rpg extends JavaPlugin
 			}
 			
 			//If infinite diamond is enabled
-			if (co.getInfiniteDiamond() == true)
+			if (generalConfig.getInfiniteDiamond() == true)
 			{
 				//Prevent diamond tools from breaking.
 				if (handItemType == Material.DIAMOND_PICKAXE && handItem.getDurability() == 1558)
@@ -420,7 +415,7 @@ public class FC_Rpg extends JavaPlugin
 		public void onBlockBreak(StructureGrowEvent event)
 		{
 			//If perfect birch is disabled return.
-			if (co.getPerfectBirch() == false)
+			if (generalConfig.getPerfectBirch() == false)
 				return;
 			
 			//For birch trees
@@ -445,7 +440,7 @@ public class FC_Rpg extends JavaPlugin
 		public void onBlockPlace(BlockPlaceEvent event)
 		{
 			//If creative control is disabled, return.
-			if (co.getCreativeControl() == false)
+			if (generalConfig.getCreativeControl() == false)
 				return;
 			
 			//Variable Declarations Pt. 2
@@ -523,7 +518,7 @@ public class FC_Rpg extends JavaPlugin
 		public void onProjectileLaunch(ProjectileLaunchEvent event)
 		{
 			//If creative control is disabled, return.
-			if (co.getCreativeControl() == false)
+			if (generalConfig.getCreativeControl() == false)
 				return;
 			
 			//Check for thrown itmes that should be blocked.
@@ -584,7 +579,7 @@ public class FC_Rpg extends JavaPlugin
 				return;
 			
 			//If exp drops are cancelled, then...
-			if (co.getExpCancelled() == true)
+			if (generalConfig.getExpCancelled() == true)
 				event.setDroppedExp(0);	//Disable exp drops.
 			
 			//Store entity
@@ -601,7 +596,7 @@ public class FC_Rpg extends JavaPlugin
 				player = (Player) entity;
 				
 				//If hardcore item loss is enabled, then...
-				if (co.getHardcoreItemLoss() == true)
+				if (generalConfig.getHardcoreItemLoss() == true)
 				{
 					//If the player has 6 hearts or less, then...
 					if (player.getFoodLevel() < 7)
@@ -679,7 +674,7 @@ public class FC_Rpg extends JavaPlugin
 		@EventHandler
 		public void onFish(PlayerFishEvent event)
 		{
-			if (co.getBetterFishing() == true)
+			if (generalConfig.getBetterFishing() == true)
 			{
 				Player player = (Player) event.getPlayer();
 				
@@ -846,7 +841,7 @@ public class FC_Rpg extends JavaPlugin
 					if (rpgManager.getRpgMonster((LivingEntity) entity) != null)
 						rpgManager.getRpgMonster((LivingEntity) entity).restoreHealth(MAX_HP);
 				}
-
+				
 				if (event.getRegainReason() == RegainReason.MAGIC)
 				{
 					if (rpgManager.getRpgMonster((LivingEntity) entity) != null)
@@ -938,7 +933,7 @@ public class FC_Rpg extends JavaPlugin
 		public void PlayerExpChangeEvent(PlayerExpChangeEvent event)
 		{
 			//If exp disabled is disabled.
-			if (co.getExpCancelled() == false)
+			if (generalConfig.getExpCancelled() == false)
 				return;
 			
 			//Variable declarations
@@ -966,7 +961,7 @@ public class FC_Rpg extends JavaPlugin
 			//Variable Declarations
 			final Arrow arrow = (Arrow) event.getProjectile();
 			Vector speed;
-			RpgClass rpgClass = FC_Rpg.classManager.getClassWithPassive(ClassConfig.passive_ScalingArrows);
+			RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(ClassConfig.passive_ScalingArrows);
 			
 			//Make it so that arrows don't bounce.
 			arrow.setBounce(false);

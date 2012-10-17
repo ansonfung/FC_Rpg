@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.Destro168.Configs.GeneralConfig;
 import me.Destro168.Configs.PvpConfig;
 import me.Destro168.Configs.WorldConfig;
 import me.Destro168.Entities.RpgPlayer;
@@ -19,7 +18,6 @@ public class PvpEvent extends GeneralEvent
 	private double rewardAmount;
 	
 	private WorldConfig wm;
-	private GeneralConfig co;
 	private PvpConfig pm;
 	
 	private Map<Player, Boolean> hasLost;
@@ -39,21 +37,22 @@ public class PvpEvent extends GeneralEvent
 		//Set super defaults.
 		super.setDefaults();
 		
-		//Check if pvp arena is setup or not.
-		co = new GeneralConfig();
+		//Instantiate a pvp config just to generate.
+		pm = new PvpConfig();
 		
-		if (co.getPvpArenaReward() == -1)
+		//Load the reward amount.
+		rewardAmount = pm.getPvpArenaReward();
+		
+		//If it's -1, return.
+		if (rewardAmount == -1)
 			return;
 		
 		//Initialize globals.
 		wm = new WorldConfig();
-		pm = new PvpConfig();
 		
 		hasLost = new HashMap<Player, Boolean>();
 		redTeam = new ArrayList<Player>();
 		yellowTeam = new ArrayList<Player>();
-		
-		rewardAmount = co.getPvpArenaReward();
 	}
 	
 	public boolean addPvper(Player player)
@@ -124,7 +123,7 @@ public class PvpEvent extends GeneralEvent
 	public void begin()
 	{
 		//If the pvp arena isn't setup, then return.
-		if (co.getPvpArenaReward() == -1)
+		if (pm.getPvpArenaReward() == -1)
 			return;
 		
 		//Set pvp defaults.

@@ -45,18 +45,18 @@ public class EntityDamageManager
 			return;
 		
 		//Handle immortality effect first.
-		if (rpgDefender.getStatusIsActive(rpgDefender.getPlayerConfigFile().getStatusDuration(EffectIDs.IMMORTAL)))
+		if (rpgDefender.getStatusActiveRpgPlayer(EffectIDs.IMMORTAL))
 		{
 			rpgDefender.attemptDamageAvoidNotification(true);
 			return;
 		}
 		
 		//Check if the player has dodge status on them.
-		if (rpgDefender.getStatusIsActive(rpgDefender.getPlayerConfigFile().getStatusDuration(EffectIDs.DODGE)))
+		if (rpgDefender.getStatusActiveRpgPlayer(EffectIDs.DODGE))
 		{
 			Random rand = new Random();
 			
-			if (rand.nextInt(100) <= rpgDefender.getPlayerConfigFile().getStatusStrength(EffectIDs.DODGE))
+			if (rand.nextInt(100) < rpgDefender.getPlayerConfigFile().getStatusMagnitude(EffectIDs.DODGE))
 			{
 				rpgDefender.attemptDamageAvoidNotification(false);
 				return;
@@ -64,12 +64,17 @@ public class EntityDamageManager
 		}
 		
 		//Deal thorns damage before anything is calculated.
-		if (rpgDefender.getStatusIsActive(rpgDefender.getPlayerConfigFile().getStatusDuration(EffectIDs.THORNS)))
+		if (rpgDefender.getStatusActiveRpgPlayer(EffectIDs.THORNS))
 		{
+			double thornsDamage = damage * rpgDefender.getPlayerConfigFile().getStatusMagnitude(EffectIDs.THORNS);
+			
+			//Attempt a dodge notification
+			rpgDefender.attemptThornsNotification(thornsDamage);
+			
 			if (rpgAttacker != null)
-				rpgAttacker.dealDamage(damage);
+				rpgAttacker.dealDamage(thornsDamage);
 			else if (rpgMobAttacker != null)
-				rpgMobAttacker.dealDamage(damage);
+				rpgMobAttacker.dealDamage(thornsDamage);
 		}
 		
 		//Add in enchantment bonuses.
@@ -82,11 +87,11 @@ public class EntityDamageManager
 		if (playerDefender.isBlocking() == true)
 		{
 			//Variable Declaration.
-			RpgClass rpgClass = FC_Rpg.classManager.getClassWithPassive(ClassConfig.passive_StrongerParry);
+			RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(ClassConfig.passive_StrongerParry);
 			
 			if (rpgClass != null)
 			{
-				if (rpgClass.getName().equals(rpgAttacker.getPlayerConfigFile().getCombatClass()))
+				if (rpgClass.getID() == rpgDefender.getPlayerConfigFile().getCombatClass())
 					damage = damage * .75; //25% damage reduction for blocking as defender.
 				else
 					damage = damage * .9; //10% damage reduction for blocking.
@@ -96,10 +101,10 @@ public class EntityDamageManager
 		}
 		
 		//If taunt status is active, then...
-		if (rpgDefender.getStatusIsActive(rpgDefender.getPlayerConfigFile().getStatusDuration(EffectIDs.TAUNT)) == true)
+		if (rpgDefender.getStatusActiveRpgPlayer(EffectIDs.TAUNT) == true)
 		{
 			//Apply taunt damage reduction.
-			damage = damage * rpgDefender.getPlayerConfigFile().getStatusStrength(EffectIDs.TAUNT);
+			damage = damage * rpgDefender.getPlayerConfigFile().getStatusMagnitude(EffectIDs.TAUNT);
 		}
 		
 		//Deal damage greater than 0.
@@ -114,8 +119,11 @@ public class EntityDamageManager
 		
 		if (rpgAttacker != null)
 		{
-			handleBerserkerSpells(rpgAttacker, playerDefender, damage);	//Handle berserker class spells
-			rpgAttacker.attemptAttackNotification(playerDefender.getLevel(), rpgDefender.getCurHealth(), damage); 
+			handle_Postoffense_Buffs(rpgAttacker, playerDefender, damage);
+			rpgAttacker.attemptAttackNotification(playerDefender.getLevel(), rpgDefender.getCurHealth(), damage);
+			
+			if (rpgAttacker.getPlayer().getItemInHand().containsEnchantment(Enchantment.KNOCKBACK))
+				applyKnockback(rpgAttacker.getPlayer(), playerDefender);
 		}
 		
 		//Set the players health based current health out of maximum health.
@@ -137,10 +145,17 @@ public class EntityDamageManager
 			rpgDefender.attemptDefenseNotification(damage);
 			
 			if (rpgAttacker != null)
-				handlePlayerDefensePassives(damage, rpgDefender, rpgAttacker.getPlayer());
+				handle_Defense_Passives(damage, rpgDefender, rpgAttacker.getPlayer());
 			else if (rpgMobAttacker != null)
-				handlePlayerDefensePassives(damage, rpgDefender, rpgMobAttacker.getEntity());
+				handle_Defense_Passives(damage, rpgDefender, rpgMobAttacker.getEntity());
 		}
+	}
+	
+	private void applyKnockback(Player attacker, LivingEntity attacked)
+	{
+		float knockback = attacker.getItemInHand().getEnchantmentLevel(Enchantment.KNOCKBACK);
+		
+	    attacked.setVelocity(attacked.getVelocity().add(attacked.getLocation().toVector().subtract(attacker.getLocation().toVector()).normalize().multiply(knockback)));
 	}
 	
 	public void attackMobDefender(RpgMonster rpgMobDefender, RpgPlayer rpgAttacker, double damage)
@@ -186,11 +201,11 @@ public class EntityDamageManager
 			}
 		}
 		
-		//If the player has the fire arrow status, then...
-		if (rpgAttacker.getStatusIsActive(rpgAttacker.getPlayerConfigFile().getStatusDuration(EffectIDs.ATTACK)))
+		//If the player has the attack buff, then...
+		if (rpgAttacker.getStatusActiveRpgPlayer(EffectIDs.ATTACK))
 		{
-			//If they have the morale buff, then increase damage by it.
-			damage = damage * rpgAttacker.getPlayerConfigFile().getStatusStrength(EffectIDs.ATTACK);
+			//Increase attack damage by its magnitude.
+			damage = damage * rpgAttacker.getPlayerConfigFile().getStatusMagnitude(EffectIDs.ATTACK);
 		}
 		
 		damage = damage * rpgAttacker.getEnchantmentOffensiveBonuses(Enchantment.DAMAGE_ALL);
@@ -201,7 +216,7 @@ public class EntityDamageManager
 			damage = damage * rpgAttacker.getEnchantmentOffensiveBonuses(Enchantment.DAMAGE_UNDEAD);
 		
 		//Handle the passives for attacking players.
-		damage = handlePlayerOffensePassives(damage, rpgAttacker, playerAttacker);
+		damage = handle_Offense_Passives(damage, rpgAttacker, playerAttacker);
 		
 		//Damage must always be 1 or 0. If it is negative it will heal the creature (not good).
 		if (damage < 0.1) damage = 0.1;
@@ -216,7 +231,13 @@ public class EntityDamageManager
 		rpgAttacker.attemptAttackNotification(rpgMobDefender.getLevel(), rpgMobDefender.getCurHealth(), damage);
 		
 		//Handle berserker class spells
-		handleBerserkerSpells(rpgAttacker, entityDefender, damage);
+		handle_Postoffense_Buffs(rpgAttacker, entityDefender, damage);
+		
+		if (playerAttacker != null)
+		{
+			if (playerAttacker.getItemInHand().containsEnchantment(Enchantment.KNOCKBACK))
+				applyKnockback(playerAttacker, entityDefender);
+		}
 		
 		//If the mob has 0 health handle it's death processes AND drop loot.
 		if (rpgMobDefender.getCurHealth() <= 0)
@@ -438,11 +459,11 @@ public class EntityDamageManager
 	}
 	
 	//Handle player defense skills
-	private void handlePlayerDefensePassives(double damage, RpgPlayer rpgDefender, LivingEntity entityAttacker)
+	private void handle_Defense_Passives(double damage, RpgPlayer rpgDefender, LivingEntity entityAttacker)
 	{
 		//Variable Declarations
 		Random rand = new Random();
-		RpgClass rpgClass = FC_Rpg.classManager.getClassWithPassive(ClassConfig.passive_CounterAttack);
+		RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(ClassConfig.passive_CounterAttack);
 		
 		if (rpgClass != null)
 		{
@@ -455,11 +476,10 @@ public class EntityDamageManager
 		}
 	}
 	
-	//Handle player offense skills.
-	private double handlePlayerOffensePassives(double damage, RpgPlayer rpgAttacker, LivingEntity entityDefender)
+	private double handle_Offense_Passives(double damage, RpgPlayer rpgAttacker, LivingEntity entityDefender)
 	{
 		//Variable Declaration.
-		RpgClass rpgClass = FC_Rpg.classManager.getClassWithPassive(ClassConfig.passive_BattleLust);
+		RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(ClassConfig.passive_BattleLust);
 		
 		if (rpgClass != null)
 		{
@@ -473,18 +493,21 @@ public class EntityDamageManager
 		return damage;
 	}
 	
-	private void handleBerserkerSpells(RpgPlayer caster, LivingEntity defender, double damage)
+	private void handle_Postoffense_Buffs(RpgPlayer caster, LivingEntity defender, double damage)
 	{
-		if (caster.getStatusIsActive(caster.getPlayerConfigFile().getStatusDuration(EffectIDs.LIFESTEAL)))
-			caster.heal(damage * caster.getPlayerConfigFile().getStatusStrength(EffectIDs.LIFESTEAL));
+		if (caster.getStatusActiveRpgPlayer(EffectIDs.LIFESTEAL))
+		{
+			double healAmount = damage * caster.getPlayerConfigFile().getStatusMagnitude(EffectIDs.LIFESTEAL);
+			
+			caster.attemptHealSelfNotification(healAmount);
+			caster.heal(healAmount);
+		}
 		
-		/* TODO - readd
-		if (caster.getStatusIsActive(caster.getStatusFerocity()))
+		if (caster.getStatusActiveRpgPlayer(EffectIDs.TELEPORT_STRIKE))
 		{
 			EntityLocationLib ell = new EntityLocationLib();
 			caster.getPlayer().teleport(ell.getLocationBehindEntity(defender.getLocation()));
 		}
-		*/
 	}
 	
 	public boolean canAttack(long time, int partySize)

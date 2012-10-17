@@ -7,7 +7,7 @@ public class Spell
 	private int effectID;
 	private String name;
 	private String description;
-	private List<Double> duration;
+	private List<Integer> duration;
 	private List<Double> manaCost;
 	private List<Double> constantMagnitude;
 	private List<Double> attackMagnitude;
@@ -22,7 +22,7 @@ public class Spell
 	public int getEffectID() { return effectID; }
 	public String getName() { return name; }
 	public String getDescription() { return description; }
-	public List<Double> getDuration() { return duration; }
+	public List<Integer> getDuration() { return duration; }
 	public List<Double> getManaCost() { return manaCost; }
 	public List<Double> getConstantMagnitude() { return constantMagnitude; }
 	public List<Double> getAttackMagnitude() { return attackMagnitude; }
@@ -34,7 +34,7 @@ public class Spell
 	public boolean getRestricted() { return restricted; }
 	
 	//Constructor
-	public Spell(int effectID_, String name_, String description_, List<Double> duration_, List<Double> manaCost_, List<Double> constantMagnitude_,
+	public Spell(int effectID_, String name_, String description_, List<Integer> duration_, List<Double> manaCost_, List<Double> constantMagnitude_,
 			List<Double> attackMagnitude_, List<Double> magicMagnitude_, List<Double> intelligenceMagnitude_, List<Double> constitutionMagnitude_,
 			List<Integer> radius_, boolean targetParty_, boolean restricted_)
 	{

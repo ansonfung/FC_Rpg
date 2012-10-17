@@ -161,16 +161,18 @@ public class RpgManager
     	//Variable Decalrations
     	RpgPlayer rpgPlayer = new RpgPlayer(player);
     	
-    	//If they aren't active, then we want to make them active by creating their rpg player.
-		if (rpgPlayer.getPlayerConfigFile().getIsActive() == false)
-			setPlayerStart("Swordsman", player, false);	//Store the player as a new player.
-		
     	//If the player information isn't stored, then store.
     	if (!(piMap.containsKey(player)))
     	{
     		//We get the rpgPlayer.
     		PlayerInformation pi = new PlayerInformation(rpgPlayer);
+    		
     		piMap.put(player, pi);
+    		
+    		//If they aren't active, then we want to make them active by creating their rpg player.
+    		if (rpgPlayer.getPlayerConfigFile().getIsActive() == false)
+    			setPlayerStart("Swordsman", player, false);	//Store the player as a new player.
+    		
     		piMap.get(player).startTasks();
     	}
     }
@@ -244,9 +246,9 @@ public class RpgManager
     	FC_Rpg.bLib.standardBroadcast("Welcome " + player.getName() + ", the " + classSelection + "!");
 		
     	//Convert stringClass to real class number.
-    	for (int i = 0; i < FC_Rpg.classManager.getRpgClasses().length; i++)
+    	for (int i = 0; i < FC_Rpg.classConfig.getRpgClasses().length; i++)
     	{
-    		if (classSelection.equals(FC_Rpg.classManager.getRpgClass(i).getName()))
+    		if (classSelection.equals(FC_Rpg.classConfig.getRpgClass(i).getName()))
     		{
     			intClass = i;
     			break;

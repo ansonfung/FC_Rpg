@@ -27,8 +27,6 @@ public class RpgEntity
 	public long getLastDefenseNotificationLong() { return lastDefenseNotification.getTime(); }
 	public boolean getIsAlive() { return isAlive; }
 	
-	public void updateLastAttackNotification() { lastAttackNotification = new Date(); }
-	public void updateLastDefenseNotification() { lastDefenseNotification = new Date(); }
 	public void setIsAlive(boolean x) { isAlive = x; }
 	
 	public RpgEntity()
@@ -41,11 +39,9 @@ public class RpgEntity
 		isAlive = true;
 	}
 	
-	public boolean getStatusIsActive(Long statusExpirationDate)
+	public boolean getStatusActiveEntity(Long statusExpirationDate)
 	{
 		Date now = new Date();
-		
-		FC_Rpg.plugin.getLogger().info("A: " + now + " then: " + statusExpirationDate);
 		
 		if (now.getTime() < statusExpirationDate)
 			return true;

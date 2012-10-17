@@ -7,11 +7,13 @@ import org.bukkit.World;
 
 public class PvpConfig extends ConfigGod
 {
+	private void setPvpArenaAward(double x) { ccm.set(prefix + ".pvpArenaReward", x); }
 	public void setLobby1(String world, double x, double y, double z, float a, float b) { ccm.setLocation(prefix + "lobby1", world, x, y, z, a, b); }
 	public void setLobby2(String world, double x, double y, double z, float a, float b) { ccm.setLocation(prefix + "lobby2", world, x, y, z, a, b); }
 	public void setSpawn1(String world, double x, double y, double z, float a, float b) { ccm.setLocation(prefix + "spawn1", world, x, y, z, a, b); }
 	public void setSpawn2(String world, double x, double y, double z, float a, float b) { ccm.setLocation(prefix + "spawn2", world, x, y, z, a, b); }
 	
+	public double getPvpArenaReward() { return ccm.getDouble(prefix + ".pvpArenaReward"); }
 	public Location getLobby1() { return ccm.getLocation(prefix + "lobby1"); }
 	public Location getLobby2() { return ccm.getLocation(prefix + "lobby2"); }
 	public Location getSpawn1() { return ccm.getLocation(prefix + "spawn1"); }
@@ -43,6 +45,7 @@ public class PvpConfig extends ConfigGod
 			setVersion(0.1);
 			
 			//Begin setting default settings.
+			setPvpArenaAward(-1);
 			setSpawn1(pvpWorldName, 180,81,106,180,0);
 			setSpawn2(pvpWorldName, 177,81,72,270,0);
 			setLobby1(pvpWorldName,170,99,82,270,0);

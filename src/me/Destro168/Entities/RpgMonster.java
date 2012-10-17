@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
+import me.Destro168.Configs.TreasureConfig;
 import me.Destro168.Configs.WorldConfig;
 import me.Destro168.FC_Suite_Shared.LocationInsideAreaCheck;
 import me.Destro168.FC_Rpg.FC_Rpg;
@@ -19,7 +20,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class RpgMonster extends RpgEntity
 {
-	private RandomTreasureGenerator rtg;
+	private TreasureConfig rtg;
 	private MobAggressionCheck mac;
 	private LivingEntity entity;
 	private int mobId;
@@ -53,10 +54,10 @@ public class RpgMonster extends RpgEntity
 	public void setLevel(int x) { level = x; }
 	public void setIsBoss(boolean x) { isBoss = x; }
 	public void setIsWeak(boolean x) { isWeak = x; }
-	public void setStatusDisabled(double x) 
+	public void setStatusDisabled(int x) 
 	{ 
 		DateManager dm = new DateManager();
-		statusDisabled = dm.getFutureDate_Seconds(x); 
+		statusDisabled = dm.getFutureDate_Milliseconds(x); 
 	}
 	
 	public boolean isCreated() { return mobId > -1; } 
@@ -74,7 +75,7 @@ public class RpgMonster extends RpgEntity
 	
 	public void setDefaults()
 	{
-		rtg = new RandomTreasureGenerator();
+		rtg = new TreasureConfig();
 		mac = null;
 		entity = null;
 		mobId = -1;
@@ -188,7 +189,7 @@ public class RpgMonster extends RpgEntity
 	
 	public void handleHostileMobDrops(Location dropSpot)
 	{
-		List<ItemStack> drops = rtg.getRandomItemList(level);
+		List<ItemStack> drops = rtg.getRandomDrops(level);
 		
 		for (ItemStack drop : drops)
 			dropSpot.getWorld().dropItem(dropSpot, drop);	//Drop the item.

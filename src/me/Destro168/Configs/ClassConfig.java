@@ -53,6 +53,7 @@ public class ClassConfig extends ConfigGod
 			setName(2, "Defender");
 			setName(3, "Wizard");
 			setName(4, "Berserker");
+			setName(5, "DebugClass");
 			
 			//Set default descriptions
 			setDescription(0, "Close range melee warrior.");
@@ -60,6 +61,7 @@ public class ClassConfig extends ConfigGod
 			setDescription(2, "Close ranged melee tank.");
 			setDescription(3, "Versatile Magician with high risk/reward.");
 			setDescription(4, "Incredible Melee Devestation Unit.");
+			setDescription(5, "A class designed for testing.");
 			
 			//Set all the default spells, using my quite complicated, but extremely line efficient algorithm.
 			int a = 0;
@@ -69,6 +71,8 @@ public class ClassConfig extends ConfigGod
 				setSpells(i,a,a+1,a+2,a+3,a+4);
 				a += 5;
 			}
+			
+			ccm.set(prefix + 5 + ".spellIDs", getDebugClassString());
 			
 			//Set all the class passives
 			setPassiveID(0, passive_ScalingArrows);
@@ -85,8 +89,19 @@ public class ClassConfig extends ConfigGod
 			setStatGrowth(1,5,1,2,2);
 			setStatGrowth(2,1,5,2,2);
 			setStatGrowth(3,0,2,4,4);
-			setStatGrowth(4,3,5,0,2);
+			setStatGrowth(4,3,5,0,2);;
+			setStatGrowth(5,999,999,999,999);
 		}
+	}
+	
+	private String getDebugClassString()
+	{
+		String a = "1";
+		
+		for (int i = 0; i < 25; i++)
+			a += "," + String.valueOf(i);
+		
+		return a;
 	}
 	
 	private void loadConfig()

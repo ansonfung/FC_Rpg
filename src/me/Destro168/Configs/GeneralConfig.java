@@ -26,7 +26,7 @@ public class GeneralConfig extends ConfigGod
 	private void setDonatorLootBonusPercent(double x) { ccm.set(prefix + ".donatorLootBonusPercent", x); }
 	private void setLevelCap(int x) { ccm.set(prefix + ".levelCap", x); }
 	private void setJobRankCosts(double a, double b, double c, double d, double e) { ccm.set(prefix + ".jobRankCosts", a + "," + b + "," + c + "," + d + "," + e); }
-	private void setPvpArenaAward(double x) { ccm.set(prefix + ".pvpArenaReward", x); }
+	private void setNotificationInterval(int x) { ccm.set(prefix + ".notificationInterval", x); }
 	
 	public Location getResetLocation() { return ccm.getLocation(prefix + ".resetLoc"); }
 	public String getDefaultPrefix() { return ccm.getString(prefix + ".defaultPrefix"); }
@@ -44,7 +44,7 @@ public class GeneralConfig extends ConfigGod
 	public double getDonatorLootBonusPercent() { return ccm.getDouble(prefix + ".donatorLootBonusPercent"); }
 	public int getLevelCap() { return ccm.getInt(prefix + ".levelCap"); }
 	public List<Double> getJobRankCosts() { return converter.getDoubleListFromString(ccm.getString(prefix + ".jobRankCosts")); }
-	public double getPvpArenaReward() { return ccm.getDouble(prefix + ".pvpArenaReward"); }
+	public int getNotifcationInterval() { return ccm.getInt(prefix + ".notificationInterval"); }
 	
 	public GeneralConfig()
 	{
@@ -55,10 +55,10 @@ public class GeneralConfig extends ConfigGod
 	public void handleUpdates()
 	{
 		//If no config was previously created, then...
-		if (getVersion() < 0.1)
+		if (getVersion() < 0.2)
 		{
 			//Update the version.
-			setVersion(0.1);
+			setVersion(0.2);
 			
 			//Set the main respawn location.
 			setResetLocation(Bukkit.getServer().getWorlds().get(0).getName(),32.5,83,160.5,90,0);
@@ -81,7 +81,7 @@ public class GeneralConfig extends ConfigGod
 			setDonatorLootBonusPercent(.1);
 			setLevelCap(100);
 			setJobRankCosts(3200.0D, 20000.0D, 55000.0D, 105000.0D, 175000.0D);
-			setPvpArenaAward(-1);
+			setNotificationInterval(2000);
 			
 			//Initialize a few things to let them attempt to generate configurations.
 			@SuppressWarnings("unused")

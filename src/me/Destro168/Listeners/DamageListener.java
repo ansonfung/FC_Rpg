@@ -5,6 +5,7 @@ import java.util.Random;
 
 import me.Destro168.Classes.EffectIDs;
 import me.Destro168.Classes.Spell;
+import me.Destro168.Classes.SpellCaster;
 import me.Destro168.Configs.WorldConfig;
 import me.Destro168.Entities.EntityDamageManager;
 import me.Destro168.Entities.RpgMonster;
@@ -204,9 +205,7 @@ public class DamageListener implements Listener
 				if (rpgMobDefender != null)
 					damage = rpgAttacker.castSpell(rpgMobDefender.getEntity(), damage, damageType);
 				else
-				{
 					damage = rpgAttacker.castSpell(rpgDefender.getPlayer(), damage, damageType);
-				}
 			}
 		}
 		
@@ -268,7 +267,7 @@ public class DamageListener implements Listener
 	{
 		//Variable Declarations/Initializations
 		Arrow arrow = null;
-		List<Spell> spell = null;
+		List<Spell> spellBook = null;
 		double damage = 0;
 		rpgMobAttacker = null;
 		
@@ -300,16 +299,21 @@ public class DamageListener implements Listener
 				if (rpgPlayer.summon_Owns(e.getDamager()))
 				{
 					//Variable Initializations
-					spell = rpgAttacker.getPlayerConfigFile().getRpgClass().getSpellBook();
 					rpgAttacker = rpgPlayer;
+					spellBook = rpgAttacker.getPlayerConfigFile().getRpgClass().getSpellBook();
 					damageType = 2;
 					
-					//TODO, check to see if this shit works, cause it seriously might not.
-					for (int i = 0; i < spell.size(); i++)
+					for (int i = 0; i < spellBook.size(); i++)
 					{
-						if (spell.get(i).getEffectID() == EffectIDs.FIREBALL)
+						if (spellBook.get(i).getEffectID() == EffectIDs.FIREBALL)
 						{
-							damage = spell.get(i).getMagicMagnitude().get(rpgAttacker.getPlayerConfigFile().getSpellLevel(i));
+							SpellCaster sc = new SpellCaster();
+							
+							FC_Rpg.plugin.getLogger().info("I: " + i);
+							FC_Rpg.plugin.getLogger().info("I: " + spellBook.get(i).getName());
+							FC_Rpg.plugin.getLogger().info("I: " + rpgAttacker.getPlayerConfigFile().getSpellLevel(i));
+							
+							damage = sc.updatefinalSpellMagnitude(rpgAttacker, spellBook.get(i), (rpgAttacker.getPlayerConfigFile().getSpellLevel(i) - 1));
 							break;
 						}
 					}
@@ -402,7 +406,7 @@ public class DamageListener implements Listener
 			//Else if not it's an error and return the monster strength.
 			else
 			{
-				FC_Rpg.plugin.getLogger().info("Error: PrepareAttacker(), undefine entity type: " + e.getDamager().toString());
+				FC_Rpg.plugin.getLogger().info("Error: PrepareAttacker(), undefined entity type: " + e.getDamager().toString());
 				
 				//Initialize rpgMobAttacker;
 				rpgMobAttacker = new RpgMonster();
@@ -415,7 +419,7 @@ public class DamageListener implements Listener
 		if (rpgAttacker != null)
 		{
 			//If disabled cancel attack
-			if (rpgAttacker.getStatusIsActive(rpgAttacker.getPlayerConfigFile().getStatusDuration(EffectIDs.DISABLED)))
+			if (rpgAttacker.getStatusActiveEntity(rpgAttacker.getPlayerConfigFile().getStatusDuration(EffectIDs.DISABLED)))
 			{
 				cancelRpgDamage = true;
 				return 0;
@@ -423,7 +427,7 @@ public class DamageListener implements Listener
 		}
 		else if (rpgMobAttacker != null)
 		{
-			if (rpgMobAttacker.getStatusIsActive(rpgMobAttacker.getStatusDisabled()))
+			if (rpgMobAttacker.getStatusActiveEntity(rpgMobAttacker.getStatusDisabled()))
 			{
 				cancelRpgDamage = true;
 				return 0;

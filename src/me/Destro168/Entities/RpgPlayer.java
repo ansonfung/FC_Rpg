@@ -29,6 +29,8 @@ import org.bukkit.inventory.PlayerInventory;
 
 public class RpgPlayer extends RpgEntity
 {
+	private final DecimalFormat df = new DecimalFormat("#.#");
+	
 	private MessageLib msgLib;
 	private ItemStack air;
 	private Player player;
@@ -41,6 +43,8 @@ public class RpgPlayer extends RpgEntity
 	private int tempMagic;
 	private int tempIntelligence;
 	private Date lastDodgeNotification;
+	private Date lastThornsNotification;
+	private Date lastHealNotification;
 	private Date logonDate;
 	private double curHealth;
 	private double maxHealth;
@@ -89,6 +93,8 @@ public class RpgPlayer extends RpgEntity
 		tempMagic = 0;
 		tempIntelligence = 0;
 		lastDodgeNotification = new Date();
+		lastThornsNotification = new Date();
+		lastHealNotification = new Date();
 		logonDate = new Date();
 		curHealth = 0;
 		maxHealth = 0;
@@ -529,54 +535,57 @@ public class RpgPlayer extends RpgEntity
 		return true;
 	}
 	
-	public void attemptAttackNotification(int level, double health, double damage)
+	private boolean getCanNotify(Date time)
 	{
 		Date now = new Date();
-        DecimalFormat df = new DecimalFormat("#.#");
+		int NotificationRepeatInterval = 2000;
+		
+		if ((now.getTime() - time.getTime()) < NotificationRepeatInterval)
+			return false;
+		
+		return true;
+	}
+	
+	public void attemptAttackNotification(int level, double health, double damage)
+	{
+		if (getCanNotify(lastAttackNotification) == false)
+			return;
+		
 		String[] msg = new String[8];
 		
-		if ((now.getTime() - getLastAttackNotificationLong()) > 3000)
-		{
-			msg[0] = "[";
-			msg[1] = "You Hit";
-			msg[2] = "] Level: ";
-			msg[3] = String.valueOf(level);
-			msg[4] = " / Remaining Health: ";
-			msg[5] = df.format(health);
-			msg[6] = " / Damage: ";
-			msg[7] = String.valueOf(df.format(damage));
-			
-			//Send the message.
-			msgLib.standardMessage(msg);
-			
-			updateLastAttackNotification();
-		}
+		msg[0] = "[";
+		msg[1] = "You Hit";
+		msg[2] = "] Level: ";
+		msg[3] = String.valueOf(level);
+		msg[4] = " / Remaining Health: ";
+		msg[5] = df.format(health);
+		msg[6] = " / Damage: ";
+		msg[7] = String.valueOf(df.format(damage));
+		
+		msgLib.standardMessage(msg);
+		lastAttackNotification = new Date();
 	}
 	
 	public void attemptDefenseNotification(double damage)
 	{
-		Date now = new Date();
-        DecimalFormat df = new DecimalFormat("#.#");
+		if (getCanNotify(lastDefenseNotification) == false)
+			return;
+		
 		String[] msg = new String[6];
 		
-		if ((now.getTime() - getLastDefenseNotificationLong()) > 3000)
-		{
-			msg[0] = "[";
-			msg[1] = "You Got Hit";
-			msg[2] = "] Damage: ";
-			msg[3] = String.valueOf(df.format(damage));
-			msg[4] = " / Remaining Health: ";
-			msg[5] = String.valueOf(df.format(curHealth));
+		msg[0] = "[";
+		msg[1] = "You Got Hit";
+		msg[2] = "] Damage: ";
+		msg[3] = String.valueOf(df.format(damage));
+		msg[4] = " / Remaining Health: ";
+		msg[5] = String.valueOf(df.format(curHealth));
 
-			msgLib.standardMessage(msg);
-			
-			updateLastDefenseNotification();
-		}
+		msgLib.standardMessage(msg);
+		lastDefenseNotification = new Date();
 	}
 	
 	public void attemptCastNotification(String spellName)
 	{
-        DecimalFormat df = new DecimalFormat("#.#");
 		String[] msg = new String[6];
 		
 		msg[0] = "[";
@@ -589,13 +598,12 @@ public class RpgPlayer extends RpgEntity
 		msgLib.standardMessage(msg);
 	}
 	
-	public void attemptHealNotification(RpgPlayer healTarget)
+	public void attemptHealOtherNotification(RpgPlayer healTarget)
 	{
-        DecimalFormat df = new DecimalFormat("#.#");
 		String[] msg = new String[9];
         
 		msg[0] = "[";
-		msg[1] = "Healed";
+		msg[1] = "Healed Other";
 		msg[2] = "] Remaining Mana: ";
 		msg[3] = String.valueOf(curMana);
 		msg[4] = " / [Target Health]: (";
@@ -607,9 +615,27 @@ public class RpgPlayer extends RpgEntity
 		msgLib.standardMessage(msg);
 	}
 	
+	public void attemptHealSelfNotification(double healAmount)
+	{
+		if (getCanNotify(lastHealNotification) == false)
+			return;
+		
+		String[] msg = new String[7];
+        
+		msg[0] = "[";
+		msg[1] = "Heal";
+		msg[2] = "] Health: (";
+		msg[3] = ChatColor.GREEN + df.format(getCurHealth());
+		msg[4] = "/";
+		msg[5] = ChatColor.GREEN + df.format(getMaxHealth());
+		msg[6] = ")";
+
+		msgLib.standardMessage(msg);
+		lastHealNotification = new Date();
+	}
+	
 	public void sendMonsterDeathNotification(int level, double exp, double loot)
 	{
-        DecimalFormat df = new DecimalFormat("#.#");
 		String[] msg = new String[8];
         
 		msg[0] = "[";
@@ -626,17 +652,37 @@ public class RpgPlayer extends RpgEntity
 	
 	public void attemptDamageAvoidNotification(boolean isImmortal)
 	{
-		Date now = new Date();
-		String type = "avoided";
+		if (getCanNotify(lastDodgeNotification) == false)
+			return;
+		
+		String type = "Dodged Damage";
+		String[] msg = new String[3];
 		
 		if (isImmortal == true)
-			type = "negated";
+			type = "Damage Immune";
 		
-        if ((now.getTime() - lastDodgeNotification.getTime()) > 500)
-		{
-        	msgLib.standardMessage("You have just " + type + " damage.");
-        	lastDodgeNotification = new Date();
-		}
+		msg[0] = "[";
+		msg[1] = type;
+		msg[2] = "] Damage Avoided!";
+		
+		msgLib.standardMessage(msg);
+		lastDodgeNotification = new Date();
+	}
+	
+	public void attemptThornsNotification(double damage)
+	{
+		if (getCanNotify(lastThornsNotification) == false)
+			return;
+		
+		String[] msg = new String[4];
+		
+		msg[0] = "[";
+		msg[1] = "Thorns";
+		msg[2] = "] Damage: ";
+		msg[3] = df.format(damage);
+		
+    	msgLib.standardMessage(msg);
+    	lastThornsNotification = new Date();
 	}
 	
 	public void attemptFeedSteak()
@@ -1138,7 +1184,7 @@ public class RpgPlayer extends RpgEntity
 		int spellNumber = -1;
 		
 		//Make sure spell is valid.
-		for (int i = 0; i < FC_Rpg.spellManager.getSpellCount(); i++)
+		for (int i = 0; i < FC_Rpg.spellConfig.getSpellCount(); i++)
 		{
 			if (playerConfigFile.getSpellBind(i) == player.getItemInHand().getTypeId())
 			{
@@ -1326,8 +1372,18 @@ public class RpgPlayer extends RpgEntity
 		
 		if (scm.getDamage() > 0)
 			return scm.getDamage();
-		else
-			return damage;
+		
+		return damage;
+	}
+	
+	public boolean getStatusActiveRpgPlayer(int effectID)
+	{
+		Date now = new Date();
+		
+		if (now.getTime() < playerConfigFile.getStatusDuration(effectID))
+			return true;
+		
+		return false;
 	}
 }
 

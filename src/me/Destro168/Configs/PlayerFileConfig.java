@@ -62,7 +62,10 @@ public class PlayerFileConfig extends ConfigGod
 	//Sets
 	public void setCustomPrefix(String x) { ccm.set(prefix + "customPrefix", x); }
 	public void setActiveSpell(String x) { ccm.set(prefix + "activeSpell", x); }
-	public void setCombatClass(int x) { ccm.set(prefix + "combatClass", x); }
+	public void setCombatClass(int x) { 
+		ccm.set(prefix + "combatClass", x);
+		refreshClass();
+	}
 	public void setClassLevel(int x) { ccm.set(prefix + "classLevel", x); }
 	public void setJobRank(int x) { ccm.set(prefix + "jobRank", x); }
 	public void setAttack(int x) { ccm.set(prefix + "attack", x); }
@@ -90,21 +93,14 @@ public class PlayerFileConfig extends ConfigGod
 	public void setRankFreeze(boolean x) { ccm.set(prefix + "rankFreeze",x); }
 	
 	//Spell Status Set/Gets
-	public void setStatusDuration(int effectID, double x) //Sets the duration of a status in seconds.
-	{
+	public void setStatusDuration(int effectID, int x) { //Sets the duration of a status in seconds.
 		DateManager dm = new DateManager();
-		Date now = new Date();
-		
-		FC_Rpg.plugin.getLogger().info("Now: " + now.getTime() + " Then: " + dm.getFutureDate_Seconds(x));
-		
-		ccm.set(prefix + "status." + effectID + ".duration", dm.getFutureDate_Seconds(x));
-	}
-	
-	public void setStatusMagnitude(int effectID, int x) { ccm.set(prefix + "status." + effectID + ".magnitude", x); }
+		ccm.set(prefix + "status." + effectID + ".duration", dm.getFutureDate_Milliseconds(x)); }
+	public void setStatusMagnitude(int effectID, double x) { ccm.set(prefix + "status." + effectID + ".magnitude", x); }
 	public void setStatusUses(int effectID, int x) { ccm.set(prefix + "status." + effectID + ".uses", x); }
 	
 	public long getStatusDuration(int effectID) { return ccm.getLong(prefix + "status." + effectID + ".duration"); }
-	public int getStatusStrength(int effectID) { return ccm.getInt(prefix + "status." + effectID + ".magnitude"); }
+	public double getStatusMagnitude(int effectID) { return ccm.getDouble(prefix + "status." + effectID + ".magnitude"); }
 	public int getStatusUses(int effectID) { return ccm.getInt(prefix + "status." + effectID + ".uses"); }
 	
 	//Mana/Hp sets and gets.
@@ -166,7 +162,12 @@ public class PlayerFileConfig extends ConfigGod
 		handleUpdates();
 		
 		//Set the players class.
-		rpgClass = FC_Rpg.classManager.getClassByID(getCombatClass());
+		refreshClass();
+	}
+	
+	private void refreshClass()
+	{
+		rpgClass = FC_Rpg.classConfig.getClassByID(getCombatClass());
 	}
 	
 	public void handleUpdates()
@@ -229,7 +230,7 @@ public class PlayerFileConfig extends ConfigGod
 			setSecondsPlayed(0);
 		
 		//Use a temporary rpgClass.
-		RpgClass tempClass = FC_Rpg.classManager.getClassByID(getCombatClass());
+		RpgClass tempClass = FC_Rpg.classConfig.getClassByID(getCombatClass());
 		
 		//Set the spell level for all spells to 0.
 		for (int i = 0; i < tempClass.getSpellBook().size(); i++)
@@ -373,7 +374,7 @@ public class PlayerFileConfig extends ConfigGod
     public void assignClassStatPoints()
 	{
     	//Assign stat points based on class.
-    	for (RpgClass rpgClass : FC_Rpg.classManager.getRpgClasses())
+    	for (RpgClass rpgClass : FC_Rpg.classConfig.getRpgClasses())
     	{
     		if (rpgClass.getName().equals(getCombatClass()))
     		{

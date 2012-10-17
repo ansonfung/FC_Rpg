@@ -107,7 +107,7 @@ public class ClassCE implements CommandExecutor
 			
 			msgLib.standardMessage("Name",rpgPlayerFile.getName());
 			msgLib.standardMessage("Time Played",String.valueOf(dm.getTimeStringFromTimeInteger(rpgPlayerFile.getSecondsPlayed())));
-			msgLib.standardMessage("Class",FC_Rpg.classManager.getRpgClass(rpgPlayerFile.getCombatClass()).getName());
+			msgLib.standardMessage("Class",FC_Rpg.classConfig.getRpgClass(rpgPlayerFile.getCombatClass()).getName());
 			msgLib.standardMessage("Class Level",String.valueOf(rpgPlayerFile.getClassLevel()));
 			msgLib.standardMessage("Class Experience",df.format(rpgPlayerFile.getClassExperience()) +
 					" of " + df.format(rpgPlayerFile.getLevelUpAmount()) +
@@ -221,7 +221,7 @@ public class ClassCE implements CommandExecutor
 			}
 			
 			//Make sure that the user is only picking from 0-4 (remember getClassNumber returns proper version).
-			if (classNumber == -1 || classNumber > FC_Rpg.classManager.getRpgClasses().length)
+			if (classNumber == -1 || classNumber > FC_Rpg.classConfig.getRpgClasses().length)
 				return msgLib.errorInvalidCommand();
 			
 			//Put in class number minus one to prevent anomolies.
