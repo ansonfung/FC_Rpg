@@ -116,9 +116,9 @@ public class GeneralConfig extends ConfigGod
 			FC_Rpg.plugin.saveConfig();
 		}
 		
-		if (getVersion() < 0.3)
+		if (getVersion() < 0.31)
 		{
-			setVersion(0.3);
+			setVersion(0.31);
 			
 			//Remove old hourly steak.
 			ccm.set(prefix + ".hourlySteak", null);

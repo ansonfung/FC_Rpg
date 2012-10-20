@@ -780,6 +780,8 @@ public class CommandGod implements CommandExecutor
 			
 			for (int i = 0; i < groups.size(); i++)
 			{
+				groupMembers.clear();
+				
 				for (Player onlinePlayer : Bukkit.getOnlinePlayers())
 				{
 					perms = new FC_RpgPermissions(onlinePlayer);
