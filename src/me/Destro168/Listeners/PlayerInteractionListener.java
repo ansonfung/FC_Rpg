@@ -6,6 +6,7 @@ import me.Destro168.Configs.WorldConfig;
 import me.Destro168.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Suite_Shared.ColorLib;
+import me.Destro168.Messaging.MessageLib;
 import me.Destro168.Util.FC_RpgPermissions;
 import me.Destro168.Util.RpgMessageLib;
 import me.Destro168.events.DungeonEvent;
@@ -23,7 +24,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 public class PlayerInteractionListener implements Listener
 {
 	Player player;
-	RpgMessageLib msgLib;
+	MessageLib msgLib;
 	WorldConfig wm;
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
@@ -36,13 +37,26 @@ public class PlayerInteractionListener implements Listener
 		Boolean allowUse = true;
 		wm = new WorldConfig();
 		
+		//Initialize variables
 		player = event.getPlayer();
-		msgLib = new RpgMessageLib(player);
+		msgLib = new MessageLib(player);
 		
+		//Initialize the block.
 		if (event.getAction() == Action.RIGHT_CLICK_BLOCK)
 			block = event.getClickedBlock();
 		else
 			return;
+		
+		//Handle signs
+		if (block.getType() == Material.SIGN_POST || block.getType() == Material.WALL_SIGN)
+		{
+			sign = (Sign) block.getState();
+			parseSignClick(sign);
+			return;
+		}
+		
+		//Initialize msgLib.
+		msgLib = new RpgMessageLib(player);
 		
 		//Blacklist items that can't be used.
 		if (player.getItemInHand().getType() == Material.MONSTER_EGG || player.getItemInHand().getType() == Material.MONSTER_EGGS)
@@ -74,14 +88,6 @@ public class PlayerInteractionListener implements Listener
 			{
 				msgLib.standardMessage("Admin Override Successful.");
 			}
-		}
-		
-		//Handle signs
-		if (block.getType() == Material.SIGN_POST || block.getType() == Material.WALL_SIGN)
-		{
-			sign = (Sign) block.getState();
-			
-			parseSignClick(sign);
 		}
 	}
 	
@@ -132,7 +138,7 @@ public class PlayerInteractionListener implements Listener
 			//Make sure they use the approriate action before continuing.
 			if (!(event.getAction() == Action.RIGHT_CLICK_AIR) && (!(event.getAction() == Action.RIGHT_CLICK_BLOCK)))
 				return;
-
+			
 			//If everything succeeded, set the active spell.
 			rp.prepareSpell(true);
 		}
@@ -264,7 +270,7 @@ public class PlayerInteractionListener implements Listener
 					//If the sign requres donator, if not donator/admin, return false.
 					if (warpManager.getDonator(i) == true && (rpgPlayer.isDonatorOrAdmin() == false))
 					{
-						msgLib.errorNotDonator();
+						msgLib.standardError("Sorry but you can't use this warp because you aren't a donator.");
 						break;
 					}
 					

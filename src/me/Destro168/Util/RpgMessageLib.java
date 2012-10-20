@@ -25,10 +25,7 @@ public class RpgMessageLib extends MessageLib
 		perms = new FC_RpgPermissions(player);
 		
 		//Store rpgPlayer
-		if (FC_Rpg.rpgManager.getRpgPlayer(player) != null)
-			rpgPlayer = FC_Rpg.rpgManager.getRpgPlayer(player);
-		else
-			rpgPlayer = null;
+		rpgPlayer = FC_Rpg.rpgManager.getRpgPlayer(player);
 	}
 	
 	public RpgMessageLib(ColouredConsoleSender sender)
@@ -60,7 +57,7 @@ public class RpgMessageLib extends MessageLib
 	
 	public boolean errorCreateCharacter()
 	{
-		standardMessage("You need to pick a class/job first!");
+		standardMessage("You need to pick a class first!");
 		return true;
 	}
 	
@@ -81,12 +78,6 @@ public class RpgMessageLib extends MessageLib
 		standardMessage("Your job level is too low!");
 		return true;
 	}
-	
-	public boolean errorWrongJob()
-	{
-		standardMessage("You aren't the proper job to do this!");
-		return true;
-	}
 
 	public boolean errorClassLevelTooLow()
 	{
@@ -97,6 +88,12 @@ public class RpgMessageLib extends MessageLib
 	public boolean errorNotDonator()
 	{
 		standardMessage("Your are not a donator!");
+		return true;
+	}
+	
+	public boolean errorConsoleCantUseCommand()
+	{
+		standardMessage("The Console Is Unable To Use This Command.");
 		return true;
 	}
 	
@@ -230,16 +227,32 @@ public class RpgMessageLib extends MessageLib
 
 	public boolean helpClass()
 	{
+		//Variable Declaration
+		String ticketMessage = "";
+		
 		standardHeader("Class Commands");
 		standardMessage("/class view [name]","Show Character Information");
 		standardMessage("/class spec [stat] [amount]","Distribute Stat Points");
 		standardMessage("- Tip","If you have stat points, use this command.");
 		standardMessage("/class allocate [on,off]","Set auto stat distribution.");
 		
-		if (rpgPlayer.hasClassChangeTicket() == true)
+		//Set the ticket count.
+		if (perms.isAdmin() == true)
+			ticketMessage = "- You have [Infinite] tickets remaining.";
+		else
+			ticketMessage = "- You have " + rpgPlayer.getPlayerConfigFile().getClassChangeTickets() + " tickets remaining.";
+		
+		if (rpgPlayer != null)
 		{
-			standardMessage("/class switch [new class name]","Use a class ticket to switch class.");
-			standardMessage("- You have " + rpgPlayer.getPlayerConfigFile().getClassChangeTickets() + " tickets remaining.");
+			if (rpgPlayer.hasClassChangeTicket() == true || perms.isAdmin() == true)
+			{
+				standardMessage("/class switch [new class name]","Use a class ticket to switch class.");
+				standardMessage(ticketMessage);
+			}
+		}
+		else
+		{
+			standardMessage("/class switch [new class name]","Console can't use this command.");
 		}
 		
 		return true;
@@ -250,9 +263,6 @@ public class RpgMessageLib extends MessageLib
 		standardHeader("Job Commands");
 		standardMessage("/job view [name]","Shows Job Information");
 		standardMessage("/job promote","Promotes you to next job rank!");
-		
-		if (rpgPlayer.isHunterOrAdmin())
-			standardMessage("[H] /job kit","Gives you a kit once per life.");
 		
 		return true;
 	}
@@ -293,14 +303,12 @@ public class RpgMessageLib extends MessageLib
 		if (perms.isAdmin())
 		{
 			standardHeader("Admin Commands ~ BE CAREFUL");
-			standardMessage("/rpg modify [name] [modifiable] [newValue]");
-			standardMessage("- modifiable = [any stat], level, addLevel, exp, addexp, class, hunterLevel, stat(s), addsecond(s), jobrank, all (all stats), spellPoint(s), rankfreeze");
-			standardMessage("/rpg heal [name]");
+			standardMessage("/rpg modify [name] [x] [newValue]");
+			secondaryMessage("x = [any stat,stat(s),all],[level,addLevel],[exp,addexp], class, addsecond(s), jobrank, spellPoint(s)");
+			standardMessage("/rpg [h, g, gh, hf]"," Heal / Gamemode / Both");
 			standardMessage("/rpg event [type]","loot,exp,off");
-			standardMessage("/rpg set [name] [to] [duration]","Set people to various ranks.");
-			standardMessage("- To = donator, hunter, predator, terror. donator needs time in months for duration.");
+			standardMessage("/rpg set [name] donator [duration]","Give donator.");
 			standardMessage("/rpg giveTicket [name] [count]","Gives donator");
-			standardMessage("/rpg generate [mine]","Regenerates specified mine.");
 			standardMessage("/h [name]","Rpg heal style a player.");
 			standardMessage("/g ","Toggle between gamemode/survival.");
 			standardMessage("/dungeon","Help for dungeons.");
@@ -321,6 +329,7 @@ public class RpgMessageLib extends MessageLib
 			standardMessage("/rpg wall","Creates wall with all classes/jobs/start sign.");
 			standardMessage("/rpg spawn [worldname] [x] [y] [z] [yaw] [pitch]","Change a worlds spawn");
 			standardMessage("/rpg spawn here","Change a worlds spawn");
+			standardMessage("/rpg levelone","Change mob level one spawnpoint to your loc.");
 			standardMessage("/rpg tp [name]","Bypassed Player Tp.");
 			standardMessage("/rpg sudo","Make somebody say anything/use any command.");
 		}

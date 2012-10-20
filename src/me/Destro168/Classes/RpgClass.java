@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.Destro168.FC_Rpg.FC_Rpg;
+import me.Destro168.LoadedObjects.Spell;
 
 public class RpgClass 
 {

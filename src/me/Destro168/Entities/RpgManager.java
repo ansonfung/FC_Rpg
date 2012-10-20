@@ -54,7 +54,6 @@ public class RpgManager
 				public void run()
 				{
 					rpgPlayer.attemptFeedSteak();
-					rpgPlayer.attemptPayHunter();
 					rpgPlayer.calcMaxHM();
 					rpgPlayer.updateTimePlayed();
 				}
@@ -179,6 +178,13 @@ public class RpgManager
     
     public RpgPlayer getRpgPlayer(Player player)
     {
+    	//Create a pcf to check if a player config file is created or not.
+    	PlayerFileConfig pcf = new PlayerFileConfig(player.getName());
+    	
+		//If the player config file isn't active return.
+		if (pcf.getIsActive() == false)
+			return null;
+		
     	//Force register the player.
     	checkPlayerRegistration(player);
     	

@@ -54,11 +54,12 @@ public class TreasureConfig extends ConfigGod
 	
 	private void handleUpdates()
 	{
-		//TODO - revert to 1.0
-		if (getVersion() < 1.2)
+		if (getVersion() < 0.1)
 		{
-			setDropChances(9900,9900,9900,9900,9900);
-			//setDropChances(3500,2000,1000,3000,1000);
+			setVersion(0.1);
+			
+			//Reset settings.
+			setDropChances(3500,2000,1000,3000,1000);
 			setEnchantChances(5000,2500,1200,700,300);
 			setEnchantLevelFiveChance(5000, 8000, 9500, 9900);
 			setEnchantLevelFourChance(5540, 8870, 9890);

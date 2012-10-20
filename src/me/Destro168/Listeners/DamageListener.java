@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Random;
 
 import me.Destro168.Classes.EffectIDs;
-import me.Destro168.Classes.Spell;
 import me.Destro168.Classes.SpellCaster;
 import me.Destro168.Configs.WorldConfig;
 import me.Destro168.Entities.EntityDamageManager;
@@ -12,6 +11,7 @@ import me.Destro168.Entities.RpgMonster;
 import me.Destro168.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.RpgParty;
+import me.Destro168.LoadedObjects.Spell;
 import me.Destro168.Util.DistanceModifierLib;
 import me.Destro168.Util.MobAggressionCheck;
 

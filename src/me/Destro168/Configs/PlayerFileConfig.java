@@ -35,7 +35,6 @@ public class PlayerFileConfig extends ConfigGod
 	public String getActiveSpell() { return ccm.getString(prefix + "activeSpell"); }
     public long getDonatorTime() { return ccm.getLong(prefix + "donatorTime"); }
 	public long getHunterLastPay() { return ccm.getLong(prefix + "hunterLastPay"); }
-	public long getLastAte() { return ccm.getLong(prefix + "lastAte"); }
 	public int getCombatClass() { return ccm.getInt(prefix + "combatClass"); }
 	public int getIntelligence() { return ccm.getInt(prefix + "intelligence"); }
 	public int getClassLevel() { return ccm.getInt(prefix + "classLevel"); }
@@ -46,7 +45,6 @@ public class PlayerFileConfig extends ConfigGod
 	public int getMagic() { return ccm.getInt(prefix + "magic"); }
 	public int getLifetimeMobKills() { return ccm.getInt(prefix + "lifetimeMobKills"); }
 	public int getClassChangeTickets() { return ccm.getInt(prefix + "classChangeTickets"); }
-	public int getHunterLevel() { return ccm.getInt(prefix + "hunterLevel"); }
 	public int getSecondsPlayed() { return ccm.getInt(prefix + "secondsPlayed"); }
 	public int getSpellPoints() { return ccm.getInt(prefix + "spellPoints"); }
 	public int getSpellLevel(int x) { return ccm.getInt(prefix + "spellLevel." + x); }
@@ -57,7 +55,8 @@ public class PlayerFileConfig extends ConfigGod
 	public boolean getShowDamageGiven() { return ccm.getBoolean(prefix + "showDamageGiven"); }
 	public boolean getHunterCanKit() { return ccm.getBoolean(prefix + "hunterCanKit"); }
 	public boolean getAutoCast() { return ccm.getBoolean(prefix + "autoCast"); }
-	public boolean getRankFreeze() { return ccm.getBoolean(prefix + "rankFreeze"); }
+	
+	public long getLastRecievedHourlyItems() { return ccm.getLong(prefix + "lastRecievedHourlyItems"); }
 	
 	//Sets
 	public void setCustomPrefix(String x) { ccm.set(prefix + "customPrefix", x); }
@@ -75,22 +74,19 @@ public class PlayerFileConfig extends ConfigGod
 	public void setIntelligence(int x) { ccm.set(prefix + "intelligence", x); }
 	public void setLifetimeMobKills(int x) { ccm.set(prefix + "lifetimeMobKills", x); }
 	public void setClassChangeTickets(int x) { ccm.set(prefix + "classChangeTickets", x); }
-	public void setHunterLevel(int x) { ccm.set(prefix + "hunterLevel", x); }
 	public void setSecondsPlayed(int x) { ccm.set(prefix + "secondsPlayed", x); }
 	public void setSpellPoints(int x) { ccm.set(prefix + "spellPoints", x); }
 	public void setSpellLevel(int x, int y) { ccm.set(prefix + "spellLevel." + x, y); }
 	public void setSpellBind(int x, int y) { ccm.set(prefix + "spellBind." + x, y); }
 	public void setDonatorTime(Long x) { ccm.set(prefix + "donatorTime", x); }
-	public void setHunterLastPay(long x) { ccm.set(prefix + "hunterLastPay", x); }
-	public void setLastAte(long x) { ccm.set(prefix + "lastAte", x); }
 	public void setClassExperience(double x) { ccm.set(prefix + "classExperience", x); }
 	public void setIsActive(boolean x) { ccm.set(prefix + "isActive",x); }
 	public void setAutomaticAllocation(boolean x) { ccm.set(prefix + "manualAllocation",x); }
 	public void setShowDamageTaken(boolean x) { ccm.set(prefix + "showDamageTaken",x); }
 	public void setShowDamageGiven(boolean x) { ccm.set(prefix + "showDamageGiven",x); }
-	public void setHunterCanKit(boolean x) { ccm.set(prefix + "hunterCanKit",x); }
 	public void setAutoCast(boolean x) { ccm.set(prefix + "autoCast",x); }
-	public void setRankFreeze(boolean x) { ccm.set(prefix + "rankFreeze",x); }
+	
+	public void setLastRecievedHourlyItems(long x) { ccm.set(prefix + "lastRecievedHourlyItems", x); }
 	
 	//Spell Status Set/Gets
 	public void setStatusDuration(int effectID, int x) { //Sets the duration of a status in seconds.
@@ -140,8 +136,7 @@ public class PlayerFileConfig extends ConfigGod
 	
 	private void updateLevelCap()
 	{
-		GeneralConfig gm = new GeneralConfig();
-		levelCap = gm.getLevelCap();
+		levelCap = FC_Rpg.generalConfig.getLevelCap();
 	}
 	
 	public void setPlayerName(String playerName)
@@ -176,21 +171,24 @@ public class PlayerFileConfig extends ConfigGod
 		if (getIsActive() == false)
 			return;
 		
-		/* if (getVersion() < 1.1)
+		if (getVersion() < 0.1)
 		{
 			//Update the version.
-			setVersion(1.1);
-		} */
+			setVersion(0.1);
+			
+			//Remove outdated variables.
+			ccm.set(prefix + "lastAte", null);
+			ccm.set(prefix + "rankFreeze", null);
+		}
 	}
 	
 	public void setDefaults()
 	{
 		//Variable Declarations
 		Date now = new Date();
-		GeneralConfig co = new GeneralConfig();
 		
 		//Set variables to the new style
-		setCustomPrefix(co.getDefaultPrefix());
+		setCustomPrefix(FC_Rpg.generalConfig.getDefaultPrefix());
 		setIsActive(false);
 		
 		//Don't wipe out donator time for players that donated.
@@ -220,11 +218,8 @@ public class PlayerFileConfig extends ConfigGod
 		setLifetimeMobKills(0);
 		setAutomaticAllocation(true);
 		setShowDamageTaken(true);
-		setHunterLastPay(now.getTime());
-		setHunterCanKit(true);
-		setLastAte(now.getTime());
+		setLastRecievedHourlyItems(now.getTime());
 		setClassChangeTickets(0);
-		setHunterLevel(0);
 		
 		if (getSecondsPlayed() == 0)
 			setSecondsPlayed(0);
@@ -241,26 +236,6 @@ public class PlayerFileConfig extends ConfigGod
 		
 		setSpellPoints(1);
 		setAutoCast(false);
-		setRankFreeze(false);
-		
-		//Set default buffs.
-		/*
-		setStatusDodge(0);
-		setStatusDodgeStrength(0);
-		setStatusMorale(0);
-		setStatusMoraleStrength(0);
-		setStatusTaunt(0);
-		setStatusTauntStrength(0);
-		setStatusThorns(0);
-		setStatusThornsStrength(0);
-		setStatusBloodthirst(0);
-		setStatusBloodthirstStrength(0);
-		setStatusFerocity(0);
-		setStatusFerocityStrength(0);
-		setStatusFireArrow(0);
-		setStatusDisabled(0);
-		setStatusImmortal(0);
-		*/
 	}
 	
 	public void setPlayerDefaults(int pickedClass, boolean manualDistribution)

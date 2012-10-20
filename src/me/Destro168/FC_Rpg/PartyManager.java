@@ -1,6 +1,6 @@
 package me.Destro168.FC_Rpg;
 
-import me.Destro168.Messaging.MessageLib;
+import me.Destro168.Util.RpgMessageLib;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -189,10 +189,9 @@ public class PartyManager
 		return false;
 	}
 	
-	public boolean viewPartyInfo(String partyName, Player player)
+	public boolean viewPartyInfo(String partyName, RpgMessageLib msgLib)
 	{
 		RpgParty party = getParty(partyName);
-		MessageLib msgLib = new MessageLib(player);
 		
 		if (party == null)
 			return false;

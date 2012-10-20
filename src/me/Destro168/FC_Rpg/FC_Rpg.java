@@ -1,6 +1,7 @@
 package me.Destro168.FC_Rpg;
 
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -8,21 +9,6 @@ import java.util.Map;
 import java.util.Random;
 
 import me.Destro168.Classes.RpgClass;
-import me.Destro168.Commands.BigHelpCE;
-import me.Destro168.Commands.ClassCE;
-import me.Destro168.Commands.DonatorCE;
-import me.Destro168.Commands.DungeonCE;
-import me.Destro168.Commands.FaqCE;
-import me.Destro168.Commands.GamemodeCE;
-import me.Destro168.Commands.HatCE;
-import me.Destro168.Commands.HealCE;
-import me.Destro168.Commands.JobCE;
-import me.Destro168.Commands.ListCE;
-import me.Destro168.Commands.PartyCE;
-import me.Destro168.Commands.PvpCE;
-import me.Destro168.Commands.ResetCE;
-import me.Destro168.Commands.RpgCE;
-import me.Destro168.Commands.SpellCE;
 import me.Destro168.Configs.ClassConfig;
 import me.Destro168.Configs.GeneralConfig;
 import me.Destro168.Configs.DungeonConfig;
@@ -86,6 +72,8 @@ public class FC_Rpg extends JavaPlugin
 {
 	final static double MAX_HP = 999999;
 	public final static DateFormat dfm = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+	public static final DecimalFormat df = new DecimalFormat("#.#");
+	
 	public final static boolean debugModeEnabled = false;
 	
 	public static FC_Rpg plugin;
@@ -93,11 +81,12 @@ public class FC_Rpg extends JavaPlugin
 	public static PartyManager partyManager;
 	public static SpellConfig spellConfig;
 	public static ClassConfig classConfig;
+	public static GeneralConfig generalConfig;
 	
 	public static ColorLib cl = new ColorLib();
 	public static PvpEvent pvp;
 	public static BroadcastLib bLib;
-	public static WorldConfig wm;
+	public static WorldConfig worldConfig;
 	public static Economy economy = null;
 	public static DungeonEvent[] dungeon;
 	
@@ -113,23 +102,7 @@ public class FC_Rpg extends JavaPlugin
 	public static Map<Player, String> classSelection = new HashMap<Player, String>();
 	public static Map<Integer, Integer> trueDungeonNumbers;
 	
-	private RpgCE rpgCE;
-	private ClassCE classCE;
-	private JobCE jobCE;
-	private SpellCE spellCE;
-	private PartyCE partyCE;
-	private DonatorCE donatorCE;
-	private ResetCE resetCE;
-	private BigHelpCE bigHelpCE;
-	private HatCE hatCE;
-	private ListCE listCE;
-	private PvpCE pvpCE;
-	private FaqCE faqCE;
-	private HealCE healCE;
-	private GamemodeCE gamemodeCE;
-	private DungeonCE dungeonCE;
-	
-	private GeneralConfig generalConfig;
+	private CommandGod CommandCE;
 	
 	@Override
 	public void onDisable() 
@@ -156,11 +129,9 @@ public class FC_Rpg extends JavaPlugin
 		//Derp
 		plugin = this;
 		
-		//Start up the general config.
-		generalConfig = new GeneralConfig();
-		
 		//World manager = new world manager;
-		wm = new WorldConfig();
+		generalConfig = new GeneralConfig();
+		worldConfig = new WorldConfig();
 		bLib = new BroadcastLib();
 		partyManager = new PartyManager();
 		pvp = new PvpEvent();
@@ -180,7 +151,11 @@ public class FC_Rpg extends JavaPlugin
 		getServer().getPluginManager().registerEvents(new RespawnListener(), plugin);
 		getServer().getPluginManager().registerEvents(new DamageListener(), plugin);
 		getServer().getPluginManager().registerEvents(new EntityDeathListener(), plugin);
-		getServer().getPluginManager().registerEvents(new ChatListener(), plugin);
+		
+		//If rpg chat is overriden, then don't perform this.
+		if (generalConfig.getRpgChatOverride() == true)
+			getServer().getPluginManager().registerEvents(new AyncPlayerChatListener(), plugin);
+		
 		getServer().getPluginManager().registerEvents(new PlayerInteractionListener(), plugin);
 		getServer().getPluginManager().registerEvents(new PlayerQuitListener(), plugin);
 		getServer().getPluginManager().registerEvents(new SignChangeListener(), plugin);
@@ -193,50 +168,24 @@ public class FC_Rpg extends JavaPlugin
 		getServer().getPluginManager().registerEvents(new ArrowFireListener(), plugin);
 		
 		//Register Commands
-		rpgCE = new RpgCE();
-		getCommand("rpg").setExecutor(rpgCE);
-		
-		classCE = new ClassCE();
-		getCommand("class").setExecutor(classCE);
-		
-		jobCE = new JobCE();
-		getCommand("job").setExecutor(jobCE);
-		
-		spellCE = new SpellCE();
-		getCommand("spell").setExecutor(spellCE);
-		
-		partyCE = new PartyCE();
-		getCommand("party").setExecutor(partyCE);
-		
-		donatorCE = new DonatorCE();
-		getCommand("donator").setExecutor(donatorCE);
-		
-		resetCE = new ResetCE();
-		getCommand("reset").setExecutor(resetCE);
-		
-		hatCE = new HatCE();
-		getCommand("hat").setExecutor(hatCE);
-		
-		bigHelpCE = new BigHelpCE();
-		getCommand("bigHelp").setExecutor(bigHelpCE);
-		
-		listCE = new ListCE();
-		getCommand("list").setExecutor(listCE);
-		
-		pvpCE = new PvpCE();
-		getCommand("pvp").setExecutor(pvpCE);
-		
-		faqCE = new FaqCE();
-		getCommand("faq").setExecutor(faqCE);
-		
-		healCE = new HealCE();
-		getCommand("h").setExecutor(healCE);
-		
-		gamemodeCE = new GamemodeCE();
-		getCommand("g").setExecutor(gamemodeCE);
-		
-		dungeonCE = new DungeonCE();
-		getCommand("dungeon").setExecutor(dungeonCE);
+		CommandCE = new CommandGod();
+		getCommand("bighelp").setExecutor(CommandCE);
+		getCommand("class").setExecutor(CommandCE);
+		getCommand("donator").setExecutor(CommandCE);
+		getCommand("dungeon").setExecutor(CommandCE);
+		getCommand("faq").setExecutor(CommandCE);
+		getCommand("g").setExecutor(CommandCE);
+		getCommand("h").setExecutor(CommandCE);
+		getCommand("gh").setExecutor(CommandCE);
+		getCommand("hg").setExecutor(CommandCE);
+		getCommand("hat").setExecutor(CommandCE);
+		getCommand("job").setExecutor(CommandCE);
+		getCommand("list").setExecutor(CommandCE);
+		getCommand("party").setExecutor(CommandCE);
+		getCommand("pvp").setExecutor(CommandCE);
+		getCommand("reset").setExecutor(CommandCE);
+		getCommand("rpg").setExecutor(CommandCE);
+		getCommand("spell").setExecutor(CommandCE);
 		
 		//Handle tasks that happen every 30 minutes. Delay'd by 5 seconds.
 		Bukkit.getScheduler().scheduleAsyncRepeatingTask(this, new Runnable()
@@ -313,7 +262,7 @@ public class FC_Rpg extends JavaPlugin
 			}
 			
 			//Handle aoe world modifier for worlds.
-			if (wm.getIsAoEWorld(worldName))
+			if (worldConfig.getIsAoEWorld(worldName))
 			{
 				Block block = event.getBlock();
 				World world = event.getBlock().getWorld();
@@ -345,7 +294,7 @@ public class FC_Rpg extends JavaPlugin
 			}
 			
 			//If not an rpg world, don't continue execution.
-			if (!wm.getIsRpgWorld(worldName))
+			if (!worldConfig.getIsRpgWorld(worldName))
 				return;
 			
 			//If exp drops are globally cancelled.
@@ -458,7 +407,7 @@ public class FC_Rpg extends JavaPlugin
 			msgLib = new MessageLib(player);
 			
 			//Blacklist items in the creative world.
-			if (wm.isCreativeWorld(block.getWorld()))
+			if (worldConfig.isCreativeWorld(block.getWorld()))
 			{
 				if (block.getType().equals(Material.REDSTONE_WIRE))
 					success = false;
@@ -522,7 +471,7 @@ public class FC_Rpg extends JavaPlugin
 				return;
 			
 			//Check for thrown itmes that should be blocked.
-			if (wm.isCreativeWorld(event.getEntity().getWorld()))
+			if (worldConfig.isCreativeWorld(event.getEntity().getWorld()))
 			{
 				if (event.getEntityType() == EntityType.EGG)
 					event.setCancelled(true);
@@ -575,7 +524,7 @@ public class FC_Rpg extends JavaPlugin
 		@EventHandler
 		public void entityDeath(EntityDeathEvent event)
 		{
-			if (!wm.getIsRpgWorld(event.getEntity().getWorld().getName()))
+			if (!worldConfig.getIsRpgWorld(event.getEntity().getWorld().getName()))
 				return;
 			
 			//If exp drops are cancelled, then...
@@ -741,7 +690,7 @@ public class FC_Rpg extends JavaPlugin
 				public void run()
 				{
 					RpgPlayer rpgPlayer = rpgManager.getRpgPlayer(player);
-					Location spectatorBooth = new Location(wm.getSpawnWorld(),177,99,74,90,0);
+					Location spectatorBooth = new Location(worldConfig.getSpawnWorld(),177,99,74,90,0);
 					
 					//If the player is in a pvp event, we handle the pvp event.
 					if (pvp.isHappening() == true && pvp.isEventPlayer(player) == true)
@@ -755,7 +704,6 @@ public class FC_Rpg extends JavaPlugin
 					
 					//Reset rpg player stuff.
 					rpgPlayer.setIsAlive(true);
-					rpgPlayer.getPlayerConfigFile().setHunterCanKit(true);
 					rpgPlayer.healFull();
 				}
 			}, 1L);
@@ -857,14 +805,20 @@ public class FC_Rpg extends JavaPlugin
 		}
 	}
 	
-	public class ChatListener implements Listener //<%1$s> %2$s = base format
+	public class AyncPlayerChatListener implements Listener //<%1$s> %2$s = base format
 	{
 		@EventHandler
 		public void onChat(AsyncPlayerChatEvent event)
 		{
 			//Variable Declaration
-			Player player = event.getPlayer();
 			RpgPlayer rpgPlayer = rpgManager.getRpgPlayer(event.getPlayer());
+			
+			//If rpg player is null don't continue.
+			if (rpgPlayer == null)
+				return;
+			
+			//Variable Declaration
+			Player player = event.getPlayer();
 			FC_RpgPermissions perms = new FC_RpgPermissions(player);
 			DateFormat timeStamp = new SimpleDateFormat("HH:mm:ss");
 			Date now = new Date();
@@ -890,7 +844,7 @@ public class FC_Rpg extends JavaPlugin
 		@EventHandler
 		public void OnEntityDamage(EntityDamageEvent event)
 		{
-			if (!wm.getIsRpgWorld(event.getEntity().getWorld().getName()))
+			if (!worldConfig.getIsRpgWorld(event.getEntity().getWorld().getName()))
 				return;
 			
 			if (event.getCause() == DamageCause.POISON)
@@ -903,7 +857,7 @@ public class FC_Rpg extends JavaPlugin
 		@EventHandler(priority = EventPriority.HIGHEST)
 		public void onCreaturespawn(CreatureSpawnEvent event)
 		{
-			if (!wm.getIsMobWorld(event.getEntity().getWorld().getName()) == false)
+			if (!worldConfig.getIsMobWorld(event.getEntity().getWorld().getName()) == false)
 				return;
 			
 			//Remove from any dungeons.
@@ -939,7 +893,7 @@ public class FC_Rpg extends JavaPlugin
 			//Variable declarations
 			Player player = event.getPlayer();
 			
-			if (!wm.getIsRpgWorld(player.getWorld().getName()))
+			if (!worldConfig.getIsRpgWorld(player.getWorld().getName()))
 				return;
 			
 			//Change everything we can to remove player experience.
@@ -955,7 +909,7 @@ public class FC_Rpg extends JavaPlugin
 		public void ArrowFireEvent(EntityShootBowEvent event)
 		{
 			//Don't perform this event in non-rpg worlds.
-			if (!wm.getIsRpgWorld(event.getEntity().getWorld().getName()))
+			if (!worldConfig.getIsRpgWorld(event.getEntity().getWorld().getName()))
 				return;
 			
 			//Variable Declarations

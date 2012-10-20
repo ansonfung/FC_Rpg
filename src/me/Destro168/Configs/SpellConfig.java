@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import me.Destro168.Classes.EffectIDs;
-import me.Destro168.Classes.Spell;
 import me.Destro168.FC_Rpg.FC_Rpg;
+import me.Destro168.LoadedObjects.Spell;
 
 //Rename spell manager
 public class SpellConfig extends ConfigGod

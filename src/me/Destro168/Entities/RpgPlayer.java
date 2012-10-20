@@ -1,15 +1,14 @@
 package me.Destro168.Entities;
 
-import java.text.DecimalFormat;
 import java.util.Date;
+import java.util.List;
 
+import me.Destro168.LoadedObjects.Group;
 import me.Destro168.Messaging.MessageLib;
 import me.Destro168.Util.FC_RpgPermissions;
 import me.Destro168.Util.HealthConverter;
 import me.Destro168.Util.RpgMessageLib;
 import me.Destro168.Classes.SpellCaster;
-import me.Destro168.Configs.GeneralConfig;
-import me.Destro168.Configs.Group;
 import me.Destro168.Configs.GroupConfig;
 import me.Destro168.Configs.PlayerFileConfig;
 import me.Destro168.Configs.WorldConfig;
@@ -29,8 +28,6 @@ import org.bukkit.inventory.PlayerInventory;
 
 public class RpgPlayer extends RpgEntity
 {
-	private final DecimalFormat df = new DecimalFormat("#.#");
-	
 	private MessageLib msgLib;
 	private ItemStack air;
 	private Player player;
@@ -184,13 +181,12 @@ public class RpgPlayer extends RpgEntity
 	{
 		//Variable Declarations
 		ColorLib cl = new ColorLib();
-		GeneralConfig co = new GeneralConfig();
 		FC_RpgPermissions perms = new FC_RpgPermissions(player);
 		GroupConfig gm = new GroupConfig();
 		
 		String[] playerGroups;
 		String customPrefix = playerConfigFile.getCustomPrefix();
-		String defaultPrefix = co.getDefaultPrefix();
+		String defaultPrefix = FC_Rpg.generalConfig.getDefaultPrefix();
 		String parsedDefault = cl.parseColors(defaultPrefix);
 		
 		//Check the customPrefix first.
@@ -237,14 +233,6 @@ public class RpgPlayer extends RpgEntity
 		if (playerConfigFile.isDonator() == true)
 			prefix = ChatColor.WHITE + "["+ ChatColor.YELLOW + "Donator" + ChatColor.WHITE + "]";
 		
-		//If a hunter add hunter tag.
-		if (playerConfigFile.getHunterLevel() == 1)
-			prefix += "["+ ChatColor.BLUE + "Hunter" + ChatColor.WHITE + "]";
-		else if (playerConfigFile.getHunterLevel() == 2)
-			prefix += "["+ ChatColor.DARK_BLUE + "Predator" + ChatColor.WHITE + "]";
-		else if (playerConfigFile.getHunterLevel() == 3)
-			prefix += "["+ ChatColor.BLACK + "Terror" + ChatColor.WHITE + "]";
-		
 		return prefix;
 	}
 	
@@ -271,16 +259,16 @@ public class RpgPlayer extends RpgEntity
 	
 	public void donatorStatUpdate()
 	{
-		GeneralConfig co = new GeneralConfig();
+		double donatorBonusPercent = FC_Rpg.generalConfig.getDonatorBonusStatPercent();
 		
 		if (playerConfigFile.isDonator() == true)
 		{
 			resetTempStats();
 			
-			tempAttack = (int) (playerConfigFile.getAttack() * co.getDonatorBonusStatPercent());
-			tempConstitution = (int) (playerConfigFile.getConstitution() * co.getDonatorBonusStatPercent());
-			tempMagic = (int) (playerConfigFile.getMagic() * co.getDonatorBonusStatPercent());
-			tempIntelligence = (int) (playerConfigFile.getIntelligence() * co.getDonatorBonusStatPercent());
+			tempAttack = (int) (playerConfigFile.getAttack() * donatorBonusPercent);
+			tempConstitution = (int) (playerConfigFile.getConstitution() * donatorBonusPercent);
+			tempMagic = (int) (playerConfigFile.getMagic() * donatorBonusPercent);
+			tempIntelligence = (int) (playerConfigFile.getIntelligence() * donatorBonusPercent);
 			
 			calcMaxHM();
 		}
@@ -304,12 +292,47 @@ public class RpgPlayer extends RpgEntity
 		return true;
 	}
 	
-	public void switchClass(int combatClass)
+	public boolean switchClass(String x)
 	{
-		playerConfigFile.setCombatClass(combatClass);
+		//Variable Declaration.
+		FC_RpgPermissions perms = new FC_RpgPermissions(player);
+		boolean isAdmin = perms.isAdmin();
+		int cNumber = -1;
 		
-		//Else we decrease tickets and return true.
-		playerConfigFile.setClassChangeTickets(playerConfigFile.getClassChangeTickets() - 1);
+		//If they have no class tickets and aren't an admin, we return no permission.
+		if (hasClassChangeTicket() == false && !isAdmin)
+		{
+			msgLib.errorNoPermission();
+			return false;
+		}
+
+		try { cNumber = Integer.valueOf(x); }
+		catch (NumberFormatException e)
+		{
+			msgLib.standardMessage("Invalid Class Number.");
+			return true;
+		}
+		
+		//Make sure the new class is different from current class.
+		if (getPlayerConfigFile().getCombatClass() == cNumber)
+		{
+			msgLib.standardMessage("You Can't Switch To The Class You Are Currently.");
+			return true;
+		}
+		
+		//Make sure that the user is only picking from proper classes.
+		if (cNumber < 0 || cNumber > FC_Rpg.classConfig.getRpgClasses().length)
+			return msgLib.errorInvalidCommand();
+		
+		//Chance the combat class.
+		playerConfigFile.setCombatClass(cNumber);
+		
+		//If not an admin we decrease class change tickets.
+		if (isAdmin == false)
+			playerConfigFile.setClassChangeTickets(playerConfigFile.getClassChangeTickets() - 1);
+		
+		//Return true for success.
+		return true;
 	}
 	
 	public void addSupportBuff(double buffStrength)
@@ -456,8 +479,7 @@ public class RpgPlayer extends RpgEntity
 	
 	public double getPromotionCost()
 	{
-		GeneralConfig co = new GeneralConfig();
-		return co.getJobRankCosts().get(playerConfigFile.getJobRank() - 1);
+		return FC_Rpg.generalConfig.getJobRankCosts().get(playerConfigFile.getJobRank() - 1);
 	}
 	
 	//Return stat points to a player.
@@ -558,9 +580,9 @@ public class RpgPlayer extends RpgEntity
 		msg[2] = "] Level: ";
 		msg[3] = String.valueOf(level);
 		msg[4] = " / Remaining Health: ";
-		msg[5] = df.format(health);
+		msg[5] = FC_Rpg.df.format(health);
 		msg[6] = " / Damage: ";
-		msg[7] = String.valueOf(df.format(damage));
+		msg[7] = String.valueOf(FC_Rpg.df.format(damage));
 		
 		msgLib.standardMessage(msg);
 		lastAttackNotification = new Date();
@@ -576,9 +598,9 @@ public class RpgPlayer extends RpgEntity
 		msg[0] = "[";
 		msg[1] = "You Got Hit";
 		msg[2] = "] Damage: ";
-		msg[3] = String.valueOf(df.format(damage));
+		msg[3] = String.valueOf(FC_Rpg.df.format(damage));
 		msg[4] = " / Remaining Health: ";
-		msg[5] = String.valueOf(df.format(curHealth));
+		msg[5] = String.valueOf(FC_Rpg.df.format(curHealth));
 
 		msgLib.standardMessage(msg);
 		lastDefenseNotification = new Date();
@@ -593,7 +615,7 @@ public class RpgPlayer extends RpgEntity
 		msg[2] = "] Name: ";
 		msg[3] = spellName;
 		msg[4] = " / Remaining Mana: ";
-		msg[5] = df.format(curMana);
+		msg[5] = FC_Rpg.df.format(curMana);
 		
 		msgLib.standardMessage(msg);
 	}
@@ -607,9 +629,9 @@ public class RpgPlayer extends RpgEntity
 		msg[2] = "] Remaining Mana: ";
 		msg[3] = String.valueOf(curMana);
 		msg[4] = " / [Target Health]: (";
-		msg[5] = ChatColor.GREEN + df.format(healTarget.getCurHealth());
+		msg[5] = ChatColor.GREEN + FC_Rpg.df.format(healTarget.getCurHealth());
 		msg[6] = "/";
-		msg[7] = ChatColor.GREEN + df.format(healTarget.getMaxHealth());
+		msg[7] = ChatColor.GREEN + FC_Rpg.df.format(healTarget.getMaxHealth());
 		msg[8] = ")";
 
 		msgLib.standardMessage(msg);
@@ -625,9 +647,9 @@ public class RpgPlayer extends RpgEntity
 		msg[0] = "[";
 		msg[1] = "Heal";
 		msg[2] = "] Health: (";
-		msg[3] = ChatColor.GREEN + df.format(getCurHealth());
+		msg[3] = ChatColor.GREEN + FC_Rpg.df.format(getCurHealth());
 		msg[4] = "/";
-		msg[5] = ChatColor.GREEN + df.format(getMaxHealth());
+		msg[5] = ChatColor.GREEN + FC_Rpg.df.format(getMaxHealth());
 		msg[6] = ")";
 
 		msgLib.standardMessage(msg);
@@ -643,9 +665,9 @@ public class RpgPlayer extends RpgEntity
 		msg[2] = "] Level: ";
 		msg[3] = String.valueOf(level);
 		msg[4] = " / Experience: ";
-		msg[5] = df.format(exp);
+		msg[5] = FC_Rpg.df.format(exp);
 		msg[6] = " / Money: ";
-		msg[7] = df.format(loot);
+		msg[7] = FC_Rpg.df.format(loot);
 		
 		msgLib.standardMessage(msg);
 	}
@@ -679,7 +701,7 @@ public class RpgPlayer extends RpgEntity
 		msg[0] = "[";
 		msg[1] = "Thorns";
 		msg[2] = "] Damage: ";
-		msg[3] = df.format(damage);
+		msg[3] = FC_Rpg.df.format(damage);
 		
     	msgLib.standardMessage(msg);
     	lastThornsNotification = new Date();
@@ -688,91 +710,61 @@ public class RpgPlayer extends RpgEntity
 	public void attemptFeedSteak()
 	{
 		Date now = new Date();
-		boolean addToInventory = false;
-		ItemStack steak = new ItemStack(Material.COOKED_BEEF, 5);
 		WorldConfig wm = new WorldConfig();
-		GeneralConfig co = new GeneralConfig();
+		List<ItemStack> timedItems = FC_Rpg.generalConfig.getTimedItems();
+		String itemText = "item";
 		
-		//If hourly steak is disabled don't feed hourly steak.
-		if (co.getHourlySteak() == false)
+		//If there are no hourly items, then return.
+		if (timedItems.size() == 0)
 			return;
+		if (timedItems.size() > 1)
+			itemText += "s";
 		
 		//Only give steak in rpg world.
 		if (!wm.getIsRpgWorld(player.getWorld().getName()))
 			return;
 		
 		//Wait an hour before giving steak again.
-		if (now.getTime() - playerConfigFile.getLastAte() > 3600000)
+		if (now.getTime() - playerConfigFile.getLastRecievedHourlyItems() > FC_Rpg.generalConfig.getTimedItemsInterval())
 		{
-			//We want to determine whether to drop the steak or to not.
-			for (ItemStack item : player.getInventory())
+			for (ItemStack hourlyItem : timedItems)
 			{
-				if (item == null)
-				{
-					addToInventory = true;
-					break;
-				}
-				//If air, or enough room from steak, then add to inventory.
-				else if (item.getType() == Material.AIR)
-				{
-					addToInventory = true;
-					break;
-				}
-				else if (item.getType() == Material.COOKED_BEEF)
-				{
-					if (item.getAmount() < 60)
-					{
-						addToInventory = true;
-						break;
-					}
-				}
+				//Tell the player about their steak and drop/add it.
+				if (hasEmptyInventorySlot(hourlyItem.getType(), hourlyItem.getAmount()))
+					player.getInventory().addItem(hourlyItem);
+				else
+					Bukkit.getServer().getWorld(player.getWorld().getName()).dropItemNaturally(player.getLocation(), hourlyItem);
 			}
 			
-			//Tell the player about their steak and drop/add it.
-			if (addToInventory == true)
-			{
-				msgLib.standardMessage("Your hourly steak has been added to your inventory! :D");
-				player.getInventory().addItem(steak);
-			}
-			else
-			{
-				msgLib.standardMessage("Your hourly steak has been dropped by you! :D");
-				Bukkit.getServer().getWorld(player.getWorld().getName()).dropItemNaturally(player.getLocation(), steak);
-			}
+			msgLib.standardMessage("Your hourly " + itemText + " have just been given to you!");
 			
 			//Update last ate time.
-			playerConfigFile.setLastAte(now.getTime());
+			playerConfigFile.setLastRecievedHourlyItems(now.getTime());
 		}
 	}
 	
-	public void attemptPayHunter()
+	private boolean hasEmptyInventorySlot(Material itemType, int itemCount)
 	{
-		Date now = new Date();
-		
-		//If it isn't time yet, don't pay them.
-		if (now.getTime() - playerConfigFile.getHunterLastPay() < 3600000)
-			return;
-		
-		//Else we want to give them money as well as experience.
-		if (playerConfigFile.getHunterLevel() == 1)
+		//We want to determine whether to drop the steak or to not.
+		for (ItemStack item : player.getInventory())
 		{
-			FC_Rpg.economy.depositPlayer(name, 200 * playerConfigFile.getJobRank());
-			addClassExperience(100 * playerConfigFile.getJobRank(), true);
-			msgLib.standardMessage("You have just recieved your Hunter pay.");
-		}
-		else if (playerConfigFile.getHunterLevel() == 2)
-		{
-			FC_Rpg.economy.depositPlayer(name, 500 * playerConfigFile.getJobRank());
-			addClassExperience(200 * playerConfigFile.getJobRank(), true);
-			msgLib.standardMessage("You have just recieved your Predator pay.");
-		}
-		else if (playerConfigFile.getHunterLevel() == 3)
-		{
-			FC_Rpg.economy.depositPlayer(name, 5000);
-			msgLib.standardMessage("You have just recieved your Terror pay.");
+			if (item == null)
+				return true;
+			
+			//If air, or enough room from steak, then add to inventory.
+			else if (item.getType() == Material.AIR)
+				return true;
+			
+			else if (item.getType() == itemType)
+			{
+				if (item.getAmount() < (64 - itemCount))
+				{
+					return true;
+				}
+			}
 		}
 		
-		playerConfigFile.setHunterLastPay(now.getTime());
+		return false;
 	}
 	
 	public void swordCheck()
@@ -1104,41 +1096,50 @@ public class RpgPlayer extends RpgEntity
 	
 	private void promotionCheck(int timePlayedInSeconds)
 	{
-		//Variable Declarations
-		String newGroup = "";
-		FC_RpgPermissions perms = new FC_RpgPermissions(player);
-		String[] playerGroups = perms.getPlayerGroups();
-		GroupConfig gm = new GroupConfig();
-		int jobReq = 0;
-		
+		//Don't continue if player isn't active.
 		if (playerConfigFile.getIsActive() == false)
 			return;
 		
-		if (playerConfigFile.getRankFreeze() == true)
-			return;
+		//Variable Declarations
+		FC_RpgPermissions perms = new FC_RpgPermissions(player);
+		GroupConfig gm = new GroupConfig();
+		String[] playerGroups = perms.getPlayerGroups();
+		List<Group> groupList = gm.getGroups();
+		Group chosenGroup = null;
+		String newGroup = "";
+		int jobReq = 0;
+		int timeReq = 0;
 		
 		//If they have no group, make them a guest and return null.
 		if (playerGroups == null)
 		{
-			perms.setPlayerGroup(gm.getGroups().get(0).getName());
+			perms.setPlayerGroup(groupList.get(0).getName());
 			return;
 		}
 		
-		for (Group group : gm.getGroups())
+		for (int i = 0; i < groupList.size(); i++)
 		{
-			//Store for fast access later.
-			jobReq = group.getJobReq();
-			
-			//If the jobReq is greater than -1.
-			if (jobReq > -1)
+			for (int j = 0; j < playerGroups.length; j++)
 			{
-				//If they meet the time played requirements and the job rank requirements, promote them.
-				if ((timePlayedInSeconds >= group.getTimeReq()) && (playerConfigFile.getJobRank() >= jobReq))
+				if (playerGroups[j].equals(groupList.get(i)))
 				{
-					newGroup = group.getName();
+					chosenGroup = groupList.get(i);
+					jobReq = chosenGroup.getJobReq();
+					timeReq = chosenGroup.getTimeReq();
 					break;
 				}
 			}
+		}
+		
+		//Don't attempt promotions on groups with -1, -1.
+		if (chosenGroup == null || jobReq == -1 && timeReq == -1)
+			return;
+		
+		//If they meet the time played requirements and the job rank requirements, promote them.
+		if ((timePlayedInSeconds >= timeReq) && (playerConfigFile.getJobRank() >= jobReq))
+		{
+			newGroup = chosenGroup.getName();
+			return;
 		}
 		
 		//If the player is already in a group, return.
@@ -1146,7 +1147,7 @@ public class RpgPlayer extends RpgEntity
 			return;
 		
 		//Broadcast Promotion.
-		FC_Rpg.bLib.standardBroadcast(name + " has been promoted to " + ChatColor.GREEN + newGroup);
+		FC_Rpg.bLib.standardBroadcast(name + " Has Been Promoted To " + ChatColor.GREEN + newGroup);
 		
 		//Add the player to the new group.
 		perms.setPlayerGroup(newGroup);
@@ -1157,19 +1158,6 @@ public class RpgPlayer extends RpgEntity
 		FC_RpgPermissions perms = new FC_RpgPermissions(player);
 		
 		if (playerConfigFile.isDonator() == true)
-			return true;
-		
-		if (perms.isAdmin() == true)
-			return true;
-		
-		return false;
-	}
-	
-	public boolean isHunterOrAdmin() 
-	{
-		FC_RpgPermissions perms = new FC_RpgPermissions(player);
-		
-		if (playerConfigFile.getHunterLevel() > 0)
 			return true;
 		
 		if (perms.isAdmin() == true)

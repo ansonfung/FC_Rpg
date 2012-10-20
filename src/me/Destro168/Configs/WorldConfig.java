@@ -9,6 +9,8 @@ import org.bukkit.World;
 public class WorldConfig extends ConfigGod
 {
 	public void setWorldSpawn(String worldName, double x, double y, double z, float a, float b) { ccm.setLocation(prefix + worldName + ".spawn", worldName, x, y, z, a, b); }
+	public void setLevelOne(String worldName, double x, double y, double z, float a, float b) { ccm.setLocation(prefix + worldName + ".levelOne", worldName, x, y, z, a, b); }
+	
 	public void setWorldSpawn(Location loc) { setWorldSpawn(loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch()); }
 	private void setWorldType(String name, int x) { ccm.set(prefix + name + ".worldType", x); }	//0 - Vanilla/1 - Creative/Nether/End/Other
 	private void setIsRpg(String name, boolean x) { ccm.set(prefix + name + ".isRpg", x); }	//Vanilla or Rpg
@@ -18,6 +20,7 @@ public class WorldConfig extends ConfigGod
 	private void setIsMobWorld(String name, boolean x) { ccm.set(prefix + name + ".isMobWorld", x); }	//Pvp
 	
 	public Location getWorldSpawn(String worldName) { return ccm.getLocation(prefix + worldName + ".spawn"); }
+	public Location getLevelOne(String worldName) { return ccm.getLocation(prefix + worldName + ".levelOne"); }
 	public int getWorldType(String name) { return ccm.getInt(prefix + name + ".worldType"); }
 	public boolean getIsRpg(String name) { return ccm.getBoolean(prefix + name + ".isRpg"); }
 	public boolean getIsPvp(String name) { return ccm.getBoolean(prefix + name + ".isPvp"); }
@@ -78,6 +81,14 @@ public class WorldConfig extends ConfigGod
 			
 			//Save the config.
 			FC_Rpg.plugin.saveConfig();
+		}
+		
+		if (getVersion() < 0.2)
+		{
+			setVersion(0.2);
+			
+			for (World world : Bukkit.getServer().getWorlds())
+				setLevelOne(world.getName(),0,70,0,0,0);
 		}
 	}
 	

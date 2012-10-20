@@ -6,7 +6,6 @@ import java.util.Random;
 import me.Destro168.Classes.EffectIDs;
 import me.Destro168.Classes.RpgClass;
 import me.Destro168.Configs.ClassConfig;
-import me.Destro168.Configs.GeneralConfig;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.RpgParty;
 import me.Destro168.Messaging.MessageLib;
@@ -303,10 +302,8 @@ public class EntityDamageManager
 				//Calculate how much loot and experience to aquire by donator
 				if (rpgAttacker.getPlayerConfigFile().isDonator())
 				{
-					GeneralConfig co = new GeneralConfig();
-					
-					loot = loot * (1 + co.getDonatorLootBonusPercent());
-					exp = loot * (1 + co.getDonatorLootBonusPercent());
+					loot = loot * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
+					exp = loot * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
 				}
 				
 				//If the player is in a party, then...

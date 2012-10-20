@@ -9,6 +9,7 @@ import me.Destro168.Entities.EntityLocationLib;
 import me.Destro168.Entities.RpgMonster;
 import me.Destro168.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.FC_Rpg;
+import me.Destro168.LoadedObjects.Spell;
 import me.Destro168.Messaging.MessageLib;
 import me.Destro168.Util.MaterialLib;
 
@@ -474,7 +475,7 @@ public class SpellCaster
 		if (z > behindLoc.getZ() - 1 && z < behindLoc.getZ() + 1)
 			behindZ = true;
 		
-		//TODO - remove
+		//TODO - Test Fully Then Remove If Unneeded - Backstab
 		//FC_Rpg.plugin.getLogger().info("player:" + x + "," + z + "  behind: " + behindLoc.getX() + "," + behindLoc.getZ());
 		
 		if (behindX == true && behindZ == true)

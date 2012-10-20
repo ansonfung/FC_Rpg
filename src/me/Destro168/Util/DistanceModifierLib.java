@@ -1,6 +1,7 @@
 package me.Destro168.Util;
 
 import me.Destro168.Configs.WorldConfig;
+import me.Destro168.FC_Rpg.FC_Rpg;
 
 import org.bukkit.Location;
 
@@ -45,23 +46,28 @@ public class DistanceModifierLib
 	
 	private int calculateXYZModifier()
 	{
-		x = x + xShiftAmount;
-		y = y + yShiftAmount;
-		z = z + zShiftAmount;
+		double xScale = FC_Rpg.generalConfig.getXScale();
+		double zScale = FC_Rpg.generalConfig.getZScale();
+		double yScale = FC_Rpg.generalConfig.getYScale();
+		double xFinal;
+		double zFinal;
+		double yFinal;
+		
+		x = x - xShiftAmount;
+		z = z - zShiftAmount;
+		y = y - yShiftAmount;
 		
 		//Every 20 out equals 1 distance Modifier.
-		if (x < 20 && x > -20) x = 0; //At least 1
-		else x = x / 20;
+		if (x < xScale && x > (xScale * -1)) xFinal = 0; //At least 1
+		else xFinal = x / xScale;
 		
-		if (z < 20 && z > -20) z = 0;
-		else z = z / 20;
+		if (z < zScale && z > (zScale * -1)) zFinal = 0;
+		else zFinal = z / zScale;
 		
-		if (y < 10) y = 10;
-		else if (y < 20) y = 8;
-		else if (y < 30) y = 6;
-		else if (y < 40) y = 4;
-		else if (y < 50) y = 2;
-		else y = 1;
+		if (y < 0)
+			yFinal = 1 + y / yScale;
+		else
+			yFinal = 1;
 		
 		if (x < 0)
 			x = x * -1;
@@ -69,10 +75,10 @@ public class DistanceModifierLib
 		if (z < 0)
 			z = z * -1;
 		
-		if ((x+z) < 1)
-			distanceModifier = (1)*y;
+		if ((xFinal+zFinal) < 1)
+			distanceModifier = (int) ((1)*yFinal);
 		else
-			distanceModifier = (x+z)*y;
+			distanceModifier = (int) ((xFinal+zFinal)*yFinal);
 		
 		return distanceModifier;
 	}
@@ -86,7 +92,7 @@ public class DistanceModifierLib
 		setBaseCoordsByLocation(entityLoc);
 		
 		//Set shift location.
-		setShiftByLocation(wm.getWorldSpawn(entityLoc.getWorld().getName()));
+		setShiftByLocation(wm.getLevelOne(entityLoc.getWorld().getName()));
 		
 		//Return a pure distance modifier that is exactly corrolated to distance.
 		return calculateXYZModifier();

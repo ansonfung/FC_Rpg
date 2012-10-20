@@ -1,3 +1,47 @@
+Version 0.3:
+
+- Please understand, all of the changes in this are from the last two days. There are definately many bugs. I'm coding as fast as possible to fix/add features and the cost of this is bugginess. I try to test what I can but not everything is fully tested. This version is EXTREMELY rushed, and I mean EXTREMELY. So please bear with it. I tried to test everything once but I didn't test comprehensively.
+
+- Fixed the resetting of player classes so that they can use sign walls to pick classes again. This was a conflict from the new spell system and optimized player mangement system that I had created (didn't mention in changelog for 0.2).
+- Removed everything regarding hunters. It was a remanence from my old server and doesn't serve a purpose.
+- Removed a few remnances of jobs from error messages as well from comments/code.
+
+- Organized and optimized all commands. They may be buggy in the next version, I tried to test them all but some bugs may have gotten through. The focus was on making commands more efficient, organized, powerful, and feature-rich. As well, console now has access to select commands. ALL HAIL THE CONSOLE!
+
+- Organized and Optimized the class command.
+- Recoded class switching a bit. Now, admins will now always see the ticket dialog. Also, admins have infinite class switch tickets now.
+- (Note To Self) Test /class view (on and offline)
+
+- Organized and Optimized the donator command.
+- Console can't use donator command.
+
+- Organized and Optimized the dungeon command.
+- Organized and Optimized the FaqCE command.
+
+- Organized and Optimized the /g and /h commands. 
+- Now you can use /g, /h, /gh, or /hg to get gamemode and/or heal. This allows you to mix them to get both effects at once. I know, I know, put it back in your pants.
+
+- Organized and Optimized the hat command.
+- Organized and Optimized the job command.
+
+- Organized and Optimized the list command.
+- List now properly works hand in hand with the groups config unlike previously.
+
+- Organized and Optimized the party command.
+- Organized and Optimized the reset command. (TODO)
+
+- Organized and Optimized the rpg command.
+- Fixed /rpg modify stat to work properly now.
+
+- Group file now automatically generates. This should help with the confusion that for some reason my plugin is being a permissions provider. IT ISN'T! However, the groups are used for automatic promotions and chat. I will elaborate more on these in documenation. As well, rank freeze was removed. To freeze a rank set the jobReq and timeReq's to -1.
+- Can now set the rate at which mob strength scales from world spawns.
+- Mob y depth based strength is now capped at 3x as high by default. As well, it is a formula so mob strength will transition very smoothly as you go deeper rather than double, triple, pentouple etc. instantly. (Customizable ofc)
+- Can now disable the rpg chat setting.
+- Reduced calls to general config substantially which improves performance a lot (well probably not noticibly ^^). Effects startup time and playerjoins.
+- Hourly items are now entirely customizable. They are now called "Timed items" and you can set them to anything! Default = 5 steak + 1 GAPPLE:1
+- New world setting "LevelOne" which is where level one monsters will spawn.
+- Updated the admin help to be smaller and updated based on commands.
+
 Version 0.2:
 
 - A lot of the focus on this version is to get things into a more permanent state. I realized that there are quite a few broken pieces of code from back when I was running FC_RPG on my server as well as misnamed stuff. A big example is that when I started the plugin the stat 'Attack' was referred to as 'Strength'. However, I changed it from strength to attack which meant that like 1/2 the code was saying strength another half was saying attacked. The main goal of this release is to fix a lot of issues like this other things from the 0.1 version. So, as such, a lot of stuff broke, as you could imagine. I could write up an upgrade guide but the amount of work people would have to do is highly unreasonable. And as such, I sadly have to say that you have to wipe out everything from before. I would keep a backup though, as a lot of settings are the same when you have to redo them. The main thing is that on my FC_Announcer, FC_Bans, and FC_Bounties plugin, I recently had to do a lot of configuration options post-release which I am actually kind of ashamed of. I don't think it's acceptable to make such changes post-release and so I focused very hard on making it so that all the configuration files are seperate now and all past improperly named code/config settings are more appropriate now. Here's to hoping I never have to ask for file wips in the future *toasts air*. However, it's still beta, I give no garuntees yet. :P

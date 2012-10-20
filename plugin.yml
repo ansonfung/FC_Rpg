@@ -1,55 +1,41 @@
 name: FC_Rpg
 main: me.Destro168.FC_Rpg.FC_Rpg
-version: 0.2
+version: 0.3
 description: Handles RPG aspects of the server.
 commands:
-   rpg:
-      description: Rpg command
-      usage: /rpg [command]
-   server:
-      description: This command gives server information to the sender.
-      usage: /server
-   class:
-      description: Class command
-      usage: /class
-   job:
-      description: Job command
-      usage: /job
-   spell:
-      description: Spell command
-      usage: /spell
-   party:
-      description: Party command
-      usage: /party
-   donator:
-      description: Donator command
-      usage: /donator
-   reset:
-      description: Reset command
-      usage: /reset
-   hat:
-      description: Hat command
-      usage: /hat
-   bigHelp:
+   bighelp:
       description: This command displays all the help topics in /help at once.
-      usage: /bigHelp
-   list:
-      description: List command.
-      usage: /list
-   pvp:
-      description: pvp command.
-      usage: /pvp
-   faq:
-      description: faq command.
-      usage: /faq
-   h:
-      description: heal command.
-      usage: /h
-   g:
-      description: Gamemode command.
-      usage: /g
+   class:
+      description: This command accesses donator commands.
+   donator:
+      description: This command accesses donator commands.
    dungeon:
-      description: Dungeon command.
-      usage: /dungeon
+      description: This command accesses dungeon commands.
+   faq:
+      description: This command accesses server faq topics.
+   g:
+      description: This command toggles gamemode.
+   h:
+      description: This command RPG-heals a player.
+   gh:
+      description: This command performs /g and /h at once.
+   hg:
+      description: This command performs /g and /h at once.
+   hat:
+      description: This command puts your held block on your head.
+   job:
+      description: This command accesses job commands.
+   list:
+      description: This command displays online players.
+   party:
+      description: This command accesses party commands.
+   pvp:
+      description: This command accesses pvp commands.
+   reset:
+      description: This command resets an RPG players class.
+   rpg:
+      description: This command handles all admin commands.
+   spell:
+      description: This command accesses spell commands.
 softdepend: [Multiverse]
 depend: [WorldEdit, WorldGuard, FC_Suite_Shared]
