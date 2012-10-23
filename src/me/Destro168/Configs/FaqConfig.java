@@ -3,6 +3,9 @@ package me.Destro168.Configs;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.Destro168.ConfigManagers.ConfigGod;
+import me.Destro168.FC_Rpg.FC_Rpg;
+
 public class FaqConfig extends ConfigGod
 {
 	private void setFaqName(int i, String x) { ccm.set(prefix + i + ".name", x); }
@@ -33,7 +36,7 @@ public class FaqConfig extends ConfigGod
 	
 	public FaqConfig()
 	{
-		super("Faqs");
+		super(FC_Rpg.dataFolderAbsolutePath, "Faqs");
 		handleConfig();
 	}
 	

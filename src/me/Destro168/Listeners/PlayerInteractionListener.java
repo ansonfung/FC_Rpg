@@ -163,8 +163,18 @@ public class PlayerInteractionListener implements Listener
 				{
 					if (pickedClass.equals(FC_Rpg.classConfig.getRpgClass(i).getName()))
 					{
+						//Prevent players from picking a job/class again without respecing.
+						if (FC_Rpg.rpgManager.getRpgPlayer(player) != null)
+						{
+							if (FC_Rpg.rpgManager.getRpgPlayer(player).getPlayerConfigFile().getIsActive() == true)
+							{
+								msgLib.standardMessage("You have to use /reset before picking a class.");
+								return;
+							}
+						}
+						
 						//Send the player a confirmation message.
-						msgLib.standardMessage("You have selected the " + pickedClass + " class.");
+						msgLib.standardMessage("You have selected the " + pickedClass + " class. Now hit the finish sign to choose how you want your stats allocated.");
 						
 						//Store their class selection in a hashmap
 						FC_Rpg.classSelection.put(player, pickedClass);
@@ -180,17 +190,7 @@ public class PlayerInteractionListener implements Listener
 				//If the player has picked both a class and job.
 				if (FC_Rpg.classSelection.containsKey(player))
 				{
-					//Prevent players from picking a job/class again without respecing.
-					if (FC_Rpg.rpgManager.getRpgPlayer(player) != null)
-					{
-						if (FC_Rpg.rpgManager.getRpgPlayer(player).getPlayerConfigFile().getIsActive() == true)
-						{
-							msgLib.standardMessage("You have to use /reset first.");
-							return;
-						}
-					}
-					
-					if (sign.getLine(3).contains("Manually"))
+					if (sign.getLine(2).contains("Manually") || sign.getLine(3).contains("Manually") || sign.getLine(4).contains("Manually"))
 					{
 						//Store the player as a new player.
 						FC_Rpg.rpgManager.setPlayerStart(FC_Rpg.classSelection.get(player), player, true);
@@ -232,7 +232,7 @@ public class PlayerInteractionListener implements Listener
 		//Variable declarations
 		rpgPlayer = FC_Rpg.rpgManager.getRpgPlayer(player);
 		FC_RpgPermissions perms = new FC_RpgPermissions(player);
-		WarpConfig warpManager = new WarpConfig();
+		WarpConfig warpConfig = FC_Rpg.warpConfig;
 		int breakLimit = 0;
 		
 		//Go through all potential warps.
@@ -246,14 +246,14 @@ public class PlayerInteractionListener implements Listener
 			}
 			
 			//If not null
-			else if (warpManager.getName(i) != null)
+			else if (warpConfig.getName(i) != null)
 			{
 				//If the name is contained on the sign
-				if (text.contains(warpManager.getName(i)))
+				if (text.contains(warpConfig.getName(i)))
 				{
 					//Attempt to pay the cost.
-					if (FC_Rpg.economy.has(player.getName(), warpManager.getCost(i)) == true)
-						FC_Rpg.economy.withdrawPlayer(player.getName(), warpManager.getCost(i));
+					if (FC_Rpg.economy.has(player.getName(), warpConfig.getCost(i)) == true)
+						FC_Rpg.economy.withdrawPlayer(player.getName(), warpConfig.getCost(i));
 					else
 					{
 						msgLib.errorNotEnoughMoney();
@@ -261,28 +261,28 @@ public class PlayerInteractionListener implements Listener
 					}
 					
 					//If it requires admin permission and the teleporter doesn't have perms.
-					if (warpManager.getAdmin(i) == true && perms.isAdmin() == false)
+					if (warpConfig.getAdmin(i) == true && perms.isAdmin() == false)
 					{
 						 msgLib.errorNoPermission();
 						 break;
 					}
 					
 					//If the sign requres donator, if not donator/admin, return false.
-					if (warpManager.getDonator(i) == true && (rpgPlayer.isDonatorOrAdmin() == false))
+					if (warpConfig.getDonator(i) == true && (rpgPlayer.isDonatorOrAdmin() == false))
 					{
 						msgLib.standardError("Sorry but you can't use this warp because you aren't a donator.");
 						break;
 					}
 					
 					//Give the person a teleport message.
-					teleportMessage(warpManager.getWelcome(i),"");
+					teleportMessage(warpConfig.getWelcome(i),"");
 					
 					//Send the warp description to the player.
-					for (String descrip : warpManager.getDescription(i))
+					for (String descrip : warpConfig.getDescription(i))
 						msgLib.standardMessage(descrip);
 					
 					//Teleport the player.
-					player.teleport(warpManager.getDestination(i));
+					player.teleport(warpConfig.getDestination(i));
 					
 					//Break to return.
 					break;

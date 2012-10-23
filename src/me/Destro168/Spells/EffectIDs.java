@@ -1,4 +1,4 @@
-package me.Destro168.Classes;
+package me.Destro168.Spells;
 
 public class EffectIDs 
 {

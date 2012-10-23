@@ -1,4 +1,4 @@
-package me.Destro168.Classes;
+package me.Destro168.Spells;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +9,7 @@ import me.Destro168.Entities.EntityLocationLib;
 import me.Destro168.Entities.RpgMonster;
 import me.Destro168.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.FC_Rpg;
+import me.Destro168.LoadedObjects.RpgClass;
 import me.Destro168.LoadedObjects.Spell;
 import me.Destro168.Messaging.MessageLib;
 import me.Destro168.Util.MaterialLib;

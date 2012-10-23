@@ -18,7 +18,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import me.Destro168.Configs.DungeonConfig;
-import me.Destro168.Configs.TreasureConfig;
 import me.Destro168.Entities.RpgMonster;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.Util.RpgMessageLib;
@@ -33,6 +32,7 @@ public class DungeonEvent extends GeneralEvent
 	private LivingEntity[] spawnedMobs;
 	private int lowestLevel;
 	private DungeonConfig dm;
+	private boolean isRpgDungeon;
 	
 	public String getDungeonName() { return dungeonName; }
 	public int getLowestLevel() { updateLowestLevel(); return lowestLevel; }
@@ -59,6 +59,7 @@ public class DungeonEvent extends GeneralEvent
 		lowestLevel = 999999;
 		dungeonWorld = null;
 		dm = new DungeonConfig();
+		isRpgDungeon = false;
 	}
 	
 	public boolean addDungeoneer(Player player, int dungeonNumber)
@@ -123,7 +124,7 @@ public class DungeonEvent extends GeneralEvent
 					initialize(dungeonNumber_);
 				}
 			}
-		}, 1200);
+		}, 12); //TODO
 	}
 	
 	public void removeDungeoneer(Player requester, Player playerToRemove, boolean displayMessages)
@@ -185,8 +186,7 @@ public class DungeonEvent extends GeneralEvent
 		{
 			for (int i = 0; i < mobCountMinusOne; i++)
 			{
-				Location randomSpawnLocation = getRandomMobSpawnLocation(dm.getStart(dungeonNumber).getWorld());
-				
+				Location randomSpawnLocation = getRandomMobSpawnLocation(dungeonStart.getWorld());
 				spawnedMobs[i] = (LivingEntity) dungeonWorld.spawnEntity(randomSpawnLocation, returnRandomLivingEntity());
 			}
 		}
@@ -198,11 +198,15 @@ public class DungeonEvent extends GeneralEvent
 		//Spawn a boss monster.
 		spawnedMobs[mobCountMinusOne] = (LivingEntity) dungeonWorld.spawnEntity(bossLocation, returnRandomLivingEntity());
 		
-		//Register the custom monster.
-		bossMob = FC_Rpg.rpgManager.registerCustomLevelEntity(spawnedMobs[mobCountMinusOne], 5);
-		
-		//Make it a boss.
-		bossMob.setIsBoss(true);
+		//TODO - test this shit.
+		if (FC_Rpg.worldConfig.getIsRpgWorld(dungeonStart.getWorld().getName()))
+		{
+			//Register the custom monster.
+			bossMob = FC_Rpg.rpgManager.registerCustomLevelEntity(spawnedMobs[mobCountMinusOne], 5);
+			
+			//Make it a boss.
+			bossMob.setIsBoss(true);
+		}
 		
 		tid[2] = Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable()
 		{
@@ -253,11 +257,19 @@ public class DungeonEvent extends GeneralEvent
 		dungeonNumber = FC_Rpg.trueDungeonNumbers.get(dungeonNumber_);
 		dungeonName = dm.getName(dungeonNumber);
 		dungeonWorld = dm.getLobby(dungeonNumber).getWorld();
+		isRpgDungeon = FC_Rpg.worldConfig.getIsRpgWorld(dungeonWorld.getName());
 	}
 	
 	private void updateLowestLevel()
 	{
 		int level = 0;
+		
+		//If not an rpg dungeon we set lowest level to -1.
+		if (!isRpgDungeon)
+		{
+			lowestLevel = -1;
+			return;
+		}
 		
 		//Reset the lowest level.
 		lowestLevel = 999999;
@@ -277,6 +289,10 @@ public class DungeonEvent extends GeneralEvent
 	
 	private void kickTooStrong()
 	{
+		//Don't perform kick if the dungeon isn't rpg.
+		if (!isRpgDungeon)
+			return;
+		
 		//Change lowest level based on player levels.
 		for (Player player : participant)
 		{
@@ -442,7 +458,6 @@ public class DungeonEvent extends GeneralEvent
 	{
 		//Variable Declarations
 		Location chestLocation = null;
-		TreasureConfig rtg = new TreasureConfig();
 		Random rand = new Random();
 		List<ItemStack> drops = null;
 		Block chestBlock;
@@ -460,37 +475,12 @@ public class DungeonEvent extends GeneralEvent
 		//Clear the chest out from other runs.
 		chest.getInventory().clear();
 		
-		//Add random treasure.
-		chest.getInventory().addItem(getRandomTreasure());
-		
 		//Get the list of random treasure.
-		drops = rtg.getRandomTreasure(rand.nextInt(5) + 1, lowestLevel);
+		drops = FC_Rpg.treasureConfig.getRandomTreasure(lowestLevel, rand.nextInt(5) + 1);
 		
 		//Add items to the inventory.
 		for (ItemStack drop : drops)
 			chest.getInventory().addItem(drop);
-	}
-	
-	private ItemStack getRandomTreasure()
-	{
-		Random rand = new Random();
-		ItemStack item;
-		int itemSize = rand.nextInt(64) + 64;
-		
-		if (lowestLevel <= 19)
-			item = new ItemStack(Material.COAL, itemSize);
-		else if (lowestLevel <= 39)
-			item = new ItemStack(Material.IRON_ORE, itemSize);
-		else if (lowestLevel <= 59)
-			item = new ItemStack(Material.DIAMOND, itemSize);
-		else if (lowestLevel <= 79)
-			item = new ItemStack(Material.GOLD_ORE, itemSize);
-		else if (lowestLevel >= 80)
-			item = new ItemStack(Material.EMERALD, itemSize);
-		else
-			item = new ItemStack(Material.COAL, itemSize);
-		
-		return item;
 	}
 	
 	private EntityType returnRandomLivingEntity()
@@ -510,11 +500,15 @@ public class DungeonEvent extends GeneralEvent
 	
 	public void checkMobDeath(Entity entity)
 	{
-		//Check if the boss mob was slain.
-		if (spawnedMobs != null)
+		//Perform boss checks only in rpg worlds.
+		if (FC_Rpg.worldConfig.getIsRpgWorld(entity.getWorld().getName()))
 		{
-			if (spawnedMobs[spawnedMobs.length - 1] == entity)
-				bLib.standardBroadcast("The Dungeon " + dungeonName + " Boss Monster Has Been Slain!");
+			//Check if the boss mob was slain.
+			if (spawnedMobs != null)
+			{
+				if (spawnedMobs[spawnedMobs.length - 1] == entity)
+					bLib.standardBroadcast("The Dungeon " + dungeonName + " Boss Monster Has Been Slain!");
+			}
 		}
 		
 		tid[6] = Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable()

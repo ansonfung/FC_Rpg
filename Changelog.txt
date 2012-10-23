@@ -1,3 +1,26 @@
+Version 0.4:
+
+- This version is NOT compatible with other FC plugins currently (unless you recently recieved a custom version from me). Just a heads up.
+- Wolves are now considered passive mobs because I can't figure out how to make them aggressive, :S
+- Configurable item restrictions.
+- Fixed Stat Growth for all classes being broken.
+- New config "Passives" to update passives. Might change into something else more expansive.
+- Mob Money is 100% configurable.
+- Exp Growth is 100% configurable
+- Dungeon treasure is now 100% configurable
+- Alchemy will NOT be made configurable. But I do take suggestions on the skill! I want this to be a skill that brings in a diverse range of items to all servers, I don't want people to be able to limit this range so if you don't like the skill don't use it! XD :D
+- Fixed a loot issue that may or may not been an issue.
+- Made dungeons that work without rpg mode enabled.
+- All locations now require a yaw and pitch, even if you have to put 0.0 in each spot. The default warp generation didn't put the 2 0's for yaw/patch and as such you will have to manually fill them in if you want default warps to work.
+- Fixed list to never mess up. Can only show player names once now which makes it work perfectly :)
+- Mob strength properly adjusts to world's spawn.
+- promote alias for "upgrade" for skill points.
+- Updated the /rpg wall to now add warps as well as new updated finish signs. It's not as obvious that I coded the manual respec into selection and the gold color can be hard to see on certain texture packs. As well it puts all the warp signs down for easy copy+paste.
+- Put /reset requirement display notifcation on actual class selection.
+- Added small message when you select a class that tells you to actually hit a finish sign.
+- ResetLoc has been entirely disabled. The teleport it gives has been removed. I can do this now because players who don't have an rpg class should be restricted from doing a lot of things now so there isn't as much of a "forced" requirement to actually have an rpg class. Will be monitered and updated as needed if bugs arise.
+- 0.4 was mostly a bug fix and customization version imo. It adds a few things but a lot of changes were to fix bugs. As always I aim to achieve as few bugs as possible. 0.5 will bring even more customization to the table. Everything is getting closer and closer now to being extremely configurable. I think that the last version will require a complete reset, because there are lots of fragments of code getting spewn about. However, everything is getting really close to release ready. I just need to basically expand on the existing features already to make them more accessible outside of editing configs via more commands. 0.4's documentation will be done tonight.
+
 Version 0.31:
 
 - Fixed /list command.

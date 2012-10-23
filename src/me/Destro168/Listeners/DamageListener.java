@@ -3,8 +3,6 @@ package me.Destro168.Listeners;
 import java.util.List;
 import java.util.Random;
 
-import me.Destro168.Classes.EffectIDs;
-import me.Destro168.Classes.SpellCaster;
 import me.Destro168.Configs.WorldConfig;
 import me.Destro168.Entities.EntityDamageManager;
 import me.Destro168.Entities.RpgMonster;
@@ -12,6 +10,8 @@ import me.Destro168.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.RpgParty;
 import me.Destro168.LoadedObjects.Spell;
+import me.Destro168.Spells.EffectIDs;
+import me.Destro168.Spells.SpellCaster;
 import me.Destro168.Util.DistanceModifierLib;
 import me.Destro168.Util.MobAggressionCheck;
 
@@ -25,6 +25,7 @@ import org.bukkit.entity.Fish;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowball;
+import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -232,8 +233,13 @@ public class DamageListener implements Listener
 			//Make creatures forcibly attack attacker.
 			if (playerAttacker != null && mobDefender != null)
 			{
+				//Set wolves to angry.
+				if (mobDefender instanceof Wolf)
+					((Wolf) mobDefender).setAngry(true);
+				
 				if (mobDefender instanceof Creature)
 				{
+					//Change aggro
 					((Creature) mobDefender).setTarget(playerAttacker);
 				}
 			}

@@ -1,7 +1,9 @@
 package me.Destro168.FC_Rpg;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import me.Destro168.Configs.FaqConfig;
 import me.Destro168.Configs.GroupConfig;
@@ -778,16 +780,28 @@ public class CommandGod implements CommandExecutor
 			msgLib.standardHeader("Total Connected Players: " + ChatColor.GREEN + ChatColor.BOLD + Bukkit.getOnlinePlayers().length + ChatColor.GRAY + ChatColor.BOLD + "/" +
 					ChatColor.RED + ChatColor.BOLD + Bukkit.getServer().getMaxPlayers());
 			
+			Player[] onlinePlayersArray = Bukkit.getServer().getOnlinePlayers();
+			Map<Integer, Player> onlinePlayersMap = new HashMap<Integer, Player>();
+			
+			for (int i = 0; i < onlinePlayersArray.length; i++) 
+				onlinePlayersMap.put(i,onlinePlayersArray[i]);
+			
 			for (int i = 0; i < groups.size(); i++)
 			{
 				groupMembers.clear();
 				
-				for (Player onlinePlayer : Bukkit.getOnlinePlayers())
+				for (int j = 0; j < onlinePlayersArray.length; j++)
 				{
-					perms = new FC_RpgPermissions(onlinePlayer);
-					
-					if (perms.inGroup(groups.get(i).getName()))
-						groupMembers.add(onlinePlayer.getName());
+					if (onlinePlayersMap.containsKey(j))
+					{
+						perms = new FC_RpgPermissions(onlinePlayersMap.get(j));
+						
+						if (perms.inGroup(groups.get(i).getName()))
+						{
+							groupMembers.add(onlinePlayersMap.get(j).getName());
+							onlinePlayersMap.remove(j);
+						}
+					}
 				}
 				
 				if (groupMembers.size() > 0)
@@ -1104,19 +1118,7 @@ public class CommandGod implements CommandExecutor
 				msgLib.standardMessage("Successfully reset",rpgPlayer.getPlayerConfigFile().getName());
 				
 				if (target != null)
-				{
 					FC_Rpg.rpgManager.unregisterRpgPlayer(target);
-					
-					//Teleport the player to spawn
-					Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable()
-					{
-						@Override
-						public void run() 
-						{
-							Bukkit.getServer().getPlayer(rpgPlayer.getPlayerConfigFile().getName()).teleport(FC_Rpg.generalConfig.getResetLocation());
-						}
-					}, 20);
-				}
 			}
 			else
 			{
@@ -1132,16 +1134,6 @@ public class CommandGod implements CommandExecutor
 				
 				//Unregister
 				FC_Rpg.rpgManager.unregisterRpgPlayer(player);
-				
-				//Teleport the player to spawn
-				Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable()
-				{
-					@Override
-					public void run() 
-					{
-						player.teleport(FC_Rpg.generalConfig.getResetLocation());
-					}
-				}, 20);
 			}
 			
 			return true;
@@ -1183,7 +1175,7 @@ public class CommandGod implements CommandExecutor
 			String name = nm.getNameByMatch(args[1]);
 			
 			//Admin Modify Command
-			if (args[0].equalsIgnoreCase("modify"))
+			if (args[0].equalsIgnoreCase("modify") || args[0].equalsIgnoreCase("m"))
 			{
 				cont = true;
 				
@@ -1314,7 +1306,7 @@ public class CommandGod implements CommandExecutor
 				}
 				else if (args[1].equalsIgnoreCase("loot"))
 				{
-					FC_Rpg.lootMultiplier = 2;
+					FC_Rpg.cashMultiplier = 2;
 					
 					FC_Rpg.bLib.standardBroadcast("Double Money Event For One Hour Started!");
 					
@@ -1744,6 +1736,8 @@ public class CommandGod implements CommandExecutor
 			//Move the wall a bit away from the player.
 			blockLocation.setZ(playerLocation.getZ() - 3);
 			
+			String warpName;
+			
 			//Create a 7x7 wall.
 			for (int i = 0; i < 13; i++)
 			{
@@ -1770,27 +1764,40 @@ public class CommandGod implements CommandExecutor
 						//0x2: Facing north / 0x3: Facing south / 0x4: Facing west / 0x5: Facing east
 						sign.setRawData((byte) 0x3);
 						
+						if (j == 0)
+						{
+							try { warpName = FC_Rpg.warpConfig.getName(i); sign.setLine(0, "Teleport:"); sign.setLine(1, warpName); } catch (NullPointerException e) { continue; }
+						}
+						
 						//Create class sign
-						if (j == 1)
+						else if (j == 1)
 						{
 							//Set sign text
 							sign.setLine(0, ChatColor.DARK_RED + "Pick Class:");
 							
-							try
-							{
-								sign.setLine(1, ChatColor.DARK_BLUE + FC_Rpg.classConfig.getRpgClass(i).getName());
-							}
-							catch (ArrayIndexOutOfBoundsException e)
-							{
-								continue;
-							}
+							try { sign.setLine(1, ChatColor.DARK_BLUE + FC_Rpg.classConfig.getRpgClass(i).getName()); }
+							catch (ArrayIndexOutOfBoundsException e) { continue; }
 						}
 						
 						//Create finish sign.
-						if (j == 2 && i == 0)
+						else if (j == 2)
 						{
-							//Set sign text
-							sign.setLine(0, ChatColor.GOLD + "Finish!");
+							if (i == 0)
+							{
+								//Set sign text
+								sign.setLine(0, ChatColor.DARK_PURPLE + "Finish!");
+								sign.setLine(1, ChatColor.DARK_RED + "And Assign");
+								sign.setLine(2, ChatColor.DARK_RED + "Stat Points");
+								sign.setLine(3, ChatColor.DARK_RED + "Automatically");
+							}
+							else if (i == 1)
+							{
+								//Set sign text
+								sign.setLine(0, ChatColor.DARK_PURPLE + "Finish!");
+								sign.setLine(1, ChatColor.DARK_RED + "And Assign Stats");
+								sign.setLine(2, ChatColor.DARK_RED + "Stat Points");
+								sign.setLine(3, ChatColor.DARK_RED + "Manually");
+							}
 						}
 						
 						//Update the sign.
@@ -1941,7 +1948,7 @@ public class CommandGod implements CommandExecutor
 				}
 			}
 			
-			else if (args[0].equalsIgnoreCase("upgrade"))
+			else if (args[0].equalsIgnoreCase("upgrade") || args[0].equalsIgnoreCase("promote"))
 			{
 				//If the player doesn't have enough spell points tell them.
 				if (rpgPlayer.getPlayerConfigFile().getSpellPoints() < 1 && !perms.isAdmin())

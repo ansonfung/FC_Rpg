@@ -5,10 +5,10 @@ import java.util.List;
 
 import me.Destro168.LoadedObjects.Group;
 import me.Destro168.Messaging.MessageLib;
+import me.Destro168.Spells.SpellCaster;
 import me.Destro168.Util.FC_RpgPermissions;
 import me.Destro168.Util.HealthConverter;
 import me.Destro168.Util.RpgMessageLib;
-import me.Destro168.Classes.SpellCaster;
 import me.Destro168.Configs.GroupConfig;
 import me.Destro168.Configs.PlayerFileConfig;
 import me.Destro168.Configs.WorldConfig;

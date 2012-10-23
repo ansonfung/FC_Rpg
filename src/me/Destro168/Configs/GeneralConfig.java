@@ -3,10 +3,9 @@ package me.Destro168.Configs;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.Destro168.ConfigManagers.ConfigGod;
 import me.Destro168.FC_Rpg.FC_Rpg;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -16,7 +15,6 @@ public class GeneralConfig extends ConfigGod
 	
 	public List<ItemStack> getTimedItems() { return timedItems; }
 	
-	private void setResetLocation(String worldName, double x, double y, double z, float a, float b) { ccm.setLocation(prefix + "resetLoc", worldName, x, y, z, a, b); }	//Pvp
 	private void setDefaultPrefix(String x) { ccm.set(prefix + "defaultPrefix", x); }
 	private void setPerfectBirch(boolean x) { ccm.set(prefix + "perfectBirch", x); }
 	private void setCreativeControl(boolean x) { ccm.set(prefix + "creativeControl", x); }
@@ -40,8 +38,15 @@ public class GeneralConfig extends ConfigGod
 	private void setTimedItemsIDs(int a, int b) { ccm.set(prefix + "timedItems.IDs", a + "," + b); }
 	private void setTimedItemsCounts(int a, int b) { ccm.set(prefix + "timedItems.Counts", a + "," +  b); }
 	private void setTimedItemsDataValues(byte a, byte b) { ccm.set(prefix + "timedItems.DataValues", a + "," +  b); }
+	private void setLevelsPerSkillPoint(int x) { ccm.set(prefix + "levelsPerSkillPoint", x); }
+	private void setStatsPerLevel(int x) { ccm.set(prefix + "statsPerLevel", x); }
+	private void setMobLevelLootModifier(double x) { ccm.set(prefix + "mobLevelLootModifier", x); }
+	private void setMobCashMultiplier(double x) { ccm.set(prefix + "mobCashMultiplier", x); }
+	private void setMobExpMultiplier(double x) { ccm.set(prefix + "mobExpMultiplier", x); }
+	private void setPowerLevelPrevention(int x) { ccm.set(prefix + "powerLevelPrevention", x); }
+	private void setExpScaleRate(int x) { ccm.set(prefix + "expScaleRate", x); }
+	private void setExpScaleBase(int x) { ccm.set(prefix + "expScaleBase", x); }
 	
-	public Location getResetLocation() { return ccm.getLocation(prefix + "resetLoc"); }
 	public String getDefaultPrefix() { return ccm.getString(prefix + "defaultPrefix"); }
 	public boolean getPerfectBirch() { return ccm.getBoolean(prefix + "perfectBirch"); }
 	public boolean getCreativeControl() { return ccm.getBoolean(prefix + "creativeControl"); }
@@ -62,10 +67,18 @@ public class GeneralConfig extends ConfigGod
 	public double getZScale() { return ccm.getDouble(prefix + "zScale"); }
 	public boolean getRpgChatOverride() { return ccm.getBoolean(prefix + "rpgChatOverride"); }
 	public long getTimedItemsInterval() { return ccm.getLong(prefix + "timedItemsInterval"); }
+	public double getLevelsPerSkillPoint() { return ccm.getInt(prefix + "levelsPerSkillPoint"); }
+	public int getStatsPerLevel() { return ccm.getInt(prefix + "statsPerLevel"); }
+	public int getMobLevelLootmodifier() { return ccm.getInt(prefix + "mobLevelLootModifier"); }
+	public int getMobCashMultiplier() { return ccm.getInt(prefix + "mobCashMultiplier"); }
+	public int getMobExpMultiplier() { return ccm.getInt(prefix + "mobExpMultiplier"); }
+	public int getPowerLevelPrevention() { return ccm.getInt(prefix + "powerLevelPrevention"); }
+	public double getExpScaleRate() { return ccm.getInt(prefix + "expScaleRate"); }
+	public double getExpScaleBase() { return ccm.getInt(prefix + "expScaleBase"); }
 	
 	public GeneralConfig()
 	{
-		super("General");
+		super(FC_Rpg.dataFolderAbsolutePath, "General");
 		handleUpdates();
 	}
 	
@@ -76,9 +89,6 @@ public class GeneralConfig extends ConfigGod
 		{
 			//Update the version.
 			setVersion(0.2);
-			
-			//Set the main respawn location.
-			setResetLocation(Bukkit.getServer().getWorlds().get(0).getName(),32.5,83,160.5,90,0);
 			
 			//Set the default prefix.
 			setDefaultPrefix("&f[&7Guest&f] ");
@@ -130,6 +140,20 @@ public class GeneralConfig extends ConfigGod
 			setTimedItemsCounts(5,1);
 			setTimedItemsDataValues((byte) 0, (byte) 1);
 			setTimedItemsInterval(3600000);
+		}
+		
+		if (getVersion() < 0.4)
+		{
+			setVersion(0.4);
+			
+			setLevelsPerSkillPoint(4);
+			setStatsPerLevel(10);
+			setMobLevelLootModifier(.2);
+			setMobCashMultiplier(.8);
+			setMobExpMultiplier(1);
+			setPowerLevelPrevention(5);
+			setExpScaleRate(3);
+			setExpScaleBase(11);
 		}
 		
 		//Load up timed items.

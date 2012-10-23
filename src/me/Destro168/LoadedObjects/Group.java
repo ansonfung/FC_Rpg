@@ -1,6 +1,6 @@
 package me.Destro168.LoadedObjects;
 
-import me.Destro168.Conversions.StringToY;
+import me.Destro168.FC_Suite_Shared.StringToY;
 
 public class Group 
 {

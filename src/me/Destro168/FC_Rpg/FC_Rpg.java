@@ -8,17 +8,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import me.Destro168.Classes.RpgClass;
 import me.Destro168.Configs.ClassConfig;
 import me.Destro168.Configs.GeneralConfig;
 import me.Destro168.Configs.DungeonConfig;
+import me.Destro168.Configs.PassiveConfig;
 import me.Destro168.Configs.SpellConfig;
+import me.Destro168.Configs.TreasureConfig;
+import me.Destro168.Configs.WarpConfig;
 import me.Destro168.Configs.WorldConfig;
 import me.Destro168.Entities.RpgManager;
 import me.Destro168.Entities.RpgPlayer;
 import me.Destro168.FC_Suite_Shared.ColorLib;
 import me.Destro168.Listeners.DamageListener;
 import me.Destro168.Listeners.PlayerInteractionListener;
+import me.Destro168.LoadedObjects.RpgClass;
 import me.Destro168.Messaging.BroadcastLib;
 import me.Destro168.Messaging.MessageLib;
 import me.Destro168.Util.DistanceModifierLib;
@@ -77,11 +80,16 @@ public class FC_Rpg extends JavaPlugin
 	public final static boolean debugModeEnabled = false;
 	
 	public static FC_Rpg plugin;
+	public static String dataFolderAbsolutePath;
+	
 	public static RpgManager rpgManager;
 	public static PartyManager partyManager;
 	public static SpellConfig spellConfig;
 	public static ClassConfig classConfig;
 	public static GeneralConfig generalConfig;
+	public static PassiveConfig passiveConfig;
+	public static TreasureConfig treasureConfig;
+	public static WarpConfig warpConfig;
 	
 	public static ColorLib cl = new ColorLib();
 	public static PvpEvent pvp;
@@ -91,7 +99,7 @@ public class FC_Rpg extends JavaPlugin
 	public static DungeonEvent[] dungeon;
 	
 	public static int expMultiplier = 1;
-	public static int lootMultiplier = 1;
+	public static int cashMultiplier = 1;
 	public static int tid3;
 	public static int tid4;
 	public static int dungeonCount;
@@ -128,6 +136,7 @@ public class FC_Rpg extends JavaPlugin
 	{
 		//Derp
 		plugin = this;
+		dataFolderAbsolutePath = FC_Rpg.plugin.getDataFolder().getAbsolutePath();
 		
 		//World manager = new world manager;
 		generalConfig = new GeneralConfig();
@@ -137,6 +146,9 @@ public class FC_Rpg extends JavaPlugin
 		pvp = new PvpEvent();
 		spellConfig = new SpellConfig();
 		classConfig = new ClassConfig();
+		passiveConfig = new PassiveConfig();
+		treasureConfig = new TreasureConfig();
+		warpConfig = new WarpConfig();
 		
 		//Set up the economy.
 		setupEconomy();
@@ -454,7 +466,7 @@ public class FC_Rpg extends JavaPlugin
 				}
 				
 				//Inform the player that the event was canceled.
-				msgLib.standardMessage("Reach Elite Rank or Ask An Admin To Place This.");
+				msgLib.standardMessage("Ask An Admin To Place This.");
 				event.setCancelled(true);	//Cancel the event
 			}
 		}
@@ -496,10 +508,6 @@ public class FC_Rpg extends JavaPlugin
 			{
 				if (event.getLine(0).contains("Pick Class:"))
 					fail = true;
-				else if (event.getLine(0).contains("Pick Job:"))
-					fail = true;
-				else if (event.getLine(0).contains("Finish And"))
-					fail = true;
 				else if (event.getLine(0).contains("Teleport:"))
 					fail = true;
 				else if (event.getLine(0).contains("Refill Mana!"))
@@ -524,19 +532,19 @@ public class FC_Rpg extends JavaPlugin
 		@EventHandler
 		public void entityDeath(EntityDeathEvent event)
 		{
-			if (!worldConfig.getIsRpgWorld(event.getEntity().getWorld().getName()))
-				return;
-			
-			//If exp drops are cancelled, then...
-			if (generalConfig.getExpCancelled() == true)
-				event.setDroppedExp(0);	//Disable exp drops.
-			
 			//Store entity
 			Entity entity = event.getEntity();
 			
 			//Do dungeon checking for mob deaths to see if dungeons are cleared.
 			for (int i = 0; i < dungeonCount; i++)
 				dungeon[i].checkMobDeath(entity);
+			
+			if (!worldConfig.getIsRpgWorld(entity.getWorld().getName()))
+				return;
+			
+			//If exp drops are cancelled, then...
+			if (generalConfig.getExpCancelled() == true)
+				event.setDroppedExp(0);	//Disable exp drops.
 			
 			//Handle item loss if a player dies with hunger.
 			if (entity instanceof Player)
@@ -915,7 +923,7 @@ public class FC_Rpg extends JavaPlugin
 			//Variable Declarations
 			final Arrow arrow = (Arrow) event.getProjectile();
 			Vector speed;
-			RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(ClassConfig.passive_ScalingArrows);
+			RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(PassiveConfig.passive_ScalingArrows);
 			
 			//Make it so that arrows don't bounce.
 			arrow.setBounce(false);
@@ -942,7 +950,7 @@ public class FC_Rpg extends JavaPlugin
 			{
 				if (rpgClass.getName().equals(rpgPlayer.getPlayerConfigFile().getCombatClass()))
 				{
-					speed = arrow.getVelocity().multiply((rpgPlayer.getPlayerConfigFile().getClassLevel() / 28) + 1);
+					speed = arrow.getVelocity().multiply((rpgPlayer.getPlayerConfigFile().getClassLevel() / FC_Rpg.passiveConfig.getScalingArrow()) + 1);
 					arrow.setVelocity(speed);
 				}
 			}
@@ -960,7 +968,7 @@ public class FC_Rpg extends JavaPlugin
 		if (economyProvider != null) {
 			economy = economyProvider.getProvider();
 		}
-
+		
 		return (economy != null);
 	}
 }

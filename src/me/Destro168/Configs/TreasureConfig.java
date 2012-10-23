@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import me.Destro168.ConfigManagers.ConfigGod;
+import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.Util.MaterialLib;
 
 import org.bukkit.Material;
@@ -19,7 +21,6 @@ public class TreasureConfig extends ConfigGod
 	private Random rand;
 	private ItemStack drop;
 	private int totalDropsCount;
-	private int typeNumber = 0;
 	
 	private void setDropChances(int a, int b, int c, int d, int e) { ccm.set(prefix + "dropChances", a + "," + b + "," + c); }
 	private void setEnchantChances(int a, int b, int c, int d, int e) { ccm.set(prefix + "enchantChances", a + "," + b + "," + c + "," + d + "," + e); }
@@ -28,6 +29,12 @@ public class TreasureConfig extends ConfigGod
 	private void setEnchantLevelFourChance(int a, int b, int c) { ccm.set(prefix + "enchantLevelFourChance", a + "," + b + "," + c); }
 	private void setEnchantLevelThreeChance(int a, int b) { ccm.set(prefix + "enchantLevelThreeChance", a + "," + b); }
 	private void setEnchantLevelTwoChance(int a) { ccm.set(prefix + "enchantLevelTwoChance", a); }
+	private void setTreasureListIDs(List<Integer> a) { ccm.setCustomList(prefix + "treasureList.ids", a); }
+	private void setTreasureListEnchantable(List<Integer> a) { ccm.setCustomList(prefix + "treasureList.enchantable", a); }
+	private void setTreasureListMobLevelRangeMin(List<Integer> a) { ccm.setCustomList(prefix + "treasureList.mobLevelRangeMin", a); }
+	private void setTreasureListMobLevelRangeMax(List<Integer> a) { ccm.setCustomList(prefix + "treasureList.mobLevelRangeMax", a); }
+	private void setTreasureListAmountFlat(List<Integer> a) { ccm.setCustomList(prefix + "treasureList.amountFlat", a); }
+	private void setTreasureListAmountRandom(List<Integer> a) { ccm.setCustomList(prefix + "treasureList.amountRandom", a); }
 	
 	private List<Integer> getDropChances() { return converter.getIntegerListFromString(ccm.getString(prefix + "dropChances")); }
 	private List<Integer> getEnchantChances() { return converter.getIntegerListFromString(ccm.getString(prefix + "enchantChances")); }
@@ -35,10 +42,38 @@ public class TreasureConfig extends ConfigGod
 	private List<Integer> getEnchantLevelFourChance() { return converter.getIntegerListFromString(ccm.getString(prefix + "enchantLevelFourChance")); }
 	private List<Integer> getEnchantLevelThreeChance() { return converter.getIntegerListFromString(ccm.getString(prefix + "enchantLevelThreeChance")); }
 	private int getEnchantLevelTwoChance() { return ccm.getInt(prefix + "enchantLevelTwoChance"); }
+	private List<Integer> getTreasureListIDs() { return converter.getIntegerListFromString(ccm.getString(prefix + "treasureList.ids")); }
+	private List<Integer> getTreasureListEnchantable() { return converter.getIntegerListFromString(ccm.getString(prefix + "treasureList.enchantable")); }
+	private List<Integer> getTreasureListMobLevelRangeMin() { return converter.getIntegerListFromString(ccm.getString(prefix + "treasureList.mobLevelRangeMin")); }
+	private List<Integer> getTreasureListMobLevelRangeMax() { return converter.getIntegerListFromString(ccm.getString(prefix + "treasureList.mobLevelRangeMax")); }
+	private List<Integer> getTreasureListAmountFlat() { return converter.getIntegerListFromString(ccm.getString(prefix + "treasureList.amountFlat")); }
+	private List<Integer> getTreasureListAmountRandom() { return converter.getIntegerListFromString(ccm.getString(prefix + "treasureList.amountRandom")); }
+	
+	List<Treasure> treasureList = new ArrayList<Treasure>();
+	
+	public class Treasure
+	{
+		int id;
+		int enchantable;
+		int rangeMin;
+		int rangeMax;
+		int amountFlat;
+		int amountRandom;
+		
+		public Treasure(int id_, int enchantable_, int rangeMin_, int rangeMax_, int amountFlat_, int amountRandom_)
+		{
+			id = id_;
+			enchantable = enchantable_;
+			rangeMin = rangeMin_;
+			rangeMax = rangeMax_;
+			amountFlat = amountFlat_;
+			amountRandom = amountRandom_;
+		}
+	}
 	
 	public TreasureConfig()
 	{
-		super("Treasure");
+		super(FC_Rpg.dataFolderAbsolutePath, "Treasure");
 		
 		setDefaults();
 		handleUpdates();
@@ -48,7 +83,6 @@ public class TreasureConfig extends ConfigGod
 	{
 		rand = new Random();
 		totalDropsCount = 0;
-		typeNumber = 0;
 		drop = null;
 	}
 	
@@ -66,6 +100,76 @@ public class TreasureConfig extends ConfigGod
 			setEnchantLevelThreeChance(8000, 9600);
 			setEnchantLevelTwoChance(9000);
 		}
+		
+		if (getVersion() < 0.2)
+		{
+			MaterialLib mLib = new MaterialLib();
+			int total_mats = MaterialLib.TIER_TOTAL_ITEMS;
+			
+			List<Integer> a = new ArrayList<Integer>();
+			List<Integer> b = new ArrayList<Integer>();
+			List<Integer> c = new ArrayList<Integer>();
+			List<Integer> d = new ArrayList<Integer>();
+			List<Integer> e = new ArrayList<Integer>();
+			List<Integer> f = new ArrayList<Integer>();
+			
+			for (int i = 0; i < 5; i++)
+			{
+				for (int j = 0; j < total_mats; j++)
+				{
+					a.add(mLib.tierList.get(i).get(j).getId());
+					b.add(1);
+					c.add(i * 20);
+					d.add(i * 20 + 20);
+					e.add(1);
+					f.add(0);
+				}
+			}
+			
+			a.add(Material.BOW.getId());
+			b.add(1);
+			c.add(0);
+			d.add(100);
+			e.add(1);
+			f.add(0);
+			
+			a.add(Material.BREAD.getId());
+			b.add(1);
+			c.add(0);
+			d.add(100);
+			e.add(1);
+			f.add(1);
+			
+			a.add(Material.COOKED_BEEF.getId());
+			b.add(1);
+			c.add(0);
+			d.add(100);
+			e.add(1);
+			f.add(1);
+			
+			setTreasureListIDs(a);
+			setTreasureListEnchantable(b);
+			setTreasureListMobLevelRangeMin(c);
+			setTreasureListMobLevelRangeMax(d);
+			setTreasureListAmountFlat(e);
+			setTreasureListAmountRandom(f);
+		}
+		
+		//Load up treasure.
+		loadTreasure();
+	}
+	
+	public void loadTreasure()
+	{
+		List<Integer> a = getTreasureListIDs();
+		List<Integer> b = getTreasureListEnchantable();
+		List<Integer> c = getTreasureListMobLevelRangeMin();
+		List<Integer> d = getTreasureListMobLevelRangeMax();
+		List<Integer> e = getTreasureListAmountFlat();
+		List<Integer> f = getTreasureListAmountRandom();
+		
+		for (int i = 0; i < a.size(); i++)
+			treasureList.add(new Treasure(a.get(i), b.get(i), c.get(i), d.get(i), e.get(i), f.get(i)));
 	}
 	
 	public List<ItemStack> getRandomDrops(int entityLevel)
@@ -125,52 +229,35 @@ public class TreasureConfig extends ConfigGod
 	{
 		//Assign variables
 		Random rand = new Random();
-		MaterialLib mLib = new MaterialLib();
-		int total_mats = MaterialLib.TIER_TOTAL_ITEMS;
-		int total_other_mats = 3;
+		Treasure t = treasureList.get(rand.nextInt(treasureList.size()));
+		int breakLimit = 0;
 		
-		boolean enchantable = true;
-		
-		//Now we determine what type of item to drop
-		typeNumber = rand.nextInt(total_mats + total_other_mats);
-		
-		//Check first material lib items.
-		if (typeNumber < total_mats)
+		//Only check if the mobs levle is above 0.
+		if (mobLevel > 0)
 		{
-			if (mobLevel < 20)
-				drop = new ItemStack(mLib.t0.get(typeNumber));
-			else if (mobLevel < 40)
-				drop = new ItemStack(mLib.t1.get(typeNumber));
-			else if (mobLevel < 60)
-				drop = new ItemStack(mLib.t2.get(typeNumber));
-			else if (mobLevel < 80)
-				drop = new ItemStack(mLib.t3.get(typeNumber));
-			else
-				drop = new ItemStack(mLib.t4.get(typeNumber));
+			//Get a random item in the treasures mob level range.
+			while (mobLevel < t.rangeMin && mobLevel > t.rangeMin)
+			{
+				t = treasureList.get(rand.nextInt(treasureList.size()));
+				
+				breakLimit++;
+				
+				if (breakLimit > 50)
+				{
+					FC_Rpg.plugin.getLogger().info("Unable to find a proper item to drop due to mob level ranges.");
+					return null;
+				}
+			}
 		}
 		
-		//Check bows.
-		else if (typeNumber == total_mats)
-		{
-			drop = new ItemStack(Material.BOW);
-		}
+		//Create the itemstack
+		drop = new ItemStack(t.id);
 		
-		//Check bread.
-		else if (typeNumber == total_mats + 1)
-		{
-			drop = new ItemStack(Material.BREAD, rand.nextInt(1) + 1);
-			enchantable = false;
-		}
+		if (t.amountRandom > 0)
+			drop.setAmount(drop.getAmount() + rand.nextInt(t.amountRandom));	//Set it's amount.
 		
-		//Check cooked_beef.
-		else if (typeNumber == total_mats + 2)
-		{
-			drop = new ItemStack(Material.COOKED_BEEF, rand.nextInt(1) + 1);
-			enchantable = false;
-		}
-		
-		//Add enchants if enchantable.
-		if (enchantable == true)
+		//If it is enchantable, then we enchant.
+		if (t.enchantable == 1)
 			drop.addEnchantments(getEnchantment());
 		
 		return drop;

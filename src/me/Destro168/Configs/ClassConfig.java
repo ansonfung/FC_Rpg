@@ -2,16 +2,13 @@ package me.Destro168.Configs;
 
 import java.util.List;
 
-import me.Destro168.Classes.RpgClass;
+import me.Destro168.ConfigManagers.ConfigGod;
+import me.Destro168.FC_Rpg.FC_Rpg;
+import me.Destro168.LoadedObjects.RpgClass;
 
 public class ClassConfig extends ConfigGod
 {
 	private final int CLASS_COUNT_MAX = 100;
-	
-	public static int passive_ScalingArrows = 0;
-	public static int passive_CounterAttack = 1;
-	public static int passive_StrongerParry = 2;
-	public static int passive_BattleLust = 3;
 	
 	private int classCount;
 	private RpgClass[] rpgClass;
@@ -35,7 +32,7 @@ public class ClassConfig extends ConfigGod
 	
 	public ClassConfig()
 	{
-		super("Classes");
+		super(FC_Rpg.dataFolderAbsolutePath, "Classes");
 		handleConfig();
 		loadConfig();
 	}
@@ -75,10 +72,10 @@ public class ClassConfig extends ConfigGod
 			ccm.set(prefix + 5 + ".spellIDs", getDebugClassString());
 			
 			//Set all the class passives
-			setPassiveID(0, passive_ScalingArrows);
-			setPassiveID(1, passive_CounterAttack);
-			setPassiveID(2, passive_StrongerParry);
-			setPassiveID(4, passive_BattleLust);
+			setPassiveID(0, PassiveConfig.passive_ScalingArrows);
+			setPassiveID(1, PassiveConfig.passive_CounterAttack);
+			setPassiveID(2, PassiveConfig.passive_StrongerParry);
+			setPassiveID(4, PassiveConfig.passive_BattleLust);
 			
 			//Set restrictions for certain classes.
 			setRestrictionID(1,0); //Only can use bows for magic.

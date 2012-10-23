@@ -1,5 +1,6 @@
 package me.Destro168.Configs;
 
+import me.Destro168.ConfigManagers.ConfigGod;
 import me.Destro168.FC_Rpg.FC_Rpg;
 
 import org.bukkit.Bukkit;
@@ -30,7 +31,7 @@ public class WorldConfig extends ConfigGod
 	
 	public WorldConfig()
 	{
-		super("Worlds");
+		super(FC_Rpg.dataFolderAbsolutePath, "Worlds");
 		handleUpdates();
 	}
 	

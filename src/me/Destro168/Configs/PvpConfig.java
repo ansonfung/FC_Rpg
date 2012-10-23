@@ -1,5 +1,6 @@
 package me.Destro168.Configs;
 
+import me.Destro168.ConfigManagers.ConfigGod;
 import me.Destro168.FC_Rpg.FC_Rpg;
 
 import org.bukkit.Location;
@@ -21,7 +22,7 @@ public class PvpConfig extends ConfigGod
 	
 	public PvpConfig()
 	{
-		super("Pvp");
+		super(FC_Rpg.dataFolderAbsolutePath, "Pvp");
 		handleUpdates();
 	}
 	

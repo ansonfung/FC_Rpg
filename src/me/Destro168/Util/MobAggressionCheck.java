@@ -30,5 +30,7 @@ public class MobAggressionCheck
 			isHostile = false;
 		else if (type == EntityType.OCELOT)
 			isHostile = false;
+		else if (type == EntityType.WOLF)
+			isHostile = false;
 	}
 }

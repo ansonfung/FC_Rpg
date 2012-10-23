@@ -3,6 +3,7 @@ package me.Destro168.Configs;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.Destro168.ConfigManagers.ConfigGod;
 import me.Destro168.FC_Rpg.FC_Rpg;
 
 import org.bukkit.Bukkit;
@@ -45,7 +46,7 @@ public class WarpConfig extends ConfigGod
 	
 	public WarpConfig()
 	{
-		super("Warps");
+		super(FC_Rpg.dataFolderAbsolutePath, "Warps");
 		handleUpdates();
 	}
 	

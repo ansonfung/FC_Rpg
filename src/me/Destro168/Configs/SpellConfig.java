@@ -4,9 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.Destro168.Classes.EffectIDs;
+import me.Destro168.ConfigManagers.ConfigGod;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.LoadedObjects.Spell;
+import me.Destro168.Spells.EffectIDs;
 
 //Rename spell manager
 public class SpellConfig extends ConfigGod
@@ -55,7 +56,7 @@ public class SpellConfig extends ConfigGod
 	
 	public SpellConfig()
 	{
-		super("Spells");
+		super(FC_Rpg.dataFolderAbsolutePath, "Spells");
 		handleConfig();
 		loadConfigValues();
 	}

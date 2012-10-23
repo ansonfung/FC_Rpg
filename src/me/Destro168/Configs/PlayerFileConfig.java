@@ -2,13 +2,15 @@ package me.Destro168.Configs;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 
-import me.Destro168.Classes.RpgClass;
+import me.Destro168.ConfigManagers.ConfigGod;
 import me.Destro168.ConfigManagers.CustomConfigurationManager;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Suite_Shared.NameMatcher;
+import me.Destro168.LoadedObjects.RpgClass;
 import me.Destro168.TimeUtils.DateManager;
 
 // Handles storing of player data in files.
@@ -113,12 +115,12 @@ public class PlayerFileConfig extends ConfigGod
 	//Misc functions
 	public synchronized void clearAllData() { ccm.clearFileData(); }
 	public double getRequiredExpPercent() { return (getClassExperience() * 100) / getLevelUpAmount(); }
-	public int getLevelUpAmount() { return 3 * getClassLevel() * getClassLevel() + 11; }
+	public int getLevelUpAmount() { return (int) (getClassLevel() * getClassLevel() * FC_Rpg.generalConfig.getExpScaleRate() + FC_Rpg.generalConfig.getExpScaleBase()); }
 	public void resetActiveSpell() { ccm.set(prefix + "activeSpell", "none"); }
 	
 	public PlayerFileConfig()
 	{
-		super("Rpg");
+		super(FC_Rpg.dataFolderAbsolutePath, "Rpg");
 		updateLevelCap();
 		
 		handleUpdates();
@@ -127,7 +129,7 @@ public class PlayerFileConfig extends ConfigGod
 	
 	public PlayerFileConfig(String playerName)
 	{
-		super("Rpg");
+		super(FC_Rpg.dataFolderAbsolutePath, "Rpg");
 		updateLevelCap();
 		
 		handleUpdates();
@@ -151,7 +153,7 @@ public class PlayerFileConfig extends ConfigGod
 		name = playerName;
 		
 		//OVERWRITE A BITCH - Create the new profile manager.
-		ccm = new CustomConfigurationManager(FC_Rpg.plugin.getDataFolder().getAbsolutePath() + "\\userinfo", playerName);
+		ccm = new CustomConfigurationManager(FC_Rpg.dataFolderAbsolutePath + "\\userinfo", playerName);
 		
 		//Handle updates.
 		handleUpdates();
@@ -322,7 +324,7 @@ public class PlayerFileConfig extends ConfigGod
 			setClassLevel(getClassLevel() + 1);
 			
 			//Spell points.
-			if (getClassLevel() % 4 == 0)
+			if (getClassLevel() % FC_Rpg.generalConfig.getLevelsPerSkillPoint() == 0)
 				setSpellPoints(getSpellPoints() + 1);
 			
 			//Acount for level cap.
@@ -336,7 +338,7 @@ public class PlayerFileConfig extends ConfigGod
 			if (getManualAllocation() == true)
 				assignClassStatPoints(); 
 			else
-				setStats(getStats() + 10);
+				setStats(getStats() + FC_Rpg.generalConfig.getStatsPerLevel());
 			
 			if (displayLevelUpMessage == true)
 				FC_Rpg.bLib.standardBroadcast(name + " is now level [" + String.valueOf(getClassLevel()) + "]");	//Broadcast that he leveled up
@@ -348,15 +350,18 @@ public class PlayerFileConfig extends ConfigGod
     
     public void assignClassStatPoints()
 	{
+    	List<Integer> statGrowth = rpgClass.getStatGrowth();
+    	
     	//Assign stat points based on class.
     	for (RpgClass rpgClass : FC_Rpg.classConfig.getRpgClasses())
     	{
-    		if (rpgClass.getName().equals(getCombatClass()))
+    		//TODO - test fix for stat allocation on levelup.
+    		if (rpgClass.getID() == getCombatClass())
     		{
-    			setAttack(getAttack() + rpgClass.getStatGrowth().get(0));
-    			setConstitution(getConstitution() + rpgClass.getStatGrowth().get(1));
-    			setMagic(getMagic() + rpgClass.getStatGrowth().get(2));
-    			setIntelligence(getIntelligence() + rpgClass.getStatGrowth().get(3));
+    			setAttack(getAttack() + statGrowth.get(0));
+    			setConstitution(getConstitution() + statGrowth.get(1));
+    			setMagic(getMagic() + statGrowth.get(2));
+    			setIntelligence(getIntelligence() + statGrowth.get(3));
     		}
     	}
     	

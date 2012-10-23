@@ -1,6 +1,8 @@
 package me.Destro168.Configs;
 
+import me.Destro168.ConfigManagers.ConfigGod;
 import me.Destro168.ConfigManagers.FileConfigPlus;
+import me.Destro168.FC_Rpg.FC_Rpg;
 
 import org.bukkit.Location;
 
@@ -80,7 +82,7 @@ public class DungeonConfig extends ConfigGod
 	
 	public DungeonConfig()
 	{
-		super("Dungeons");
+		super(FC_Rpg.dataFolderAbsolutePath, "Dungeons");
 		handleUpdates();
 	}
 	

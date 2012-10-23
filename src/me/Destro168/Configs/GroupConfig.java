@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.milkbowl.vault.permission.Permission;
 
+import me.Destro168.ConfigManagers.ConfigGod;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Suite_Shared.ColorLib;
 import me.Destro168.FC_Suite_Shared.PermissionManager;
@@ -18,7 +19,7 @@ public class GroupConfig extends ConfigGod
 	
 	public GroupConfig()
 	{
-		super("Groups");
+		super(FC_Rpg.dataFolderAbsolutePath, "Groups");
 		handleUpdates();
 	}
 	

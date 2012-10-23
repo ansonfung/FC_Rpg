@@ -3,12 +3,12 @@ package me.Destro168.Entities;
 import java.util.Date;
 import java.util.Random;
 
-import me.Destro168.Classes.EffectIDs;
-import me.Destro168.Classes.RpgClass;
-import me.Destro168.Configs.ClassConfig;
+import me.Destro168.Configs.PassiveConfig;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.RpgParty;
+import me.Destro168.LoadedObjects.RpgClass;
 import me.Destro168.Messaging.MessageLib;
+import me.Destro168.Spells.EffectIDs;
 import me.Destro168.Util.HealthConverter;
 
 import org.bukkit.Bukkit;
@@ -86,12 +86,12 @@ public class EntityDamageManager
 		if (playerDefender.isBlocking() == true)
 		{
 			//Variable Declaration.
-			RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(ClassConfig.passive_StrongerParry);
+			RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(PassiveConfig.passive_StrongerParry);
 			
 			if (rpgClass != null)
 			{
 				if (rpgClass.getID() == rpgDefender.getPlayerConfigFile().getCombatClass())
-					damage = damage * .75; //25% damage reduction for blocking as defender.
+					damage = damage * FC_Rpg.passiveConfig.getStrongerParry(); //25% damage reduction for blocking as defender.
 				else
 					damage = damage * .9; //10% damage reduction for blocking.
 			}
@@ -164,7 +164,7 @@ public class EntityDamageManager
 		LivingEntity entityDefender = rpgMobDefender.getEntity();
 		Player playerLooter = null;
 		RpgParty party = null;
-		double loot = 0;
+		double cash = 0;
 		double exp = 0;
 		double levelDifference = 0;
 		double bonusPercent = 0;
@@ -267,43 +267,46 @@ public class EntityDamageManager
 				}
 				
 				levelDifference = level1 - level2;
+				int powerLevelPrevention = FC_Rpg.generalConfig.getPowerLevelPrevention();
 				
 				//Give a bonus percent based on level difference, 1 level = 20% more.
 				if (levelDifference == 0)
 					bonusPercent = 1;
-				else if (levelDifference >= 6 || levelDifference <= -6)
+				else if (powerLevelPrevention > -1)
 				{
-					bonusPercent = 0;
-					
-					if (playerAttacker != null)
+					if (levelDifference > powerLevelPrevention || levelDifference < powerLevelPrevention * -1)
 					{
-						MessageLib msgLib = new MessageLib(playerAttacker);
-						msgLib.standardMessage("WARNING! This monster is not in your level range so you get no experience or loot from killing it.");
+						bonusPercent = 0;
+						
+						if (playerAttacker != null)
+						{
+							MessageLib msgLib = new MessageLib(playerAttacker);
+							msgLib.standardMessage("WARNING! This monster is not in your level range so you get no experience or loot from killing it.");
+						}
+						
+						//Disable item drops.
+						disableDrops = true;
 					}
-					
-					//Disable item drops.
-					disableDrops = true;
 				}
 				
 				else if (playerLevelHigher == true)
-					bonusPercent = 1 - levelDifference * .2;
+					bonusPercent = 1 - levelDifference * FC_Rpg.generalConfig.getMobLevelLootmodifier();
 				else
-					bonusPercent = 1 + levelDifference * .2;
+					bonusPercent = 1 + levelDifference * FC_Rpg.generalConfig.getMobLevelLootmodifier();
 				
 				//Set up loot amounts.
-				loot = rpgMobDefender.getLevel() * bonusPercent * .8;
-				exp = rpgMobDefender.getLevel() * bonusPercent;
+				cash = rpgMobDefender.getLevel() * bonusPercent * FC_Rpg.generalConfig.getMobCashMultiplier();
+				exp = rpgMobDefender.getLevel() * bonusPercent * FC_Rpg.generalConfig.getMobExpMultiplier();
 				
 				//Add global modifiers
-				loot = loot * FC_Rpg.lootMultiplier;
+				cash = cash * FC_Rpg.cashMultiplier;
 				exp = exp * FC_Rpg.expMultiplier;
-				
 				
 				//Calculate how much loot and experience to aquire by donator
 				if (rpgAttacker.getPlayerConfigFile().isDonator())
 				{
-					loot = loot * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
-					exp = loot * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
+					cash = cash * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
+					exp = cash * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
 				}
 				
 				//If the player is in a party, then...
@@ -312,7 +315,7 @@ public class EntityDamageManager
 					//Add a mob kill for that party once.
 					party.addMobKill();
 					
-					//Drop loot
+					//Give loot
 					for (int j = 0; j < party.getMemberCount(); j++)
 					{
 						playerLooter = Bukkit.getServer().getPlayer(party.getPartyMember(j));
@@ -320,21 +323,21 @@ public class EntityDamageManager
 						//If the mob is hostile then give money and experience.
 						if (party.closeToPartyLeader(j) == true)
 						{
-							FC_Rpg.economy.depositPlayer(playerLooter.getName(), party.getPartyBonus(loot));
+							FC_Rpg.economy.depositPlayer(playerLooter.getName(), party.getPartyBonus(cash));
 							FC_Rpg.rpgManager.getRpgPlayer(playerLooter).addClassExperience(party.getPartyBonus(exp), true);
 						}
 					}
 				}
 				
-				//Else if not in a party, give the drops to the single player.
+				//Else if not in a party, give loot to the single player.
 				else
 				{
-					FC_Rpg.economy.depositPlayer(playerAttacker.getName(), loot);
+					FC_Rpg.economy.depositPlayer(playerAttacker.getName(), cash);
 					rpgAttacker.addClassExperience(exp, true);
 				}
 				
 				//Send a message to the player showing experience and loot gains.
-				rpgAttacker.sendMonsterDeathNotification(rpgMobDefender.getLevel(), exp, loot);
+				rpgAttacker.sendMonsterDeathNotification(rpgMobDefender.getLevel(), exp, cash);
 				
 				//Don't drop loot if the monster is too high level.
 				if (disableDrops == false)
@@ -460,14 +463,14 @@ public class EntityDamageManager
 	{
 		//Variable Declarations
 		Random rand = new Random();
-		RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(ClassConfig.passive_CounterAttack);
+		RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(PassiveConfig.passive_CounterAttack);
 		
 		if (rpgClass != null)
 		{
 			if (rpgClass.getName().equals(rpgDefender.getPlayerConfigFile().getCombatClass()))
 			{
-				//10% chance for counter-attack.
-				if (rand.nextInt(10) == 0)
+				//Handle counter-attack chance.
+				if (rand.nextInt(FC_Rpg.passiveConfig.getCounterAttack()) == 0)
 					entityAttacker.damage(1, rpgDefender.getPlayer());
 			}
 		}
@@ -476,14 +479,14 @@ public class EntityDamageManager
 	private double handle_Offense_Passives(double damage, RpgPlayer rpgAttacker, LivingEntity entityDefender)
 	{
 		//Variable Declaration.
-		RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(ClassConfig.passive_BattleLust);
+		RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(PassiveConfig.passive_BattleLust);
 		
 		if (rpgClass != null)
 		{
 			if (rpgClass.getName().equals(rpgAttacker.getPlayerConfigFile().getCombatClass()))
 			{
 				//Scale damage by 1/4th
-				damage = damage * (1 + rpgAttacker.getMissingHealthDecimal() * .4);
+				damage = damage * (1 + rpgAttacker.getMissingHealthDecimal() * FC_Rpg.passiveConfig.getBattleLust());
 			}
 		}
 		
