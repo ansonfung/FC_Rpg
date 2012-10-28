@@ -104,17 +104,11 @@ public class PvpEvent extends GeneralEvent
 		}
 		
 		//Attempt to remove the player from the event.
-		for (int i = 0; i < participant.length; i++)
-		{
-			if (participant[i] != null)
-			{
-				if (participant[i] == player)
-				{
-					participant[i] = null;
-					hasLost.put(player, true);
-				}
-			}
-		}
+		if (participantList.contains(player))
+			participantList.remove(player);
+		
+		if (hasLost.containsKey(player))
+			hasLost.put(player, true);
 		
 		//Return the new team without the player.
 		return team;
@@ -168,21 +162,17 @@ public class PvpEvent extends GeneralEvent
 		phase = 2;
 		
 		//Add players to teams.
-		for (int i = 0; i < participant.length; i++)
+		for (Player p : participantList)
 		{
-			//Make sure the event player isn't null.
-			if (participant[i] != null)
+			if (alternate == true)
 			{
-				if (alternate == true)
-				{
-					redTeam.add(participant[i]);
-					alternate = false;
-				}
-				else
-				{
-					yellowTeam.add(participant[i]);
-					alternate = true;
-				}
+				redTeam.add(p);
+				alternate = false;
+			}
+			else
+			{
+				yellowTeam.add(p);
+				alternate = true;
 			}
 		}
 		
@@ -234,18 +224,18 @@ public class PvpEvent extends GeneralEvent
 		phase = 3;
 		
 		//Attempt to heal the players.
-		for (int i = 0; i < participant.length; i++)
+		for (Player player : participantList)
 		{
-			if (participant[i] != null)
+			if (player != null)
 			{
 				//Fully heal the participants.
-				rpgPlayer = FC_Rpg.rpgManager.getRpgPlayer(participant[i]);
+				rpgPlayer = FC_Rpg.rpgManager.getRpgPlayer(player);
 				
 				if (rpgPlayer != null)
 					rpgPlayer.healFull();
 				
-				participant[i].setFoodLevel(20);
-				participant[i].setHealth(20);
+				rpgPlayer.getPlayer().setFoodLevel(20);
+				rpgPlayer.getPlayer().setHealth(20);
 			}
 		}
 		
@@ -315,17 +305,22 @@ public class PvpEvent extends GeneralEvent
 	
 	public int returnWinnerSlot()
 	{
+		int winnerSlot = -1;
 		int winners = 0;
-		int winnerSlot = 0;
 		
-		for (int i = 0; i < Bukkit.getServer().getMaxPlayers(); i++)
+		for (int i = 0; i < participantList.size(); i++)
 		{
-			if (hasLost.containsKey(participant[i]))
+			if (hasLost.containsKey(participantList.get(i)))
 			{
-				if (hasLost.get(participant[i]) == false)
+				if (hasLost.get(participantList.get(i)) == false)
 				{
 					winnerSlot = i;
 					winners++;
+					
+					if (winners > 1)
+						return -1;
+					
+					break;
 				}
 			}
 		}
@@ -338,9 +333,7 @@ public class PvpEvent extends GeneralEvent
 	
 	public void setHasLostTrue(Player player) 
 	{
-		int id = getEventPlayerId(player);
-		
-		if (id > -1)
+		if (hasLost.containsKey(player))
 			hasLost.put(player, true);
 		
 		if (returnWinnerSlot() != -1)
@@ -372,10 +365,10 @@ public class PvpEvent extends GeneralEvent
 			else if (winnerSlot > -1)
 			{
 				//Announce the winner!
-				bLib.standardBroadcast(participant[winnerSlot].getName() + " Is The New Pvp Champion And Has Won $" + rewardAmount + "!");
+				bLib.standardBroadcast(participantList.get(winnerSlot).getName() + " Is The New Pvp Champion And Has Won $" + rewardAmount + "!");
 				
 				//Give the reward
-				FC_Rpg.economy.depositPlayer(participant[winnerSlot].getName(), rewardAmount);
+				FC_Rpg.economy.depositPlayer(participantList.get(winnerSlot).getName(), rewardAmount);
 			}
 		}
 		

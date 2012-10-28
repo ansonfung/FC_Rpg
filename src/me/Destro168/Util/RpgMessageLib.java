@@ -57,7 +57,7 @@ public class RpgMessageLib extends MessageLib
 	
 	public boolean errorCreateCharacter()
 	{
-		standardMessage("You need to pick a class first!");
+		standardMessage("A class must be chosen first!");
 		return true;
 	}
 	
@@ -99,13 +99,12 @@ public class RpgMessageLib extends MessageLib
 	
 	public boolean bigHelp()
 	{
-		help();
+		helpRpg();
 		helpClass();
 		helpJob();
 		helpSpell();
 		helpParty();
 		helpDonator();
-		helpPotion();
 		helpAdmin();
 		helpOwner();
 		
@@ -142,7 +141,7 @@ public class RpgMessageLib extends MessageLib
 		return true;
 	}
 	
-	public boolean help()
+	public boolean helpRpg()
 	{
 		standardHeader("Help for Everything!");
 		standardError("Constantly Asking Questions In Help = Mute");
@@ -153,17 +152,24 @@ public class RpgMessageLib extends MessageLib
 		standardMessage("/spell","Help for spells");
 		standardMessage("/pvp","Help for pvp events.");
 		standardMessage("/reset","Reset Your Character! (Infinite/You Keep Money)");
+		standardMessage("/list","See who is online.");
 		
-		if (rpgPlayer.isDonatorOrAdmin())
+		if (perms.isAdmin())
+			standardMessage("/donator","Help for donators.");
+		else if (rpgPlayer.isDonatorOrAdmin())
 			standardMessage("/donator","Help for donators.");
 		
 		standardMessage("/bigHelp","List all helps at once.");
 		
 		if (perms.isAdmin())
-			standardMessage("[A] /rpg admin","Help for admins.");
+		{
+			standardMessage("[A] /dungeon","Help for dungeons.");
+			standardMessage("[A] /modify","Help for modify command.");
+			standardMessage("[A] /rpg admin","Admin Commands.");
+		}
 		
 		if (perms.isOwner())
-			standardMessage("[A] /rpg owner","Destro168's Private Commands");
+			standardMessage("[A] /rpg owner","Owner Commands!");
 		
 		return true;
 	}
@@ -173,10 +179,13 @@ public class RpgMessageLib extends MessageLib
 		if (perms.isAdmin())
 		{
 			standardHeader("Dungeon Help ~ 0 = D1, 1 = D2");
-			standardMessage("[A] /dungeon init [num]","Start a dungeon.");
-			standardMessage("[A] /dungeon stop [num]","Stop a dungeon.");
-			standardMessage("[A] /dungeon check [num]","Check if any mobs are left to update loot chest.");
-			standardMessage("[A] /dungeon kick [num]","Kick somebody from a dungeon.");
+			standardMessage("/dungeon list","List dungeons.");
+			standardMessage("/dungeon info [num]","See information regarding a specific dungeon.");
+			standardMessage("/dungeon start [num]","Start a dungeon.");
+			standardMessage("/dungeon stop [num]","Stop a dungeon.");
+			standardMessage("/dungeon check [num]","Check if any mobs are left to update loot chest.");
+			standardMessage("/dungeon kick [num] [name]","Kick somebody from a dungeon.");
+			standardMessage("/dungeon define [num]","After selecting two dungeon points use this to define a dungeon.");
 		}
 		
 		return true;
@@ -227,32 +236,26 @@ public class RpgMessageLib extends MessageLib
 
 	public boolean helpClass()
 	{
-		//Variable Declaration
-		String ticketMessage = "";
-		
+		//Display header and commands.
 		standardHeader("Class Commands");
 		standardMessage("/class view [name]","Show Character Information");
-		standardMessage("/class spec [stat] [amount]","Distribute Stat Points");
-		standardMessage("- Tip","If you have stat points, use this command.");
-		standardMessage("/class allocate [on,off]","Set auto stat distribution.");
-		
-		//Set the ticket count.
-		if (perms.isAdmin() == true)
-			ticketMessage = "- You have [Infinite] tickets remaining.";
-		else
-			ticketMessage = "- You have " + rpgPlayer.getPlayerConfigFile().getClassChangeTickets() + " tickets remaining.";
 		
 		if (rpgPlayer != null)
 		{
-			if (rpgPlayer.hasClassChangeTicket() == true || perms.isAdmin() == true)
+			standardMessage("/class spec [stat] [amount]","Distribute Stat Points");
+			standardMessage("- Tip","If you have stat points, use this command.");
+			standardMessage("/class allocate [on,off]","Set auto stat distribution.");
+			
+			if (rpgPlayer.hasClassChangeTicket() == true || perms.isAdmin())
 			{
 				standardMessage("/class switch [new class name]","Use a class ticket to switch class.");
-				standardMessage(ticketMessage);
+				
+				//Set the ticket count.
+				if (perms.isAdmin())
+					standardMessage("- You have [Infinite] tickets remaining.");
+				else
+					standardMessage("- You have " + rpgPlayer.getPlayerConfig().getClassChangeTickets() + " tickets remaining.");
 			}
-		}
-		else
-		{
-			standardMessage("/class switch [new class name]","Console can't use this command.");
 		}
 		
 		return true;
@@ -262,7 +265,9 @@ public class RpgMessageLib extends MessageLib
 	{
 		standardHeader("Job Commands");
 		standardMessage("/job view [name]","Shows Job Information");
-		standardMessage("/job promote","Promotes you to next job rank!");
+		
+		if (rpgPlayer != null)
+			standardMessage("/job promote","Promotes you to next job rank!");
 		
 		return true;
 	}
@@ -281,58 +286,51 @@ public class RpgMessageLib extends MessageLib
 		}
 	}
 	
-	public boolean helpPotion()
+	public boolean helpModify()
 	{
-		if (perms.isAdmin())
-		{
-			standardHeader("Potion information");
-			standardMessage("/rpg potion [type] [amount]");
-			standardMessage("The following is a reference of potion IDs. All are splash max level/length.");
-			standardMessage("8225 - reg     / 8229 - hea");
-			standardMessage("8228 - poi    / 8236 - har");
-			standardMessage("8233 - str  / 8226 - swi");
-			standardMessage("8266 - slo      / 8264 - wea");
-			standardMessage("8259 - fir");
-		}
+		if (!perms.isAdmin())
+			return true;
+		
+		standardHeader("Modify Command ~ Modifiables");
+		standardMessage("/modify [name] [modifiable] [newValue]", "Modify player settings in-game.");
+		secondaryMessage("The following is a list of catagorized modifiables.");
+		standardMessage("Stats", "strength, constitution, intelligence, magic, all, stats, ");
+		standardMessage("Levels/Exp","level, addlevel, exp, addexp");
+		standardMessage("Donator","donator, tickets");
+		standardMessage("Play Time","seconds, addseconds");
+		standardMessage("Misc","class, jobrank, spellPoint");
+		secondaryMessage("Please note that most 's' characters can be ommited and there are many aliases for each modifiable.");
 		
 		return true;
 	}
 	
 	public boolean helpAdmin()
 	{
-		if (perms.isAdmin())
-		{
-			standardHeader("Admin Commands ~ BE CAREFUL");
-			standardMessage("/rpg modify [name] [x] [newValue]");
-			secondaryMessage("x = [any stat,stat(s),all],[level,addLevel],[exp,addexp], class, addsecond(s), jobrank, spellPoint(s)");
-			standardMessage("/rpg [h, g, gh, hf]"," Heal / Gamemode / Both");
-			standardMessage("/rpg event [type]","loot,exp,off");
-			standardMessage("/rpg set [name] donator [duration]","Give donator.");
-			standardMessage("/rpg giveTicket [name] [count]","Gives donator");
-			standardMessage("/h [name]","Rpg heal style a player.");
-			standardMessage("/g ","Toggle between gamemode/survival.");
-			standardMessage("/dungeon","Help for dungeons.");
-			standardMessage("/rpg potion","Help for potions.");
-			standardMessage("/rpg listworld(s)","List all worlds on your server.");
-			standardMessage("/rpg go [u [amount] | d [amount] | (coords)]","Teleport anywhere.");
-			standardMessage("/rpg tpworld [worldname]","Teleport to a worlds spawn.");
-		}
+		if (!perms.isAdmin())
+			return true;
+		
+		standardHeader("Admin Commands ~ BE CAREFUL");
+		standardMessage("/rpg event [type]","loot,exp,off");
+		standardMessage("/h|/g|/hg|/gh [name]","Heal/Gamemode single/hybrid commands.");
+		standardMessage("/rpg listworld(s)","List all worlds on your server.");
+		standardMessage("/rpg go [u [amount] | d [amount] | (coords)]","Teleport anywhere.");
+		standardMessage("/rpg tpworld [worldname]","Teleport to a worlds spawn.");
 		
 		return true;
 	}
 	
 	public boolean helpOwner()
 	{
-		if (perms.isOwner())
-		{
-			standardHeader("Owner Only commands");
-			standardMessage("/rpg wall","Creates wall with all classes/jobs/start sign.");
-			standardMessage("/rpg spawn [worldname] [x] [y] [z] [yaw] [pitch]","Change a worlds spawn");
-			standardMessage("/rpg spawn here","Change a worlds spawn");
-			standardMessage("/rpg levelone","Change mob level one spawnpoint to your loc.");
-			standardMessage("/rpg tp [name]","Bypassed Player Tp.");
-			standardMessage("/rpg sudo","Make somebody say anything/use any command.");
-		}
+		if (!perms.isOwner())
+			return true;
+	
+		standardHeader("Owner Only commands");
+		standardMessage("/rpg wall","Creates wall with all classes/jobs/start sign.");
+		standardMessage("/rpg spawn [worldname] [x] [y] [z] [yaw] [pitch]","Change a worlds spawn");
+		standardMessage("/rpg spawn here","Change a worlds spawn");
+		standardMessage("/rpg levelone","Change mob level one spawnpoint to your loc.");
+		standardMessage("/rpg tp [name]","Bypassed Player Tp.");
+		standardMessage("/rpg sudo","Make somebody say anything/use any command.");
 		
 		return true;
 	}

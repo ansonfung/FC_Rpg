@@ -19,6 +19,8 @@ import me.Destro168.Configs.WorldConfig;
 import me.Destro168.Entities.RpgManager;
 import me.Destro168.Entities.RpgPlayer;
 import me.Destro168.FC_Suite_Shared.ColorLib;
+import me.Destro168.FC_Suite_Shared.SelectionVector;
+import me.Destro168.Listeners.BlockBreakListener;
 import me.Destro168.Listeners.DamageListener;
 import me.Destro168.Listeners.PlayerInteractionListener;
 import me.Destro168.LoadedObjects.RpgClass;
@@ -46,7 +48,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -64,6 +65,8 @@ import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -96,10 +99,11 @@ public class FC_Rpg extends JavaPlugin
 	public static BroadcastLib bLib;
 	public static WorldConfig worldConfig;
 	public static Economy economy = null;
-	public static DungeonEvent[] dungeon;
+	public static DungeonEvent[] dungeonEventArray;
+	public static SelectionVector sv;
 	
-	public static int expMultiplier = 1;
-	public static int cashMultiplier = 1;
+	public static int eventExpMultiplier = 1;
+	public static int eventCashMultiplier = 1;
 	public static int tid3;
 	public static int tid4;
 	public static int dungeonCount;
@@ -124,8 +128,8 @@ public class FC_Rpg extends JavaPlugin
 		
 		for (int i = 0; i < dungeonCount; i++)
 		{
-			if (dungeon[FC_Rpg.trueDungeonNumbers.get(i)].isHappening() == true)
-				dungeon[FC_Rpg.trueDungeonNumbers.get(i)].end(false);
+			if (dungeonEventArray[FC_Rpg.trueDungeonNumbers.get(i)].isHappening() == true)
+				dungeonEventArray[FC_Rpg.trueDungeonNumbers.get(i)].end(false);
 		}
 		
 		this.getLogger().info("Disabled");
@@ -149,6 +153,8 @@ public class FC_Rpg extends JavaPlugin
 		passiveConfig = new PassiveConfig();
 		treasureConfig = new TreasureConfig();
 		warpConfig = new WarpConfig();
+		
+		sv = new SelectionVector();
 		
 		//Set up the economy.
 		setupEconomy();
@@ -178,6 +184,7 @@ public class FC_Rpg extends JavaPlugin
 		getServer().getPluginManager().registerEvents(new CreatureSpawnListener(), plugin);
 		getServer().getPluginManager().registerEvents(new ExperienceChangeListener(), plugin);
 		getServer().getPluginManager().registerEvents(new ArrowFireListener(), plugin);
+		getServer().getPluginManager().registerEvents(new teleportListener(), plugin);
 		
 		//Register Commands
 		CommandCE = new CommandGod();
@@ -198,6 +205,7 @@ public class FC_Rpg extends JavaPlugin
 		getCommand("reset").setExecutor(CommandCE);
 		getCommand("rpg").setExecutor(CommandCE);
 		getCommand("spell").setExecutor(CommandCE);
+		getCommand("modify").setExecutor(CommandCE);
 		
 		//Handle tasks that happen every 30 minutes. Delay'd by 5 seconds.
 		Bukkit.getScheduler().scheduleAsyncRepeatingTask(this, new Runnable()
@@ -243,130 +251,11 @@ public class FC_Rpg extends JavaPlugin
 		dungeonCount = trueDungeonNumbers.size();
 		
 		//Create dungeonEvents based on size of dungeons.
-		dungeon = new DungeonEvent[dungeonCount];
+		dungeonEventArray = new DungeonEvent[dungeonCount];
 		
 		//Initate the dungeons.
 		for (int i = 0; i < dungeonCount; i++)
-			dungeon[i] = new DungeonEvent();
-	}
-	
-	//Listen for block breaks.
-	public class BlockBreakListener implements Listener
-	{
-		@EventHandler
-		public void onBlockBreak(BlockBreakEvent event)
-		{
-			//Variable Declarations
-			Player player = event.getPlayer();
-			ItemStack handItem = player.getItemInHand();
-			Material handItemType = handItem.getType();
-			FC_RpgPermissions perms = new FC_RpgPermissions(player);
-			String worldName = event.getBlock().getWorld().getName();
-			
-			//Prevent breaking of sponge blocks.
-			if (event.getBlock().getType() == Material.SPONGE)
-			{
-				if (generalConfig.getPreventSpongeBreak() == true)
-				{
-					if (!perms.isAdmin())
-						event.setCancelled(true);
-				}
-			}
-			
-			//Handle aoe world modifier for worlds.
-			if (worldConfig.getIsAoEWorld(worldName))
-			{
-				Block block = event.getBlock();
-				World world = event.getBlock().getWorld();
-				boolean breakSuccess = false;
-				
-				if (handItemType == Material.STONE_PICKAXE)
-					breakSuccess = true;
-				else if (handItemType == Material.IRON_PICKAXE)
-					breakSuccess = true;
-				else if (handItemType == Material.GOLD_PICKAXE)
-					breakSuccess = true;
-				else if (handItemType == Material.DIAMOND_PICKAXE)
-					breakSuccess = true;
-				
-				if (breakSuccess == false)
-					return;
-				
-				for (int x = block.getLocation().getBlockX() - 1; x < block.getLocation().getBlockX() + 2; x++)
-				{
-					for (int y = block.getLocation().getBlockY() - 1; y < block.getLocation().getBlockY() + 2; y++)
-					{
-						for (int z = block.getLocation().getBlockZ() - 1; z < block.getLocation().getBlockZ() + 2; z++)
-						{
-							if (world.getBlockAt(x,y,z).getType() != Material.BEDROCK)
-								world.getBlockAt(x,y,z).breakNaturally();
-						}
-					}
-				}
-			}
-			
-			//If not an rpg world, don't continue execution.
-			if (!worldConfig.getIsRpgWorld(worldName))
-				return;
-			
-			//If exp drops are globally cancelled.
-			if (generalConfig.getExpCancelled() == true)
-				event.setExpToDrop(0);	//Cancel experience drops.
-			
-			//Handle perfect wheat if enabled.
-			if (generalConfig.getPerfectWheat() == true)
-			{
-				if (event.getBlock().getType().equals(Material.CROPS))
-				{
-					//Variable Declarations
-					Random rand = new Random();
-					ItemStack wheat = new ItemStack(Material.WHEAT, rand.nextInt(2) + 1);
-					ItemStack seed = new ItemStack(Material.SEEDS, rand.nextInt(2));
-					
-					//If wheat is fully grown.
-					if (event.getBlock().getData() == 7)
-					{
-						//Drop the wheat and seeds.
-						event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), wheat);
-						event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), seed);
-						
-						//Set the data back to 0.
-						event.getBlock().setData((byte) 0);
-					}
-					
-					if (!perms.isAdmin())
-						event.setCancelled(true);
-				}
-			}
-			
-			//If infinite gold is enabled
-			if (generalConfig.getInfiniteGold() == true)
-			{
-				//Prevent gold tools from breaking.
-				if (handItemType == Material.GOLD_PICKAXE && handItem.getDurability() == 29)
-					handItem.setDurability((short) 0);
-				
-				else if (handItemType == Material.GOLD_SPADE && handItem.getDurability() == 29)
-					handItem.setDurability((short) 0);
-				
-				else if (handItemType == Material.GOLD_AXE && handItem.getDurability() == 29)
-					handItem.setDurability((short) 0);
-			}
-			
-			//If infinite diamond is enabled
-			if (generalConfig.getInfiniteDiamond() == true)
-			{
-				//Prevent diamond tools from breaking.
-				if (handItemType == Material.DIAMOND_PICKAXE && handItem.getDurability() == 1558)
-					handItem.setDurability((short) 0);
-				
-				else if (handItemType == Material.DIAMOND_SPADE && handItem.getDurability() == 1558)
-					handItem.setDurability((short) 0);
-				
-				else if (handItemType == Material.DIAMOND_AXE && handItem.getDurability() == 1558)
-					handItem.setDurability((short) 0);
-			}
-		}
+			dungeonEventArray[i] = new DungeonEvent(i);
 	}
 	
 	//Listen for block growth
@@ -537,7 +426,7 @@ public class FC_Rpg extends JavaPlugin
 			
 			//Do dungeon checking for mob deaths to see if dungeons are cleared.
 			for (int i = 0; i < dungeonCount; i++)
-				dungeon[i].checkMobDeath(entity);
+				dungeonEventArray[i].checkMobDeath(entity);
 			
 			if (!worldConfig.getIsRpgWorld(entity.getWorld().getName()))
 				return;
@@ -565,7 +454,7 @@ public class FC_Rpg extends JavaPlugin
 				
 				//Remove from any dungeons.
 				for (int i = 0; i < dungeonCount; i++)
-					dungeon[i].removeDungeoneer(player,player,false);
+					dungeonEventArray[i].removeDungeoneer(player,player,false);
 			}
 			
 			//Clear drops for mobs
@@ -680,7 +569,7 @@ public class FC_Rpg extends JavaPlugin
 			
 			//Remove from any dungeons.
 			for (int i = 0; i < dungeonCount; i++)
-				dungeon[i].removeDungeoneer(p,p,false);
+				dungeonEventArray[i].removeDungeoneer(p,p,false);
 		}
 	}
 	
@@ -836,13 +725,13 @@ public class FC_Rpg extends JavaPlugin
 			//Change features for admins.
 			if (perms.isAdmin() == true)
 			{
-				event.setMessage(cl.parseColors(event.getMessage()));
+				event.setMessage(cl.parse(event.getMessage()));
 				messageColor = ChatColor.YELLOW;
 				secondaryColor = ChatColor.WHITE;
 			}
 			
 			//Set the message format.
-			event.setFormat(messageColor + timeStamp.format(now) + " " + rpgPlayer.updatePrefix() + messageColor + rpgPlayer.getPlayerConfigFile().getName() + secondaryColor + ": " + "%2$s");
+			event.setFormat(messageColor + timeStamp.format(now) + " " + rpgPlayer.updatePrefix() + messageColor + rpgPlayer.getPlayerConfig().getName() + secondaryColor + ": " + "%2$s");
 		}
 	}
 	
@@ -871,7 +760,7 @@ public class FC_Rpg extends JavaPlugin
 			//Remove from any dungeons.
 			for (int i = 0; i < dungeonCount; i++)
 			{
-				if (dungeon[i].isInsideDungeon(event.getLocation()))
+				if (dungeonEventArray[i].isInsideDungeon(event.getLocation()))
 				{
 					//Prevent mobs spawned for certain reasons.
 					if (event.getSpawnReason() == SpawnReason.NATURAL)
@@ -948,16 +837,33 @@ public class FC_Rpg extends JavaPlugin
 			
 			if (rpgClass != null)
 			{
-				if (rpgClass.getName().equals(rpgPlayer.getPlayerConfigFile().getCombatClass()))
+				if (rpgClass.getName().equals(rpgPlayer.getPlayerConfig().getCombatClass()))
 				{
-					speed = arrow.getVelocity().multiply((rpgPlayer.getPlayerConfigFile().getClassLevel() / FC_Rpg.passiveConfig.getScalingArrow()) + 1);
+					speed = arrow.getVelocity().multiply((rpgPlayer.getPlayerConfig().getClassLevel() / FC_Rpg.passiveConfig.getScalingArrow()) + 1);
 					arrow.setVelocity(speed);
 				}
 			}
 			
 			//If auto-cast is enabled.
-			if (rpgPlayer.getPlayerConfigFile().getAutoCast() == true)
+			if (rpgPlayer.getPlayerConfig().getAutoCast() == true)
 				rpgPlayer.prepareSpell(false);	//Prepare the spell.
+		}
+	}
+	
+	public class teleportListener implements Listener
+	{
+		@EventHandler
+		public void onPearlThrow(PlayerTeleportEvent event)
+		{
+			if (FC_Rpg.generalConfig.getDisableEnderPearls() == false)
+				return;
+			
+			if (event.getCause() == TeleportCause.ENDER_PEARL)
+			{
+				FC_Rpg.plugin.getLogger().info("Ender pearl teleportation by " + event.getPlayer().getName() + " prevented.");
+				event.getPlayer().sendMessage("Ender Pearl Teleportation Is Disabled");
+				event.setCancelled(true);
+			}
 		}
 	}
 	

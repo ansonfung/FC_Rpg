@@ -1,22 +1,24 @@
 package me.Destro168.events;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import me.Destro168.Messaging.BroadcastLib;
 import me.Destro168.Messaging.MessageLib;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public class GeneralEvent 
 {
 	//Variables
-	protected Player[] participant;
+	protected List<Player> participantList;
 	protected BroadcastLib bLib;
 	protected int phase; //The phase variable represents all the phases of the event. 1: Start, 2: Lobby Wait, 3: Fight, 0:, 4: Duel None
 	
 	//Gets
 	public int getPhase() { return phase; }
-	public Player[] getParticipants() { return participant; }
+	public List<Player> getParticipants() { return participantList; }
 	
 	//General functions
 	public boolean isHappening() { if (phase != 0) return true; else return false; }
@@ -30,63 +32,48 @@ public class GeneralEvent
 	{
 		//Initialize globals.
 		phase = 0;
-		participant = new Player[Bukkit.getServer().getMaxPlayers()];
+		participantList = new ArrayList<Player>();
 		bLib = new BroadcastLib();
-		
-		for (int i = 0; i < Bukkit.getServer().getMaxPlayers(); i++)
-			participant[i] = null;
 	}
 	
 	public boolean isEventPlayer(Player player)
 	{
-		if (participant == null)
-			participant = new Player[Bukkit.getServer().getMaxPlayers()];
-		
-		for (int i = 0; i < participant.length; i++)
-		{
-			if (participant[i] != null)
-			{
-				if (participant[i] == player)
-					return true;
-			}
-		}
+		if (participantList.contains(player))
+			return true;
 		
 		return false;
 	}
 	
+	/*
 	protected int getEventPlayerId(Player player)
 	{
-		for (int i = 0; i < participant.length; i++)
+		
+		for (int i = 0; i < participantArray.length; i++)
 		{
-			if (participant[i] != null)
+			if (participantArray[i] != null)
 			{
-				if (participant[i] == player)
+				if (participantArray[i] == player)
 					return i;
 			}
 		}
 		
 		return -1;
 	}
+	*/
 	
 	protected boolean addParticipant(Player player)
 	{
 		MessageLib msgLib = new MessageLib(player);
 		
 		//Check if the player is already a participant
-		if (isEventPlayer(player) == true)
+		if (participantList.contains(player))
 		{
 			msgLib.standardMessage("You Are Already A Participant.");
 			return false;
 		}
-		
-		//Add the player to the event player array.
-		for (int i = 0; i < participant.length; i++)
+		else
 		{
-			if (participant[i] == null)
-			{
-				participant[i] = player;
-				break;
-			}
+			participantList.add(player);
 		}
 		
 		return true;
@@ -108,15 +95,8 @@ public class GeneralEvent
 		//If the player is in the event, then...
 		if (isEventPlayer(removePlayer) == true)
 		{
-			//Remove the players.
-			for (int i = 0; i < participant.length; i++)
-			{
-				if (participant[i] == removePlayer)
-				{
-					participant[i] = null;
-					break;
-				}
-			}
+			//Remove the player.
+			participantList.remove(removePlayer);
 			
 			//Tell the requester if they aren't the player that sent the command a success message
 			if (msgLib != null && requester != removePlayer && displayMessages == true)
@@ -139,7 +119,7 @@ public class GeneralEvent
 	
 	protected void messageAllParticipants(String message)
 	{
-		for (Player player: participant)
+		for (Player player : participantList)
 		{
 			MessageLib msgLib = new MessageLib(player);
 			msgLib.standardMessage(message);
@@ -148,7 +128,7 @@ public class GeneralEvent
 	
 	protected void teleportAllParticipants(Location loc)
 	{
-		for (Player player: participant)
+		for (Player player: participantList)
 		{
 			if (player != null)
 				player.teleport(loc);

@@ -1,3 +1,33 @@
+Version 0.5:
+
+- Please note that this build is again, a really fast rushed build, I'm working as fast as possible to push these builds out! Reporting issues is fantastic for me! Thanks :D
+- Heal command and gm commands will no longer say success while at the same time saying successfully healed/gamemoded a player.
+- Added a new general config setting that allows you to prevent ender pearl teleportation. Allows me to delete my seperate project FC_NoEnderPearls, xD :D!
+- Had a lot of doubles relating to exp scaling set to return ints when they should be doubles! REALLY GLAD I CAUGHT THIS, LOL. Fixed now.
+- Artificial damage cause added to players in damagelistener. As well, eventpriority set to high. This means other plugins should be able to cancel/override FC_RPG is at lower ep's and can hook in at higher EP's. (Allows FC_Bounties compatibility for example).
+- Fixed double loot event never ending.
+- Fixed mob spawning levels going negative direction and negative levels. Should work fine always now.
+- Fixed treasure config issue with getting drop chance never resetting number of items dropped. Also updated default item drop chances. Finally fixed checking mob level for item drops.
+- Fixed improperly reading exp/gold value multipliers from config for mob money. Also updated the anti-powerleveling to prevent giving exp/gold.
+- Did a good bit of updating to commands again to make even more commands usable via console. Also fixed some bugs/errors with them.
+- Organized and Optimized the /dungeon command.
+- Dungeon command now has several dungeon sub-commands.
+- Heavily improved the /dungeon command. Now you can create dungeons in-game by selecting points to define regions for them.
+- Going to be working on this hard for 0.6 to let you change more settings in-game.
+
+- Organized and Optimized the rpg command.
+- Moved /rpg modify to be just /modify now.
+- Console can use both now. Maybe bugs with console getting errors still, I'm always working on these but if you find one feel free to make a ticket.
+
+- Organized and Optimized the reset command.
+- Console can use to reset other players now.
+
+
+(INCOMPLETE, 1.4 DEV BUILD INTERUPT, will be in 0.6)
+- Organized and Optimized the dungeon command.
+- (TODO - TEST) - Added /warp command.
+- I changed the implementation for pvp arena around a lot. It's untested entirely so yeah it could be really really buggy. Just a warning. I need to test it.
+
 Version 0.4:
 
 - This version is NOT compatible with other FC plugins currently (unless you recently recieved a custom version from me). Just a heads up.
@@ -55,7 +85,6 @@ Version 0.3:
 - List now properly works hand in hand with the groups config unlike previously.
 
 - Organized and Optimized the party command.
-- Organized and Optimized the reset command. (TODO)
 
 - Organized and Optimized the rpg command.
 - Fixed /rpg modify stat to work properly now.

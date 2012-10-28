@@ -101,11 +101,11 @@ public class RpgMonster extends RpgEntity
 		{
 			tdm = FC_Rpg.trueDungeonNumbers.get(i);
 			
-			if (FC_Rpg.dungeon[tdm].getPhase() == 2)
+			if (FC_Rpg.dungeonEventArray[tdm].getPhase() == 2)
 			{
-				if (FC_Rpg.dungeon[tdm].isInsideDungeon(entity.getLocation()))
+				if (FC_Rpg.dungeonEventArray[tdm].isInsideDungeon(entity.getLocation()))
 				{
-					modifier = FC_Rpg.dungeon[tdm].getLowestLevel() + levelBonus;
+					modifier = FC_Rpg.dungeonEventArray[tdm].getLowestLevel() + levelBonus;
 					calculateModifierByArea = false;
 					break;
 				}

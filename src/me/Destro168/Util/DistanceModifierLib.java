@@ -44,6 +44,15 @@ public class DistanceModifierLib
 		zShiftAmount = (int) shiftLocation.getZ();
 	}
 	
+	private void positizeXZ()
+	{
+		if (x < 0)
+			x = x * -1;
+		
+		if (z < 0)
+			z = z * -1;
+	}
+	
 	private int calculateXYZModifier()
 	{
 		double xScale = FC_Rpg.generalConfig.getXScale();
@@ -53,32 +62,47 @@ public class DistanceModifierLib
 		double zFinal;
 		double yFinal;
 		
+		positizeXZ();
+		
+		if (xShiftAmount < 0)
+			xShiftAmount = xShiftAmount * -1;
+		
+		if (zShiftAmount < 0)
+			zShiftAmount = zShiftAmount * -1;
+		
 		x = x - xShiftAmount;
 		z = z - zShiftAmount;
 		y = y - yShiftAmount;
 		
-		//Every 20 out equals 1 distance Modifier.
-		if (x < xScale && x > (xScale * -1)) xFinal = 0; //At least 1
+		if (xScale < 0)
+			xScale = xScale * -1;
+		
+		if (zScale < 0)
+			zScale = zScale * -1;
+		
+		positizeXZ();
+		
+		//Every xScale out equals 1 distance Modifier.
+		if (x < xScale) xFinal = 0;
 		else xFinal = x / xScale;
 		
-		if (z < zScale && z > (zScale * -1)) zFinal = 0;
+		if (z < zScale) zFinal = 0;
 		else zFinal = z / zScale;
 		
+		yFinal = 1;
+		
 		if (y < 0)
-			yFinal = 1 + y / yScale;
-		else
-			yFinal = 1;
+			yFinal += y / yScale;
 		
-		if (x < 0)
-			x = x * -1;
-
-		if (z < 0)
-			z = z * -1;
-		
-		if ((xFinal+zFinal) < 1)
+		if (x < xScale && z < zScale)
 			distanceModifier = (int) ((1)*yFinal);
 		else
-			distanceModifier = (int) ((xFinal+zFinal)*yFinal);
+		{
+			if (x < xScale || z < zScale)
+				distanceModifier = 1 + (int) ((xFinal+zFinal)*yFinal);
+			else
+				distanceModifier = (int) ((xFinal+zFinal)*yFinal);
+		}
 		
 		return distanceModifier;
 	}

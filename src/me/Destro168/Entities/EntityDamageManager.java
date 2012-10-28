@@ -18,6 +18,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 
 public class EntityDamageManager 
 {
@@ -55,17 +57,31 @@ public class EntityDamageManager
 		{
 			Random rand = new Random();
 			
-			if (rand.nextInt(100) < rpgDefender.getPlayerConfigFile().getStatusMagnitude(EffectIDs.DODGE))
+			if (rand.nextInt(100) < rpgDefender.getPlayerConfig().getStatusMagnitude(EffectIDs.DODGE))
 			{
 				rpgDefender.attemptDamageAvoidNotification(false);
 				return;
 			}
 		}
 		
+		//Set the last damage cause for players.
+		EntityDamageByEntityEvent edbe;
+		
+		if (rpgAttacker != null)
+		{
+			edbe = new EntityDamageByEntityEvent(rpgAttacker.getPlayer(), playerDefender, DamageCause.ENTITY_ATTACK, 0);
+			playerDefender.setLastDamageCause(edbe);
+		}
+		else if (rpgMobAttacker != null)
+		{
+			edbe = new EntityDamageByEntityEvent(rpgMobAttacker.getEntity(), rpgDefender.getPlayer(), DamageCause.ENTITY_ATTACK, 0);
+			playerDefender.setLastDamageCause(edbe);
+		}
+		
 		//Deal thorns damage before anything is calculated.
 		if (rpgDefender.getStatusActiveRpgPlayer(EffectIDs.THORNS))
 		{
-			double thornsDamage = damage * rpgDefender.getPlayerConfigFile().getStatusMagnitude(EffectIDs.THORNS);
+			double thornsDamage = damage * rpgDefender.getPlayerConfig().getStatusMagnitude(EffectIDs.THORNS);
 			
 			//Attempt a dodge notification
 			rpgDefender.attemptThornsNotification(thornsDamage);
@@ -90,7 +106,7 @@ public class EntityDamageManager
 			
 			if (rpgClass != null)
 			{
-				if (rpgClass.getID() == rpgDefender.getPlayerConfigFile().getCombatClass())
+				if (rpgClass.getID() == rpgDefender.getPlayerConfig().getCombatClass())
 					damage = damage * FC_Rpg.passiveConfig.getStrongerParry(); //25% damage reduction for blocking as defender.
 				else
 					damage = damage * .9; //10% damage reduction for blocking.
@@ -103,7 +119,7 @@ public class EntityDamageManager
 		if (rpgDefender.getStatusActiveRpgPlayer(EffectIDs.TAUNT) == true)
 		{
 			//Apply taunt damage reduction.
-			damage = damage * rpgDefender.getPlayerConfigFile().getStatusMagnitude(EffectIDs.TAUNT);
+			damage = damage * rpgDefender.getPlayerConfig().getStatusMagnitude(EffectIDs.TAUNT);
 		}
 		
 		//Deal damage greater than 0.
@@ -170,7 +186,7 @@ public class EntityDamageManager
 		double bonusPercent = 0;
 		int level1 = 0;
 		int level2 = 0;
-		int fireUses = rpgAttacker.getPlayerConfigFile().getStatusUses(EffectIDs.FIRE_ARROW);
+		int fireUses = rpgAttacker.getPlayerConfig().getStatusUses(EffectIDs.FIRE_ARROW);
 		boolean playerLevelHigher = false;
 		boolean disableDrops = false;
 		
@@ -193,7 +209,7 @@ public class EntityDamageManager
 				((LivingEntity) entityDefender).setFireTicks(20);	 //set the mob on fire!
 				
 				//Remove a fire arrow use.
-				rpgAttacker.getPlayerConfigFile().setStatusUses(EffectIDs.FIRE_ARROW, fireUses - 1);
+				rpgAttacker.getPlayerConfig().setStatusUses(EffectIDs.FIRE_ARROW, fireUses - 1);
 				
 				//Then return
 				return;
@@ -204,7 +220,7 @@ public class EntityDamageManager
 		if (rpgAttacker.getStatusActiveRpgPlayer(EffectIDs.ATTACK))
 		{
 			//Increase attack damage by its magnitude.
-			damage = damage * rpgAttacker.getPlayerConfigFile().getStatusMagnitude(EffectIDs.ATTACK);
+			damage = damage * rpgAttacker.getPlayerConfig().getStatusMagnitude(EffectIDs.ATTACK);
 		}
 		
 		damage = damage * rpgAttacker.getEnchantmentOffensiveBonuses(Enchantment.DAMAGE_ALL);
@@ -249,19 +265,19 @@ public class EntityDamageManager
 			if (rpgMobDefender.getMobAggressionCheck().isHostile() == true)
 			{
 				//Give the attacker a mob kill
-				rpgAttacker.getPlayerConfigFile().setLifetimeMobKills(rpgAttacker.getPlayerConfigFile().getLifetimeMobKills() + 1);
+				rpgAttacker.getPlayerConfig().setLifetimeMobKills(rpgAttacker.getPlayerConfig().getLifetimeMobKills() + 1);
 				
 				//5 mob defender level, 1 player defender, that's 5 - 1 = 4, that's 4 levels up, gives (20 * 4)
 				//Level 1 mob and level 5 player, that's 1 - 5, which is -4, give -20 * 4
-				if (rpgMobDefender.getLevel() > rpgAttacker.getPlayerConfigFile().getClassLevel())
+				if (rpgMobDefender.getLevel() > rpgAttacker.getPlayerConfig().getClassLevel())
 				{
 					level1 = rpgMobDefender.getLevel();
-					level2 = rpgAttacker.getPlayerConfigFile().getClassLevel();
+					level2 = rpgAttacker.getPlayerConfig().getClassLevel();
 					playerLevelHigher = false;
 				}
 				else
 				{
-					level1 = rpgAttacker.getPlayerConfigFile().getClassLevel();
+					level1 = rpgAttacker.getPlayerConfig().getClassLevel();
 					level2 = rpgMobDefender.getLevel();
 					playerLevelHigher = true;
 				}
@@ -269,10 +285,7 @@ public class EntityDamageManager
 				levelDifference = level1 - level2;
 				int powerLevelPrevention = FC_Rpg.generalConfig.getPowerLevelPrevention();
 				
-				//Give a bonus percent based on level difference, 1 level = 20% more.
-				if (levelDifference == 0)
-					bonusPercent = 1;
-				else if (powerLevelPrevention > -1)
+				if (powerLevelPrevention > -1)
 				{
 					if (levelDifference > powerLevelPrevention || levelDifference < powerLevelPrevention * -1)
 					{
@@ -289,24 +302,30 @@ public class EntityDamageManager
 					}
 				}
 				
-				else if (playerLevelHigher == true)
-					bonusPercent = 1 - levelDifference * FC_Rpg.generalConfig.getMobLevelLootmodifier();
-				else
-					bonusPercent = 1 + levelDifference * FC_Rpg.generalConfig.getMobLevelLootmodifier();
-				
-				//Set up loot amounts.
-				cash = rpgMobDefender.getLevel() * bonusPercent * FC_Rpg.generalConfig.getMobCashMultiplier();
-				exp = rpgMobDefender.getLevel() * bonusPercent * FC_Rpg.generalConfig.getMobExpMultiplier();
-				
-				//Add global modifiers
-				cash = cash * FC_Rpg.cashMultiplier;
-				exp = exp * FC_Rpg.expMultiplier;
-				
-				//Calculate how much loot and experience to aquire by donator
-				if (rpgAttacker.getPlayerConfigFile().isDonator())
+				if (disableDrops == false)
 				{
-					cash = cash * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
-					exp = cash * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
+					//Give a bonus percent based on level difference, 1 level = x% more.
+					if (levelDifference == 0)
+						bonusPercent = 1;
+					else if (playerLevelHigher == true)
+						bonusPercent = 1 - levelDifference * FC_Rpg.generalConfig.getMobLevelLootmodifier();
+					else
+						bonusPercent = 1 + levelDifference * FC_Rpg.generalConfig.getMobLevelLootmodifier();
+					
+					//Set up loot amounts.
+					cash = rpgMobDefender.getLevel() * bonusPercent * FC_Rpg.generalConfig.getMobCashMultiplier();
+					exp = rpgMobDefender.getLevel() * bonusPercent * FC_Rpg.generalConfig.getMobExpMultiplier();
+					
+					//Add global modifiers
+					cash = cash * FC_Rpg.eventCashMultiplier;
+					exp = exp * FC_Rpg.eventExpMultiplier;
+					
+					//Calculate how much loot and experience to aquire by donator
+					if (rpgAttacker.getPlayerConfig().isDonator())
+					{
+						cash = cash * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
+						exp = cash * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
+					}
 				}
 				
 				//If the player is in a party, then...
@@ -441,7 +460,7 @@ public class EntityDamageManager
 	{
 		Player playerDefender = rpgDefender.getPlayer();
 		double armorBonus = 1;
-		int constitution = rpgDefender.getPlayerConfigFile().getConstitution();
+		int constitution = rpgDefender.getPlayerConfig().getConstitution();
 		
 		if (playerDefender.getInventory().getHelmet() != null)
 			armorBonus = armorBonus + calcArmorModifier(playerDefender.getInventory().getHelmet().getType(), constitution);
@@ -467,7 +486,7 @@ public class EntityDamageManager
 		
 		if (rpgClass != null)
 		{
-			if (rpgClass.getName().equals(rpgDefender.getPlayerConfigFile().getCombatClass()))
+			if (rpgClass.getName().equals(rpgDefender.getPlayerConfig().getCombatClass()))
 			{
 				//Handle counter-attack chance.
 				if (rand.nextInt(FC_Rpg.passiveConfig.getCounterAttack()) == 0)
@@ -483,7 +502,7 @@ public class EntityDamageManager
 		
 		if (rpgClass != null)
 		{
-			if (rpgClass.getName().equals(rpgAttacker.getPlayerConfigFile().getCombatClass()))
+			if (rpgClass.getName().equals(rpgAttacker.getPlayerConfig().getCombatClass()))
 			{
 				//Scale damage by 1/4th
 				damage = damage * (1 + rpgAttacker.getMissingHealthDecimal() * FC_Rpg.passiveConfig.getBattleLust());
@@ -497,7 +516,7 @@ public class EntityDamageManager
 	{
 		if (caster.getStatusActiveRpgPlayer(EffectIDs.LIFESTEAL))
 		{
-			double healAmount = damage * caster.getPlayerConfigFile().getStatusMagnitude(EffectIDs.LIFESTEAL);
+			double healAmount = damage * caster.getPlayerConfig().getStatusMagnitude(EffectIDs.LIFESTEAL);
 			
 			caster.attemptHealSelfNotification(healAmount);
 			caster.heal(healAmount);

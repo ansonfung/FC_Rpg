@@ -93,7 +93,7 @@ public class TreasureConfig extends ConfigGod
 			setVersion(0.1);
 			
 			//Reset settings.
-			setDropChances(3500,2000,1000,3000,1000);
+			setDropChances(3500,2000,1000,300,100);
 			setEnchantChances(5000,2500,1200,700,300);
 			setEnchantLevelFiveChance(5000, 8000, 9500, 9900);
 			setEnchantLevelFourChance(5540, 8870, 9890);
@@ -175,7 +175,9 @@ public class TreasureConfig extends ConfigGod
 	public List<ItemStack> getRandomDrops(int entityLevel)
 	{
 		List<ItemStack> items = new ArrayList<ItemStack>();
+		rand = new Random();
 		ItemStack drop = null;
+		totalDropsCount = 0;
 		
 		//While successful, keep getting items.
 		while (getItemDropChance() == true)
@@ -194,7 +196,9 @@ public class TreasureConfig extends ConfigGod
 	public List<ItemStack> getRandomTreasure(int entityLevel, int size)
 	{
 		List<ItemStack> items = new ArrayList<ItemStack>();
+		rand = new Random();
 		ItemStack drop = null;
+		totalDropsCount = 0;
 		
 		//Get a fixed amount of loot.
 		for (int i = 0; i < size; i++)
@@ -215,12 +219,18 @@ public class TreasureConfig extends ConfigGod
 		//Variable Declarations
 		List<Integer> dropChances = getDropChances();
 		
-		//Return a chance to drop the item
-		if (rand.nextInt(randomConstant) < dropChances.get(totalDropsCount))
-			return true;
-		
-		//Increase the number of items that have been dropped.
-		totalDropsCount++;
+		//Return true to drop an item if true.
+		try
+		{
+			if (rand.nextInt(randomConstant) < dropChances.get(totalDropsCount))
+			{
+				totalDropsCount++;
+				return true;
+			}
+		}
+		catch (IndexOutOfBoundsException e) { 
+			return false; 
+		}
 		
 		return false;
 	}
@@ -236,7 +246,7 @@ public class TreasureConfig extends ConfigGod
 		if (mobLevel > 0)
 		{
 			//Get a random item in the treasures mob level range.
-			while (mobLevel < t.rangeMin && mobLevel > t.rangeMin)
+			while (mobLevel < t.rangeMin || mobLevel > t.rangeMax)
 			{
 				t = treasureList.get(rand.nextInt(treasureList.size()));
 				
@@ -244,7 +254,7 @@ public class TreasureConfig extends ConfigGod
 				
 				if (breakLimit > 50)
 				{
-					FC_Rpg.plugin.getLogger().info("Unable to find a proper item to drop due to mob level ranges.");
+					FC_Rpg.plugin.getLogger().info("Failed to find item in proper range.");
 					return null;
 				}
 			}

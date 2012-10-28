@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.Destro168.Configs.PlayerFileConfig;
+import me.Destro168.Configs.PlayerConfig;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.RpgParty;
 import me.Destro168.Messaging.BroadcastLib;
@@ -45,7 +45,7 @@ public class RpgManager
 			//Cancel past player updates.
 			stopPlayerUpdates();
 			
-			if (rpgPlayer.getPlayerConfigFile().getIsActive() == false)
+			if (rpgPlayer.getPlayerConfig().getIsActive() == false)
 				return;
 			
 			updateTask = Bukkit.getScheduler().scheduleAsyncRepeatingTask(FC_Rpg.plugin, new Runnable()
@@ -71,7 +71,7 @@ public class RpgManager
 			//Cancel any past mana regenerations.
 			cancelManaRegen();
 			
-			if (rpgPlayer.getPlayerConfigFile().getIsActive() == false)
+			if (rpgPlayer.getPlayerConfig().getIsActive() == false)
 				return;
 			
 			//Start a new mana regeneration.
@@ -169,7 +169,7 @@ public class RpgManager
     		piMap.put(player, pi);
     		
     		//If they aren't active, then we want to make them active by creating their rpg player.
-    		if (rpgPlayer.getPlayerConfigFile().getIsActive() == false)
+    		if (rpgPlayer.getPlayerConfig().getIsActive() == false)
     			setPlayerStart("Swordsman", player, false);	//Store the player as a new player.
     		
     		piMap.get(player).startTasks();
@@ -179,7 +179,7 @@ public class RpgManager
     public RpgPlayer getRpgPlayer(Player player)
     {
     	//Create a pcf to check if a player config file is created or not.
-    	PlayerFileConfig pcf = new PlayerFileConfig(player.getName());
+    	PlayerConfig pcf = new PlayerConfig(player.getName());
     	
 		//If the player config file isn't active return.
 		if (pcf.getIsActive() == false)
@@ -285,7 +285,7 @@ public class RpgManager
 		//Attempt to delete player data if older than 14 days.
 		for (OfflinePlayer player : Bukkit.getOfflinePlayers())
 		{
-			PlayerFileConfig file = new PlayerFileConfig(player.getName());
+			PlayerConfig file = new PlayerConfig(player.getName());
 			
 			if (player.isOnline() == true)
 				return;

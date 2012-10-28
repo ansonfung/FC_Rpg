@@ -1,7 +1,6 @@
 package me.Destro168.Configs;
 
 import me.Destro168.ConfigManagers.ConfigGod;
-import me.Destro168.ConfigManagers.FileConfigPlus;
 import me.Destro168.FC_Rpg.FC_Rpg;
 
 import org.bukkit.Location;
@@ -10,17 +9,17 @@ public class DungeonConfig extends ConfigGod
 {
 	private WorldConfig wm;
 	
-	private void setName(int dNum, String x) { ccm.set(getDP(dNum) + "name", x); }
-	private void setCost(int dNum, double x) { ccm.set(getDP(dNum) + "cost", x); }
-	private void setSpawnCount(int dNum, int x) { ccm.set(getDP(dNum) + "spawnCount", x); }
-	private void setLevelMin(int dNum, int x) { ccm.set(getDP(dNum) + "levelMin", x); }
-	private void setLevelMax(int dNum, int x) { ccm.set(getDP(dNum) + "levelMax", x); }
-	private void setLobby(int dNum, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"lobby",world,x,y,z,a,b); }
-	private void setStart(int dNum, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"start",world,x,y,z,a,b); }
-	private void setExit(int dNum, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"exit",world,x,y,z,a,b); }
-	private void setBossSpawn(int dNum, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"bossSpawn",world,x,y,z,a,b); }
-	private void setTreasureChest(int dNum, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"treasure",world,x,y,z,a,b); }
-	private int setRange1(int dNum, String world, double x, double y, double z, float a, float b) 
+	public void setName(int dNum, String x) { ccm.set(getDP(dNum) + "name", x); }
+	public void setCost(int dNum, double x) { ccm.set(getDP(dNum) + "cost", x); }
+	public void setSpawnCount(int dNum, int x) { ccm.set(getDP(dNum) + "spawnCount", x); }
+	public void setLevelMin(int dNum, int x) { ccm.set(getDP(dNum) + "levelMin", x); }
+	public void setLevelMax(int dNum, int x) { ccm.set(getDP(dNum) + "levelMax", x); }
+	public void setLobby(int dNum, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"lobby",world,x,y,z,a,b); }
+	public void setStart(int dNum, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"start",world,x,y,z,a,b); }
+	public void setExit(int dNum, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"exit",world,x,y,z,a,b); }
+	public void setBossSpawn(int dNum, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"bossSpawn",world,x,y,z,a,b); }
+	public void setTreasureChest(int dNum, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"treasure",world,x,y,z,a,b); }
+	public int setRange1(int dNum, String world, double x, double y, double z, float a, float b) 
 	{
 		//Variable Declarations
 		int emptyIndex = 0;
@@ -46,12 +45,12 @@ public class DungeonConfig extends ConfigGod
 		//Return an emptyIndex.
 		return emptyIndex;
 	}
-	private void setRange2(int dNum, int index, String world, double x, double y, double z, float a, float b) //The index is acquired from setMin()
+	public void setRange2(int dNum, int index, String world, double x, double y, double z, float a, float b) //The index is acquired from setMin()
 	{
 		String fullReferenceString = "range2." + index;
 		setLocation(dNum,fullReferenceString,world,x,y,z,a,b);
 	}
-	private void setSpawnChance(int dNum, int index, int x) //The index is acquired from setRange1()
+	public void setSpawnChance(int dNum, int index, int x) //The index is acquired from setRange1()
 	{
 		ccm.set(getDP(dNum) + "spawnChance." + index, x);
 	}
@@ -69,16 +68,12 @@ public class DungeonConfig extends ConfigGod
 	public Location getRange1(int dNum, int index) { return getLocation(dNum,"range1." + index); }
 	public Location getRange2(int dNum, int index) { return getLocation(dNum,"range2." + index); }
 	public int getSpawnChance(int dNum, int index) { return ccm.getInt(getDP(dNum) + "spawnChance." + index); }
-	private void setLocation(int dNum, String field, String world, double x, double y, double z, float a, float b)
+	
+	public void setLocation(int dNum, String field, String world, double x, double y, double z, float a, float b)
 	{
-		FileConfigPlus fcp = new FileConfigPlus(ccm.getConfig());
-		fcp.setLocation(getDP(dNum) + field, world, x, y, z, a, b);
+		ccm.setLocation(getDP(dNum) + field, world, x, y, z, a, b);
 	}
-	private Location getLocation(int dNum, String field)
-	{
-		FileConfigPlus fcp = new FileConfigPlus(ccm.getConfig());
-		return fcp.getLocation(getDP(dNum) + field);
-	}
+	public Location getLocation(int dNum, String field) { return ccm.getLocation(getDP(dNum) + field); }
 	
 	public DungeonConfig()
 	{

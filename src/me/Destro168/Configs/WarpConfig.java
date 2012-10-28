@@ -19,7 +19,6 @@ public class WarpConfig extends ConfigGod
 	private void setCost(int i, double x) { ccm.set(prefix + i + ".cost", x); }
 	private void setAdmin(int i, boolean x) { ccm.set(prefix + i + ".admin", x); }
 	private void setDonator(int i, boolean x) { ccm.set(prefix + i + ".donator", x); }
-	
 	private void setDestination(int i, Location loc) 
 	{
 		if (loc == null)
@@ -28,7 +27,7 @@ public class WarpConfig extends ConfigGod
 			return;
 		}
 		
-		ccm.setLocation(prefix + i + ".destination", loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ());
+		ccm.setLocation(prefix + i + ".destination", loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
 	}
 	
 	public String getName(int i) { return ccm.getString(prefix + i + ".name"); }
@@ -38,7 +37,6 @@ public class WarpConfig extends ConfigGod
 	public double getCost(int i) { return ccm.getDouble(prefix + i + ".cost"); }
 	public boolean getAdmin(int i) { return ccm.getBoolean(prefix + i + ".admin"); }
 	public boolean getDonator(int i) { return ccm.getBoolean(prefix + i + ".donator"); }
-	
 	public Location getDestination(int i)
 	{
 		return ccm.getLocation(prefix + i + ".destination");

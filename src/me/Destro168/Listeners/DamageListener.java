@@ -16,6 +16,7 @@ import me.Destro168.Util.DistanceModifierLib;
 import me.Destro168.Util.MobAggressionCheck;
 
 import org.bukkit.GameMode;
+import org.bukkit.craftbukkit.entity.CraftLightningStrike;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Creature;
@@ -63,7 +64,7 @@ public class DamageListener implements Listener
 	LivingEntity creatureAttacker;
 	LivingEntity mobDefender;
 	
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.HIGH)
 	public void onEntityDamage(EntityDamageEvent event_)
 	{
 		//If the event is cancelled, then we want to return.
@@ -99,7 +100,7 @@ public class DamageListener implements Listener
 				Player player = (Player) event.getEntity();
 				
 				//Prevent damage done to already dead players
-				if (FC_Rpg.rpgManager.getRpgPlayer(player).getPlayerConfigFile().getIsActive() == true);
+				if (FC_Rpg.rpgManager.getRpgPlayer(player).getPlayerConfig().getIsActive() == true);
 				{
 					if (FC_Rpg.rpgManager.getRpgPlayer(player).getIsAlive() == false)
 						return;
@@ -306,7 +307,7 @@ public class DamageListener implements Listener
 				{
 					//Variable Initializations
 					rpgAttacker = rpgPlayer;
-					spellBook = rpgAttacker.getPlayerConfigFile().getRpgClass().getSpellBook();
+					spellBook = rpgAttacker.getPlayerConfig().getRpgClass().getSpellBook();
 					damageType = 2;
 					
 					for (int i = 0; i < spellBook.size(); i++)
@@ -317,9 +318,9 @@ public class DamageListener implements Listener
 							
 							FC_Rpg.plugin.getLogger().info("I: " + i);
 							FC_Rpg.plugin.getLogger().info("I: " + spellBook.get(i).getName());
-							FC_Rpg.plugin.getLogger().info("I: " + rpgAttacker.getPlayerConfigFile().getSpellLevel(i));
+							FC_Rpg.plugin.getLogger().info("I: " + rpgAttacker.getPlayerConfig().getSpellLevel(i));
 							
-							damage = sc.updatefinalSpellMagnitude(rpgAttacker, spellBook.get(i), (rpgAttacker.getPlayerConfigFile().getSpellLevel(i) - 1));
+							damage = sc.updatefinalSpellMagnitude(rpgAttacker, spellBook.get(i), (rpgAttacker.getPlayerConfig().getSpellLevel(i) - 1));
 							break;
 						}
 					}
@@ -354,7 +355,7 @@ public class DamageListener implements Listener
 				rpgAttacker = FC_Rpg.rpgManager.getRpgPlayer(playerAttacker);
 				
 				//Halve the damage of arrows.
-				damage = rpgAttacker.getPlayerConfigFile().getAttack();
+				damage = rpgAttacker.getPlayerConfig().getAttack();
 			}
 			else
 			{
@@ -374,6 +375,14 @@ public class DamageListener implements Listener
 			
 			//Remove all arrows.
 			arrow.remove();
+		}
+		
+		else if (e.getDamager() instanceof CraftLightningStrike)
+		{
+			//Initialize rpgMobAttacker;
+			rpgMobAttacker = new RpgMonster();
+			
+			damage = rpgMobAttacker.getStrength();
 		}
 		
 		//Melee player attacks
@@ -425,7 +434,7 @@ public class DamageListener implements Listener
 		if (rpgAttacker != null)
 		{
 			//If disabled cancel attack
-			if (rpgAttacker.getStatusActiveEntity(rpgAttacker.getPlayerConfigFile().getStatusDuration(EffectIDs.DISABLED)))
+			if (rpgAttacker.getStatusActiveEntity(rpgAttacker.getPlayerConfig().getStatusDuration(EffectIDs.DISABLED)))
 			{
 				cancelRpgDamage = true;
 				return 0;

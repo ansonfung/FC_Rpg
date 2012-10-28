@@ -28,7 +28,7 @@ public class PlayerInteractionListener implements Listener
 	WorldConfig wm;
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onLeftClick(PlayerInteractEvent event)
+	public void onClick(PlayerInteractEvent event)
 	{
 		//Variable Declerations
 		Sign sign;
@@ -111,7 +111,7 @@ public class PlayerInteractionListener implements Listener
 		if (leftClick == true)
 		{
 			//If auto-cast is enabled, we cast the spell.
-			if (rp.getPlayerConfigFile().getAutoCast() == true)
+			if (rp.getPlayerConfig().getAutoCast() == true)
 			{
 				//Then set active spell.
 				rp.prepareSpell(false);
@@ -120,10 +120,10 @@ public class PlayerInteractionListener implements Listener
 				rp.castSpell(null, 0, 0);
 			}
 			
-			else if (rp.getPlayerConfigFile().getActiveSpell() != null)
+			else if (rp.getPlayerConfig().getActiveSpell() != null)
 			{
 				//If a spell is ready to be cast, then...
-				if (!rp.getPlayerConfigFile().getActiveSpell().equals("none"))
+				if (!rp.getPlayerConfig().getActiveSpell().equals("none"))
 				{
 					//Then set active spell.
 					rp.prepareSpell(false);
@@ -144,8 +144,30 @@ public class PlayerInteractionListener implements Listener
 		}
 	}
 	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onClick3(PlayerInteractEvent event)
+	{
+		boolean isLeft;
+		
+		if (event.getAction() == Action.LEFT_CLICK_BLOCK)
+			isLeft = true;
+		else if ((event.getAction() == Action.RIGHT_CLICK_BLOCK))
+			isLeft = false;
+		else
+			return;
+		
+		if (player == null)
+			return;
+		
+		if (!player.getItemInHand().getType().equals(Material.getMaterial(FC_Rpg.generalConfig.getDungeonSelectionToolID())))
+			return;
+		
+		//Select the two points.
+		FC_Rpg.sv.selectNewPoint(event.getPlayer(), event.getClickedBlock().getLocation(), isLeft);
+	}
+	
 	//If the player left-clicks a sign, we want to evaluate this.
-	public void parseSignClick(Sign sign)
+	private void parseSignClick(Sign sign)
 	{
 		String pickedClass = "";
 		ColorLib cl = new ColorLib();
@@ -166,7 +188,7 @@ public class PlayerInteractionListener implements Listener
 						//Prevent players from picking a job/class again without respecing.
 						if (FC_Rpg.rpgManager.getRpgPlayer(player) != null)
 						{
-							if (FC_Rpg.rpgManager.getRpgPlayer(player).getPlayerConfigFile().getIsActive() == true)
+							if (FC_Rpg.rpgManager.getRpgPlayer(player).getPlayerConfig().getIsActive() == true)
 							{
 								msgLib.standardMessage("You have to use /reset before picking a class.");
 								return;
@@ -227,7 +249,7 @@ public class PlayerInteractionListener implements Listener
 	}
 
 	//Teleports players based on sign text.
-	public void teleportPlayer(RpgPlayer rpgPlayer, String text)
+	private void teleportPlayer(RpgPlayer rpgPlayer, String text)
 	{
 		//Variable declarations
 		rpgPlayer = FC_Rpg.rpgManager.getRpgPlayer(player);
@@ -338,7 +360,7 @@ public class PlayerInteractionListener implements Listener
 		if (text.contains("-"))
 		{
 			teleportMessage("You Have Exited The Dungeon " + dm.getName(dNumber) + "!","");
-			FC_Rpg.dungeon[dNumber].removeDungeoneer(player, player,true);
+			FC_Rpg.dungeonEventArray[dNumber].removeDungeoneer(player, player,true);
 			player.teleport(dm.getExit(dNumber));
 			
 			//Also return for exiting.
@@ -350,7 +372,7 @@ public class PlayerInteractionListener implements Listener
 			return;
 		
 		//Store dungeon for faster access.
-		DungeonEvent dungeon = FC_Rpg.dungeon[dNumber];
+		DungeonEvent dungeon = FC_Rpg.dungeonEventArray[dNumber];
 		
 		if (dungeon.getPhase() == 0 || dungeon.getPhase() == 1)
 		{

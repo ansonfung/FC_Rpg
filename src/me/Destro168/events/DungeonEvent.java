@@ -37,12 +37,12 @@ public class DungeonEvent extends GeneralEvent
 	public String getDungeonName() { return dungeonName; }
 	public int getLowestLevel() { updateLowestLevel(); return lowestLevel; }
 	
-	public DungeonEvent()
+	public DungeonEvent(int dungeonNumber_)
 	{
-		setDungeonDefaults();
+		setDungeonDefaults(dungeonNumber_);
 	}
 	
-	public void setDungeonDefaults()
+	public void setDungeonDefaults(int dungeonNumber_)
 	{
 		super.setDefaults();
 		
@@ -55,18 +55,18 @@ public class DungeonEvent extends GeneralEvent
 		
 		//Reset variables.
 		tid = new int[8];
-		dungeonNumber = -1;
 		lowestLevel = 999999;
-		dungeonWorld = null;
 		dm = new DungeonConfig();
-		isRpgDungeon = false;
+		
+		//Set the dungeon number.
+		setDungeonNumber(dungeonNumber_);
 	}
 	
 	public boolean addDungeoneer(Player player, int dungeonNumber)
 	{
 		//Variable declarations.
 		RpgMessageLib msgLib = new RpgMessageLib(player);
-		int level = FC_Rpg.rpgManager.getRpgPlayer(player).getPlayerConfigFile().getClassLevel();
+		int level = FC_Rpg.rpgManager.getRpgPlayer(player).getPlayerConfig().getClassLevel();
 		
 		//Update the dungeonNumber
 		setDungeonNumber(dungeonNumber);
@@ -124,7 +124,7 @@ public class DungeonEvent extends GeneralEvent
 					initialize(dungeonNumber_);
 				}
 			}
-		}, 12); //TODO
+		}, 1200);
 	}
 	
 	public void removeDungeoneer(Player requester, Player playerToRemove, boolean displayMessages)
@@ -134,19 +134,7 @@ public class DungeonEvent extends GeneralEvent
 		if (isHappening() == false)
 			return;
 		
-		//Check if one player remains in the dungeon or not.
-		boolean hasOne = false;
-		
-		for (int i = 0; i < participant.length; i++)
-		{
-			if (participant[i] != null)
-			{
-				hasOne = true;
-				break;
-			}
-		}
-		
-		if (hasOne == false)
+		if (participantList.size() > 0)
 			end(false);
 	}
 	
@@ -275,11 +263,11 @@ public class DungeonEvent extends GeneralEvent
 		lowestLevel = 999999;
 		
 		//Change lowest level based on player levels.
-		for (Player player : participant)
+		for (Player player : participantList)
 		{
 			if (player != null)
 			{
-				level = FC_Rpg.rpgManager.getRpgPlayer(player).getPlayerConfigFile().getClassLevel();
+				level = FC_Rpg.rpgManager.getRpgPlayer(player).getPlayerConfig().getClassLevel();
 				
 				if (level < lowestLevel)
 					lowestLevel = level;
@@ -294,11 +282,11 @@ public class DungeonEvent extends GeneralEvent
 			return;
 		
 		//Change lowest level based on player levels.
-		for (Player player : participant)
+		for (Player player : participantList)
 		{
 			if (player != null)
 			{
-				if (FC_Rpg.rpgManager.getRpgPlayer(player).getPlayerConfigFile().getClassLevel() > lowestLevel + 5)
+				if (FC_Rpg.rpgManager.getRpgPlayer(player).getPlayerConfig().getClassLevel() > lowestLevel + 5)
 				{
 					//Refund players
 					FC_Rpg.economy.depositPlayer(player.getName(), dm.getCost(dungeonNumber));
@@ -663,7 +651,7 @@ public class DungeonEvent extends GeneralEvent
 					teleportAllParticipants(dm.getExit(dungeonNumber));
 					
 					//Reset everything.
-					setDungeonDefaults();
+					setDungeonDefaults(dungeonNumber);
 				}
 			}, 1200);
 		}
@@ -676,7 +664,7 @@ public class DungeonEvent extends GeneralEvent
 			teleportAllParticipants(dm.getExit(dungeonNumber));
 			
 			//Reset everything.
-			setDungeonDefaults();
+			setDungeonDefaults(dungeonNumber);
 		}
 	}
 }

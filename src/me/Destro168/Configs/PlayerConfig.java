@@ -14,7 +14,7 @@ import me.Destro168.LoadedObjects.RpgClass;
 import me.Destro168.TimeUtils.DateManager;
 
 // Handles storing of player data in files.
-public class PlayerFileConfig extends ConfigGod
+public class PlayerConfig extends ConfigGod
 {
 	private int levelCap;
 	protected RpgClass rpgClass;
@@ -118,7 +118,7 @@ public class PlayerFileConfig extends ConfigGod
 	public int getLevelUpAmount() { return (int) (getClassLevel() * getClassLevel() * FC_Rpg.generalConfig.getExpScaleRate() + FC_Rpg.generalConfig.getExpScaleBase()); }
 	public void resetActiveSpell() { ccm.set(prefix + "activeSpell", "none"); }
 	
-	public PlayerFileConfig()
+	public PlayerConfig()
 	{
 		super(FC_Rpg.dataFolderAbsolutePath, "Rpg");
 		updateLevelCap();
@@ -127,7 +127,7 @@ public class PlayerFileConfig extends ConfigGod
 		name = "";
 	}
 	
-	public PlayerFileConfig(String playerName)
+	public PlayerConfig(String playerName)
 	{
 		super(FC_Rpg.dataFolderAbsolutePath, "Rpg");
 		updateLevelCap();
@@ -388,6 +388,11 @@ public class PlayerFileConfig extends ConfigGod
 
 		//Give the donator their time.
 		setDonatorTime(gc.getTime().getTime());
+	}
+    
+    public double getPromotionCost()
+	{
+		return FC_Rpg.generalConfig.getJobRankCosts().get(getJobRank() - 1);
 	}
 }
 

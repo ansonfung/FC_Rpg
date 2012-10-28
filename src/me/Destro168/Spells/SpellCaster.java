@@ -89,12 +89,12 @@ public class SpellCaster
 		damage = damage_;
 		damageType = damageType_;
 		playerCaster = spellCaster_.getPlayer();
-		combatClass = rpgCaster.getPlayerConfigFile().getCombatClass();
+		combatClass = rpgCaster.getPlayerConfig().getCombatClass();
 		
 		//Variable Declarations
-		String activeSpell = rpgCaster.getPlayerConfigFile().getActiveSpell();
+		String activeSpell = rpgCaster.getPlayerConfig().getActiveSpell();
 		MessageLib msgLib = new MessageLib(playerCaster);
-		List<Spell> spellBook = rpgCaster.getPlayerConfigFile().getRpgClass().getSpellBook();
+		List<Spell> spellBook = rpgCaster.getPlayerConfig().getRpgClass().getSpellBook();
 		
 		//If the player has no active spell return.
 		if (activeSpell == null)
@@ -127,7 +127,7 @@ public class SpellCaster
 			return false;
 		
 		//Assign Variables.
-		spellTier = rpgCaster.getPlayerConfigFile().getSpellLevel(spellNumber) - 1;
+		spellTier = rpgCaster.getPlayerConfig().getSpellLevel(spellNumber) - 1;
 		
 		//If the spell is restricted, then...
 		if (spell.getRestricted())
@@ -171,7 +171,7 @@ public class SpellCaster
 		}
 		
 		//Reset active spell for caster.
-		rpgCaster.getPlayerConfigFile().resetActiveSpell();
+		rpgCaster.getPlayerConfig().resetActiveSpell();
 		
 		//Store spell information for use later.
 		try { duration = spell.getDuration().get(spellTier); } catch (NullPointerException e) {  }
@@ -204,7 +204,7 @@ public class SpellCaster
 		}
 		
 		else if (x == EffectIDs.FIRE_ARROW)
-			rpgCaster.getPlayerConfigFile().setStatusUses(x, (int) finalSpellMagnitude);
+			rpgCaster.getPlayerConfig().setStatusUses(x, (int) finalSpellMagnitude);
 		
 		else if (x == EffectIDs.DAMAGE_BOOST)
 			damage = damage * finalSpellMagnitude;
@@ -310,15 +310,15 @@ public class SpellCaster
 			//For all friendly party members
 			for (RpgPlayer partyMember : FC_Rpg.rpgManager.getNearbyPartiedRpgPlayers(playerCaster, radius))
 			{
-				partyMember.getPlayerConfigFile().setStatusDuration(effectID, duration);
-				partyMember.getPlayerConfigFile().setStatusMagnitude(effectID, finalSpellMagnitude);
+				partyMember.getPlayerConfig().setStatusDuration(effectID, duration);
+				partyMember.getPlayerConfig().setStatusMagnitude(effectID, finalSpellMagnitude);
 			}
 		}
 		else
 		{
 			//Give buff to only caster.
-			rpgCaster.getPlayerConfigFile().setStatusDuration(effectID, duration);
-			rpgCaster.getPlayerConfigFile().setStatusMagnitude(effectID, finalSpellMagnitude);
+			rpgCaster.getPlayerConfig().setStatusDuration(effectID, duration);
+			rpgCaster.getPlayerConfig().setStatusMagnitude(effectID, finalSpellMagnitude);
 		}
 	}
 	
@@ -525,7 +525,7 @@ public class SpellCaster
 			rpgMobDefender.setStatusDisabled((int) finalSpellMagnitude);
 		
 		else if (playerDefender != null)
-			rpgDefender.getPlayerConfigFile().setStatusMagnitude(EffectIDs.DISABLED, finalSpellMagnitude);
+			rpgDefender.getPlayerConfig().setStatusMagnitude(EffectIDs.DISABLED, finalSpellMagnitude);
 		
 		return true;
 	}

@@ -46,6 +46,8 @@ public class GeneralConfig extends ConfigGod
 	private void setPowerLevelPrevention(int x) { ccm.set(prefix + "powerLevelPrevention", x); }
 	private void setExpScaleRate(int x) { ccm.set(prefix + "expScaleRate", x); }
 	private void setExpScaleBase(int x) { ccm.set(prefix + "expScaleBase", x); }
+	private void setDisableEnderPearls(boolean x) { ccm.set(prefix + "disableEnderPearls", x); }
+	private void setDungeonSelectionToolID(int x) { ccm.set(prefix + "dungeonSelectionToolID", x); }
 	
 	public String getDefaultPrefix() { return ccm.getString(prefix + "defaultPrefix"); }
 	public boolean getPerfectBirch() { return ccm.getBoolean(prefix + "perfectBirch"); }
@@ -67,14 +69,16 @@ public class GeneralConfig extends ConfigGod
 	public double getZScale() { return ccm.getDouble(prefix + "zScale"); }
 	public boolean getRpgChatOverride() { return ccm.getBoolean(prefix + "rpgChatOverride"); }
 	public long getTimedItemsInterval() { return ccm.getLong(prefix + "timedItemsInterval"); }
-	public double getLevelsPerSkillPoint() { return ccm.getInt(prefix + "levelsPerSkillPoint"); }
+	public int getLevelsPerSkillPoint() { return ccm.getInt(prefix + "levelsPerSkillPoint"); }
 	public int getStatsPerLevel() { return ccm.getInt(prefix + "statsPerLevel"); }
-	public int getMobLevelLootmodifier() { return ccm.getInt(prefix + "mobLevelLootModifier"); }
-	public int getMobCashMultiplier() { return ccm.getInt(prefix + "mobCashMultiplier"); }
-	public int getMobExpMultiplier() { return ccm.getInt(prefix + "mobExpMultiplier"); }
+	public double getMobLevelLootmodifier() { return ccm.getDouble(prefix + "mobLevelLootModifier"); }
+	public double getMobCashMultiplier() { return ccm.getDouble(prefix + "mobCashMultiplier"); }
+	public double getMobExpMultiplier() { return ccm.getDouble(prefix + "mobExpMultiplier"); }
 	public int getPowerLevelPrevention() { return ccm.getInt(prefix + "powerLevelPrevention"); }
-	public double getExpScaleRate() { return ccm.getInt(prefix + "expScaleRate"); }
-	public double getExpScaleBase() { return ccm.getInt(prefix + "expScaleBase"); }
+	public double getExpScaleRate() { return ccm.getDouble(prefix + "expScaleRate"); }
+	public double getExpScaleBase() { return ccm.getDouble(prefix + "expScaleBase"); }
+	public boolean getDisableEnderPearls() { return ccm.getBoolean(prefix + "disableEnderPearls"); }
+	public int getDungeonSelectionToolID() { return ccm.getInt(prefix + "dungeonSelectionToolID"); }
 	
 	public GeneralConfig()
 	{
@@ -154,6 +158,14 @@ public class GeneralConfig extends ConfigGod
 			setPowerLevelPrevention(5);
 			setExpScaleRate(3);
 			setExpScaleBase(11);
+		}
+		
+		if (getVersion() < 0.5)
+		{
+			setVersion(0.5);
+			
+			setDisableEnderPearls(true);
+			setDungeonSelectionToolID(268);
 		}
 		
 		//Load up timed items.

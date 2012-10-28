@@ -1,6 +1,6 @@
 name: FC_Rpg
 main: me.Destro168.FC_Rpg.FC_Rpg
-version: 0.4
+version: 0.5
 description: Handles RPG aspects of the server.
 commands:
    bighelp:
@@ -37,5 +37,7 @@ commands:
       description: This command handles all admin commands.
    spell:
       description: This command accesses spell commands.
+   modify:
+      description: This command accesses modify commands.
 softdepend: [Multiverse]
 depend: [WorldEdit, WorldGuard, FC_Suite_Shared]
