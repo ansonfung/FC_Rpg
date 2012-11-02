@@ -254,6 +254,10 @@ public class TreasureConfig extends ConfigGod
 				
 				if (breakLimit > 50)
 				{
+					//Don't attempt to drop items when dungeons are started with no players (ie, while debugging).
+					if (mobLevel == 999999)
+						return null;
+					
 					FC_Rpg.plugin.getLogger().info("Failed to find item in proper range.");
 					return null;
 				}

@@ -168,6 +168,11 @@ public class GeneralConfig extends ConfigGod
 			setDungeonSelectionToolID(268);
 		}
 		
+		if (getVersion() < 0.6)
+		{
+			setVersion(0.6);
+		}
+		
 		//Load up timed items.
 		loadTimedItems();
 	}

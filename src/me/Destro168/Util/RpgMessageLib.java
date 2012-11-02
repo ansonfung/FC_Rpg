@@ -87,7 +87,7 @@ public class RpgMessageLib extends MessageLib
 	
 	public boolean errorNotDonator()
 	{
-		standardMessage("Your are not a donator!");
+		standardMessage("You're not a donator!");
 		return true;
 	}
 	
@@ -97,13 +97,24 @@ public class RpgMessageLib extends MessageLib
 		return true;
 	}
 	
+	public boolean errorWarpDoesNotExist()
+	{
+		standardMessage("Warp specified does not exist.");
+		return true;
+	}
+	
 	public boolean bigHelp()
 	{
+		helpFaq();
 		helpRpg();
-		helpClass();
-		helpJob();
+		helpDungeon();
+		helpDungeonDefinition();
+		helpPvp();
 		helpSpell();
 		helpParty();
+		helpClass();
+		helpJob();
+		helpWarp();
 		helpDonator();
 		helpAdmin();
 		helpOwner();
@@ -163,6 +174,7 @@ public class RpgMessageLib extends MessageLib
 		
 		if (perms.isAdmin())
 		{
+			standardMessage("[A] /w", "Help with warps.");
 			standardMessage("[A] /dungeon","Help for dungeons.");
 			standardMessage("[A] /modify","Help for modify command.");
 			standardMessage("[A] /rpg admin","Admin Commands.");
@@ -176,17 +188,39 @@ public class RpgMessageLib extends MessageLib
 	
 	public boolean helpDungeon()
 	{
-		if (perms.isAdmin())
-		{
-			standardHeader("Dungeon Help ~ 0 = D1, 1 = D2");
-			standardMessage("/dungeon list","List dungeons.");
-			standardMessage("/dungeon info [num]","See information regarding a specific dungeon.");
-			standardMessage("/dungeon start [num]","Start a dungeon.");
-			standardMessage("/dungeon stop [num]","Stop a dungeon.");
-			standardMessage("/dungeon check [num]","Check if any mobs are left to update loot chest.");
-			standardMessage("/dungeon kick [num] [name]","Kick somebody from a dungeon.");
-			standardMessage("/dungeon define [num]","After selecting two dungeon points use this to define a dungeon.");
-		}
+		if (!perms.isAdmin())
+			return errorNoPermission();
+		
+		standardHeader("Dungeon Help ~ 0 = D1, 1 = D2");
+		standardMessage("/dungeon list","List dungeons.");
+		standardMessage("/dungeon info [num]","See information regarding a specific dungeon.");
+		standardMessage("/dungeon start [num]","Start a dungeon.");
+		standardMessage("/dungeon stop [num]","Stop a dungeon.");
+		standardMessage("/dungeon check [num]","Check if any mobs are left to update loot chest.");
+		standardMessage("/dungeon kick [num] [name]","Kick somebody from a dungeon.");
+		standardMessage("/dungeon define [num]","After selecting two dungeon points use this to define a dungeon.");
+		secondaryMessage("Want to define dungeons in-game? Use /d9");
+		
+		return true;
+	}
+	
+	public boolean helpDungeonDefinition()
+	{
+		standardHeader("Dungeon Definition Commands.");
+		standardHeader("BE CAREFUL ~ READ PLUGIN HELP!");
+		standardMessage("/dungeon name [num]");
+		standardMessage("/dungeon ranges [num]");
+		standardMessage("/dungeon lobby [num]");
+		standardMessage("/dungeon playerStart [num]","NOT 'START'! Careful!");
+		standardMessage("/dungeon playerEnd [num]","NOT 'END'! Careful!");
+		standardMessage("/dungeon boss [num]");
+		standardMessage("/dungeon treasure [num]");
+		standardMessage("/dungeon ranges [num]");
+		standardMessage("/dungeon cost [num] [value]");
+		standardMessage("/dungeon lmin [num] [value]");
+		standardMessage("/dungeon lmax [num] [value]");
+		standardMessage("/dungeon spawnCount [num] [index]");
+		standardMessage("/dungeon spawnchance [num] [index] [value]");
 		
 		return true;
 	}
@@ -268,6 +302,23 @@ public class RpgMessageLib extends MessageLib
 		
 		if (rpgPlayer != null)
 			standardMessage("/job promote","Promotes you to next job rank!");
+		
+		return true;
+	}
+	
+	public boolean helpWarp()
+	{
+		if (!perms.isAdmin())
+			return errorNoPermission();
+		
+		standardHeader("Warp Commands");
+		standardMessage("/w list [start]","list warps from a startpoint.");
+		standardMessage("/w info [name]","See detailed information about a warp.");
+		standardMessage("/w add [name]","Add a warp at your position.");
+		standardMessage("/w del [name]","Add a warp.");
+		standardMessage("/w tp [name]","Teleport to a warp.");
+		standardMessage("/w edit [name] [modifiable] [new val]","Edit warp.");
+		standardMessage("Modifiables","name, description, cost, welcome, exit, donator, admin");
 		
 		return true;
 	}

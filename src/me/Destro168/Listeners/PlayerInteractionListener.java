@@ -164,6 +164,9 @@ public class PlayerInteractionListener implements Listener
 		
 		//Select the two points.
 		FC_Rpg.sv.selectNewPoint(event.getPlayer(), event.getClickedBlock().getLocation(), isLeft);
+		
+		//Cancel the event.
+		event.setCancelled(true);
 	}
 	
 	//If the player left-clicks a sign, we want to evaluate this.

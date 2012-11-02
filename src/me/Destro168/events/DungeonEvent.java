@@ -1,6 +1,5 @@
 package me.Destro168.events;
 
-import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
@@ -239,7 +238,7 @@ public class DungeonEvent extends GeneralEvent
 	
 	private void setDungeonNumber(int dungeonNumber_)
 	{
-		if (dungeonNumber_ < -1)
+		if (dungeonNumber_ < 0)
 			return;
 		
 		dungeonNumber = FC_Rpg.trueDungeonNumbers.get(dungeonNumber_);
@@ -503,14 +502,11 @@ public class DungeonEvent extends GeneralEvent
 		{
 			public void run()
 			{
-				try
-				{
+				try	{
 					//Check if the dungeon is empty.
 					if (checkEmpty() == true)
 						end(true);
-				}
-				catch (ConcurrentModificationException e) { }
-				catch (NullPointerException e) { }
+				} catch (NullPointerException e) { } //Allows you to pass in nulls.
 			}
 		}, 20);
 	}
@@ -523,10 +519,11 @@ public class DungeonEvent extends GeneralEvent
 		//Return if not the proper phase.
 		if (phase != 2)
 			return true;
-		
+
 		//Return if no entities.
 		if (entities == null)
 			return true;
+
 		
 		//Check all wordly entities and compare coords.
 		for (LivingEntity entity : entities)
@@ -541,7 +538,7 @@ public class DungeonEvent extends GeneralEvent
 		return true;
 	}
 	
-	public boolean isInsideDungeon(Location loc)
+	public boolean isInsideDungeon(Location entityLocation)
 	{
 		//Variable Declarations
 		Location dMin;
@@ -554,13 +551,8 @@ public class DungeonEvent extends GeneralEvent
 			//Reset min
 			dMin = null;
 			
-			//Attempt to store dungeon bound locations.
-			try
-			{
-				//Store the minimum for faster reference later.
-				dMin = dm.getRange1(dungeonNumber, i);
-			}
-			catch (NullPointerException e) { }
+			//Store the minimum for faster reference later.
+			try { dMin = dm.getRange1(dungeonNumber, i); } catch (NullPointerException e) { }
 			
 			//If not null, evaluate
 			if (dMin != null)
@@ -569,10 +561,7 @@ public class DungeonEvent extends GeneralEvent
 				dMax = dm.getRange2(dungeonNumber, i);
 				
 				//Check if x is in range.
-				if (checkInRange(loc.getX(), dMin.getX(), dMax.getX()) == true)
-					return true;
-				
-				if (checkInRange(loc.getZ(), dMin.getZ(), dMax.getZ()) == true)
+				if (isInsideRange(entityLocation.getX(), dMin.getX(), dMax.getX()) == true && isInsideRange(entityLocation.getZ(), dMin.getZ(), dMax.getZ()) == true)
 					return true;
 			}
 			
@@ -587,27 +576,27 @@ public class DungeonEvent extends GeneralEvent
 		}
 		
 		//Return false by default.
-		return true;
+		return false;
 	}
 	
-	private boolean checkInRange(double direction, double min, double max)
+	private boolean isInsideRange(double checkPos, double r1, double r2)
 	{
 		//Variable declarations
-		int test = 0;
+		double test = 0;
 		
 		//Make sure min/max are ordered properly
-		if (min > max)
+		if (r1 > r2)
 		{
-			max = test;
-			max = min;
-			min = test;
+			test = r2;
+			r2 = r1;
+			r1 = test;
 		}
 		
-		//Check if in range or out of range.
-		if (direction < min || direction > max)
-			return false;
+		//If outside range, return true.
+		if (checkPos >= r1 && checkPos <= r2)
+			return true;
 		
-		return true;
+		return false;
 	}
 	
 	public void end(final boolean normalEnd)
@@ -651,7 +640,7 @@ public class DungeonEvent extends GeneralEvent
 					teleportAllParticipants(dm.getExit(dungeonNumber));
 					
 					//Reset everything.
-					setDungeonDefaults(dungeonNumber);
+					setDungeonDefaults(-1);
 				}
 			}, 1200);
 		}

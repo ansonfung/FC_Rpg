@@ -1,3 +1,20 @@
+Version 0.6:
+
+- General:
+- The next version should be release. Everything needs tested thoroughly in 0.6 before I go to release. I don't plan to add many (if any) new features during the transition to 1.0, I just go through and make sure everything is perfect. If I need to do a 0.7 I will, but I just want things perfect. :)
+- Removed potion code stuff, useless with creative potion inventory.
+- World Edit and World Guard requirements have been removed.
+- FC_Suite_Shared hasn't been changed and as such this version should be compatible with other FC plugins.
+
+- Updated Commands:
+- Added new command /d9.
+- /dungeon updated to account for new command.
+- Upgraded /fullhelp to include new helps that weren't added before.
+- Added new command for managing warps, /w.
+
+Dungeons:
+- Fixed several stupid mob death checks not working due to failed swap function, failed coordinate checking, etc. etc. Just mob spawn checking works now.
+
 Version 0.5:
 
 - Please note that this build is again, a really fast rushed build, I'm working as fast as possible to push these builds out! Reporting issues is fantastic for me! Thanks :D

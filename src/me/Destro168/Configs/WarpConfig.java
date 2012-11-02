@@ -12,14 +12,15 @@ import org.bukkit.World;
 
 public class WarpConfig extends ConfigGod
 {
-	private void setName(int i, String x) { ccm.set(prefix + i + ".name", x); }
-	private void setDescription(int i, List<String> x) { ccm.setList(prefix + i + ".description", x); }
-	private void setWelcome(int i, String x) { ccm.set(prefix + i + ".welcome", x); }
-	private void setExit(int i, String x) { ccm.set(prefix + i + ".exit", x); }
-	private void setCost(int i, double x) { ccm.set(prefix + i + ".cost", x); }
-	private void setAdmin(int i, boolean x) { ccm.set(prefix + i + ".admin", x); }
-	private void setDonator(int i, boolean x) { ccm.set(prefix + i + ".donator", x); }
-	private void setDestination(int i, Location loc) 
+	public void setName(int i, String x) { ccm.set(prefix + i + ".name", x); }
+	public void setDescription(int i, String x) { ccm.set(prefix + i + ".description", x); }
+	public void setDescription(int i, List<String> x) { ccm.setList(prefix + i + ".description", x); }
+	public void setWelcome(int i, String x) { ccm.set(prefix + i + ".welcome", x); }
+	public void setExit(int i, String x) { ccm.set(prefix + i + ".exit", x); }
+	public void setCost(int i, double x) { ccm.set(prefix + i + ".cost", x); }
+	public void setAdmin(int i, boolean x) { ccm.set(prefix + i + ".admin", x); }
+	public void setDonator(int i, boolean x) { ccm.set(prefix + i + ".donator", x); }
+	public void setDestination(int i, Location loc) 
 	{
 		if (loc == null)
 		{
@@ -41,6 +42,8 @@ public class WarpConfig extends ConfigGod
 	{
 		return ccm.getLocation(prefix + i + ".destination");
 	}
+	
+	public void setNull(int i) { ccm.set(prefix + i, null); }
 	
 	public WarpConfig()
 	{
@@ -88,6 +91,24 @@ public class WarpConfig extends ConfigGod
 			//Save default warps.
 			FC_Rpg.plugin.saveConfig();
 		}
+	}
+	
+	public int getWarpIDByName(String name)
+	{
+		String warpName = "";
+		
+		for (int i = 0; i < 10000; i++)
+		{
+			warpName = getName(i);
+			
+			if (warpName != null)
+			{
+				if (warpName.equalsIgnoreCase(name))
+					return i;
+			}
+		}
+		
+		return -1;
 	}
 }
 
