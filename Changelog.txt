@@ -1,3 +1,25 @@
+Version 1.0:
+
+General:
+- This is the final version for release. Finally made it. Got all the changes I wanted done and all formats should be pretty perfectly done. Documentation incoming tonight (definately before 1.0 is approved)!
+- Thoroughly tested every feature as much as possible! This version should be ohhhh so stable.
+
+Commands:
+- Fixed major issue where some servers were unable to use commands due to players being treated as consoles.
+- Updated modify command. It had a few issues, just fixed it up and now it's good to go.
+- Added subcommand list to /class. This lets you see available server classes!
+- Added new commands to /faq for the editing of them in game. How did I not think of this before? *Hours after Coding* Oh yeah, holy f*** that was brutal. Heavily upgraded.
+- Removed case checking for over 58 instances of command related string checking.
+- Added /buff command with appropriate help.
+- Had to remove bighelp... there is just too much help now ^^.
+
+Configs:
+- Updated two faqConfig values. 'name' is now 'header' | 'tag' is now 'displayTag' | 'faqs1' is now 'faqList1' | 'faqs2' is now 'faqList2'. Update configs accordingly!
+
+- TODO, potion effect speed only goes up to 4, adjust for this.
+- TODO, fix fucking health regeneration again.
+- TODO, check to make sure fire res potion works, as well as make sure that protection works and all potion buffs (regen, etc.).
+
 Version 0.6:
 
 - General:

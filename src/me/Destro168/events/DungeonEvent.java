@@ -185,7 +185,6 @@ public class DungeonEvent extends GeneralEvent
 		//Spawn a boss monster.
 		spawnedMobs[mobCountMinusOne] = (LivingEntity) dungeonWorld.spawnEntity(bossLocation, returnRandomLivingEntity());
 		
-		//TODO - test this shit.
 		if (FC_Rpg.worldConfig.getIsRpgWorld(dungeonStart.getWorld().getName()))
 		{
 			//Register the custom monster.

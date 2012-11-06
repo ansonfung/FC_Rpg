@@ -208,6 +208,7 @@ public class FC_Rpg extends JavaPlugin
 		getCommand("spell").setExecutor(CommandCE);
 		getCommand("modify").setExecutor(CommandCE);
 		getCommand("w").setExecutor(CommandCE);
+		getCommand("buff").setExecutor(CommandCE);
 		
 		//Handle tasks that happen every 30 minutes. Delay'd by 5 seconds.
 		Bukkit.getScheduler().scheduleAsyncRepeatingTask(this, new Runnable()

@@ -8,36 +8,90 @@ import me.Destro168.FC_Rpg.FC_Rpg;
 
 public class FaqConfig extends ConfigGod
 {
-	private void setFaqName(int i, String x) { ccm.set(prefix + i + ".name", x); }
-	private void setFaqTag(int i, String x) { ccm.set(prefix + i + ".tag", x); }
-	private void setFaq1(int i, List<String> x) { ccm.setList(prefix + i + ".faq1", x); }
-	private void setFaq2(int i, List<String> x) { ccm.setList(prefix + i + ".faq2", x); }
+	public void setHeader(int i, String x) { ccm.set(prefix + i + ".header", x); }
+	public void setDisplayTag(int i, String x) { ccm.set(prefix + i + ".displayTag", x); }
+	public void setFaqList(int i, int a, List<String> x) { ccm.setList(prefix + i + ".faqList" + a, x); } //a = 1 or 2
 	
-	public String getFaqName(int i) { return ccm.getString(prefix + i + ".name"); }
-	public String getFaqTag(int i) { return ccm.getString(prefix + i + ".tag"); }
-	public List<String> getFaq1(int i) { return ccm.getStringList(prefix + i + ".faq1"); }
-	public List<String> getFaq2(int i) { return ccm.getStringList(prefix + i + ".faq2"); }
+	public String getHeader(int i) { return ccm.getString(prefix + i + ".header"); }
+	public String getDisplayTag(int i) { return ccm.getString(prefix + i + ".displayTag"); }
+	public List<String> getFaqList(int i, int a) { return ccm.getStringList(prefix + i + ".faqList" + a); }
 	
-	public void addNewFaq(List<String> x, List<String> y)
-	{
-		List<String> testCase;
-		
-		for (int i = 0; i < 10000; i++)
-		{
-			testCase = getFaq1(i);
-			
-			if (testCase.size() == 0)
-			{
-				setFaq1(i, x);
-				setFaq2(i, y);
-			}
-		}
-	}
+	public void setFaqNull(String faqKeyWord) { ccm.set(prefix + getFaqIndex(faqKeyWord), null); }
 	
 	public FaqConfig()
 	{
 		super(FC_Rpg.dataFolderAbsolutePath, "Faqs");
 		handleConfig();
+	}
+	
+	public void addNewFaq(String displayTag)
+	{
+		List<String> testCase;
+		
+		for (int i = 0; i < 10000; i++)
+		{
+			testCase = getFaqList(i, 1);
+			
+			if (testCase.size() == 0)
+			{
+				setDisplayTag(i, displayTag);
+				break;
+			}
+		}
+	}
+	
+	public boolean editFaqProperties(String displayTag, String modifable, String val)
+	{
+		int i = getFaqIndex(displayTag);
+		
+		if (i == -1)
+			return false;
+		
+		if (modifable.equalsIgnoreCase("header"))
+			setHeader(i, val);
+		else if (modifable.equalsIgnoreCase("displayTag"))
+			setDisplayTag(i, val);
+		
+		return true;
+	}
+	
+	public boolean editFaqLines(String displayTag, int line, int half, String newValue)
+	{
+		int i = getFaqIndex(displayTag);
+		
+		if (i == -1)
+			return false;
+		
+		List<String> args;
+		
+		//Chance the faq halves.
+		args = getFaqList(i, half);
+		
+		if (newValue == null)
+			args.remove(line);
+		else
+		{
+			try { args.set(line, newValue); }
+			catch (IndexOutOfBoundsException e) { args.add(newValue); }
+		}
+		
+		setFaqList(i, half, args);
+		
+		return true;
+	}
+	
+	public int getFaqIndex(String displayTag)
+	{
+		for (int i = 0; i < 10000; i++)
+		{
+			if (getDisplayTag(i) != null)
+			{
+				if (getDisplayTag(i).equalsIgnoreCase(displayTag))
+					return i;
+			}
+		}
+		
+		return -1;
 	}
 	
 	public void handleConfig()
@@ -49,8 +103,8 @@ public class FaqConfig extends ConfigGod
 			setVersion(0.1);
 			
 			//Begin setting defaults.
-			setFaqName(0, "FabledCraft Server Information");
-			setFaqTag(0, "server");
+			setHeader(0, "FabledCraft Server Information");
+			setDisplayTag(0, "server");
 			
 			//Create an arraylist of faqs
 			List<String> faqs = new ArrayList<String>();
@@ -62,7 +116,7 @@ public class FaqConfig extends ConfigGod
 			faqs.add("Donation Info");
 			
 			//Store 1st half of faqs.
-			setFaq1(0, faqs);
+			setFaqList(0, 1, faqs);
 			
 			//Clear the list
 			List<String> faqs2 = new ArrayList<String>();
@@ -75,7 +129,7 @@ public class FaqConfig extends ConfigGod
 			faqs2.add("http://fabledcraft.enjin.com/store");
 			
 			//Set second half of faqs.
-			setFaq2(0, faqs2);
+			setFaqList(0, 2, faqs2);
 		}
 	}
 }

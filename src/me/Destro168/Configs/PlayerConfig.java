@@ -355,7 +355,6 @@ public class PlayerConfig extends ConfigGod
     	//Assign stat points based on class.
     	for (RpgClass rpgClass : FC_Rpg.classConfig.getRpgClasses())
     	{
-    		//TODO - test fix for stat allocation on levelup.
     		if (rpgClass.getID() == getCombatClass())
     		{
     			setAttack(getAttack() + statGrowth.get(0));

@@ -3,8 +3,10 @@ package me.Destro168.FC_Rpg;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import me.Destro168.Configs.DungeonConfig;
 import me.Destro168.Configs.FaqConfig;
@@ -17,6 +19,7 @@ import me.Destro168.Entities.RpgPlayer;
 import me.Destro168.FC_Suite_Shared.ArgParser;
 import me.Destro168.FC_Suite_Shared.NameMatcher;
 import me.Destro168.LoadedObjects.Group;
+import me.Destro168.LoadedObjects.RpgClass;
 import me.Destro168.TimeUtils.DateManager;
 import me.Destro168.Util.FC_RpgPermissions;
 import me.Destro168.Util.RpgMessageLib;
@@ -35,6 +38,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.command.ColouredConsoleSender;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 public class CommandGod implements CommandExecutor
 {
@@ -53,11 +58,6 @@ public class CommandGod implements CommandExecutor
 		{
 			msgLib.standardMessage("Failed to initialize key variables for continued command execution.");
 			return true;
-		}
-		
-		if (command.getName().equalsIgnoreCase("bighelp"))
-		{
-			return msgLib.bigHelp();
 		}
 		
 		else if (command.getName().equalsIgnoreCase("class"))
@@ -154,6 +154,12 @@ public class CommandGod implements CommandExecutor
 			WarpCE cmd = new WarpCE();
 			return cmd.execute();
 		}
+
+		else if (command.getName().equalsIgnoreCase("buff"))
+		{
+			BuffCE cmd = new BuffCE();
+			return cmd.execute();
+		}
 		
 		return true;
     }
@@ -173,6 +179,7 @@ public class CommandGod implements CommandExecutor
 			perms = new FC_RpgPermissions(player);
 			msgLib = new RpgMessageLib(player);
 			isActive = rpgPlayer.getPlayerConfig().getIsActive();
+			console = null;
 		}
 		else if (sender instanceof ColouredConsoleSender)
 		{
@@ -180,6 +187,7 @@ public class CommandGod implements CommandExecutor
 			perms = new FC_RpgPermissions(true);
 			msgLib = new RpgMessageLib(console);
 			isActive = true;
+			player = null;
 		}
 		else
 		{
@@ -197,15 +205,17 @@ public class CommandGod implements CommandExecutor
 		public boolean execute()
 	    {
 			//Variable declarations.
-			if (args[0].equals(""))
+			if (args[0].equalsIgnoreCase(""))
 				return msgLib.helpClass();
 			if (args[0].equalsIgnoreCase("spec"))
 				return specSubCommand();
 			else if (args[0].equalsIgnoreCase("view"))
 				return viewSubCommand();
+			else if (args[0].equalsIgnoreCase("list"))
+				return listSubCommand();
 			else if (args[0].equalsIgnoreCase("allocate"))
 				return allocateSubCommand();
-			else if (args[0].equals("switch"))
+			else if (args[0].equalsIgnoreCase("switch"))
 				return switchSubCommand();
 			
 			return true;
@@ -269,8 +279,9 @@ public class CommandGod implements CommandExecutor
 			String totalKeyWord = " Total: ";
 			
 			//Check to see if we are viewing somebody elses's file
-			if (!args[1].equals(""))
+			if (!args[1].equalsIgnoreCase(""))
 			{
+				
 				//If so load the file
 				rpgPlayerFile = new PlayerConfig(args[1]);
 				
@@ -359,13 +370,25 @@ public class CommandGod implements CommandExecutor
 			return true;
 		}
 		
+		private boolean listSubCommand()
+		{
+			RpgClass[] classes = FC_Rpg.classConfig.getRpgClasses();
+			
+			msgLib.standardHeader("Server Classes List");
+			
+			for (int i = 0; i < classes.length; i++)
+				msgLib.standardMessage("#" + i,classes[i].getName());
+			
+			return true;
+		}
+		
 		//Let the player view their stat points, experience, just all statistics really.
 		private boolean allocateSubCommand()
 		{
 			if (console != null)
 				return msgLib.standardError("The Console Must Enter A Player Name To Use This Command.");
 			
-			if (!args[1].equals(""))
+			if (!args[1].equalsIgnoreCase(""))
 			{
 				if (args[1].equalsIgnoreCase("on"))
 				{
@@ -446,7 +469,7 @@ public class CommandGod implements CommandExecutor
 			if (rpgPlayer.getPlayerConfig().isDonator() == false)
 				return msgLib.errorNoPermission();
 			
-			if (args[0].equals(""))
+			if (args[0].equalsIgnoreCase(""))
 			{
 				//Display the players donation information.
 				msgLib.standardHeader("Donator Information");
@@ -477,7 +500,7 @@ public class CommandGod implements CommandExecutor
 			if (perms.isAdmin() == false)
 				return msgLib.errorNoPermission();
 			
-			if (args[0].equals(""))
+			if (args[0].equalsIgnoreCase(""))
 				return msgLib.helpDungeon();
 			
 			//Commands that require only an argument.
@@ -569,7 +592,7 @@ public class CommandGod implements CommandExecutor
 				if (dungeonNumber == -1)
 					return msgLib.errorInvalidCommand();
 				
-				if (args[2].equals(""))
+				if (args[2].equalsIgnoreCase(""))
 					return msgLib.errorInvalidCommand();
 				
 				Player p2 = Bukkit.getServer().getPlayer(args[2]);
@@ -632,7 +655,7 @@ public class CommandGod implements CommandExecutor
 			}
 			
 			//Commands that require a second part.
-			if (args[2].equals(""))
+			if (args[2].equalsIgnoreCase(""))
 				return msgLib.helpDungeon();
 			
 			if (args[0].equalsIgnoreCase("cost"))
@@ -660,7 +683,7 @@ public class CommandGod implements CommandExecutor
 			}
 			
 			//Commands that require a third part.
-			if (args[3].equals(""))
+			if (args[3].equalsIgnoreCase(""))
 				return msgLib.helpDungeonDefinition();
 			else if (args[0].equalsIgnoreCase("spawnchance"))
 				dc.setSpawnChance(dungeonNumber, Integer.valueOf(args[2]), Integer.valueOf(args[3]));
@@ -688,29 +711,107 @@ public class CommandGod implements CommandExecutor
 	
 	public class FaqCE
 	{
+		FaqConfig fc = new FaqConfig();
+		
 		public FaqCE() { }
 			
 		public boolean execute()
 	    {
-			FaqConfig fm = new FaqConfig();
+			if (args[0].equalsIgnoreCase("add"))
+				return addSubCommand();
+			else if (args[0].equalsIgnoreCase("del"))
+				return delSubCommand();
+			else if (args[0].equalsIgnoreCase("eProperty"))
+				return editPropertySubCommand();
+			else if (args[0].equalsIgnoreCase("eLine"))
+				return editLineSubCommand();
+			else
+				return displaySubTopic();
+	    }
+		
+		// /faq add [displayTag] 
+		private boolean addSubCommand()
+		{
+			if (args[1].equalsIgnoreCase(""))
+				return msgLib.errorInvalidCommand();
+			
+			fc.addNewFaq(args[1]);
+			fc.editFaqProperties(args[1], "header", args[1]);
+			fc.editFaqProperties(args[1], "displayTag", args[1]);
+			fc.editFaqLines(args[1], 0, 1, "Example");
+			fc.editFaqLines(args[1], 0, 2, "Example");
+			
+			return msgLib.standardMessage("Success! Remember to use the /faq edit (good luck) command on this faq to set it up!!!");
+		}
+		
+		// /faq del [displayTag] <line> <half>
+		private boolean delSubCommand()
+		{
+			if (args[1].equalsIgnoreCase(""))
+				return msgLib.errorInvalidCommand();
+			
+			if (!args[2].equalsIgnoreCase(""))
+			{
+				if (args[3].equalsIgnoreCase("1"))
+					fc.editFaqLines(args[1], Integer.valueOf(args[2]), 1, null);
+				else if (args[3].equalsIgnoreCase("2"))
+					fc.editFaqLines(args[1], Integer.valueOf(args[2]), 2, null);
+				else
+				{
+					fc.editFaqLines(args[1], Integer.valueOf(args[2]), 1, null);
+					fc.editFaqLines(args[1], Integer.valueOf(args[2]), 2, null);
+				}
+			}
+			else
+				fc.setFaqNull(args[1]);
+			
+			return msgLib.successCommand();
+		}
+		
+		// /faq eProperty [displayTag] [modifiable] [new value]
+		private boolean editPropertySubCommand()
+		{
+			fc.editFaqProperties(args[1], args[2], args[3]);
+			
+			return msgLib.successCommand();
+		}
+		
+		// /faq eLine [displayTag] <line> <half> [new value]
+		private boolean editLineSubCommand()
+		{
+			boolean success = false;
+			
+			ArgParser ap = new ArgParser(args);
+			ap.setLastArg(4);
+			try { success = fc.editFaqLines(args[1], Integer.valueOf(args[2]), Integer.valueOf(args[3]), ap.getFinalArg()); } catch (NumberFormatException e) { return msgLib.errorInvalidCommand(); }
+			
+			if (success == true)
+				return msgLib.successCommand();
+			else
+				return msgLib.errorInvalidCommand();
+		}
+		
+		//Called with no subcommand.
+		private boolean displaySubTopic()
+		{
 			String tag = "";
 			String faqFirstHalf = "";
 			String faqSecondHalf = "";
-			boolean success = false;
 			int breakPoint1 = 0;
 			int breakPoint2 = 0;
+			int count = 0;
 			
 			//We attempt to display faqs and parse based on faq.
 			for (int i = 0; i < 10000; i++)
 			{
 				//Store the tag that we are currently parsing.
-				tag = fm.getFaqTag(i);
+				tag = fc.getDisplayTag(i);
 				
 				//If the tag isn't null...
-				if (fm.getFaqTag(i) != null)
+				if (fc.getDisplayTag(i) != null)
 				{
 					//Also if the argument entered is equal to the tag...
-					if (args[0].equals(tag))
+					if (args[0].equalsIgnoreCase(tag))
 					{
 						//We prase through the faqs for that tag now.
 						for (int j = 0; j < 10000; j++)
@@ -718,20 +819,20 @@ public class CommandGod implements CommandExecutor
 							//Store first and second half of the faq.
 							try
 							{
-								faqFirstHalf = fm.getFaq1(i).get(j);
-								faqSecondHalf = fm.getFaq2(i).get(j);
+								faqFirstHalf = fc.getFaqList(i, 1).get(j);
+								faqSecondHalf = fc.getFaqList(i, 2).get(j);
 								
 								if (faqFirstHalf != null && faqSecondHalf != null)
 								{
-									if (success == false)
-										msgLib.standardHeader(fm.getFaqName(i));
+									if (count == 0)
+										msgLib.standardHeader(fc.getHeader(i));
 									
-									if (!(faqSecondHalf.equals("[empty]")))
-										msgLib.standardMessage(faqFirstHalf,faqSecondHalf);
+									if (!(faqSecondHalf.equalsIgnoreCase("[empty]")))
+										msgLib.standardMessage("#" + count + ": " + faqFirstHalf,faqSecondHalf);
 									else
-										msgLib.standardMessage(faqFirstHalf);
-
-									success = true;
+										msgLib.standardMessage("#" + count + ": " + faqFirstHalf);
+									
+									count++;
 								}
 								else
 								{
@@ -754,11 +855,11 @@ public class CommandGod implements CommandExecutor
 				}
 			}
 			
-			if (success == false)
+			if (count == 0)
 				return msgLib.helpFaq();
 			
 			return true;
-	    }
+		}
 	}
 	
 	public class QuickCE
@@ -771,7 +872,7 @@ public class CommandGod implements CommandExecutor
 			if (perms.isAdmin() == false)
 				return msgLib.errorNoPermission();
 			
-			if (args[0].equals(""))
+			if (args[0].equalsIgnoreCase(""))
 				args[0] = player.getName();
 			
 			if (Bukkit.getServer().getPlayer(args[0]) == null)
@@ -856,7 +957,7 @@ public class CommandGod implements CommandExecutor
 				return msgLib.errorCreateCharacter();
 			
 			//Return help on empty sub commands.
-			if (args[0].equals(""))
+			if (args[0].equalsIgnoreCase(""))
 				return msgLib.helpJob();
 			
 			if (args[0].equalsIgnoreCase("view"))
@@ -864,7 +965,7 @@ public class CommandGod implements CommandExecutor
 				PlayerConfig playerFile = null;
 				
 				//Pick the target.
-				if (!args[1].equals(""))
+				if (!args[1].equalsIgnoreCase(""))
 				{
 					if (Bukkit.getServer().getPlayer(args[1]) != null)
 					{
@@ -1045,7 +1146,7 @@ public class CommandGod implements CommandExecutor
 			if (isActive == false)
 				return msgLib.errorCreateCharacter();
 			
-			if (args[0].equals(""))
+			if (args[0].equalsIgnoreCase(""))
 			{
 				return msgLib.helpParty();
 			}
@@ -1060,7 +1161,7 @@ public class CommandGod implements CommandExecutor
 				if (console != null)
 					return msgLib.errorConsoleCantUseCommand();
 				
-				if (args[1].equals(""))
+				if (args[1].equalsIgnoreCase(""))
 					args[1] = "No Name! Rename!";
 				
 				success = FC_Rpg.partyManager.createParty(player.getName(), args[1]);
@@ -1100,7 +1201,7 @@ public class CommandGod implements CommandExecutor
 				if (console != null)
 					return msgLib.errorConsoleCantUseCommand();
 				
-				if (args[1].equals(""))
+				if (args[1].equalsIgnoreCase(""))
 				{
 					msgLib.standardError("You must specify a party to join!");
 				}
@@ -1134,7 +1235,7 @@ public class CommandGod implements CommandExecutor
 			}
 			else if (args[0].equalsIgnoreCase("view"))
 			{
-				if (args[1].equals(""))
+				if (args[1].equalsIgnoreCase(""))
 				{
 					return msgLib.errorInvalidCommand();
 				}
@@ -1159,7 +1260,7 @@ public class CommandGod implements CommandExecutor
 			boolean isHappening = FC_Rpg.pvp.isHappening();
 			
 			//If the new sub command is used, ...
-			if (args[0].equals("new"))
+			if (args[0].equalsIgnoreCase("new"))
 			{
 				//Only admins can use this command.
 				if (perms.isAdmin() == false)
@@ -1176,14 +1277,14 @@ public class CommandGod implements CommandExecutor
 			
 			else if (isHappening == false)
 			{
-				if (args[0].equals(""))
+				if (args[0].equalsIgnoreCase(""))
 					return msgLib.helpPvp();
 				else
 					return msgLib.standardMessage("Command was blocked because no event is currently happening.");
 			}
 			
 			//If the end sub command is used, ...
-			else if (args[0].equals("end") || args[0].equals("stop"))
+			else if (args[0].equalsIgnoreCase("end") || args[0].equalsIgnoreCase("stop"))
 			{
 				//Only admins can use this command.
 				if (perms.isAdmin() == false)
@@ -1195,7 +1296,7 @@ public class CommandGod implements CommandExecutor
 			}
 			
 			//If the join command is used, ...
-			if (args[0].equals("join"))
+			if (args[0].equalsIgnoreCase("join"))
 			{
 				//Prevent console from using this command.
 				if (console != null)
@@ -1209,7 +1310,7 @@ public class CommandGod implements CommandExecutor
 			}
 			
 			//If the leave command is used, ...
-			else if (args[0].equals("leave"))
+			else if (args[0].equalsIgnoreCase("leave"))
 			{
 				//Prevent console from using this command.
 				if (console != null)
@@ -1222,7 +1323,7 @@ public class CommandGod implements CommandExecutor
 			}
 			
 			//If the leave command is used, ...
-			else if (args[0].equals("kick"))
+			else if (args[0].equalsIgnoreCase("kick"))
 			{
 				//Ensure an admin is performing the command.
 				if (perms.isAdmin() == false)
@@ -1245,7 +1346,7 @@ public class CommandGod implements CommandExecutor
 			}
 			
 			//If the list command is used, ...
-			else if (args[0].equals("list"))
+			else if (args[0].equalsIgnoreCase("list"))
 			{
 				msgLib.standardHeader("Red Team:");
 				
@@ -1280,7 +1381,7 @@ public class CommandGod implements CommandExecutor
 			PlayerConfig rpgPlayerFile;
 			Player target;
 			
-			if (args[0].equals(""))
+			if (args[0].equalsIgnoreCase(""))
 			{
 				if (console != null)
 					return msgLib.errorConsoleCantUseCommand();
@@ -1314,7 +1415,7 @@ public class CommandGod implements CommandExecutor
 			else
 			{
 				//We want to return if the player is attempting to reset somebody else.
-				if (!rpgPlayerFile.getName().equals(player.getName()))
+				if (!rpgPlayerFile.getName().equalsIgnoreCase(player.getName()))
 					return true;
 				
 				//Set to inactive
@@ -1342,16 +1443,15 @@ public class CommandGod implements CommandExecutor
 			//THE ALMIGHTTY MODIFY COMMAND.
 			String name = args[0];
 			String modifable = args[1];
-			String newValue = args[2];
-			int intArg3;
+			int intArg2;
 			
-			if (newValue.equals(""))
-				intArg3 = -1;
+			if (args[2].equalsIgnoreCase(""))
+				return msgLib.helpModify();
 			else
-				try { intArg3 = Integer.valueOf(newValue); } catch (NumberFormatException e) { intArg3 = -1; }
+				try { intArg2 = Integer.valueOf(args[2]); } catch (NumberFormatException e) { intArg2 = -1; }
 			
 			// modify [name] [modifiable] [new value]
-			if (name.equals("") && modifable.equals("") && newValue.equals(""))
+			if (name.equalsIgnoreCase("") && modifable.equalsIgnoreCase(""))
 				return msgLib.helpModify();
 			
 			/********************
@@ -1371,58 +1471,58 @@ public class CommandGod implements CommandExecutor
 			
 			//Evaluate command parts.
 			if (modifable.equalsIgnoreCase("prefix"))
-				playerFile.setCustomPrefix(newValue);
+				playerFile.setCustomPrefix(args[2]);
 			else
 			{
-				if (intArg3 > -1)
+				if (intArg2 == -1)
 					return msgLib.errorInvalidCommand();
 				
 				if (modifable.equalsIgnoreCase("strength") || modifable.equalsIgnoreCase("attack"))
-					playerFile.setAttack(intArg3);
+					playerFile.setAttack(intArg2);
 				else if (modifable.equalsIgnoreCase("magic"))
-					playerFile.setMagic(intArg3);
+					playerFile.setMagic(intArg2);
 				else if (modifable.equalsIgnoreCase("constitution") || modifable.equalsIgnoreCase("health"))
-					playerFile.setConstitution(intArg3);
+					playerFile.setConstitution(intArg2);
 				else if (modifable.equalsIgnoreCase("intelligence") || modifable.equalsIgnoreCase("mana"))
-					playerFile.setIntelligence(intArg3);
+					playerFile.setIntelligence(intArg2);
 				else if (modifable.equalsIgnoreCase("all"))
 				{
-					playerFile.setAttack(intArg3);
-					playerFile.setMagic(intArg3);
-					playerFile.setConstitution(intArg3);
-					playerFile.setIntelligence(intArg3);
+					playerFile.setAttack(intArg2);
+					playerFile.setMagic(intArg2);
+					playerFile.setConstitution(intArg2);
+					playerFile.setIntelligence(intArg2);
 				}
 				else if (modifable.equalsIgnoreCase("stat") || modifable.equalsIgnoreCase("stats"))
-					playerFile.setStats(intArg3);
+					playerFile.setStats(intArg2);
 				else if (modifable.equalsIgnoreCase("addLevel") || modifable.equalsIgnoreCase("addLevels"))
-					playerFile.addLevels(intArg3);
+					playerFile.addLevels(intArg2);
 				else if (modifable.equalsIgnoreCase("level"))
-					playerFile.setClassLevel(intArg3);
+					playerFile.setClassLevel(intArg2);
 				else if (modifable.equalsIgnoreCase("exp"))
-					playerFile.setClassExperience(intArg3);
+					playerFile.setClassExperience(intArg2);
 				else if (modifable.equalsIgnoreCase("addExp") || modifable.equalsIgnoreCase("addExperience"))
-					playerFile.addOfflineClassExperience(intArg3, true);
+					playerFile.addOfflineClassExperience(intArg2, true);
 				else if (modifable.equalsIgnoreCase("class"))
 				{
-					if (intArg3 >= 0 && intArg3 < FC_Rpg.classConfig.getRpgClasses().length)
-						playerFile.setCombatClass(intArg3);
+					if (intArg2 >= 0 && intArg2 < FC_Rpg.classConfig.getRpgClasses().length)
+						playerFile.setCombatClass(intArg2);
 				}
 				else if (modifable.equalsIgnoreCase("jobRank"))
-					playerFile.setJobRank(intArg3);
+					playerFile.setJobRank(intArg2);
 				else if (modifable.equalsIgnoreCase("spellPoint") || modifable.equalsIgnoreCase("spellPoints"))
-					playerFile.setSpellPoints(intArg3);
+					playerFile.setSpellPoints(intArg2);
 				else if (modifable.equalsIgnoreCase("addsecond") || modifable.equalsIgnoreCase("addseconds"))
-					playerFile.setSecondsPlayed(playerFile.getSecondsPlayed() + intArg3);
+					playerFile.setSecondsPlayed(playerFile.getSecondsPlayed() + intArg2);
 				else if (modifable.equalsIgnoreCase("setsecond") || modifable.equalsIgnoreCase("setseconds"))
-					playerFile.setSecondsPlayed(intArg3);
+					playerFile.setSecondsPlayed(intArg2);
 				
 				else if (modifable.equalsIgnoreCase("donator") || modifable.equalsIgnoreCase("d"))
 				{
-					playerFile.offlineSetDonator(intArg3);
+					playerFile.offlineSetDonator(intArg2);
 					FC_Rpg.bLib.standardBroadcast("Thank you for donating " + args[0] + "!!!");
 				}
 				else if (modifable.equalsIgnoreCase("ticket") || modifable.equalsIgnoreCase("tickets"))
-					playerFile.setClassChangeTickets(intArg3);
+					playerFile.setClassChangeTickets(intArg2);
 				else
 					return msgLib.errorInvalidCommand();
 				
@@ -1460,7 +1560,7 @@ public class CommandGod implements CommandExecutor
 			//Handle admin events
 			if (args[0].equalsIgnoreCase("event"))
 			{
-				if (args[1].equals(""))
+				if (args[1].equalsIgnoreCase(""))
 					args[1] = "";
 				
 				if (args[1].equalsIgnoreCase("exp"))
@@ -1573,7 +1673,7 @@ public class CommandGod implements CommandExecutor
 				{
 					WorldConfig wm = new WorldConfig();
 					
-					if (args[1].equals("here"))
+					if (args[1].equalsIgnoreCase("here"))
 					{
 						wm.setWorldSpawn(player.getWorld().getName(), player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(),
 								player.getLocation().getYaw(), player.getLocation().getPitch());
@@ -1582,7 +1682,7 @@ public class CommandGod implements CommandExecutor
 					{
 						//Make sure all arguments are valid.
 						for (int i = 1; i < 7; i++)
-							if (args[i].equals("")) return msgLib.helpOwner();
+							if (args[i].equalsIgnoreCase("")) return msgLib.helpOwner();
 						
 						try
 						{
@@ -1618,7 +1718,7 @@ public class CommandGod implements CommandExecutor
 				if (perms.isOwner() == false)
 					return msgLib.errorNoPermission();
 				
-				if (args[1].equals(""))
+				if (args[1].equalsIgnoreCase(""))
 					return msgLib.errorInvalidCommand();
 				
 				if (Bukkit.getServer().getPlayer(args[1]) != null)
@@ -1635,10 +1735,10 @@ public class CommandGod implements CommandExecutor
 				if (perms.isOwner() == false)
 					return msgLib.errorNoPermission();
 				
-				if (args[1].equals(""))	//Name
+				if (args[1].equalsIgnoreCase(""))	//Name
 					return msgLib.errorInvalidCommand();
 				
-				if (args[2].equals(""))	//Command to send.
+				if (args[2].equalsIgnoreCase(""))	//Command to send.
 					return msgLib.errorInvalidCommand();
 				
 				//Variable Declarations
@@ -1858,7 +1958,7 @@ public class CommandGod implements CommandExecutor
 				return msgLib.errorConsoleCantUseCommand();
 			
 			//Without an argument, return.
-			if (args[0].equals(""))
+			if (args[0].equalsIgnoreCase(""))
 				return msgLib.helpSpell();
 			
 			if (args[0].equalsIgnoreCase("bind") || args[0].equalsIgnoreCase("set"))
@@ -1868,7 +1968,7 @@ public class CommandGod implements CommandExecutor
 				return listSubCommand();
 			
 			else if (args[0].equalsIgnoreCase("upgrade") || args[0].equalsIgnoreCase("promote"))
-				return ugpradeSubCommand();
+				return upgradeSubCommand();
 			
 			else if (args[0].equalsIgnoreCase("reset"))
 				return resetSubCommand();
@@ -1881,7 +1981,7 @@ public class CommandGod implements CommandExecutor
 		
 		private boolean bindSubCommand()
 		{
-			if (args[1].equals(""))
+			if (args[1].equalsIgnoreCase(""))
 				return msgLib.errorInvalidCommand();
 			
 			//Variable declaration.
@@ -1948,7 +2048,7 @@ public class CommandGod implements CommandExecutor
 			return true;
 		}
 		
-		private boolean ugpradeSubCommand()
+		private boolean upgradeSubCommand()
 		{
 			//If the player doesn't have enough spell points tell them.
 			if (rpgPlayer.getPlayerConfig().getSpellPoints() < 1 && !perms.isAdmin())
@@ -1993,9 +2093,9 @@ public class CommandGod implements CommandExecutor
 		
 		private boolean autocastSubCommand()
 		{
-			if (args[1].equals("on"))
+			if (args[1].equalsIgnoreCase("on"))
 				rpgPlayer.getPlayerConfig().setAutoCast(true);
-			else if (args[1].equals("off"))
+			else if (args[1].equalsIgnoreCase("off"))
 				rpgPlayer.getPlayerConfig().setAutoCast(false);
 			else
 			{
@@ -2054,17 +2154,17 @@ public class CommandGod implements CommandExecutor
 			wc = new WarpConfig();
 			
 			//One argument commands.
-			if (args[0].equals(""))
+			if (args[0].equalsIgnoreCase(""))
 				return msgLib.helpWarp();
 			
-			if (args[0].equals("list"))
+			if (args[0].equalsIgnoreCase("list"))
 				return listSubCommand();
 			
 			//Two argument commands.
-			if (args[1].equals(""))
+			if (args[1].equalsIgnoreCase(""))
 				return msgLib.helpWarp();
 			
-			if (args[0].equals("info"))
+			if (args[0].equalsIgnoreCase("info"))
 				return infoSubCommand();
 			else if (args[0].equalsIgnoreCase("add"))
 				return addSubCommand();
@@ -2074,7 +2174,7 @@ public class CommandGod implements CommandExecutor
 				return tpSubCommand();
 			
 			//Four argument commands.
-			if (args[2].equals("") || args[3].equals(""))
+			if (args[2].equalsIgnoreCase("") || args[3].equalsIgnoreCase(""))
 				return msgLib.helpWarp();
 			
 			if (args[0].equalsIgnoreCase("edit"))
@@ -2090,7 +2190,7 @@ public class CommandGod implements CommandExecutor
 			int count = 0;
 			String[] msg = new String[5];
 			
-			if (!args[1].equals(""))
+			if (!args[1].equalsIgnoreCase(""))
 				try { startPoint = Integer.valueOf(args[1]); } catch (NumberFormatException e) { }
 			
 			msgLib.standardHeader("Warp List");
@@ -2220,6 +2320,127 @@ public class CommandGod implements CommandExecutor
 			return df.format(wc.getDestination(warpNumber).getX()) + ", " + df.format(wc.getDestination(warpNumber).getY()) + ", " + df.format(wc.getDestination(warpNumber).getZ());
 		}
 	}
+	
+	public class BuffCE
+	{
+		Map<String, PotionEffect> peMap;
+		
+		public BuffCE() {  }
+		
+		public boolean execute()
+		{
+			initializePEMap();
+			
+			if (args[0].equals(""))
+				return msgLib.helpBuff();
+			
+			if (args[0].equalsIgnoreCase("self"))
+				return selfSubCommand();
+			
+			else if (args[0].equalsIgnoreCase("all"))
+				return allSubCommand();
+			
+			else if (args[0].equalsIgnoreCase("clear"))
+				return clearSubCommand();
+			
+			return msgLib.errorInvalidCommand();
+		}
+		
+		private void initializePEMap()
+		{
+			peMap = new HashMap<String, PotionEffect>();
+			
+			peMap.put("jump", new PotionEffect(PotionEffectType.JUMP, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("speed", new PotionEffect(PotionEffectType.SPEED, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("regeneration", new PotionEffect(PotionEffectType.REGENERATION, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("fireresistance", new PotionEffect(PotionEffectType.FIRE_RESISTANCE, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put( "fastdigging", new PotionEffect(PotionEffectType.FAST_DIGGING, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("increasedamage", new PotionEffect(PotionEffectType.INCREASE_DAMAGE, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("damageresistance", new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put( "heal", new PotionEffect(PotionEffectType.HEAL, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("invisibility", new PotionEffect(PotionEffectType.INVISIBILITY, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("nightvision", new PotionEffect(PotionEffectType.NIGHT_VISION, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("waterbreathing", new PotionEffect(PotionEffectType.WATER_BREATHING, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("slow", new PotionEffect(PotionEffectType.SLOW, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("blindness", new PotionEffect(PotionEffectType.BLINDNESS, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("poison", new PotionEffect(PotionEffectType.POISON, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("confusion", new PotionEffect(PotionEffectType.CONFUSION, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("hunger", new PotionEffect(PotionEffectType.HUNGER, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("harm", new PotionEffect(PotionEffectType.HARM, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("slowdigging", new PotionEffect(PotionEffectType.SLOW_DIGGING, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("weakness", new PotionEffect(PotionEffectType.WEAKNESS, getRandomDuration(), getRandomPotionStrength()));
+		}
+		
+		private boolean selfSubCommand()
+		{
+			PotionEffect pickedPE = getRandomPotionEffect();
+			
+			//Lets admin put potions on theirself.
+			if (perms.isAdmin() == true && !args[1].equals("") && !args[2].equals("") && !args[3].equals(""))
+				try { pickedPE = new PotionEffect(PotionEffectType.getByName(args[1]), Integer.valueOf(args[2]), Integer.valueOf(args[3])); } catch (NumberFormatException e) { }
+			
+			//Add the potion effect.
+			player.addPotionEffect(pickedPE);
+			
+			return msgLib.successCommand();
+		}
+		
+		public boolean allSubCommand()
+		{
+			if (!perms.isAdmin())
+				return msgLib.errorNoPermission();
+			
+			for (Player p : Bukkit.getServer().getOnlinePlayers())
+				p.addPotionEffect(getRandomPotionEffect());
+			
+			msgLib.standardBroadcast("Everybody has been given a random (de)buff!");
+			
+			return true;
+		}
+		
+		private boolean clearSubCommand()
+		{
+			if (!perms.isAdmin())
+				return msgLib.errorNoPermission();
+			
+			Player target = player;
+			
+			if (!args[1].equals(""))
+			{
+				if (Bukkit.getServer().getPlayer(args[1]) != null)
+					target = Bukkit.getServer().getPlayer(args[1]);
+			}
+			
+			for (PotionEffect p : target.getActivePotionEffects()) 
+				target.removePotionEffect(p.getType());
+			
+			return msgLib.standardMessage("Successfully cleared all buffs on player &p" + target.getName() + "&p!");
+		}
+		
+		private PotionEffect getRandomPotionEffect()
+		{
+			Iterator<PotionEffect> itr = peMap.values().iterator();
+			Random rand = new Random();
+			int stoppingPoint = rand.nextInt(peMap.values().size());
+			
+			for (int i = 0; i < stoppingPoint - 1; i++)
+				itr.next();
+			
+			return itr.next();
+		}
+		
+		private int getRandomDuration()
+		{
+			Random rand = new Random();
+			return 1200 * (rand.nextInt(2) + 1);
+		}
+		
+		private int getRandomPotionStrength()
+		{
+			Random rand = new Random();
+			return rand.nextInt(3) + 1;	//rand.nextInt((maxStrength - 1)) + 1;
+		}
+	}
 }
 
 
@@ -2232,7 +2453,9 @@ public class CommandGod implements CommandExecutor
 
 
 
+/*
 
+*/
 
 
 

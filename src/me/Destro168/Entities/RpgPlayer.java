@@ -196,7 +196,7 @@ public class RpgPlayer extends RpgEntity
 			prefix = parsedDefault;
 			return prefix;
 		}
-		else if (customPrefix.equals(""))
+		else if (customPrefix.equals("") || customPrefix.equals("none"))
 		{
 			playerConfig.setCustomPrefix(defaultPrefix);
 			prefix = parsedDefault;

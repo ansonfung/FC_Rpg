@@ -103,41 +103,25 @@ public class RpgMessageLib extends MessageLib
 		return true;
 	}
 	
-	public boolean bigHelp()
-	{
-		helpFaq();
-		helpRpg();
-		helpDungeon();
-		helpDungeonDefinition();
-		helpPvp();
-		helpSpell();
-		helpParty();
-		helpClass();
-		helpJob();
-		helpWarp();
-		helpDonator();
-		helpAdmin();
-		helpOwner();
-		
-		return true;
-	}
-	
 	public boolean helpFaq()
 	{
+		//Variable Declarations
 		FaqConfig fm = new FaqConfig();
 		String faq;
 		String topics = "";
+		String seperator = "";
 		int breakPoint = 0;
 		
-		standardHeader("Server Faq Topics!");
-		standardMessage("Type /faq followed by the topic you want to learn about!");
-		
+		//Create topic list
 		for (int i = 0; i < 10000; i++)
 		{
-			faq = fm.getFaqTag(i);
+			faq = fm.getDisplayTag(i);
 			
 			if (faq != null)
-				topics = topics + faq;
+			{
+				topics += seperator + faq;
+				seperator = ", ";
+			}
 			else
 			{
 				breakPoint++;
@@ -147,7 +131,17 @@ public class RpgMessageLib extends MessageLib
 			}
 		}
 		
-		standardMessage("Topics", topics);
+		standardHeader("Server Faq Topics!");
+		standardMessage("/faq [topic]","Learn more about a FAQ.");
+		standardMessage("FAQ Topics",topics);
+		
+		if (perms.isAdmin())
+		{
+			standardMessage("[A] /faq add [displayTag]","Add a faq.");
+			standardMessage("[A] /faq del [displayTag] <line> <half>","Delete a faq.");
+			standardMessage("[A] /faq eProperty [displayTag] [modifiable] [new value]","Edit a faq's property.");
+			standardMessage("[A] /faq eLine [displayTag] <line> <half> [new value]","Edit a faq's lines.");
+		}
 		
 		return true;
 	}
@@ -164,13 +158,12 @@ public class RpgMessageLib extends MessageLib
 		standardMessage("/pvp","Help for pvp events.");
 		standardMessage("/reset","Reset Your Character! (Infinite/You Keep Money)");
 		standardMessage("/list","See who is online.");
+		standardMessage("/buff","Help with buffs.");
 		
 		if (perms.isAdmin())
 			standardMessage("/donator","Help for donators.");
 		else if (rpgPlayer.isDonatorOrAdmin())
 			standardMessage("/donator","Help for donators.");
-		
-		standardMessage("/bigHelp","List all helps at once.");
 		
 		if (perms.isAdmin())
 		{
@@ -273,6 +266,7 @@ public class RpgMessageLib extends MessageLib
 		//Display header and commands.
 		standardHeader("Class Commands");
 		standardMessage("/class view [name]","Show Character Information");
+		standardMessage("/class list","View a list of all server classes.");
 		
 		if (rpgPlayer != null)
 		{
@@ -306,19 +300,17 @@ public class RpgMessageLib extends MessageLib
 		return true;
 	}
 	
-	public boolean helpWarp()
+	public boolean helpBuff()
 	{
-		if (!perms.isAdmin())
-			return errorNoPermission();
+		standardHeader("Buff Commands");
+		standardMessage("/buff self","Apply a random buff to yourself.");
 		
-		standardHeader("Warp Commands");
-		standardMessage("/w list [start]","list warps from a startpoint.");
-		standardMessage("/w info [name]","See detailed information about a warp.");
-		standardMessage("/w add [name]","Add a warp at your position.");
-		standardMessage("/w del [name]","Add a warp.");
-		standardMessage("/w tp [name]","Teleport to a warp.");
-		standardMessage("/w edit [name] [modifiable] [new val]","Edit warp.");
-		standardMessage("Modifiables","name, description, cost, welcome, exit, donator, admin");
+		if (perms.isAdmin())
+		{
+			standardMessage("[A] /buff self [name] [length] [level]","Apply a specific buff with specified characteristics to yourself.");
+			standardMessage("[A] /buff all","Buff everybody online.");
+			standardMessage("[A] /buff clear [name]","Clear target of buffs.");
+		}
 		
 		return true;
 	}
@@ -337,6 +329,23 @@ public class RpgMessageLib extends MessageLib
 		}
 	}
 	
+	public boolean helpWarp()
+	{
+		if (!perms.isAdmin())
+			return errorNoPermission();
+		
+		standardHeader("Warp Commands");
+		standardMessage("/w list [start]","list warps from a startpoint.");
+		standardMessage("/w info [name]","See detailed information about a warp.");
+		standardMessage("/w add [name]","Add a warp at your position.");
+		standardMessage("/w del [name]","Add a warp.");
+		standardMessage("/w tp [name]","Teleport to a warp.");
+		standardMessage("/w edit [name] [modifiable] [new val]","Edit warp.");
+		standardMessage("Modifiables","name, description, cost, welcome, exit, donator, admin");
+		
+		return true;
+	}
+	
 	public boolean helpModify()
 	{
 		if (!perms.isAdmin())
@@ -349,7 +358,7 @@ public class RpgMessageLib extends MessageLib
 		standardMessage("Levels/Exp","level, addlevel, exp, addexp");
 		standardMessage("Donator","donator, tickets");
 		standardMessage("Play Time","seconds, addseconds");
-		standardMessage("Misc","class, jobrank, spellPoint");
+		standardMessage("Misc","class, jobrank, spellPoint, prefix (use 'none' to reset')");
 		secondaryMessage("Please note that most 's' characters can be ommited and there are many aliases for each modifiable.");
 		
 		return true;
