@@ -20,12 +20,16 @@ public class RpgEntity
 	
 	private Map<Entity, Integer> summonTIDMap;
 	private List<Entity> summon;
+	public int speedTID;
 	
 	public Date getLastDamage() { return lastDamaged; }
 	public long getLastDamagedLong() { return lastDamaged.getTime(); }
 	public long getLastAttackNotificationLong() { return lastAttackNotification.getTime(); }
 	public long getLastDefenseNotificationLong() { return lastDefenseNotification.getTime(); }
 	public boolean getIsAlive() { return isAlive; }
+	public int getSpeedTID() { return speedTID; }
+	
+	public void setSpeedTID(int x) { speedTID = x; }
 	
 	public void setIsAlive(boolean x) { isAlive = x; }
 	
@@ -37,6 +41,7 @@ public class RpgEntity
 		summon = new ArrayList<Entity>();
 		summonTIDMap = new HashMap<Entity, Integer>();
 		isAlive = true;
+		speedTID = -1;
 	}
 	
 	public boolean getStatusActiveEntity(Long statusExpirationDate)

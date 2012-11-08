@@ -113,9 +113,9 @@ public class CommandGod implements CommandExecutor
 			return cmd.execute();
 		}
 		
-		else if (command.getName().equalsIgnoreCase("party"))
+		else if (command.getName().equalsIgnoreCase("guild"))
 		{
-			PartyCE cmd = new PartyCE();
+			GuildCE cmd = new GuildCE();
 			return cmd.execute();
 		}
 		
@@ -281,7 +281,6 @@ public class CommandGod implements CommandExecutor
 			//Check to see if we are viewing somebody elses's file
 			if (!args[1].equalsIgnoreCase(""))
 			{
-				
 				//If so load the file
 				rpgPlayerFile = new PlayerConfig(args[1]);
 				
@@ -377,7 +376,7 @@ public class CommandGod implements CommandExecutor
 			msgLib.standardHeader("Server Classes List");
 			
 			for (int i = 0; i < classes.length; i++)
-				msgLib.standardMessage("#" + i,classes[i].getName());
+				msgLib.standardMessage("#" + (i+1),classes[i].getName());
 			
 			return true;
 		}
@@ -1133,9 +1132,9 @@ public class CommandGod implements CommandExecutor
 		}
 	}
 	
-	public class PartyCE
+	public class GuildCE
 	{
-		public PartyCE() { }
+		public GuildCE() { }
 		
 		public boolean execute()
 	    {
@@ -1147,13 +1146,11 @@ public class CommandGod implements CommandExecutor
 				return msgLib.errorCreateCharacter();
 			
 			if (args[0].equalsIgnoreCase(""))
-			{
-				return msgLib.helpParty();
-			}
+				return msgLib.helpGuild();
 			
 			if (args[0].equalsIgnoreCase("list"))
 			{
-				msgLib.standardMessage(FC_Rpg.partyManager.getPartyList());
+				msgLib.standardMessage(FC_Rpg.guildManager.getGuildList());
 			}
 			else if (args[0].equalsIgnoreCase("create"))
 			{
@@ -1164,10 +1161,10 @@ public class CommandGod implements CommandExecutor
 				if (args[1].equalsIgnoreCase(""))
 					args[1] = "No Name! Rename!";
 				
-				success = FC_Rpg.partyManager.createParty(player.getName(), args[1]);
+				success = FC_Rpg.guildManager.createGuild(args[1], player.getName());
 				
 		    	if (success == false)
-		    		msgLib.standardError("Failed to create a new party.");
+		    		msgLib.standardError("Failed to create a new guild.");
 			}
 			else if (args[0].equalsIgnoreCase("close"))
 			{
@@ -1175,12 +1172,22 @@ public class CommandGod implements CommandExecutor
 				if (console != null)
 					return msgLib.errorConsoleCantUseCommand();
 				
-				success = FC_Rpg.partyManager.closeParty(player.getName());
+				if (args[1].equals(""))
+					success = FC_Rpg.guildManager.playerAttemptSetGuildPrivate(player.getName(), true);
+				else
+				{
+					if (!perms.isAdmin())
+						return msgLib.errorNoPermission();
+					
+					FC_Rpg.guildManager.adminForceGuildPrivate(args[1], true);
+					
+					return msgLib.standardMessage("Successfully set the guild " + args[1] + " private.");
+				}
 				
 				if (success == false)
-					msgLib.standardError("Failed to close your party.");
+					msgLib.standardError("Failed to close your guild.");
 				else
-					msgLib.standardMessage("Successfully closed your party!");
+					msgLib.standardMessage("Successfully closed your guild!");
 			}
 			else if (args[0].equalsIgnoreCase("open"))
 			{
@@ -1188,12 +1195,22 @@ public class CommandGod implements CommandExecutor
 				if (console != null)
 					return msgLib.errorConsoleCantUseCommand();
 				
-				success = FC_Rpg.partyManager.openParty(player.getName());
+				if (args[1].equals(""))
+					success = FC_Rpg.guildManager.playerAttemptSetGuildPrivate(player.getName(), false);
+				else
+				{
+					if (!perms.isAdmin())
+						return msgLib.errorNoPermission();
+					
+					FC_Rpg.guildManager.adminForceGuildPrivate(args[1], false);
+					
+					return msgLib.standardMessage("Successfully set the guild " + args[1] + " public.");
+				}
 				
 				if (success == false)
-					msgLib.standardError("Failed to open your party.");
+					msgLib.standardError("Failed to open your guild.");
 				else
-					msgLib.standardMessage("Successfully opened your party!");
+					msgLib.standardMessage("Successfully opened your guild!");
 			}
 			else if (args[0].equalsIgnoreCase("join"))
 			{
@@ -1202,22 +1219,27 @@ public class CommandGod implements CommandExecutor
 					return msgLib.errorConsoleCantUseCommand();
 				
 				if (args[1].equalsIgnoreCase(""))
-				{
-					msgLib.standardError("You must specify a party to join!");
-				}
+					return msgLib.standardError("You must specify a guild to join!");
+				
+				//Add to the new guild
+				success = FC_Rpg.guildManager.addMember(player.getName(), args[1], perms.isAdmin());
+				
+				if (success == false)
+					msgLib.standardError("Failed to join guild.");
 				else
-				{
-					//Remove the member from any old parties
-					FC_Rpg.partyManager.removeMemberFromAllParties(player.getName());
-					
-					//Add to the new party
-					success = FC_Rpg.partyManager.addMember(player.getName(), args[1]);
-					
-					if (success == false)
-						msgLib.standardError("Failed to join party.");
-					else
-						msgLib.standardMessage("Successfully joined party");
-				}
+					msgLib.standardMessage("Successfully joined guild");
+			}
+			else if (args[0].equalsIgnoreCase("kick"))
+			{
+				if (args[1].equalsIgnoreCase(""))
+					return msgLib.standardError("You must specify a player to kick!");
+				
+				success = FC_Rpg.guildManager.kickMember(player.getName(), args[1], perms.isAdmin());
+				
+				if (success == false)
+					msgLib.standardError("Failed to kick " + args[1] + " from a guild.");
+				else
+					msgLib.standardMessage("Successfully kicked " + args[1] + " from a guild.");
 			}
 			else if (args[0].equalsIgnoreCase("leave"))
 			{
@@ -1225,27 +1247,48 @@ public class CommandGod implements CommandExecutor
 				if (console != null)
 					return msgLib.errorConsoleCantUseCommand();
 				
-				//Remove the member from any old parties
-				success = FC_Rpg.partyManager.removeMemberFromAllParties(player.getName());
+				//Remove the member from any old guilds
+				success = FC_Rpg.guildManager.removeMemberFromAllGuilds(player.getName());
 				
 				if (success == false)
-					msgLib.standardError("Failed to leave any parties.");
+					msgLib.standardError("Failed to leave any guilds.");
 				else
-					msgLib.standardMessage("Successfully left any and all parties.");
+					msgLib.standardMessage("Successfully left any and all guilds.");
 			}
-			else if (args[0].equalsIgnoreCase("view"))
+			else if (args[0].equalsIgnoreCase("view") || args[0].equalsIgnoreCase("info"))
 			{
 				if (args[1].equalsIgnoreCase(""))
 				{
-					return msgLib.errorInvalidCommand();
+					if (FC_Rpg.guildManager.getGuildByMember(sender.getName()) != null)
+						success = FC_Rpg.guildManager.viewGuildInfo(FC_Rpg.guildManager.getGuildByMember(sender.getName()), msgLib);
+					else
+						success = false;
+					
+					if (success == false)
+						msgLib.standardError("Failed to view any guilds.");
 				}
 				else
 				{
-					success = FC_Rpg.partyManager.viewPartyInfo(args[1], msgLib);
+					success = FC_Rpg.guildManager.viewGuildInfoByGuildName(args[1], msgLib);
 					
 					if (success == false)
-						msgLib.standardError("Failed to view any parties.");
+						msgLib.standardError("Failed to view any guilds.");
 				}
+			}
+			else if (args[0].equalsIgnoreCase("delete"))
+			{
+				if (perms.isAdmin() == false)
+					return msgLib.errorNoPermission();
+				
+				if (args[1].equalsIgnoreCase(""))
+					return msgLib.standardError("You must enter a guild to delete.");
+				
+				success = FC_Rpg.guildManager.setGuildNull(args[1]);
+				
+				if (success == false)
+					return msgLib.standardError("Failed to delete the guild.");
+				else
+					return msgLib.successCommand();
 			}
 			
 			return true;

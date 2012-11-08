@@ -29,8 +29,8 @@ commands:
       description: This command accesses job commands.
    list:
       description: This command displays online players.
-   party:
-      description: This command accesses party commands.
+   guild:
+      description: This command accesses guild commands.
    pvp:
       description: This command accesses pvp commands.
    reset:

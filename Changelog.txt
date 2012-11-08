@@ -1,8 +1,9 @@
 Version 1.0:
 
 General:
-- This is the final version for release. Finally made it. Got all the changes I wanted done and all formats should be pretty perfectly done. Documentation incoming tonight (definately before 1.0 is approved)!
-- Thoroughly tested every feature as much as possible! This version should be ohhhh so stable.
+- Wound up adding tons of stuff I didn't expect to add, so 0.7. Still not a release build, sorry. There are just too many changes ^^.
+- Updated all lists to start at 1 now. This means you should very rarely have to use 0 as a list argument. Still will probably have to use 0 for config arguments though.
+- Updated combat display to show exp % remaining when you kill a mob.
 
 Commands:
 - Fixed major issue where some servers were unable to use commands due to players being treated as consoles.
@@ -12,13 +13,25 @@ Commands:
 - Removed case checking for over 58 instances of command related string checking.
 - Added /buff command with appropriate help.
 - Had to remove bighelp... there is just too much help now ^^.
+- Fixed class selection again.
+- Fix fucking health regeneration again.
+- Can now switch class using class name.
+
+Spells:
+- Updated Adreneline base spell. Check included default config to see new values. Most notable is duration is in seconds now and speed boost is in decimals.
+
+Parties: 
+- Parties are now known as "Guilds". Why? This no longer conflicts with other plugins that use /party if you still want that. Guilds will be expanded on in the future potentially. Everything is now '/guild' or 'guild', no more parties!
+- Guilds are persistent which means they don't go away anymore.
+- New file called Guilds created which stores all guilds.
+- All guild commands heavily optimized, updated, and modified.
+- Added the ability for admins to be able to manage and control guilds and use commands no matter what.
+- Added new sub-commands to guilds for player management of guilds.
 
 Configs:
 - Updated two faqConfig values. 'name' is now 'header' | 'tag' is now 'displayTag' | 'faqs1' is now 'faqList1' | 'faqs2' is now 'faqList2'. Update configs accordingly!
-
-- TODO, potion effect speed only goes up to 4, adjust for this.
-- TODO, fix fucking health regeneration again.
 - TODO, check to make sure fire res potion works, as well as make sure that protection works and all potion buffs (regen, etc.).
+- TODO, make it so that you can have more than 5 spells.
 
 Version 0.6:
 

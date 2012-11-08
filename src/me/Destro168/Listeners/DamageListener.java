@@ -8,7 +8,7 @@ import me.Destro168.Entities.EntityDamageManager;
 import me.Destro168.Entities.RpgMonster;
 import me.Destro168.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.FC_Rpg;
-import me.Destro168.FC_Rpg.RpgParty;
+import me.Destro168.LoadedObjects.Guild;
 import me.Destro168.LoadedObjects.Spell;
 import me.Destro168.Spells.EffectIDs;
 import me.Destro168.Spells.SpellCaster;
@@ -41,7 +41,7 @@ public class DamageListener implements Listener
 	
 	Player playerDefender;
 	Player playerAttacker;
-	RpgParty party;
+	Guild party;
 	
 	Random defendChance;
 	Random counterattackChance;

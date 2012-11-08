@@ -24,10 +24,8 @@ import org.bukkit.entity.Fireball;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
-public class SpellCaster 
+public class SpellCaster
 {
 	private EntityLocationLib ell;
 	private EffectIDs e;
@@ -260,7 +258,7 @@ public class SpellCaster
 		else if (x == EffectIDs.SACRIFICE_HEALTH_FOR_DAMAGE)
 			effect_Sacrifice_Health_For_Damage();
 		
-		else if (x == EffectIDs.SPEED_POTION)
+		else if (x == EffectIDs.SPEED)
 			effect_Potion_Speed();
 		
 		else if (x == EffectIDs.POISON)
@@ -324,8 +322,36 @@ public class SpellCaster
 	
 	private void effect_Potion_Speed()
 	{
-		//Create a potion effect and apply to the attacker.
-		playerCaster.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 200, (int) finalSpellMagnitude));
+		//Adjust player move speed.
+		playerCaster.setWalkSpeed((float) finalSpellMagnitude);
+		playerCaster.setFlySpeed((float) finalSpellMagnitude);
+		
+		int speedTID = FC_Rpg.rpgManager.getRpgPlayer(playerCaster).getSpeedTID();
+		
+		//Prevent overlapping tasks to reset players speed.
+		if (speedTID > -1)
+		{
+			Bukkit.getServer().getScheduler().cancelTask(speedTID);
+			FC_Rpg.rpgManager.getRpgPlayer(playerCaster).setSpeedTID(-1);
+		}
+		
+		//Revert after duration.
+		int tid = Bukkit.getServer().getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				//Adjust player move speed.
+				playerCaster.setWalkSpeed((float) .2);
+				playerCaster.setFlySpeed((float) .2);
+				
+				//Remove player from map.
+				FC_Rpg.rpgManager.getRpgPlayer(playerCaster).setSpeedTID(-1);
+			}
+		}, duration * 20);
+		
+		//Remove player from map.
+		FC_Rpg.rpgManager.getRpgPlayer(playerCaster).setSpeedTID(tid);
 	}
 	
 	private void effect_Taunt()

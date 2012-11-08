@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import me.Destro168.LoadedObjects.Group;
+import me.Destro168.LoadedObjects.RpgClass;
 import me.Destro168.Messaging.MessageLib;
 import me.Destro168.Spells.SpellCaster;
 import me.Destro168.Util.FC_RpgPermissions;
@@ -305,18 +306,34 @@ public class RpgPlayer extends RpgEntity
 			msgLib.errorNoPermission();
 			return false;
 		}
-
-		try { cNumber = Integer.valueOf(x); }
+		
+		try { cNumber = Integer.valueOf(x) - 1; }
 		catch (NumberFormatException e)
 		{
-			msgLib.standardMessage("Invalid Class Number.");
-			return true;
+			//Attempt to get class by word entry.
+			RpgClass[] c = FC_Rpg.classConfig.getRpgClasses();
+			
+			for (int i = 0; i < c.length; i++)
+			{
+				if (x.equalsIgnoreCase(c[i].getName()))
+				{
+					cNumber = i;
+					break;
+				}
+			}
+			
+			//If the word failed to match a class return fail.
+			if (cNumber == -1)
+			{
+				msgLib.standardError("Invalid Class Number.");
+				return true;
+			}
 		}
 		
 		//Make sure the new class is different from current class.
 		if (getPlayerConfig().getCombatClass() == cNumber)
 		{
-			msgLib.standardMessage("You Can't Switch To The Class You Are Currently.");
+			msgLib.standardError("You Can't Switch To The Class You Are Currently.");
 			return true;
 		}
 		
@@ -660,7 +677,7 @@ public class RpgPlayer extends RpgEntity
 		msg[2] = "] Level: ";
 		msg[3] = String.valueOf(level);
 		msg[4] = " / Experience: ";
-		msg[5] = FC_Rpg.df.format(exp);
+		msg[5] = FC_Rpg.df.format(exp) + " (" + FC_Rpg.df.format(playerConfig.getRequiredExpPercent()) + "%)";
 		msg[6] = " / Money: ";
 		msg[7] = FC_Rpg.df.format(loot);
 		

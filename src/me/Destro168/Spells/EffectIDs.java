@@ -13,7 +13,7 @@ public class EffectIDs
 	
 	public static final int TAUNT = 1000;
 	public static final int FIREBALL = 1001;
-	public static final int SPEED_POTION = 1002;
+	public static final int SPEED = 1002;
 	public static final int FIRE_ARROW = 1003;
 	public static final int DISABLED = 1004;
 	public static final int POISON = 1005;

@@ -8,7 +8,7 @@ import java.util.Map;
 
 import me.Destro168.Configs.PlayerConfig;
 import me.Destro168.FC_Rpg.FC_Rpg;
-import me.Destro168.FC_Rpg.RpgParty;
+import me.Destro168.LoadedObjects.Guild;
 import me.Destro168.Messaging.BroadcastLib;
 
 import org.bukkit.Bukkit;
@@ -115,7 +115,7 @@ public class RpgManager
     	
     	//Check all online players registrations.
     	for (Player player : Bukkit.getServer().getOnlinePlayers())
-    		checkPlayerRegistration(player);
+    		checkPlayerRegistration(player, true);
     }
     
     public List<RpgPlayer> getOnlineRpgPlayers()
@@ -130,7 +130,7 @@ public class RpgManager
     
 	public List<RpgPlayer> getNearbyPartiedRpgPlayers(Player sourcePlayer, int distance)
 	{
-		RpgParty party = FC_Rpg.partyManager.getParty(sourcePlayer.getName());
+		Guild party = FC_Rpg.guildManager.getGuildByMember(sourcePlayer.getName());
 		
 		//If no party return the source player in list form.
 		if (party == null)
@@ -143,7 +143,7 @@ public class RpgManager
 		EntityLocationLib ell = new EntityLocationLib();
 		List<RpgPlayer> rpgPlayerList = new ArrayList<RpgPlayer>();
 		
-		for (Player player : party.getPartyPlayerList())
+		for (Player player : party.getOnlineGuildPlayerList())
 		{
 			if (ell.isNearby(sourcePlayer, player, distance))
 			{
@@ -155,7 +155,7 @@ public class RpgManager
 	}
 	
     //Functions
-    public void checkPlayerRegistration(Player player)
+    public void checkPlayerRegistration(Player player, boolean forceStart)
     {
     	//Variable Decalrations
     	RpgPlayer rpgPlayer = new RpgPlayer(player);
@@ -168,11 +168,14 @@ public class RpgManager
     		
     		piMap.put(player, pi);
     		
-    		//If they aren't active, then we want to make them active by creating their rpg player.
-    		if (rpgPlayer.getPlayerConfig().getIsActive() == false)
-    			setPlayerStart("Swordsman", player, false);	//Store the player as a new player.
-    		
-    		piMap.get(player).startTasks();
+    		if (forceStart == true) //Ignore for new
+    		{
+    			//If they aren't active, then we want to make them active by creating their rpg player.
+        		if (rpgPlayer.getPlayerConfig().getIsActive() == false)
+        			setPlayerStart("Swordsman", player, false);	//Store the player as a new player.
+        		
+        		piMap.get(player).startTasks();
+    		}
     	}
     }
     
@@ -186,7 +189,7 @@ public class RpgManager
 			return null;
 		
     	//Force register the player.
-    	checkPlayerRegistration(player);
+    	checkPlayerRegistration(player, true);
     	
     	//Return the rpg player.
     	return piMap.get(player).getRpgPlayer();
@@ -269,10 +272,12 @@ public class RpgManager
     	}
     	
     	//Check player registration
-    	checkPlayerRegistration(player);
+    	checkPlayerRegistration(player, false);
     	
     	//Handle new player tasks.
     	piMap.get(player).getRpgPlayer().createPlayerRecord(player, intClass, manualSelection); //Create the player record
+    	
+    	piMap.get(player).startTasks();
 	}
     
     public void clearOldPlayerData()

@@ -153,7 +153,7 @@ public class RpgMessageLib extends MessageLib
 		standardMessage("/faq", ChatColor.RED + "Important Server Information! READ!");
 		standardMessage("/class","Help for classes.");
 		standardMessage("/job","Help for jobs.");
-		standardMessage("/party","Help for parties.");
+		standardMessage("/guild","Help for guilds.");
 		standardMessage("/spell","Help for spells");
 		standardMessage("/pvp","Help for pvp events.");
 		standardMessage("/reset","Reset Your Character! (Infinite/You Keep Money)");
@@ -247,16 +247,18 @@ public class RpgMessageLib extends MessageLib
 		return true;
 	}
 	
-	public boolean helpParty()
+	public boolean helpGuild()
 	{
-		standardHeader("Party Commands");
-		standardMessage("/party list [page]","See a list of parties.");
-		standardMessage("/party create [partyName]","Create a party.");
-		standardMessage("/party join [partyName]","Join a party.");
-		standardMessage("/party leave","Leave your party.");
-		standardMessage("/party close","Prevents new members from joining.");
-		standardMessage("/party open","Allows new members to join.");
-		standardMessage("/party view [partyName]","See party info.");
+		standardHeader("Guild Commands");
+		standardMessage("/guild list [page]","See a list of guilds.");
+		standardMessage("/guild create [guildName]","Create a guild.");
+		standardMessage("/guild join [guildName]","Join a guild.");
+		standardMessage("/guild kick [member]","Kick a guild member.");
+		standardMessage("/guild leave","Leave your guild.");
+		standardMessage("/guild [<open>,<close>]","Open Or Close Your Guild.");
+		standardMessage("/guild info [guildName]","See a guilds info.");
+		standardMessage("[A] /guild delete [guildName]","Delete a guild.");
+		standardMessage("[A] /guild [<open>,<close>] [name]","Open Or Close A Guild.");
 		
 		return true;
 	}

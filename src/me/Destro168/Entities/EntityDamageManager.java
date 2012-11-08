@@ -5,8 +5,8 @@ import java.util.Random;
 
 import me.Destro168.Configs.PassiveConfig;
 import me.Destro168.FC_Rpg.FC_Rpg;
-import me.Destro168.FC_Rpg.RpgParty;
 import me.Destro168.LoadedObjects.RpgClass;
+import me.Destro168.LoadedObjects.Guild;
 import me.Destro168.Messaging.MessageLib;
 import me.Destro168.Spells.EffectIDs;
 import me.Destro168.Util.HealthConverter;
@@ -28,15 +28,15 @@ public class EntityDamageManager
 	public void attackPlayerDefender(RpgPlayer rpgDefender, RpgPlayer rpgAttacker, RpgMonster rpgMobAttacker, double damage)
 	{
 		Player playerDefender = rpgDefender.getPlayer();
-		RpgParty party = null;
+		Guild party = null;
 		HealthConverter hc = null;
 		int memberCount = 0;
 		
 		//Get party and member count.
-		if (FC_Rpg.partyManager.getPartyByMember(playerDefender.getName()) != null)
+		if (FC_Rpg.guildManager.getGuildByMember(playerDefender.getName()) != null)
 		{
-			party = FC_Rpg.partyManager.getPartyByMember(playerDefender.getName());
-			memberCount = party.getMemberCount();
+			party = FC_Rpg.guildManager.getGuildByMember(playerDefender.getName());
+			memberCount = party.getOnlineGuildPlayerList().size();
 		}
 		else
 			memberCount = 1;
@@ -179,7 +179,7 @@ public class EntityDamageManager
 		Player playerAttacker = rpgAttacker.getPlayer();
 		LivingEntity entityDefender = rpgMobDefender.getEntity();
 		Player playerLooter = null;
-		RpgParty party = null;
+		Guild party = null;
 		double cash = 0;
 		double exp = 0;
 		double levelDifference = 0;
@@ -187,15 +187,18 @@ public class EntityDamageManager
 		int level1 = 0;
 		int level2 = 0;
 		int fireUses = rpgAttacker.getPlayerConfig().getStatusUses(EffectIDs.FIRE_ARROW);
+		int partyMemberCount = 1;
 		boolean playerLevelHigher = false;
 		boolean disableDrops = false;
 		
 		//Make sure that the mob wasn't attacked too recently.
-		if (FC_Rpg.partyManager.getPartyByMember(playerAttacker.getName()) != null)
+		if (FC_Rpg.guildManager.getGuildByMember(playerAttacker.getName()) != null)
 		{
-			party = FC_Rpg.partyManager.getPartyByMember(playerAttacker.getName());
+			party = FC_Rpg.guildManager.getGuildByMember(playerAttacker.getName());
 			
-			if (canAttack(rpgMobDefender.getLastDamagedLong(),party.getPartySize()) == false)
+			partyMemberCount = party.getOnlineGuildPlayerList().size();
+			
+			if (canAttack(rpgMobDefender.getLastDamagedLong(), partyMemberCount) == false)
 				return;
 		}
 		
@@ -331,19 +334,18 @@ public class EntityDamageManager
 				//If the player is in a party, then...
 				if (party != null)
 				{
-					//Add a mob kill for that party once.
-					party.addMobKill();
+					//Add a mob kill for that party.
+					FC_Rpg.guildManager.addMobKill(party.getName());
 					
 					//Give loot
-					for (int j = 0; j < party.getMemberCount(); j++)
+					for (String pName : party.getMembers())
 					{
-						playerLooter = Bukkit.getServer().getPlayer(party.getPartyMember(j));
+						playerLooter = Bukkit.getServer().getPlayer(pName);
 						
-						//If the mob is hostile then give money and experience.
-						if (party.closeToPartyLeader(j) == true)
+						if (playerLooter != null)
 						{
-							FC_Rpg.economy.depositPlayer(playerLooter.getName(), party.getPartyBonus(cash));
-							FC_Rpg.rpgManager.getRpgPlayer(playerLooter).addClassExperience(party.getPartyBonus(exp), true);
+							FC_Rpg.economy.depositPlayer(playerLooter.getName(), party.getGuildBonus(cash));
+							FC_Rpg.rpgManager.getRpgPlayer(playerLooter).addClassExperience(party.getGuildBonus(exp), true);
 						}
 					}
 				}

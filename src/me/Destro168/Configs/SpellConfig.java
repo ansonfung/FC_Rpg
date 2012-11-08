@@ -148,11 +148,13 @@ public class SpellConfig extends ConfigGod
 		 * Assassin
 		*******************************************/
 		
-		setEffectID(5, EffectIDs.SPEED_POTION);
+		setEffectID(5, EffectIDs.SPEED);
 		setName(5, "Adreneline");
 		setDescription(5, "Applies (x) speed buff on character for 10 seconds.");
-		setBuffStats(5);
-		setConstantMagnitude(5, 1, 2, 3, 4, 5);
+		setDuration(5, 10, 10, 10, 10, 10);
+		setManaCost(5, 10, 15, 20, 25, 30);
+		setRestricted(5, false);
+		setConstantMagnitude(5, .3, .4, .5, .6, .7);
 		
 		setEffectID(6, EffectIDs.FIRE_ARROW);
 		setName(6, "Flame");

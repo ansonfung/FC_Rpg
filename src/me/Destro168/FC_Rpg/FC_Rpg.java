@@ -11,6 +11,7 @@ import java.util.Random;
 import me.Destro168.Configs.ClassConfig;
 import me.Destro168.Configs.GeneralConfig;
 import me.Destro168.Configs.DungeonConfig;
+import me.Destro168.Configs.GuildConfig;
 import me.Destro168.Configs.PassiveConfig;
 import me.Destro168.Configs.SpellConfig;
 import me.Destro168.Configs.TreasureConfig;
@@ -86,7 +87,7 @@ public class FC_Rpg extends JavaPlugin
 	public static String dataFolderAbsolutePath;
 	
 	public static RpgManager rpgManager;
-	public static PartyManager partyManager;
+	public static GuildConfig guildManager;
 	public static SpellConfig spellConfig;
 	public static ClassConfig classConfig;
 	public static GeneralConfig generalConfig;
@@ -114,7 +115,7 @@ public class FC_Rpg extends JavaPlugin
 	public static Map<Player, String> classSelection = new HashMap<Player, String>();
 	public static Map<Integer, Integer> trueDungeonNumbers;
 	
-	private CommandGod CommandCE;
+	private CommandGod commandCE;
 	
 	@Override
 	public void onDisable() 
@@ -146,15 +147,17 @@ public class FC_Rpg extends JavaPlugin
 		generalConfig = new GeneralConfig();
 		worldConfig = new WorldConfig();
 		bLib = new BroadcastLib();
-		partyManager = new PartyManager();
+		guildManager = new GuildConfig();
 		pvp = new PvpEvent();
 		spellConfig = new SpellConfig();
 		classConfig = new ClassConfig();
 		passiveConfig = new PassiveConfig();
 		treasureConfig = new TreasureConfig();
 		warpConfig = new WarpConfig();
-		
 		sv = new SelectionVector();
+		
+		for (Player player : Bukkit.getServer().getOnlinePlayers())
+			player.setWalkSpeed((float) .2);
 		
 		//Set up the economy.
 		setupEconomy();
@@ -187,28 +190,28 @@ public class FC_Rpg extends JavaPlugin
 		getServer().getPluginManager().registerEvents(new teleportListener(), plugin);
 		
 		//Register Commands
-		CommandCE = new CommandGod();
-		getCommand("bighelp").setExecutor(CommandCE);
-		getCommand("class").setExecutor(CommandCE);
-		getCommand("donator").setExecutor(CommandCE);
-		getCommand("dungeon").setExecutor(CommandCE);
-		getCommand("d9").setExecutor(CommandCE);
-		getCommand("faq").setExecutor(CommandCE);
-		getCommand("g").setExecutor(CommandCE);
-		getCommand("h").setExecutor(CommandCE);
-		getCommand("gh").setExecutor(CommandCE);
-		getCommand("hg").setExecutor(CommandCE);
-		getCommand("hat").setExecutor(CommandCE);
-		getCommand("job").setExecutor(CommandCE);
-		getCommand("list").setExecutor(CommandCE);
-		getCommand("party").setExecutor(CommandCE);
-		getCommand("pvp").setExecutor(CommandCE);
-		getCommand("reset").setExecutor(CommandCE);
-		getCommand("rpg").setExecutor(CommandCE);
-		getCommand("spell").setExecutor(CommandCE);
-		getCommand("modify").setExecutor(CommandCE);
-		getCommand("w").setExecutor(CommandCE);
-		getCommand("buff").setExecutor(CommandCE);
+		commandCE = new CommandGod();
+		getCommand("bighelp").setExecutor(commandCE);
+		getCommand("class").setExecutor(commandCE);
+		getCommand("donator").setExecutor(commandCE);
+		getCommand("dungeon").setExecutor(commandCE);
+		getCommand("d9").setExecutor(commandCE);
+		getCommand("faq").setExecutor(commandCE);
+		getCommand("g").setExecutor(commandCE);
+		getCommand("h").setExecutor(commandCE);
+		getCommand("gh").setExecutor(commandCE);
+		getCommand("hg").setExecutor(commandCE);
+		getCommand("hat").setExecutor(commandCE);
+		getCommand("job").setExecutor(commandCE);
+		getCommand("list").setExecutor(commandCE);
+		getCommand("guild").setExecutor(commandCE);
+		getCommand("pvp").setExecutor(commandCE);
+		getCommand("reset").setExecutor(commandCE);
+		getCommand("rpg").setExecutor(commandCE);
+		getCommand("spell").setExecutor(commandCE);
+		getCommand("modify").setExecutor(commandCE);
+		getCommand("w").setExecutor(commandCE);
+		getCommand("buff").setExecutor(commandCE);
 		
 		//Handle tasks that happen every 30 minutes. Delay'd by 5 seconds.
 		Bukkit.getScheduler().scheduleAsyncRepeatingTask(this, new Runnable()
@@ -548,7 +551,7 @@ public class FC_Rpg extends JavaPlugin
 				return;
 			
 			//Register the player if needed.
-			FC_Rpg.rpgManager.checkPlayerRegistration(player);
+			FC_Rpg.rpgManager.checkPlayerRegistration(player, true);
 		}
 	}
 	
@@ -566,9 +569,6 @@ public class FC_Rpg extends JavaPlugin
 			
 			//Unregister the player from the object pool.
 			rpgManager.unregisterRpgPlayer(p);
-			
-			//Kick them from their party.
-			partyManager.removeMemberFromAllParties(p.getName());
 			
 			//Remove from any dungeons.
 			for (int i = 0; i < dungeonCount; i++)
@@ -621,10 +621,9 @@ public class FC_Rpg extends JavaPlugin
 			double magnitudeModifier = 0;
 			DistanceModifierLib dmm = null;
 			HealthConverter hc = null;
-			RpgPlayer rpgPlayer;
 			WorldConfig wm = new WorldConfig();
 			
-			if (wm.getIsRpgWorld(entity.getWorld().getName()))
+			if (!wm.getIsRpgWorld(entity.getWorld().getName()))
 				return;
 			
 			//Deal damage to the defender but the defender isn't type Player. The defender is type RpgEntity.
@@ -635,11 +634,8 @@ public class FC_Rpg extends JavaPlugin
 				//Cancel the event.
 				event.setCancelled(true);
 				
-				//Set rpgPlayer
-				rpgPlayer = rpgManager.getRpgPlayer(player);
-				
 				//Set the magnitude to heal by the players max health.
-				magnitudeModifier = rpgPlayer.getMaxHealth();
+				magnitudeModifier = rpgManager.getRpgPlayer(player).getMaxHealth();
 				
 				//Heal the player different amounts for different things.
 				if (event.getRegainReason() == RegainReason.EATING)
@@ -664,11 +660,10 @@ public class FC_Rpg extends JavaPlugin
 					magnitudeModifier = 1;
 				
 				//Restore health/mana to the player
-				rpgPlayer.restoreHealth(magnitudeModifier);
+				rpgManager.getRpgPlayer(player).restoreHealth(magnitudeModifier);
 				
 				//Update health
-				hc = new HealthConverter(rpgManager.getRpgPlayer(player).getMaxHealth(),
-						rpgManager.getRpgPlayer(player).getCurHealth());
+				hc = new HealthConverter(rpgManager.getRpgPlayer(player).getMaxHealth(), rpgManager.getRpgPlayer(player).getCurHealth());
 				
 				player.setHealth(hc.getMinecraftHearts());
 			}

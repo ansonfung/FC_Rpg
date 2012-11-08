@@ -175,79 +175,74 @@ public class PlayerInteractionListener implements Listener
 		String pickedClass = "";
 		ColorLib cl = new ColorLib();
 		
-		try
+		//If the player clicks a special pick class sign.
+		if (sign.getLine(0).contains("Pick Class:"))
 		{
-			//If the player clicks a special pick class sign.
-			if (sign.getLine(0).contains("Pick Class:"))
-			{
-				//Strip colors
-				pickedClass = cl.removeColors(sign.getLine(1));
-				
-				//If the sign was proper, then 
-				for (int i = 0; i < FC_Rpg.classConfig.getRpgClasses().length; i++)
-				{
-					if (pickedClass.equals(FC_Rpg.classConfig.getRpgClass(i).getName()))
-					{
-						//Prevent players from picking a job/class again without respecing.
-						if (FC_Rpg.rpgManager.getRpgPlayer(player) != null)
-						{
-							if (FC_Rpg.rpgManager.getRpgPlayer(player).getPlayerConfig().getIsActive() == true)
-							{
-								msgLib.standardMessage("You have to use /reset before picking a class.");
-								return;
-							}
-						}
-						
-						//Send the player a confirmation message.
-						msgLib.standardMessage("You have selected the " + pickedClass + " class. Now hit the finish sign to choose how you want your stats allocated.");
-						
-						//Store their class selection in a hashmap
-						FC_Rpg.classSelection.put(player, pickedClass);
-						
-						//Break.
-						break;
-					}
-				}
-			}
+			//Strip colors
+			pickedClass = cl.removeColors(sign.getLine(1));
 			
-			else if (sign.getLine(0).contains("Finish"))
+			//If the sign was proper, then 
+			for (int i = 0; i < FC_Rpg.classConfig.getRpgClasses().length; i++)
 			{
-				//If the player has picked both a class and job.
-				if (FC_Rpg.classSelection.containsKey(player))
+				if (pickedClass.equalsIgnoreCase(FC_Rpg.classConfig.getRpgClass(i).getName()))
 				{
-					if (sign.getLine(2).contains("Manually") || sign.getLine(3).contains("Manually") || sign.getLine(4).contains("Manually"))
+					//Prevent players from picking a job/class again without respecing.
+					if (FC_Rpg.rpgManager.getRpgPlayer(player) != null)
 					{
-						//Store the player as a new player.
-						FC_Rpg.rpgManager.setPlayerStart(FC_Rpg.classSelection.get(player), player, true);
+						msgLib.standardMessage("You have to use /reset before picking a class.");
+						return;
 					}
-					else
-					{
-						//Store the player as a new player.
-						FC_Rpg.rpgManager.setPlayerStart(FC_Rpg.classSelection.get(player), player, false);
-					}
+					
+					//Send the player a confirmation message.
+					msgLib.standardMessage("You have selected the " + pickedClass + " class. Now hit the finish sign to choose how you want your stats allocated.");
+					
+					//Store their class selection in a hashmap
+					if (FC_Rpg.classSelection.containsKey(player))
+						FC_Rpg.classSelection.remove(player);
+					
+					FC_Rpg.classSelection.put(player, pickedClass);
+					
+					//Break.
+					break;
 				}
-				else
-				{
-					msgLib.standardMessage("Please pick a class first!");
-					return;
-				}
-			}
-			else if (sign.getLine(0).contains("Refill Mana!"))
-			{
-				if (FC_Rpg.rpgManager.getRpgPlayer(player) != null)
-					FC_Rpg.rpgManager.getRpgPlayer(player).restoreMana(99999);
-				
-				msgLib.standardMessage("Refilled Mana!");
-			}
-			else if (sign.getLine(0).contains("Teleport:"))
-			{
-				if (FC_Rpg.rpgManager.getRpgPlayer(player) != null)
-					teleportPlayer(FC_Rpg.rpgManager.getRpgPlayer(player), sign.getLine(1));
 			}
 		}
-		catch (ArrayIndexOutOfBoundsException e)
+		
+		else if (sign.getLine(0).contains("Finish"))
 		{
-			return;
+			//If the player has picked both a class and job.
+			if (FC_Rpg.classSelection.containsKey(player))
+			{
+				if (sign.getLine(1).contains("Manually") || sign.getLine(2).contains("Manually") || sign.getLine(3).contains("Manually"))
+				{
+					//Store the player as a new player.
+					FC_Rpg.rpgManager.setPlayerStart(FC_Rpg.classSelection.get(player), player, true);
+					FC_Rpg.classSelection.remove(player);
+				}
+				else if (sign.getLine(1).contains("Auto") || sign.getLine(2).contains("Auto") || sign.getLine(3).contains("Auto"))
+				{
+					//Store the player as a new player.
+					FC_Rpg.rpgManager.setPlayerStart(FC_Rpg.classSelection.get(player), player, false);
+					FC_Rpg.classSelection.remove(player);
+				}
+			}
+			else
+			{
+				msgLib.standardMessage("Please pick a class first!");
+				return;
+			}
+		}
+		else if (sign.getLine(0).contains("Refill Mana!"))
+		{
+			if (FC_Rpg.rpgManager.getRpgPlayer(player) != null)
+				FC_Rpg.rpgManager.getRpgPlayer(player).restoreMana(99999);
+			
+			msgLib.standardMessage("Refilled Mana!");
+		}
+		else if (sign.getLine(0).contains("Teleport:"))
+		{
+			if (FC_Rpg.rpgManager.getRpgPlayer(player) != null)
+				teleportPlayer(FC_Rpg.rpgManager.getRpgPlayer(player), sign.getLine(1));
 		}
 	}
 
