@@ -2293,7 +2293,10 @@ public class CommandGod implements CommandExecutor
 			for (int i = 0; i < 10000; i++)
 			{
 				if (wc.getName(i) == null)
+				{
 					wc.setName(i, args[1]);
+					break;
+				}
 			}
 			
 			return msgLib.successCommand();

@@ -187,7 +187,7 @@ public class PlayerConfig extends ConfigGod
 		name = playerName;
 		
 		//OVERWRITE A BITCH - Create the new profile manager.
-		ccm = new CustomConfigurationManager(FC_Rpg.dataFolderAbsolutePath + "\\userinfo", playerName);
+		ccm = new CustomConfigurationManager(FC_Rpg.dataFolderAbsolutePath + "/userinfo", playerName);
 		
 		//Set the players class.
 		refreshClass();

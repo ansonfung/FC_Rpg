@@ -1182,7 +1182,7 @@ public class RpgPlayer extends RpgEntity
 		int spellNumber = -1;
 		
 		//Make sure spell is valid.
-		for (int i = 0; i < FC_Rpg.spellConfig.getSpellCount(); i++)
+		for (int i = 0; i < playerConfig.getSpellBinds().size(); i++)
 		{
 			if (playerConfig.getSpellBinds().get(i) == player.getItemInHand().getTypeId())
 			{

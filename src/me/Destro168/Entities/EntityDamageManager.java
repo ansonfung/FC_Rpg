@@ -417,7 +417,6 @@ public class EntityDamageManager
 		}
 	}
 	
-	
 	private int getLevelDifference(Player playerLooter, RpgMonster rpgMobDefender)
 	{
 		RpgPlayer rpgLooter = FC_Rpg.rpgManager.getRpgPlayer(playerLooter);

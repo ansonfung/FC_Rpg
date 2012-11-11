@@ -256,7 +256,7 @@ public class RpgMonster extends RpgEntity
 	private void dropPassiveItem(Material material, Location dropSpot)
 	{
 		Random rand = new Random();
-		ItemStack loot = new ItemStack(material, rand.nextInt(2));
+		ItemStack loot = new ItemStack(material, rand.nextInt(2) + 1);
 		
 		dropSpot.getWorld().dropItemNaturally(dropSpot, loot);
 	}

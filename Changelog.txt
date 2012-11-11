@@ -1,3 +1,16 @@
+Version 0.81:
+
+- Check FC_Suite_Shared changelog! <- Main reason for update.
+- Fixed ghost drops that can't be picked up.
+- Fixed issue with infinite 10k warps being created when you use /w add command.
+
+Todo:
+
+- Explain in help: The purpose of jobs is to be able to have a way for players to be able to pay to gain ranks that give access to better warps.
+- Class requirement / Job Rank minimum / Minimum level requirement for warps.
+- Customizable chat format.
+- Bind poisons to player skill so that normal poisons can be reenabled.
+
 Version 0.7:
 
 General:

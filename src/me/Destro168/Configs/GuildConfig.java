@@ -120,7 +120,7 @@ public class GuildConfig extends ConfigGod
     
 	public void updateGCCM(String guildName)
 	{
-		gccm = new CustomConfigurationManager(FC_Rpg.dataFolderAbsolutePath + "\\guilds", guildName);
+		gccm = new CustomConfigurationManager(FC_Rpg.dataFolderAbsolutePath + "/guilds", guildName);
 	}
 	
 	private void handleConfig()

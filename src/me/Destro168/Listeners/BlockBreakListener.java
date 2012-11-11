@@ -132,7 +132,10 @@ public class BlockBreakListener implements Listener
 				{
 					//Drop the wheat and seeds.
 					block.getWorld().dropItemNaturally(block.getLocation(), wheat);
-					block.getWorld().dropItemNaturally(block.getLocation(), seed);
+					
+					//Drop seeds if more than one.
+					if (seed.getAmount() > 0)
+						block.getWorld().dropItemNaturally(block.getLocation(), seed);
 					
 					//Set the data back to 0.
 					block.setData((byte) 0);
