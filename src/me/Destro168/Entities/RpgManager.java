@@ -8,7 +8,6 @@ import java.util.Map;
 
 import me.Destro168.Configs.PlayerConfig;
 import me.Destro168.FC_Rpg.FC_Rpg;
-import me.Destro168.LoadedObjects.Guild;
 import me.Destro168.Messaging.BroadcastLib;
 
 import org.bukkit.Bukkit;
@@ -130,10 +129,10 @@ public class RpgManager
     
 	public List<RpgPlayer> getNearbyPartiedRpgPlayers(Player sourcePlayer, int distance)
 	{
-		Guild party = FC_Rpg.guildManager.getGuildByMember(sourcePlayer.getName());
+		String guild = FC_Rpg.guildManager.getGuildByMember(sourcePlayer.getName());
 		
 		//If no party return the source player in list form.
-		if (party == null)
+		if (guild == null)
 		{
 			List<RpgPlayer> rpgPartyList = new ArrayList<RpgPlayer>();
 			rpgPartyList.add(getRpgPlayer(sourcePlayer));
@@ -143,7 +142,7 @@ public class RpgManager
 		EntityLocationLib ell = new EntityLocationLib();
 		List<RpgPlayer> rpgPlayerList = new ArrayList<RpgPlayer>();
 		
-		for (Player player : party.getOnlineGuildPlayerList())
+		for (Player player : FC_Rpg.guildManager.getOnlineGuildPlayerList(guild))
 		{
 			if (ell.isNearby(sourcePlayer, player, distance))
 			{

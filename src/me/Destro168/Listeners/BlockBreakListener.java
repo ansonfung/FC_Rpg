@@ -1,15 +1,20 @@
 package me.Destro168.Listeners;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.Util.FC_RpgPermissions;
+import me.Destro168.Util.Unbreakables;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
@@ -17,7 +22,7 @@ import org.bukkit.inventory.ItemStack;
 //Listen for block breaks.
 public class BlockBreakListener implements Listener
 {
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockBreak(BlockBreakEvent event)
 	{
 		//Variable Declarations
@@ -41,6 +46,17 @@ public class BlockBreakListener implements Listener
 		//Handle aoe world modifier for worlds.
 		if (FC_Rpg.worldConfig.getIsAoEWorld(worldName))
 		{
+			if (FC_Rpg.aoeLock.containsKey(player))
+			{
+				if (FC_Rpg.aoeLock.get(player) == true)
+				{
+					event.setCancelled(false);
+					return;
+				}
+			}
+			
+			FC_Rpg.aoeLock.put(player, true);
+			
 			World world = block.getWorld();
 			boolean breakSuccess = false;
 			
@@ -56,17 +72,41 @@ public class BlockBreakListener implements Listener
 			if (breakSuccess == false)
 				return;
 			
+			List<Block> targetBlocks = new ArrayList<Block>();
+			Unbreakables unbreaks = new Unbreakables();
+			List<Material> unbreakableList = unbreaks.getUnbreakables();
+			Block targetBlock;
+			
 			for (int x = block.getLocation().getBlockX() - 1; x < block.getLocation().getBlockX() + 2; x++)
 			{
 				for (int y = block.getLocation().getBlockY() - 1; y < block.getLocation().getBlockY() + 2; y++)
 				{
 					for (int z = block.getLocation().getBlockZ() - 1; z < block.getLocation().getBlockZ() + 2; z++)
 					{
-						if (world.getBlockAt(x,y,z).getType() != Material.BEDROCK)
-							world.getBlockAt(x,y,z).breakNaturally();
+						targetBlock = world.getBlockAt(x,y,z);
+						
+						if (!unbreakableList.contains(targetBlock.getType()))
+							targetBlocks.add(targetBlock);
 					}
 				}
 			}
+			
+			if (Bukkit.getServer().getPluginManager().isPluginEnabled("mcMMO"))
+			{
+				for (Block b : targetBlocks)
+					com.gmail.nossr50.skills.gathering.Mining.miningBlockCheck(player, b);
+			}
+			
+			BlockBreakEvent e;
+			
+			for (Block b : targetBlocks)
+			{
+				e = new BlockBreakEvent(b, player);
+				Bukkit.getPluginManager().callEvent(e);
+				b.breakNaturally();
+			}
+			
+			FC_Rpg.aoeLock.put(player, false);
 		}
 		
 		//If not an rpg world, don't continue execution.

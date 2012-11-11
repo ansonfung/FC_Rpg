@@ -5,5 +5,6 @@
 	<classpathentry kind="lib" path="C:/Users/Destro/Desktop/Locathost server/plugins/Vault.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Destro/Desktop/Locathost server/craftbukkit-0.0.1-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Destro/Desktop/Locathost server/plugins/FC_Suite_Shared.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Destro/Desktop/Locathost server/plugins/mcMMO.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

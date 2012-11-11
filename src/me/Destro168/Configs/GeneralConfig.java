@@ -48,6 +48,13 @@ public class GeneralConfig extends ConfigGod
 	private void setExpScaleBase(int x) { ccm.set(prefix + "expScaleBase", x); }
 	private void setDisableEnderPearls(boolean x) { ccm.set(prefix + "disableEnderPearls", x); }
 	private void setDungeonSelectionToolID(int x) { ccm.set(prefix + "dungeonSelectionToolID", x); }
+	public void setGlobalExpMultiplier(int x) { ccm.set(prefix + "globalExpMultiplier", x); }
+	private void setChainReq(int x) { ccm.set(prefix + "stoneReq", x); }
+	private void setIronReq(int x) { ccm.set(prefix + "ironReq", x); }
+	private void setDiamondReq(int x) { ccm.set(prefix + "diamondReq", x); }
+	private void setGoldReq(int x) { ccm.set(prefix + "goldReq", x); }
+	private void setWitherLevelBonus(int x) { ccm.set(prefix + "witherLevelBonus", x); }
+	private void setEnderDragonLevelBonus(int x) { ccm.set(prefix + "enderDragonLevelBonus", x); }
 	
 	public String getDefaultPrefix() { return ccm.getString(prefix + "defaultPrefix"); }
 	public boolean getPerfectBirch() { return ccm.getBoolean(prefix + "perfectBirch"); }
@@ -79,6 +86,13 @@ public class GeneralConfig extends ConfigGod
 	public double getExpScaleBase() { return ccm.getDouble(prefix + "expScaleBase"); }
 	public boolean getDisableEnderPearls() { return ccm.getBoolean(prefix + "disableEnderPearls"); }
 	public int getDungeonSelectionToolID() { return ccm.getInt(prefix + "dungeonSelectionToolID"); }
+	public int getGlobalExpMultiplier() { return ccm.getInt(prefix + "globalExpMultiplier"); }
+	public int getChainReq() { return ccm.getInt(prefix + "stoneReq"); }
+	public int getIronReq() { return ccm.getInt(prefix + "ironReq"); }
+	public int getDiamondReq() { return ccm.getInt(prefix + "diamondReq"); }
+	public int getGoldReq() { return ccm.getInt(prefix + "goldReq"); }
+	public int getWitherLevelBonus() { return ccm.getInt(prefix + "witherLevelBonus"); }
+	public int getEnderDragonLevelBonus() { return ccm.getInt(prefix + "enderDragonLevelBonus"); }
 	
 	public GeneralConfig()
 	{
@@ -165,12 +179,20 @@ public class GeneralConfig extends ConfigGod
 			setVersion(0.5);
 			
 			setDisableEnderPearls(true);
-			setDungeonSelectionToolID(268);
+			setDungeonSelectionToolID(7);
 		}
 		
-		if (getVersion() < 0.6)
+		if (getVersion() < 0.7)
 		{
-			setVersion(0.6);
+			setVersion(0.7);
+			
+			setGlobalExpMultiplier(1);
+			setChainReq(125);
+			setIronReq(250);
+			setDiamondReq(375);
+			setGoldReq(500);
+			setWitherLevelBonus(100);
+			setEnderDragonLevelBonus(50);
 		}
 		
 		//Load up timed items.

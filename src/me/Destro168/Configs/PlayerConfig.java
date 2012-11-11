@@ -1,5 +1,6 @@
 package me.Destro168.Configs;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -49,8 +50,14 @@ public class PlayerConfig extends ConfigGod
 	public int getClassChangeTickets() { return ccm.getInt(prefix + "classChangeTickets"); }
 	public int getSecondsPlayed() { return ccm.getInt(prefix + "secondsPlayed"); }
 	public int getSpellPoints() { return ccm.getInt(prefix + "spellPoints"); }
-	public int getSpellLevel(int x) { return ccm.getInt(prefix + "spellLevel." + x); }
-	public int getSpellBind(int x) { return ccm.getInt(prefix + "spellBind." + x); }
+	
+	
+	
+	public List<Integer> getSpellLevels() { return converter.getIntegerListFromString(ccm.getString(prefix + "spell.levels")); }
+	public List<Integer> getSpellBinds() { return converter.getIntegerListFromString(ccm.getString(prefix + "spell.binds")); }
+	
+	
+	
 	public double getClassExperience() { return ccm.getDouble(prefix + "classExperience"); }
 	public boolean getManualAllocation() { return ccm.getBoolean(prefix + "manualAllocation"); }
 	public boolean getShowDamageTaken() { return ccm.getBoolean(prefix + "showDamageTaken"); }
@@ -78,8 +85,19 @@ public class PlayerConfig extends ConfigGod
 	public void setClassChangeTickets(int x) { ccm.set(prefix + "classChangeTickets", x); }
 	public void setSecondsPlayed(int x) { ccm.set(prefix + "secondsPlayed", x); }
 	public void setSpellPoints(int x) { ccm.set(prefix + "spellPoints", x); }
-	public void setSpellLevel(int x, int y) { ccm.set(prefix + "spellLevel." + x, y); }
-	public void setSpellBind(int x, int y) { ccm.set(prefix + "spellBind." + x, y); }
+	
+	
+	
+	
+	public void setSpellLevels(int x) { ccm.set(prefix + "spell.levels", x); }
+	public void setSpellBinds(int x) { ccm.set(prefix + "spell.binds", x); }
+	public void setSpellLevels(List<Integer> x) { ccm.setCustomList(prefix + "spell.levels", x); }
+	public void setSpellBinds(List<Integer> x) { ccm.setCustomList(prefix + "spell.binds", x); }
+	
+	
+	
+	
+	
 	public void setDonatorTime(Long x) { ccm.set(prefix + "donatorTime", x); }
 	public void setClassExperience(double x) { ccm.set(prefix + "classExperience", x); }
 	public void setIsActive(boolean x) { ccm.set(prefix + "isActive",x); }
@@ -118,6 +136,22 @@ public class PlayerConfig extends ConfigGod
 	public int getLevelUpAmount() { return (int) (getClassLevel() * getClassLevel() * FC_Rpg.generalConfig.getExpScaleRate() + FC_Rpg.generalConfig.getExpScaleBase()); }
 	public void resetActiveSpell() { ccm.set(prefix + "activeSpell", "none"); }
 	
+	
+	public void updateSpellLevel(int spellID, int newVal)
+	{
+		List<Integer> sl = getSpellLevels();
+		sl.set(spellID, newVal);
+		setSpellLevels(sl);
+	}
+	
+	public void updateSpellBind(int spellID, int newVal)
+	{
+		List<Integer> sb = getSpellBinds();
+		sb.set(spellID, newVal);
+		setSpellBinds(sb);
+	}
+	
+	
 	public PlayerConfig()
 	{
 		super(FC_Rpg.dataFolderAbsolutePath, "Rpg");
@@ -155,16 +189,41 @@ public class PlayerConfig extends ConfigGod
 		//OVERWRITE A BITCH - Create the new profile manager.
 		ccm = new CustomConfigurationManager(FC_Rpg.dataFolderAbsolutePath + "\\userinfo", playerName);
 		
-		//Handle updates.
-		handleUpdates();
-		
 		//Set the players class.
 		refreshClass();
+		
+		//Handle updates.
+		handleUpdates();
 	}
 	
 	private void refreshClass()
 	{
 		rpgClass = FC_Rpg.classConfig.getClassByID(getCombatClass());
+		
+		//Automatically detect missing levels and binds for spells and fill them into the players config. Null = player isn't active yet or upgraded
+		//If the player isn't upgraded to 0.2, then the handleUpdates function will udpate rather than this instance.
+		int playerStoredSpellLevels = 0;
+		try { playerStoredSpellLevels = this.getSpellLevels().size(); } catch (NullPointerException e) { return; }
+		
+		//Check if the player needs more default level slots for spells.
+		if (playerStoredSpellLevels < rpgClass.getSpellBook().size())
+		{
+			List<Integer> levels = new ArrayList<Integer>();
+			List<Integer> binds = new ArrayList<Integer>();
+			
+			levels = getSpellLevels();
+			binds = getSpellBinds();
+			
+			for (int i = playerStoredSpellLevels; i < rpgClass.getSpellBook().size(); i++)
+			{
+				levels.add(0);
+				binds.add(999);
+			}
+			
+			//Update spell levels and binds with new lists
+			setSpellLevels(levels);
+			setSpellBinds(binds);
+		}
 	}
 	
 	public void handleUpdates()
@@ -181,6 +240,35 @@ public class PlayerConfig extends ConfigGod
 			//Remove outdated variables.
 			ccm.set(prefix + "lastAte", null);
 			ccm.set(prefix + "rankFreeze", null);
+		}
+		
+		if (getVersion() < 0.2)
+		{
+			setVersion(0.2);
+			
+			List<Integer> levels = new ArrayList<Integer>();
+			List<Integer> binds = new ArrayList<Integer>();
+			
+			//Load up old spell levels and spell binds.
+			for (int i = 0; i < 5; i++)
+			{
+				levels.add(ccm.getInt(prefix + "spellLevel." + i));
+				binds.add(ccm.getInt(prefix + "spellBind." + i));
+			}
+			
+			//Remove them.
+			ccm.set(prefix + "spellLevel", null);
+			ccm.set(prefix + "spellBind", null);
+			
+			//Add in defaults for the class.
+			for (int i = levels.size(); i < rpgClass.getSpellBook().size(); i++)
+			{
+				levels.add(0);
+				binds.add(999);
+			}
+			
+			setSpellLevels(levels);
+			setSpellBinds(binds);
 		}
 	}
 	
@@ -229,12 +317,18 @@ public class PlayerConfig extends ConfigGod
 		//Use a temporary rpgClass.
 		RpgClass tempClass = FC_Rpg.classConfig.getClassByID(getCombatClass());
 		
-		//Set the spell level for all spells to 0.
+		//Set the spell level and binds for spells.
+		List<Integer> levels = new ArrayList<Integer>();
+		List<Integer> binds = new ArrayList<Integer>();
+		
 		for (int i = 0; i < tempClass.getSpellBook().size(); i++)
 		{
-			setSpellLevel(i, 0);
-			setSpellBind(i, 999);
+			levels.add(0);
+			binds.add(999);
 		}
+
+		setSpellLevels(levels);
+		setSpellBinds(binds);
 		
 		setSpellPoints(1);
 		setAutoCast(false);

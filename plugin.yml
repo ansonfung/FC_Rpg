@@ -1,6 +1,6 @@
 name: FC_Rpg
 main: me.Destro168.FC_Rpg.FC_Rpg
-version: 0.6
+version: 0.7
 description: Handles RPG aspects of the server.
 commands:
    bighelp:
@@ -45,5 +45,5 @@ commands:
       description: This command accesses warp commands.
    buff:
       description: This command accesses buff commands.
-softdepend: [Multiverse]
+softdepend: [Multiverse, mcMMO]
 depend: [FC_Suite_Shared]

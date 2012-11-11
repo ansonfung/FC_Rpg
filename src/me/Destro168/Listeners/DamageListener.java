@@ -8,7 +8,6 @@ import me.Destro168.Entities.EntityDamageManager;
 import me.Destro168.Entities.RpgMonster;
 import me.Destro168.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.FC_Rpg;
-import me.Destro168.LoadedObjects.Guild;
 import me.Destro168.LoadedObjects.Spell;
 import me.Destro168.Spells.EffectIDs;
 import me.Destro168.Spells.SpellCaster;
@@ -21,6 +20,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Egg;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Fish;
 import org.bukkit.entity.LivingEntity;
@@ -33,6 +33,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.potion.PotionEffectType;
 
 public class DamageListener implements Listener
 {
@@ -41,7 +42,7 @@ public class DamageListener implements Listener
 	
 	Player playerDefender;
 	Player playerAttacker;
-	Guild party;
+	String party;
 	
 	Random defendChance;
 	Random counterattackChance;
@@ -86,13 +87,23 @@ public class DamageListener implements Listener
 		//Always set event damage to 0.
 		event.setDamage(0);
 		
+		boolean dealEnviromentalDamage = false;
+		
 		//For entity damage events we want to handle the attck normally.
 		if (event instanceof EntityDamageByEntityEvent)
 		{
-			entityAttack((EntityDamageByEntityEvent) event, -1);
+			if (((EntityDamageByEntityEvent) event).getDamager().getType() == EntityType.WITHER)
+				dealEnviromentalDamage = true;
+			else if (((EntityDamageByEntityEvent) event).getDamager().getType() == EntityType.WITHER_SKULL)
+				dealEnviromentalDamage = true;
+			else
+				entityAttack((EntityDamageByEntityEvent) event, -1);
 		}
-		//Else we want to deal the damage to the player/mob as though not from an entity.
 		else
+			dealEnviromentalDamage = true;
+		
+		//Else we want to deal the damage to the player/mob as though not from an entity.
+		if (dealEnviromentalDamage == true)
 		{
 			//If the defender is a player, then we attacker player defender.
 			if (event.getEntity() instanceof Player)
@@ -120,8 +131,11 @@ public class DamageListener implements Listener
 			else
 			{
 				if (event.getCause() != DamageCause.FALL)
-					edm.nukeMob((LivingEntity) event.getEntity());
-			}
+				{
+					if (event.getEntity() instanceof LivingEntity)
+						edm.nukeMob((LivingEntity) event.getEntity());
+				}
+			}	
 		}
 	}
 	
@@ -318,9 +332,9 @@ public class DamageListener implements Listener
 							
 							FC_Rpg.plugin.getLogger().info("I: " + i);
 							FC_Rpg.plugin.getLogger().info("I: " + spellBook.get(i).getName());
-							FC_Rpg.plugin.getLogger().info("I: " + rpgAttacker.getPlayerConfig().getSpellLevel(i));
+							FC_Rpg.plugin.getLogger().info("I: " + rpgAttacker.getPlayerConfig().getSpellLevels().get(i));
 							
-							damage = sc.updatefinalSpellMagnitude(rpgAttacker, spellBook.get(i), (rpgAttacker.getPlayerConfig().getSpellLevel(i) - 1));
+							damage = sc.updatefinalSpellMagnitude(rpgAttacker, spellBook.get(i), (rpgAttacker.getPlayerConfig().getSpellLevels().get(i) - 1));
 							break;
 						}
 					}
@@ -495,16 +509,28 @@ public class DamageListener implements Listener
 		{
 			damage = distanceModifier * 2;
 			damage = rpgDefender.calculateBonusEnchantmentDefense(player, Enchantment.PROTECTION_FIRE, damage);
+			
+			//95% damage reduction from fire resistance.
+			if (rpgDefender.getPlayer().getActivePotionEffects().contains(PotionEffectType.FIRE_RESISTANCE))
+				damage = damage * .05;
 		}
 		else if (event.getCause().equals(DamageCause.FIRE_TICK))
 		{
 			damage = distanceModifier * 2;
 			damage = rpgDefender.calculateBonusEnchantmentDefense(player, Enchantment.PROTECTION_FIRE, damage);
+			
+			//25% damage reduction from fire resistance.
+			if (rpgDefender.getPlayer().getActivePotionEffects().contains(PotionEffectType.FIRE_RESISTANCE))
+				damage = damage * .25;
 		}
 		else if (event.getCause().equals(DamageCause.LAVA))
 		{
 			damage = distanceModifier * 1;
 			damage = rpgDefender.calculateBonusEnchantmentDefense(player, Enchantment.PROTECTION_FIRE, damage);
+			
+			//95% damage reduction from fire resistance.
+			if (rpgDefender.getPlayer().getActivePotionEffects().contains(PotionEffectType.FIRE_RESISTANCE))
+				damage = damage * .05;
 		}
 		else if (event.getCause().equals(DamageCause.STARVATION))
 		{

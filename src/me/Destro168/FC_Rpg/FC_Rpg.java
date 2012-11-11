@@ -114,6 +114,7 @@ public class FC_Rpg extends JavaPlugin
 	
 	public static Map<Player, String> classSelection = new HashMap<Player, String>();
 	public static Map<Integer, Integer> trueDungeonNumbers;
+	public static Map<Player, Boolean> aoeLock = new HashMap<Player, Boolean>();
 	
 	private CommandGod commandCE;
 	
@@ -665,7 +666,7 @@ public class FC_Rpg extends JavaPlugin
 				//Update health
 				hc = new HealthConverter(rpgManager.getRpgPlayer(player).getMaxHealth(), rpgManager.getRpgPlayer(player).getCurHealth());
 				
-				player.setHealth(hc.getMinecraftHearts());
+				player.setHealth(hc.getPlayerHearts());
 			}
 			else if (entity instanceof LivingEntity)
 			{
@@ -685,13 +686,28 @@ public class FC_Rpg extends JavaPlugin
 						rpgManager.getRpgMonster((LivingEntity) entity).restoreHealth(MAX_HP);
 				}
 				
-				if (event.getRegainReason() == RegainReason.MAGIC)
+				else if (event.getRegainReason() == RegainReason.MAGIC)
 				{
 					if (rpgManager.getRpgMonster((LivingEntity) entity) != null)
 						rpgManager.getRpgMonster((LivingEntity) entity).restoreHealth(magnitudeModifier * 5);
 				}
 
-				if (event.getRegainReason() == RegainReason.MAGIC_REGEN)
+				else if (event.getRegainReason() == RegainReason.MAGIC_REGEN)
+				{
+					if (rpgManager.getRpgMonster((LivingEntity) entity) != null)
+						rpgManager.getRpgMonster((LivingEntity) entity).restoreHealth(magnitudeModifier);
+				}
+				
+				else if (event.getRegainReason() == RegainReason.WITHER_SPAWN)
+				{
+					if (rpgManager.getRpgMonster((LivingEntity) entity) == null)
+						rpgManager.registerCustomLevelEntity((LivingEntity) entity, 50);
+					
+					rpgManager.getRpgMonster((LivingEntity) entity).restoreHealth(999999999);
+					((LivingEntity) entity).setHealth(300);
+				}
+				
+				else if (event.getRegainReason() == RegainReason.WITHER)
 				{
 					if (rpgManager.getRpgMonster((LivingEntity) entity) != null)
 						rpgManager.getRpgMonster((LivingEntity) entity).restoreHealth(magnitudeModifier);
@@ -781,20 +797,25 @@ public class FC_Rpg extends JavaPlugin
 		@EventHandler
 		public void PlayerExpChangeEvent(PlayerExpChangeEvent event)
 		{
-			//If exp disabled is disabled.
-			if (generalConfig.getExpCancelled() == false)
+			//If experience is cancelled, then cancel it.
+			if (generalConfig.getExpCancelled() == true)
+			{
+				//Variable declarations
+				Player player = event.getPlayer();
+				
+				if (!worldConfig.getIsRpgWorld(player.getWorld().getName()))
+					return;
+				
+				//Change everything we can to remove player experience.
+				event.setAmount(0);
+				player.setLevel(0);
+				player.setExp(0);
+				
 				return;
+			}
 			
-			//Variable declarations
-			Player player = event.getPlayer();
-			
-			if (!worldConfig.getIsRpgWorld(player.getWorld().getName()))
-				return;
-			
-			//Change everything we can to remove player experience.
-			event.setAmount(0);
-			player.setLevel(0);
-			player.setExp(0);
+			//If experience isn't canceled, then we just alter by global exp multiplier.
+			event.setAmount(event.getAmount() * FC_Rpg.generalConfig.getGlobalExpMultiplier());
 		}
 	}
 	

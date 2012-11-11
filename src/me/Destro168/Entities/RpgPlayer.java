@@ -125,7 +125,7 @@ public class RpgPlayer extends RpgEntity
     	WorldConfig wm = new WorldConfig();
     	
     	if (wm.getIsRpgWorld(name) == true)
-    		player_.setHealth(hc.getMinecraftHearts());
+    		player_.setHealth(hc.getPlayerHearts());
 		
 		//Check and apply donator bonuses
 		donatorStatUpdate();
@@ -525,8 +525,8 @@ public class RpgPlayer extends RpgEntity
 		
 		for (int i = 0; i < playerConfig.getRpgClass().getSpellBook().size(); i++)
 		{
-			spellPoints += playerConfig.getSpellLevel(i);
-			playerConfig.setSpellLevel(i, 0);
+			spellPoints += playerConfig.getSpellLevels().get(i);
+			playerConfig.updateSpellLevel(i, 0);
 		}
 		
 		playerConfig.setSpellPoints(spellPoints);
@@ -793,57 +793,55 @@ public class RpgPlayer extends RpgEntity
 		
 		if (handItemType == Material.WOOD_SWORD)
 		{
-			if (handItemDurability >= 56)
-			{
+			if (handItemDurability >= 50)
 				player.getInventory().getItem(player.getInventory().getHeldItemSlot()).setDurability((short) 0);
-			}
 		}
 		
 		if (handItemType == Material.STONE_SWORD)
 		{
-			if (player.getItemInHand().getDurability() >= 128)
+			if (handItemDurability >= 122)
 				player.getInventory().getItem(player.getInventory().getHeldItemSlot()).setDurability((short) 0);
 			
-			if (playerConfig.getAttack() < 125)
+			if (playerConfig.getAttack() < FC_Rpg.generalConfig.getChainReq())
 			{
 				success = false;
-				msgLib.standardMessage("Without 125+ Attack, Stone Swords Are USELESS TO YOU!");
+				msgLib.standardMessage("Without " + FC_Rpg.generalConfig.getChainReq() + "+ Attack, Stone Swords Are USELESS TO YOU!");
 			}
 		}
 		
 		if (handItemType == Material.IRON_SWORD)
 		{
-			if (player.getItemInHand().getDurability() >= 247)
+			if (handItemDurability >= 241)
 				player.getInventory().getItem(player.getInventory().getHeldItemSlot()).setDurability((short) 0);
 			
-			if (playerConfig.getAttack() < 250)
+			if (playerConfig.getAttack() < FC_Rpg.generalConfig.getIronReq())
 			{
 				success = false;
-				msgLib.standardMessage("Without 250+ Attack, Iron Swords Are USELESS TO YOU!");
+				msgLib.standardMessage("Without " + FC_Rpg.generalConfig.getIronReq() + "+ Attack, Iron Swords Are USELESS TO YOU!");
 			}
 		}
 	
 		if (handItemType == Material.DIAMOND_SWORD)
 		{
-			if (player.getItemInHand().getDurability() >= 1558)
+			if (handItemDurability >= FC_Rpg.generalConfig.getDiamondReq())
 				player.getInventory().getItem(player.getInventory().getHeldItemSlot()).setDurability((short) 0);
 			
-			if (playerConfig.getAttack() < 375)
+			if (playerConfig.getAttack() < FC_Rpg.generalConfig.getDiamondReq())
 			{
 				success = false;
-				msgLib.standardMessage("Without 375+ Attack, Diamond Swords Are USELESS TO YOU!");
+				msgLib.standardMessage("Without " + FC_Rpg.generalConfig.getDiamondReq() + "+ Attack, Diamond Swords Are USELESS TO YOU!");
 			}
 		}
 		
 		if (handItemType == Material.GOLD_SWORD)
 		{
-			if (player.getItemInHand().getDurability() >= 27)
+			if (handItemDurability >= 23)
 				player.getInventory().getItem(player.getInventory().getHeldItemSlot()).setDurability((short) 0);
 			
-			if (playerConfig.getAttack() < 500)
+			if (playerConfig.getAttack() < FC_Rpg.generalConfig.getGoldReq())
 			{
 				success = false;
-				msgLib.standardMessage("Without 500+ Attack, Gold Swords Are USELESS TO YOU!");
+				msgLib.standardMessage("Without " + FC_Rpg.generalConfig.getGoldReq() + "+ Attack, Gold Swords Are USELESS TO YOU!");
 			}
 		}
 		
@@ -873,38 +871,38 @@ public class RpgPlayer extends RpgEntity
 		else
 			headType = helmet.getType();
 		
-		if (playerConfig.getConstitution() < 125)
+		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getChainReq())
 		{
 			if (headType == Material.CHAINMAIL_HELMET)
 			{
-				msgLib.standardMessage("You Need 125+ Constitution To Wear Chain Helmets!");
+				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getChainReq() + "+ Constitution To Wear Chain Helmets!");
 				success = false;
 			}
 		}
 		
-		if (playerConfig.getConstitution() < 250)
+		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getIronReq())
 		{
 			if (headType == Material.IRON_HELMET)
 			{
-				msgLib.standardMessage("You Need 250+ Constitution To Wear Iron Helmets!");
+				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getIronReq() + "+ Constitution To Wear Iron Helmets!");
 				success = false;
 			}
 		}
 		
-		if (playerConfig.getConstitution() < 375)
+		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getDiamondReq())
 		{
 			if (headType == Material.DIAMOND_HELMET)
 			{
-				msgLib.standardMessage("You Need 375+ Constitution To Wear Diamond Helmets!");
+				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getDiamondReq() + "+ Constitution To Wear Diamond Helmets!");
 				success = false;
 			}
 		}
 		
-		if (playerConfig.getConstitution() < 500)
+		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getGoldReq())
 		{
 			if (headType == Material.GOLD_HELMET)
 			{
-				msgLib.standardMessage("You Need 500+ Constitution To Wear Gold Helmets!");
+				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getGoldReq() + "+ Constitution To Wear Gold Helmets!");
 				success = false;
 			}
 		}
@@ -929,38 +927,38 @@ public class RpgPlayer extends RpgEntity
 		else
 			chestType = chest.getType();
 		
-		if (playerConfig.getConstitution() < 125)
+		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getChainReq())
 		{
 			if (chestType == Material.CHAINMAIL_CHESTPLATE)
 			{
-				msgLib.standardMessage("You Need 125+ Constitution To Wear Chain ChestPlates!");
+				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getChainReq() + "+ + Constitution To Wear Chain ChestPlates!");
 				success = false;
 			}
 		}
 		
-		if (playerConfig.getConstitution() < 250)
+		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getIronReq())
 		{
 			if (chestType == Material.IRON_CHESTPLATE)
 			{
-				msgLib.standardMessage("You Need 250+ Constitution To Wear Iron ChestPlates!");
+				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getIronReq() + "+ Constitution To Wear Iron ChestPlates!");
 				success = false;
 			}
 		}
 		
-		if (playerConfig.getConstitution() < 375)
+		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getDiamondReq())
 		{
 			if (chestType == Material.DIAMOND_CHESTPLATE)
 			{
-				msgLib.standardMessage("You Need 375+ Constitution To Wear Diamond ChestPlates!");
+				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getDiamondReq() + "+ Constitution To Wear Diamond ChestPlates!");
 				success = false;
 			}
 		}
 		
-		if (playerConfig.getConstitution() < 500)
+		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getGoldReq())
 		{
 			if (chestType == Material.GOLD_CHESTPLATE)
 			{
-				msgLib.standardMessage("You Need 500+ Constitution To Wear Gold ChestPlates!");
+				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getGoldReq() + "+ Constitution To Wear Gold ChestPlates!");
 				success = false;
 			}
 		}
@@ -985,38 +983,38 @@ public class RpgPlayer extends RpgEntity
 		else
 			leggingsType = leggings.getType();
 		
-		if (playerConfig.getConstitution() < 125)
+		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getChainReq())
 		{
 			if (leggingsType == Material.CHAINMAIL_LEGGINGS)
 			{
-				msgLib.standardMessage("You Need 125+ Constitution To Wear Chain Leggings!");
+				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getChainReq() + "+ Constitution To Wear Chain Leggings!");
 				success = false;
 			}
 		}
 		
-		if (playerConfig.getConstitution() < 250)
+		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getIronReq())
 		{
 			if (leggingsType == Material.IRON_LEGGINGS)
 			{
-				msgLib.standardMessage("You Need 250+ Constitution To Wear Iron Leggings!");
+				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getIronReq() + "+ Constitution To Wear Iron Leggings!");
 				success = false;
 			}
 		}
 		
-		if (playerConfig.getConstitution() < 375)
+		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getDiamondReq())
 		{
 			if (leggingsType == Material.DIAMOND_LEGGINGS)
 			{
-				msgLib.standardMessage("You Need 375+ Constitution To Wear Diamond Leggings!");
+				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getDiamondReq() + "+ Constitution To Wear Diamond Leggings!");
 				success = false;
 			}
 		}
 		
-		if (playerConfig.getConstitution() < 500)
+		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getGoldReq())
 		{
 			if (leggingsType == Material.GOLD_LEGGINGS)
 			{
-				msgLib.standardMessage("You Need 500+ Constitution To Wear Gold Leggings!");
+				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getGoldReq() + "+ Constitution To Wear Gold Leggings!");
 				success = false;
 			}
 		}
@@ -1041,37 +1039,37 @@ public class RpgPlayer extends RpgEntity
 		else
 			bootsType = boots.getType();
 		
-		if (playerConfig.getConstitution() < 125)
+		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getChainReq())
 		{
 			if (bootsType == Material.CHAINMAIL_BOOTS)
 			{
-				msgLib.standardMessage("You Need 125+ Constitution To Wear Chain Boots!");
+				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getChainReq() + "+ Constitution To Wear Chain Boots!");
 				success = false;
 			}
 		}
 		
-		if (playerConfig.getConstitution() < 250)
+		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getIronReq())
 		{
 			if (bootsType == Material.IRON_BOOTS)
 			{
-				msgLib.standardMessage("You Need 250+ Constitution To Wear Iron Boots!");
+				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getIronReq() + "+ Constitution To Wear Iron Boots!");
 				success = false;
 			}
 		}
 		
-		if (playerConfig.getConstitution() < 375)
+		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getDiamondReq())
 		{
 			if (bootsType == Material.DIAMOND_BOOTS)
 			{
-				msgLib.standardMessage("You Need 375+ Constitution To Wear Diamond Boots!");
+				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getDiamondReq() + "+ Constitution To Wear Diamond Boots!");
 				success = false;
 			}
 		}
-		if (playerConfig.getConstitution() < 500)
+		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getGoldReq())
 		{
 			if (bootsType == Material.GOLD_BOOTS)
 			{
-				msgLib.standardMessage("You Need 250+ Constitution To Wear Gold Boots!");
+				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getGoldReq() + "+ Constitution To Wear Gold Boots!");
 				success = false;
 			}
 		}
@@ -1186,7 +1184,7 @@ public class RpgPlayer extends RpgEntity
 		//Make sure spell is valid.
 		for (int i = 0; i < FC_Rpg.spellConfig.getSpellCount(); i++)
 		{
-			if (playerConfig.getSpellBind(i) == player.getItemInHand().getTypeId())
+			if (playerConfig.getSpellBinds().get(i) == player.getItemInHand().getTypeId())
 			{
 				spellNumber = i;
 				break;
@@ -1198,7 +1196,7 @@ public class RpgPlayer extends RpgEntity
 			return false;
 		
 		//We want to return if they don't have any points in the skill.
-		if (playerConfig.getSpellLevel(spellNumber) < 1)
+		if (playerConfig.getSpellLevels().get(spellNumber) < 1)
 		{
 			msgLib.standardError("You must levelup the spell once before you can use it.");
 			return false;
@@ -1248,12 +1246,12 @@ public class RpgPlayer extends RpgEntity
 		if (inv.getChestplate() != null)
 			bonus = getDefenseBonuses(inv.getChestplate(), bonus, enchant);
 		
-		if (inv.getHelmet() != null)
-			bonus = getDefenseBonuses(inv.getHelmet(), bonus, enchant);
+		if (inv.getLeggings() != null)
+			bonus = getDefenseBonuses(inv.getLeggings(), bonus, enchant);
 		
 		if (inv.getBoots() != null)
 			bonus = getDefenseBonuses(inv.getBoots(), bonus, enchant);
-
+		
 		return bonus;
 	}
 	

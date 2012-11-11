@@ -6,12 +6,10 @@ import java.util.Random;
 import me.Destro168.Configs.PassiveConfig;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.LoadedObjects.RpgClass;
-import me.Destro168.LoadedObjects.Guild;
 import me.Destro168.Messaging.MessageLib;
 import me.Destro168.Spells.EffectIDs;
 import me.Destro168.Util.HealthConverter;
 
-import org.bukkit.Bukkit;
 import org.bukkit.EntityEffect;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -20,15 +18,18 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.inventory.ItemStack;
 
 public class EntityDamageManager 
 {
+	private final int DROP_FAIL_VALUE = 999999;
+	
 	public EntityDamageManager() { }
 	
 	public void attackPlayerDefender(RpgPlayer rpgDefender, RpgPlayer rpgAttacker, RpgMonster rpgMobAttacker, double damage)
 	{
 		Player playerDefender = rpgDefender.getPlayer();
-		Guild party = null;
+		String party = "";
 		HealthConverter hc = null;
 		int memberCount = 0;
 		
@@ -36,7 +37,7 @@ public class EntityDamageManager
 		if (FC_Rpg.guildManager.getGuildByMember(playerDefender.getName()) != null)
 		{
 			party = FC_Rpg.guildManager.getGuildByMember(playerDefender.getName());
-			memberCount = party.getOnlineGuildPlayerList().size();
+			memberCount = FC_Rpg.guildManager.getOnlineGuildPlayerList(party).size();
 		}
 		else
 			memberCount = 1;
@@ -144,7 +145,10 @@ public class EntityDamageManager
 		//Set the players health based current health out of maximum health.
 		hc = new HealthConverter(rpgDefender.getMaxHealth(), rpgDefender.getCurHealth());
 		
-		playerDefender.setHealth(hc.getMinecraftHearts());
+		playerDefender.setHealth(hc.getPlayerHearts());
+		
+		//Check armor durabilities for the player defender.
+		increaseArmorDurabilities(playerDefender);
 		
 		//If the players has 0 health, kill minecraft body and set to dead.
 		if (rpgDefender.getCurHealth() < 1)
@@ -166,6 +170,117 @@ public class EntityDamageManager
 		}
 	}
 	
+	private void increaseArmorDurabilities(Player p)
+	{
+		short currentDurability = 0;
+		boolean setAir = false;
+		ItemStack boots = p.getInventory().getBoots();
+		ItemStack chest = p.getInventory().getChestplate();
+		ItemStack legs = p.getInventory().getLeggings();
+		ItemStack helm = p.getInventory().getHelmet();
+		ItemStack air = new ItemStack(Material.AIR);
+		
+		if (boots != null)
+		{
+			if (boots.getEnchantments().size() > 0)
+			{
+				boots.setDurability((short) (boots.getDurability() + 1));
+				currentDurability = boots.getDurability();
+				
+				if (boots.getType() == Material.LEATHER_BOOTS && currentDurability >= Material.LEATHER_BOOTS.getMaxDurability())
+					setAir = true;
+				else if (boots.getType() == Material.CHAINMAIL_BOOTS && currentDurability >= Material.CHAINMAIL_BOOTS.getMaxDurability())
+					setAir = true;
+				else if (boots.getType() == Material.IRON_BOOTS && currentDurability >= Material.IRON_BOOTS.getMaxDurability())
+					setAir = true;
+				else if (boots.getType() == Material.DIAMOND_BOOTS && currentDurability >= Material.DIAMOND_BOOTS.getMaxDurability())
+					setAir = true;
+				else if (boots.getType() == Material.GOLD_BOOTS && currentDurability >= Material.GOLD_BOOTS.getMaxDurability())
+					setAir = true;
+				
+				if (setAir == true)
+					p.getInventory().setBoots(air);
+				else
+					p.getInventory().setBoots(boots);
+			}
+		}
+		
+		if (chest != null)
+		{
+			if (chest.getEnchantments().size() > 0)
+			{
+				chest.setDurability((short) (chest.getDurability() + 1));
+				currentDurability = chest.getDurability();
+				
+				if (chest.getType() == Material.LEATHER_CHESTPLATE && currentDurability >= Material.LEATHER_CHESTPLATE.getMaxDurability())
+					setAir = true;
+				else if (chest.getType() == Material.CHAINMAIL_CHESTPLATE && currentDurability >= Material.CHAINMAIL_CHESTPLATE.getMaxDurability())
+					setAir = true;
+				else if (chest.getType() == Material.IRON_CHESTPLATE && currentDurability >= Material.IRON_CHESTPLATE.getMaxDurability())
+					setAir = true;
+				else if (chest.getType() == Material.DIAMOND_CHESTPLATE && currentDurability >= Material.DIAMOND_CHESTPLATE.getMaxDurability())
+					setAir = true;
+				else if (chest.getType() == Material.GOLD_CHESTPLATE && currentDurability >= Material.GOLD_CHESTPLATE.getMaxDurability())
+					setAir = true;
+				
+				if (setAir == true)
+					p.getInventory().setChestplate(air);
+				else
+					p.getInventory().setChestplate(chest);
+			}
+		}
+		
+		if (legs != null)
+		{
+			if (legs.getEnchantments().size() > 0)
+			{
+				legs.setDurability((short) (legs.getDurability() + 1));
+				currentDurability = legs.getDurability();
+				
+				if (legs.getType() == Material.LEATHER_LEGGINGS && currentDurability >= Material.LEATHER_LEGGINGS.getMaxDurability())
+					setAir = true;
+				else if (legs.getType() == Material.CHAINMAIL_LEGGINGS && currentDurability >= Material.CHAINMAIL_LEGGINGS.getMaxDurability())
+					setAir = true;
+				else if (legs.getType() == Material.IRON_LEGGINGS && currentDurability >= Material.IRON_LEGGINGS.getMaxDurability())
+					setAir = true;
+				else if (legs.getType() == Material.DIAMOND_LEGGINGS && currentDurability >= Material.DIAMOND_LEGGINGS.getMaxDurability())
+					setAir = true;
+				else if (legs.getType() == Material.GOLD_LEGGINGS && currentDurability >= Material.GOLD_LEGGINGS.getMaxDurability())
+					setAir = true;
+				
+				if (setAir == true)
+					p.getInventory().setLeggings(air);
+				else
+					p.getInventory().setLeggings(legs);
+			}
+		}
+		
+		if (helm != null)
+		{
+			if (helm.getEnchantments().size() > 0)
+			{
+				helm.setDurability((short) (helm.getDurability() + 1));
+				currentDurability = helm.getDurability();
+				
+				if (helm.getType() == Material.LEATHER_HELMET && currentDurability >= Material.LEATHER_HELMET.getMaxDurability())
+					setAir = true;
+				else if (helm.getType() == Material.CHAINMAIL_HELMET && currentDurability >= Material.CHAINMAIL_HELMET.getMaxDurability())
+					setAir = true;
+				else if (helm.getType() == Material.IRON_HELMET && currentDurability >= Material.IRON_HELMET.getMaxDurability())
+					setAir = true;
+				else if (helm.getType() == Material.DIAMOND_HELMET && currentDurability >= Material.DIAMOND_HELMET.getMaxDurability())
+					setAir = true;
+				else if (helm.getType() == Material.GOLD_HELMET && currentDurability >= Material.GOLD_HELMET.getMaxDurability())
+					setAir = true;
+				
+				if (setAir == true)
+					p.getInventory().setHelmet(air);
+				else
+					p.getInventory().setHelmet(helm);
+			}
+		}
+	}
+	
 	private void applyKnockback(Player attacker, LivingEntity attacked)
 	{
 		float knockback = attacker.getItemInHand().getEnchantmentLevel(Enchantment.KNOCKBACK);
@@ -178,25 +293,15 @@ public class EntityDamageManager
 		//Variable Declarations.
 		Player playerAttacker = rpgAttacker.getPlayer();
 		LivingEntity entityDefender = rpgMobDefender.getEntity();
-		Player playerLooter = null;
-		Guild party = null;
-		double cash = 0;
-		double exp = 0;
-		double levelDifference = 0;
-		double bonusPercent = 0;
-		int level1 = 0;
-		int level2 = 0;
+		String guild = null;
 		int fireUses = rpgAttacker.getPlayerConfig().getStatusUses(EffectIDs.FIRE_ARROW);
 		int partyMemberCount = 1;
-		boolean playerLevelHigher = false;
-		boolean disableDrops = false;
 		
 		//Make sure that the mob wasn't attacked too recently.
 		if (FC_Rpg.guildManager.getGuildByMember(playerAttacker.getName()) != null)
 		{
-			party = FC_Rpg.guildManager.getGuildByMember(playerAttacker.getName());
-			
-			partyMemberCount = party.getOnlineGuildPlayerList().size();
+			guild = FC_Rpg.guildManager.getGuildByMember(playerAttacker.getName());
+			partyMemberCount = FC_Rpg.guildManager.getOnlineGuildPlayerList(guild).size();
 			
 			if (canAttack(rpgMobDefender.getLastDamagedLong(), partyMemberCount) == false)
 				return;
@@ -245,6 +350,18 @@ public class EntityDamageManager
 		//Perform damage effect.
 		entityDefender.playEffect(EntityEffect.HURT);
 		
+		//Update health for ender dragon and wither bosses.
+		if (entityDefender.getType() == EntityType.ENDER_DRAGON)
+		{
+			HealthConverter hc = new HealthConverter(rpgMobDefender.getMaxHealth(), rpgMobDefender.getCurHealth());
+			entityDefender.setHealth(hc.getEnderDragonHearts());
+		}
+		else if (entityDefender.getType() == EntityType.WITHER)
+		{
+			HealthConverter hc = new HealthConverter(rpgMobDefender.getMaxHealth(), rpgMobDefender.getCurHealth());
+			entityDefender.setHealth(hc.getWitherHearts());
+		}
+		
 		//Attempt to send an attack notification.
 		rpgAttacker.attemptAttackNotification(rpgMobDefender.getLevel(), rpgMobDefender.getCurHealth(), damage);
 		
@@ -270,98 +387,23 @@ public class EntityDamageManager
 				//Give the attacker a mob kill
 				rpgAttacker.getPlayerConfig().setLifetimeMobKills(rpgAttacker.getPlayerConfig().getLifetimeMobKills() + 1);
 				
-				//5 mob defender level, 1 player defender, that's 5 - 1 = 4, that's 4 levels up, gives (20 * 4)
-				//Level 1 mob and level 5 player, that's 1 - 5, which is -4, give -20 * 4
-				if (rpgMobDefender.getLevel() > rpgAttacker.getPlayerConfig().getClassLevel())
-				{
-					level1 = rpgMobDefender.getLevel();
-					level2 = rpgAttacker.getPlayerConfig().getClassLevel();
-					playerLevelHigher = false;
-				}
-				else
-				{
-					level1 = rpgAttacker.getPlayerConfig().getClassLevel();
-					level2 = rpgMobDefender.getLevel();
-					playerLevelHigher = true;
-				}
-				
-				levelDifference = level1 - level2;
-				int powerLevelPrevention = FC_Rpg.generalConfig.getPowerLevelPrevention();
-				
-				if (powerLevelPrevention > -1)
-				{
-					if (levelDifference > powerLevelPrevention || levelDifference < powerLevelPrevention * -1)
-					{
-						bonusPercent = 0;
-						
-						if (playerAttacker != null)
-						{
-							MessageLib msgLib = new MessageLib(playerAttacker);
-							msgLib.standardMessage("WARNING! This monster is not in your level range so you get no experience or loot from killing it.");
-						}
-						
-						//Disable item drops.
-						disableDrops = true;
-					}
-				}
-				
-				if (disableDrops == false)
-				{
-					//Give a bonus percent based on level difference, 1 level = x% more.
-					if (levelDifference == 0)
-						bonusPercent = 1;
-					else if (playerLevelHigher == true)
-						bonusPercent = 1 - levelDifference * FC_Rpg.generalConfig.getMobLevelLootmodifier();
-					else
-						bonusPercent = 1 + levelDifference * FC_Rpg.generalConfig.getMobLevelLootmodifier();
-					
-					//Set up loot amounts.
-					cash = rpgMobDefender.getLevel() * bonusPercent * FC_Rpg.generalConfig.getMobCashMultiplier();
-					exp = rpgMobDefender.getLevel() * bonusPercent * FC_Rpg.generalConfig.getMobExpMultiplier();
-					
-					//Add global modifiers
-					cash = cash * FC_Rpg.eventCashMultiplier;
-					exp = exp * FC_Rpg.eventExpMultiplier;
-					
-					//Calculate how much loot and experience to aquire by donator
-					if (rpgAttacker.getPlayerConfig().isDonator())
-					{
-						cash = cash * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
-						exp = cash * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
-					}
-				}
-				
 				//If the player is in a party, then...
-				if (party != null)
+				if (guild != null)
 				{
 					//Add a mob kill for that party.
-					FC_Rpg.guildManager.addMobKill(party.getName());
+					FC_Rpg.guildManager.addMobKill(guild);
 					
-					//Give loot
-					for (String pName : party.getMembers())
+					for (Player p : FC_Rpg.guildManager.getOnlineGuildPlayerList(guild))
 					{
-						playerLooter = Bukkit.getServer().getPlayer(pName);
-						
-						if (playerLooter != null)
-						{
-							FC_Rpg.economy.depositPlayer(playerLooter.getName(), party.getGuildBonus(cash));
-							FC_Rpg.rpgManager.getRpgPlayer(playerLooter).addClassExperience(party.getGuildBonus(exp), true);
-						}
+						if (p != null)
+							attemptGiveBattleWinnings(guild, p, rpgMobDefender);
 					}
 				}
-				
-				//Else if not in a party, give loot to the single player.
 				else
-				{
-					FC_Rpg.economy.depositPlayer(playerAttacker.getName(), cash);
-					rpgAttacker.addClassExperience(exp, true);
-				}
-				
-				//Send a message to the player showing experience and loot gains.
-				rpgAttacker.sendMonsterDeathNotification(rpgMobDefender.getLevel(), exp, cash);
+					attemptGiveBattleWinnings(guild, playerAttacker, rpgMobDefender);	//Else if not in a party, give loot to the single player.
 				
 				//Don't drop loot if the monster is too high level.
-				if (disableDrops == false)
+				if (!(getLevelDifference(playerAttacker, rpgMobDefender) == DROP_FAIL_VALUE))
 					rpgMobDefender.handleHostileMobDrops(entityDefender.getLocation());	//Drop items for hostile mobs.
 			}
 			else
@@ -375,18 +417,82 @@ public class EntityDamageManager
 		}
 	}
 	
+	
+	private int getLevelDifference(Player playerLooter, RpgMonster rpgMobDefender)
+	{
+		RpgPlayer rpgLooter = FC_Rpg.rpgManager.getRpgPlayer(playerLooter);
+		int levelDifference = rpgMobDefender.getLevel() - rpgLooter.getPlayerConfig().getClassLevel();
+		int powerLevelPrevention = FC_Rpg.generalConfig.getPowerLevelPrevention();
+		
+		if (powerLevelPrevention > -1)
+		{
+			if (levelDifference > powerLevelPrevention || levelDifference < powerLevelPrevention * -1)
+				return DROP_FAIL_VALUE;
+		}
+		
+		return levelDifference;
+	}
+	
+	private void attemptGiveBattleWinnings(String guild, Player playerLooter, RpgMonster rpgMobDefender)
+	{
+		RpgPlayer rpgLooter = FC_Rpg.rpgManager.getRpgPlayer(playerLooter);
+		double bonusPercent = 1;
+		int levelDifference = getLevelDifference(playerLooter, rpgMobDefender);
+		double cash;
+		double exp;
+		
+		if (levelDifference == DROP_FAIL_VALUE)
+		{
+			MessageLib msgLib = new MessageLib(playerLooter);
+			
+			if (levelDifference > 0)
+				msgLib.standardMessage("That monster was too strong so you got nothing.");
+			else
+				msgLib.standardMessage("That monster was too weak so you got nothing.");
+			
+			return;
+		}
+		
+		//Give a bonus percent based on level difference, 1 level = x% more.
+		if (levelDifference == 0)
+			bonusPercent = 1;
+		else
+			bonusPercent = 1 + levelDifference * FC_Rpg.generalConfig.getMobLevelLootmodifier();
+		
+		//Set up loot amounts.
+		cash = rpgMobDefender.getLevel() * bonusPercent * FC_Rpg.generalConfig.getMobCashMultiplier();
+		exp = rpgMobDefender.getLevel() * bonusPercent * FC_Rpg.generalConfig.getMobExpMultiplier();
+		
+		//Add global modifiers
+		cash = cash * FC_Rpg.eventCashMultiplier;
+		exp = exp * FC_Rpg.eventExpMultiplier;
+		
+		//Calculate how much loot and experience to aquire by donator
+		if (rpgLooter.getPlayerConfig().isDonator())
+		{
+			cash = cash * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
+			exp = exp * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
+		}
+		
+		FC_Rpg.economy.depositPlayer(playerLooter.getName(), FC_Rpg.guildManager.getGuildBonus(guild, cash));
+		FC_Rpg.rpgManager.getRpgPlayer(playerLooter).addClassExperience(FC_Rpg.guildManager.getGuildBonus(guild, exp), true);
+		
+		//Send a message to the player showing experience and loot gains.
+		rpgLooter.sendMonsterDeathNotification(rpgMobDefender.getLevel(), exp, cash);
+	}
+	
 	private double calcArmorModifier(Material armor, int constitution)
 	{
 		//LEATHER - 10% total, .5%, 1%, 1.5%, 2%
 		if (armor.equals(Material.LEATHER_BOOTS))
 			return .005;
-
+		
 		else if (armor.equals(Material.LEATHER_HELMET))
 			return .01;
-
+		
 		else if (armor.equals(Material.LEATHER_LEGGINGS))
 			return .015;
-
+		
 		else if (armor.equals(Material.LEATHER_CHESTPLATE))
 			return .02;
 		

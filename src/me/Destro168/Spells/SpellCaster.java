@@ -125,7 +125,7 @@ public class SpellCaster
 			return false;
 		
 		//Assign Variables.
-		spellTier = rpgCaster.getPlayerConfig().getSpellLevel(spellNumber) - 1;
+		spellTier = rpgCaster.getPlayerConfig().getSpellLevels().get(spellNumber) - 1;
 		
 		//If the spell is restricted, then...
 		if (spell.getRestricted())

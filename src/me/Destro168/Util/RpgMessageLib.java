@@ -373,10 +373,11 @@ public class RpgMessageLib extends MessageLib
 		
 		standardHeader("Admin Commands ~ BE CAREFUL");
 		standardMessage("/rpg event [type]","loot,exp,off");
-		standardMessage("/h|/g|/hg|/gh [name]","Heal/Gamemode single/hybrid commands.");
+		standardMessage("/h - /g - /hg - /gh [name]","Heal/Gamemode single/hybrid commands.");
 		standardMessage("/rpg listworld(s)","List all worlds on your server.");
 		standardMessage("/rpg go [u [amount] | d [amount] | (coords)]","Teleport anywhere.");
 		standardMessage("/rpg tpworld [worldname]","Teleport to a worlds spawn.");
+		standardMessage("/rpg expMult [x]","Change current global exp multiplier. Currently: " + FC_Rpg.generalConfig.getGlobalExpMultiplier());
 		
 		return true;
 	}

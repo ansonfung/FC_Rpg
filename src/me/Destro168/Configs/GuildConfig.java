@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.Destro168.ConfigManagers.ConfigGod;
+import me.Destro168.ConfigManagers.CustomConfigurationManager;
 import me.Destro168.FC_Rpg.FC_Rpg;
-import me.Destro168.LoadedObjects.Guild;
 import me.Destro168.Util.RpgMessageLib;
 
 import org.bukkit.Bukkit;
@@ -15,48 +15,101 @@ import org.bukkit.entity.Player;
 public class GuildConfig extends ConfigGod
 {
 	final static int MAX_GUILDS = 1000;
+	public CustomConfigurationManager gccm;
 	
-	List<Guild> guildList = new ArrayList<Guild>();
+	public void setGuildList(List<String> x) { ccm.setCustomList(prefix + "guildList", x); }
+	public void setLeader(String x) { gccm.set(prefix + "leader", x); }
+	public void setMembers(List<String> x) { gccm.setCustomList(prefix + "members", x); }
+	public void setPerks(List<String> x) { gccm.setCustomList(prefix + "perkList", x); }
+	public void setPerks(String x) { gccm.set(prefix + "perkList", x); }
+	public void setPrivate(boolean x) { gccm.set(prefix + "private", true); }
+	public void setMobKills(int x) { gccm.set(prefix + "mobKills", x); }
 	
-	public void setName(int i, String x) { ccm.set(prefix + i + ".name", x); }
-	public void setLeader(int i, String x) { ccm.set(prefix + i + ".leader", x); }
-	public void setMembers(int i, List<String> x) { ccm.setCustomList(prefix + i + ".members", x); }
-	public void setMembers(int i, String x) { ccm.set(prefix + i + ".members", x); }
-	public void setPerks(int i, List<String> x) { ccm.setCustomList(prefix + i + ".perkList", x); }
-	public void setPerks(int i, String x) { ccm.set(prefix + i + ".perkList", x); }
-	public void setPrivate(int i, boolean x) { ccm.set(prefix + i + ".private", true); }
-	public void setMobKills(int i, int x) { ccm.set(prefix + i + ".mobKills", x); }
+	public List<String> getGuildList() { try { return converter.getStringListFromString(ccm.getString(prefix + "guildList")); } catch (NullPointerException e) { return null; } }
+	public String getLeader() { return gccm.getString(prefix + "leader"); }
+	public List<String> getMembers() { try { return converter.getStringListFromString(gccm.getString(prefix + "members")); } catch (NullPointerException e) { return null; } }
+	public List<String> getPerks() { return converter.getStringListFromString(gccm.getString(prefix + "perkList")); }
+	public boolean getPrivate() { return gccm.getBoolean(prefix + "private"); }
+	public int getMobKills() { return gccm.getInt(prefix + "mobKills"); }
 	
-	public String getName(int i) { return ccm.getString(prefix + i + ".name"); }
-	public String getLeader(int i) { return ccm.getString(prefix + i + ".leader"); }
-	public List<String> getMembers(int i) { return converter.getStringListFromString(ccm.getString(prefix + i + ".members")); }
-	public List<String> getPerks(int i) { return converter.getStringListFromString(ccm.getString(prefix + i + ".perkList")); }
-	public boolean getPrivate(int i) { return ccm.getBoolean(prefix + i + ".private"); }
-	public int getMobKills(int i) { return ccm.getInt(prefix + i + ".mobKills"); }
-	
-	public void setGuildNull(int i) { ccm.set(prefix + i, null); guildList.remove(i); }
-	
-	public boolean setGuildNull(String x) 
+	public void addMember(String x)
 	{
-		int i = getGuildIndex(x);
+		List<String> members = getMembers();
 		
-		if (i != -1)
-		{
-			ccm.set(prefix + i, null);
-			guildList.remove(i);
-			return true;
-		}
+		if (!(members == null))
+			members.add(x);
 		else
-			return false;
+		{
+			members = new ArrayList<String>();
+			members.add(x);
+		}
 		
-		
+		setMembers(members);
 	}
 	
-	public void addPerk(int guildIndex, String perk)
+	public void removeMember(String x)
 	{
-		List<String> perks = getPerks(guildIndex);
+		List<String> members = getMembers();
+		
+		if (!(members == null))
+			members.remove(x);
+		else
+			return;
+		
+		if (members.size() == 0)
+			setGuildList(null);
+		else
+			setMembers(members);
+	}
+    
+	public void guildListAdd(String x)
+	{
+		List<String> gList = getGuildList();
+		
+		if (!(gList == null))
+			gList.add(x);
+		else
+		{
+			gList = new ArrayList<String>();
+			gList.add(x);
+		}
+		
+		setGuildList(gList);
+	}
+	
+	public void guildListRemove(String x)
+	{
+		List<String> gList = getGuildList();
+		
+		if (!(gList == null))
+			gList.remove(x);
+		else
+			return;
+		
+		if (gList.size() == 0)
+			setGuildList(null);
+		else
+			setGuildList(gList);
+	}
+	
+	public boolean setGuildNull(String guildName) 
+	{
+		if (!exists(guildName))
+			return false;
+		
+		updateGCCM(guildName);
+		
+		gccm.set("Guilds", null);
+		guildListRemove(guildName);
+		
+		return true;
+	}
+	
+	public void addPerk(String perk)
+	{
+		List<String> perks = getPerks();
 		perks.add(perk);
-		setPerks(guildIndex, perks);
+		setPerks(perks);
 	}
 	
 	public GuildConfig()
@@ -65,58 +118,58 @@ public class GuildConfig extends ConfigGod
 		handleConfig();
 	}
     
+	public void updateGCCM(String guildName)
+	{
+		gccm = new CustomConfigurationManager(FC_Rpg.dataFolderAbsolutePath + "\\guilds", guildName);
+	}
+	
 	private void handleConfig()
 	{
 		//Create a config  if not created
-		if (getVersion() < 0.1)
+		if (getVersion() < 0.2)
 		{
-			setVersion(0.1);
+			setVersion(0.2);
 			
-			setName(0, "Default");
-			setLeader(0, "[NONYA]");
-			setMembers(0, "Face1,Pie2");
-			setPerks(0, "p1");
-			setPrivate(0, true);
-			setMobKills(0, 99999);
-		}
-		
-		int breakPoint = 0;
-		
-		for (int i = 0; i < MAX_GUILDS; i++)
-		{
-			if (getName(i) != null)
-			{
-				if (!getName(i).equals(""))
-					guildList.add(new Guild(getName(i), getLeader(i), getMembers(i), getPerks(i), getPrivate(i), getMobKills(i)));
-			}
-			else
-			{
-				breakPoint++;
-				
-				if (breakPoint < 50)
-					break;
-			}
+			//Create a default guild in the configuration file.
+			updateGCCM("Default");
+			setLeader("[NONYA]");
+			
+			List<String> a = new ArrayList<String>();
+			
+			a.add("Face1");
+			a.add("Face2");
+			
+			setMembers(a);
+			setPerks("p1");
+			setPrivate(true);
+			setMobKills(99999);
+			
+			guildListAdd("Default");
 		}
 	}
 	
-    public String getGuildList()
+    public String listGuilds()
     {
     	boolean guildGreen = true;
     	String list = "Listing guilds: ";
     	int guildCount = 0;
+    	String noGuildMessage = ChatColor.RED + "There are currently no created guilds.";
     	
-    	for (Guild g : guildList)
+    	if (getGuildList() == null)
+    		return noGuildMessage;
+    	
+    	for (String g : getGuildList())
     	{
     		guildCount++;
 			
 			if (guildGreen == true)
 			{
-				list = list + ChatColor.WHITE + g.getName() + " ";
+				list = list + ChatColor.WHITE + g + " ";
 				guildGreen = false;
 			}
 			else
 			{
-				list = list + ChatColor.YELLOW + g.getName() + " ";
+				list = list + ChatColor.YELLOW + g + " ";
 				guildGreen = true;
 			}
     	}
@@ -124,175 +177,158 @@ public class GuildConfig extends ConfigGod
     	if (guildCount > 0)
     		return list;
     	else
-    		return ChatColor.RED + "There are currently no created guilds.";
+    		return noGuildMessage;
     }
     
     public boolean createGuild(String guildName, String newLeader)
     {
-    	int count = 0;
-    	String newName = guildName;
-    	
     	//Check to see if the person already is in a guild.
     	if (getGuildByMember(newLeader) != null)
     		return false;
     	
     	//Check to see if any guilds exist with that name;
-    	while (getGuildByGuildName(guildName) != null)
+    	if (getGuildList() != null)
     	{
-    		guildName = newName + "_" + count;
-    		count++;
+    		for (String gName : getGuildList())
+        	{
+        		if (gName.equalsIgnoreCase(guildName))
+        			return false;
+        	}
     	}
     	
-    	for (int i = 0; i < MAX_GUILDS; i++)
-    	{
-    		if (getName(i) == null)
-    		{
-    			List<String> members = new ArrayList<String>();
-    			List<String> perks = new ArrayList<String>();
-    			
-    			members.add(newLeader);
-    			perks.add("none");
-    			
-    			guildList.add(new Guild(guildName, newLeader, members, perks, true, 0));
-    			
-    			setName(i, guildName);
-    			setLeader(i, newLeader);
-    			setMembers(i, members);
-    			setPerks(i, perks);
-    			setPrivate(i, true);
-    			setMobKills(i, 0);
-    			
-    			FC_Rpg.bLib.standardBroadcast(newLeader + " has created the guild " + guildName + ".");
-    			
-    			return true;
-    		}
-    	}
+    	updateGCCM(guildName);
     	
-    	return false;
-    }
-    
-    public boolean playerAttemptSetGuildPrivate(String memberName, boolean trueOrFalse)
-    {
-		for (int i = 0; i < guildList.size(); i++)
-    	{
-			if (guildList.get(i) != null)
-			{
-				if (guildList.get(i).isLeader(memberName) == true)
-				{
-					setPrivate(i, trueOrFalse);
-					return true;
-				}
-    		}
-    	}
+    	List<String> members = new ArrayList<String>();
+		List<String> perks = new ArrayList<String>();
 		
-		return false;
+		members.add(newLeader);
+		perks.add("none");
+		
+		setLeader(newLeader);
+		setMembers(members);
+		setPerks(perks);
+		setPrivate(true);
+		setMobKills(0);
+		
+		guildListAdd(guildName);
+		
+		FC_Rpg.bLib.standardBroadcast(newLeader + " has created the guild " + guildName + ".");
+		
+		return true;
     }
     
-    public void adminForceGuildPrivate(String guildName, boolean trueOrFalse)
+    public boolean playerAttemptSetGuildPrivate(String memberName, boolean trueOrFalse, boolean forcePrivate)
     {
-    	setPrivate(getGuildIndex(guildName), trueOrFalse);
+    	if (!exists(getGuildByMember(memberName)))
+    		return false;
+    	
+    	if (getLeader().equalsIgnoreCase(memberName) || forcePrivate)
+		{
+			setPrivate(trueOrFalse);
+			return true;
+		}
+    	
+		return false;
     }
     
 	public boolean removeMemberFromAllGuilds(String playerName)
 	{
-		for (int i = 0; i < guildList.size(); i++)
-    	{
-			if (guildList.get(i) != null)
+		for (String gName : getGuildList())
+		{
+			updateGCCM(gName);
+			
+			if (getMembers().contains(playerName))
 			{
-				if (guildList.get(i).isMember(playerName) == true)
+				removeMember(playerName);
+				
+				List<String> members = getMembers();
+				
+				if (members.size() > 0)
 				{
-					guildList.get(i).removeMember(playerName);
-					
-					if (guildList.get(i).getMembers().size() > 0)
-					{
-						//Update members
-						setMembers(i, guildList.get(i).getMembers());
-						
-						//Replace leader if needed
-						if (guildList.get(i).getLeader().equalsIgnoreCase(playerName))
-							setLeader(i, getMembers(i).get(0));
-						
-						guildList.get(i).messageGuildMembers(ChatColor.GRAY + playerName + " has left the guild!");
-					}
-					else
-						setGuildNull(i);
-					
-					return true;
+					//Replace leader if needed
+					if (getLeader().equalsIgnoreCase(playerName))
+						setLeader(playerName);
 				}
+				else
+					setGuildNull(gName);
+				
+				//Tell guild members that the player left.
+				messageGuildMembers(ChatColor.GRAY + playerName + " has left the guild!");
+				
+				return true;
 			}
-    	}
+		}
 		
 		return false;
 	}
 	
-	public int getGuildIndex(String guildName)
+	public boolean exists(String name)
 	{
-		for (int i = 0; i < guildList.size(); i++)
-    	{
-			if (guildList.get(i) != null)
-			{
-				if (guildList.get(i).getName().equalsIgnoreCase(guildName))
-				{
-					return i;
-				}
-			}
-    	}
+		if (name == null)
+			return false;
 		
-		return -1;
+		updateGCCM(name);
+		
+		if (getLeader() == null)
+			return false;
+		
+		return true;
 	}
 	
-	public Guild getGuildByGuildName(String guildName)
+	public String getGuildByMember(String playerName)
 	{
-		int guildIndex = getGuildIndex(guildName);
+		List<String> guildList = getGuildList();
 		
-		if (guildIndex != -1)
-			return guildList.get(guildIndex);
-		else
+		if (getGuildList() == null)
 			return null;
-	}
-	
-	public Guild getGuildByMember(String playerName)
-	{
-		for (int i = 0; i < guildList.size(); i++)
-    	{
-			if (guildList.get(i) != null)
+		
+		for (String gName : guildList)
+		{
+			updateGCCM(gName);
+			
+			for (String pName : getMembers())
 			{
-				if (guildList.get(i).isMember(playerName))
-				{
-					return guildList.get(i);
-				}
+				if (pName.equalsIgnoreCase(playerName))
+					return gName;
 			}
-    	}
+		}
 		
 		return null;
 	}
 	
-	public boolean addMember(String playerName, String guildName, boolean forceAdmin)
+	public boolean attemptAddGuildMember(String playerName, String guildName, boolean forceAdmin)
 	{
 		removeMemberFromAllGuilds(playerName);
-		
-		Guild g = getGuildByGuildName(guildName);
-		
-		if (g == null)
+    	
+    	if (!exists(guildName))
+    		return false;
+    	
+		if (getPrivate() && !forceAdmin)
 			return false;
 		
-		if (g.getPrivate() && !forceAdmin)
-			return false;
+		addMember(playerName);
 		
-		g.getMembers().add(playerName);
-		setMembers(getGuildIndex(guildName), g.getMembers());
-		g.messageGuildMembers(ChatColor.GRAY + playerName + " successfully joined the guild!");
+		//Tell guild members that player joined.
+		messageGuildMembers(ChatColor.GRAY + playerName + " successfully joined the guild!");
+		
 		return true;
+	}
+	
+	public void messageGuildMembers(String x)
+	{
+		for (String p : getMembers())
+		{
+			if (Bukkit.getServer().getPlayer(p) != null)
+				Bukkit.getServer().getPlayer(p).sendMessage(x);
+		}
 	}
 	
 	public boolean kickMember(String requester, String targetPlayer, boolean forceAdmin)
 	{
-		Guild g = getGuildByMember(requester);
+		if (!exists(getGuildByMember(requester)))
+			return false;
 		
-		if (g == null)
-			return true;
-		
-		if (g.isLeader(requester) || forceAdmin)
+		if (getLeader().equalsIgnoreCase(requester) || forceAdmin)
 		{
 			removeMemberFromAllGuilds(targetPlayer);
 			return true;
@@ -303,68 +339,111 @@ public class GuildConfig extends ConfigGod
 	
 	public boolean viewGuildInfoByGuildName(String guildName, RpgMessageLib msgLib)
 	{
-		Guild guild = getGuildByGuildName(guildName);
-		
-		if (guild == null)
+		if (!exists(guildName))
 			return false;
 		
-		return viewGuildInfo(guild, msgLib);
+		return viewGuildInfo(guildName, msgLib);
 	}
 	
-	public boolean viewGuildInfo(Guild guild, RpgMessageLib msgLib)
+	public boolean viewGuildInfo(String guildName, RpgMessageLib msgLib)
 	{
-		msgLib.standardHeader("Guild Name: " + ChatColor.YELLOW + ChatColor.ITALIC + guild.getName());
-		msgLib.standardMessage("Leader",guild.getLeader());
-		msgLib.standardMessage("Members",guild.returnMemberList());
+		updateGCCM(guildName);
+		
+		msgLib.standardHeader("Guild Name: " + ChatColor.YELLOW + ChatColor.ITALIC + guildName);
+		msgLib.standardMessage("Leader",getLeader());
+		
+    	boolean colorAlternate = true;
+    	String list = "Members: ";
+    	int count = 0;
+    	
+		for (String g : getMembers())
+    	{
+			if (colorAlternate == true)
+			{
+				if (count != 0)
+					list += ", ";
+				
+				list += ChatColor.WHITE + g;
+				colorAlternate = false;
+			}
+			else
+			{
+				list += ", " + ChatColor.YELLOW + g;
+				colorAlternate = true;
+			}
+			
+			count++;
+    	}
+		
+		msgLib.standardMessage(list);
+		
 		//msgLib.standardMessage("Perks",guild.getPerks()); TODO - ADD PERKS
-		msgLib.standardMessage("Private?",String.valueOf(guild.getPrivate()));
-		msgLib.standardMessage("Mob Kills",String.valueOf(guild.getMobKills()));
+		msgLib.standardMessage("Private?",String.valueOf(getPrivate()));
+		msgLib.standardMessage("Mob Kills",String.valueOf(getMobKills()));
 		
 		return true;
 	}
 
 	public boolean teleportToLeader(Player player) 
 	{
-		for (int i = 0; i < guildList.size(); i++)
-    	{
-    		if (guildList.get(i) != null)
-    		{
-    			if (guildList.get(i).isMember(player.getName()) == true)
-    			{
-    				if (guildList.get(i).isLeader(player.getName()) == true)
-    					return true;
-    				
-    				if (Bukkit.getServer().getPlayer(guildList.get(i).getGuildMember(0)) != null)
-    				{
-    					player.teleport(Bukkit.getServer().getPlayer(guildList.get(i).getGuildMember(0)));
-    					return true;
-    				}
-    				
-    			}
-    		}
-    	}
+		if (!exists(getGuildByMember(player.getName())))
+			return false;
+		
+		String leaderName = getLeader();
+		
+		if (leaderName.equalsIgnoreCase(player.getName()))
+			return true;
+		
+		if (Bukkit.getServer().getPlayer(leaderName) != null)
+		{
+			player.teleport(Bukkit.getServer().getPlayer(leaderName));
+			return true;
+		}
 		
 		return false;
 	}
 	
 	public void addMobKill(String guildName)
 	{
-		int mobKills = getGuildByGuildName(guildName).getMobKills();
-		int pi = getGuildIndex(guildName);
+		if (!exists(guildName))
+			return;
 		
-		setMobKills(pi, mobKills + 1);
+		int mobKills = getMobKills();
+		
+		setMobKills(mobKills + 1);
 		
 		//Perk 1 - exp, 2 - loot, 3 - damage, 4 - lifesteal
 		if (mobKills == 9999999) //Add increments by 250 later.
-			addPerk(pi, "1");
+			addPerk("1");
 		
 		else if (mobKills == 9999999)
-			addPerk(pi, "2");
+			addPerk("2");
 		
 		else if (mobKills == 9999999)
-			addPerk(pi, "3");
+			addPerk("3");
 		
 		else if (mobKills == 9999999)
-			addPerk(pi, "4");
+			addPerk("4");
+	}
+	
+	public List<Player> getOnlineGuildPlayerList(String guildName) 
+	{
+		if (!exists(guildName))
+			return null;
+		
+		List<Player> playerList = new ArrayList<Player>();
+		
+		for (String pName : getMembers())
+		{
+			if (Bukkit.getServer().getPlayer(pName) != null)
+				playerList.add(Bukkit.getServer().getPlayer(pName));
+		}
+		
+		return playerList;
+	}
+
+	public double getGuildBonus(String guildName, double loot) 
+	{
+		return loot * (1.0D + getOnlineGuildPlayerList(guildName).size() * 0.0025D);
 	}
 }

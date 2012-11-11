@@ -1150,7 +1150,7 @@ public class CommandGod implements CommandExecutor
 			
 			if (args[0].equalsIgnoreCase("list"))
 			{
-				msgLib.standardMessage(FC_Rpg.guildManager.getGuildList());
+				msgLib.standardMessage(FC_Rpg.guildManager.listGuilds());
 			}
 			else if (args[0].equalsIgnoreCase("create"))
 			{
@@ -1166,28 +1166,19 @@ public class CommandGod implements CommandExecutor
 		    	if (success == false)
 		    		msgLib.standardError("Failed to create a new guild.");
 			}
-			else if (args[0].equalsIgnoreCase("close"))
+			else if (args[0].equalsIgnoreCase("close") || args[0].equalsIgnoreCase("private"))
 			{
 				//Prevent console from using this command.
 				if (console != null)
 					return msgLib.errorConsoleCantUseCommand();
 				
 				if (args[1].equals(""))
-					success = FC_Rpg.guildManager.playerAttemptSetGuildPrivate(player.getName(), true);
-				else
-				{
-					if (!perms.isAdmin())
-						return msgLib.errorNoPermission();
-					
-					FC_Rpg.guildManager.adminForceGuildPrivate(args[1], true);
-					
-					return msgLib.standardMessage("Successfully set the guild " + args[1] + " private.");
-				}
+					success = FC_Rpg.guildManager.playerAttemptSetGuildPrivate(player.getName(), true, perms.isAdmin());
 				
 				if (success == false)
-					msgLib.standardError("Failed to close your guild.");
+					msgLib.standardError("Failed to close the guild.");
 				else
-					msgLib.standardMessage("Successfully closed your guild!");
+					msgLib.standardMessage("Successfully closed the guild!");
 			}
 			else if (args[0].equalsIgnoreCase("open"))
 			{
@@ -1196,21 +1187,12 @@ public class CommandGod implements CommandExecutor
 					return msgLib.errorConsoleCantUseCommand();
 				
 				if (args[1].equals(""))
-					success = FC_Rpg.guildManager.playerAttemptSetGuildPrivate(player.getName(), false);
-				else
-				{
-					if (!perms.isAdmin())
-						return msgLib.errorNoPermission();
-					
-					FC_Rpg.guildManager.adminForceGuildPrivate(args[1], false);
-					
-					return msgLib.standardMessage("Successfully set the guild " + args[1] + " public.");
-				}
+					success = FC_Rpg.guildManager.playerAttemptSetGuildPrivate(player.getName(), false, perms.isAdmin());
 				
 				if (success == false)
-					msgLib.standardError("Failed to open your guild.");
+					msgLib.standardError("Failed to open the guild.");
 				else
-					msgLib.standardMessage("Successfully opened your guild!");
+					msgLib.standardMessage("Successfully opened the guild!");
 			}
 			else if (args[0].equalsIgnoreCase("join"))
 			{
@@ -1222,7 +1204,7 @@ public class CommandGod implements CommandExecutor
 					return msgLib.standardError("You must specify a guild to join!");
 				
 				//Add to the new guild
-				success = FC_Rpg.guildManager.addMember(player.getName(), args[1], perms.isAdmin());
+				success = FC_Rpg.guildManager.attemptAddGuildMember(player.getName(), args[1], perms.isAdmin());
 				
 				if (success == false)
 					msgLib.standardError("Failed to join guild.");
@@ -1690,7 +1672,17 @@ public class CommandGod implements CommandExecutor
 					}
 				}
 			}
-
+			
+			else if (args[0].equalsIgnoreCase("expMult"))
+			{
+				if (args[1].equalsIgnoreCase(""))
+					return msgLib.errorInvalidCommand();
+				
+				try { FC_Rpg.generalConfig.setGlobalExpMultiplier(Integer.valueOf(args[1])); } catch (NumberFormatException e) { return msgLib.errorInvalidCommand(); }
+				
+				return msgLib.successCommand();
+			}
+			
 			/*******************************
 			//Owner only commmands.
 			*******************************/
@@ -2036,18 +2028,18 @@ public class CommandGod implements CommandExecutor
 			//Remove the item from other spell binds if true.
 			for (int i = 0; i < rpgPlayer.getPlayerConfig().getRpgClass().getSpellBook().size(); i++)
 			{
-				if (rpgPlayer.getPlayerConfig().getSpellBind(i) == player.getItemInHand().getTypeId())
-					rpgPlayer.getPlayerConfig().setSpellBind(i, 999);
+				if (rpgPlayer.getPlayerConfig().getSpellBinds().get(i) == player.getItemInHand().getTypeId())
+					rpgPlayer.getPlayerConfig().updateSpellBind(i, 999);
 			}
 			
-			if (rpgPlayer.getPlayerConfig().getSpellLevel(intArg1) < 1)
+			if (rpgPlayer.getPlayerConfig().getSpellLevels().get(intArg1) < 1)
 			{
 				msgLib.standardError("You must level the skill up before you can bind it.");
 				return true;
 			}
 			
 			//Set the spell bind.
-			rpgPlayer.getPlayerConfig().setSpellBind(intArg1, player.getItemInHand().getTypeId());
+			rpgPlayer.getPlayerConfig().updateSpellBind(intArg1, player.getItemInHand().getTypeId());
 			
 			//Send a success message to the player.
 			msgLib.standardMessage("Successfully bound " + rpgPlayer.getPlayerConfig().getRpgClass().getSpell(intArg1).getName() + " to item: " + player.getItemInHand().getType());
@@ -2061,29 +2053,35 @@ public class CommandGod implements CommandExecutor
 			
 			msgLib.standardMessage("Current Spell Points",String.valueOf(rpgPlayer.getPlayerConfig().getSpellPoints()));
 			
-			String[] msg = new String[8];
+			String[] msg = new String[10];
+			int spellLevel;
 			
 			for (int i = 0; i < rpgPlayer.getPlayerConfig().getRpgClass().getSpellBook().size(); i++)
 			{
-				msg[0] = "[N]: ";
-				msg[1] = rpgPlayer.getPlayerConfig().getRpgClass().getSpell(i).getName();
+				spellLevel = rpgPlayer.getPlayerConfig().getSpellLevels().get(i);
 				
-				msg[2] = " [L]: ";
-				msg[3] = String.valueOf(rpgPlayer.getPlayerConfig().getSpellLevel(i));
+				msg[0] = "#";
+				msg[1] = String.valueOf(i+1) + ": ";
 				
-				if (rpgPlayer.getPlayerConfig().getSpellLevel(i) > 0)
+				msg[2] = "[N]: ";
+				msg[3] = rpgPlayer.getPlayerConfig().getRpgClass().getSpell(i).getName();
+				
+				msg[4] = " [L]: ";
+				msg[5] = String.valueOf(spellLevel);
+				
+				if (rpgPlayer.getPlayerConfig().getSpellLevels().get(i) > 0)
 				{
-					msg[4] = " [MC]: ";
-					msg[5] = String.valueOf(rpgPlayer.getPlayerConfig().getRpgClass().getSpell(i).getManaCost().get(i));
+					msg[6] = " [MC]: ";
+					msg[7] = String.valueOf(rpgPlayer.getPlayerConfig().getRpgClass().getSpell(i).getManaCost().get(spellLevel));
 				}
 				else
 				{
-					msg[4] = " [MC]: ";
-					msg[5] = "0";
+					msg[6] = " [MC]: ";
+					msg[7] = "0";
 				}
 				
-				msg[6] = " [D]: ";
-				msg[7] = rpgPlayer.getPlayerConfig().getRpgClass().getSpell(i).getDescription();
+				msg[8] = " [D]: ";
+				msg[9] = rpgPlayer.getPlayerConfig().getRpgClass().getSpell(i).getDescription();
 				
 				msgLib.standardMessage(msg);
 			}
@@ -2103,18 +2101,18 @@ public class CommandGod implements CommandExecutor
 			//Get the spell number by using the function getSpellNumber().
 			int intArg1 = getSpellNumber(args[1]);
 			
-			//Check to make sure that the spell specialized is proper.
-			if (intArg1 < 0 || intArg1 > SpellConfig.SPELL_TIERS)
-				return msgLib.errorInvalidCommand();
+			//Return if intArg1 is -1.
+			if (intArg1 == -1)
+				return true;
 			
-			if (rpgPlayer.getPlayerConfig().getSpellLevel(intArg1) >= 5)
+			if (rpgPlayer.getPlayerConfig().getSpellLevels().get(intArg1) >= 5)
 			{
 				msgLib.standardError("This skill is already maxed");
 				return true;
 			}
 			
 			//Increaese the spell level.
-			rpgPlayer.getPlayerConfig().setSpellLevel(intArg1, rpgPlayer.getPlayerConfig().getSpellLevel(intArg1) + 1);
+			rpgPlayer.getPlayerConfig().updateSpellLevel(intArg1, rpgPlayer.getPlayerConfig().getSpellLevels().get(intArg1) + 1);
 			
 			//Decrease player spell points.
 			rpgPlayer.getPlayerConfig().setSpellPoints(rpgPlayer.getPlayerConfig().getSpellPoints() - 1);
@@ -2127,8 +2125,8 @@ public class CommandGod implements CommandExecutor
 		{
 			for (int i = 0; i < rpgPlayer.getPlayerConfig().getRpgClass().getSpellBook().size(); i++)
 			{
-				if (rpgPlayer.getPlayerConfig().getSpellBind(i) == player.getItemInHand().getTypeId())
-					rpgPlayer.getPlayerConfig().setSpellBind(i, 999);
+				if (rpgPlayer.getPlayerConfig().getSpellBinds().get(i) == player.getItemInHand().getTypeId())
+					rpgPlayer.getPlayerConfig().updateSpellBind(i, 999);
 			}
 			
 			return msgLib.successCommand();
@@ -2178,7 +2176,7 @@ public class CommandGod implements CommandExecutor
 			//Check to make sure the spell is in the right range.
 			if (intArg1 < 0 || intArg1 > spellCount)
 			{
-				msgLib.standardError("You have entered an invalid spell.");
+				msgLib.standardError("You have chosen an invalid spell.");
 				return -1;
 			}
 			

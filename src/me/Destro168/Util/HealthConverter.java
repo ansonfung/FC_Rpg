@@ -2,11 +2,21 @@ package me.Destro168.Util;
 
 public class HealthConverter 
 {
-	double minecraftHearts;
+	int finalHearts;
+	double maxHealth;
+	double currentHealth;
 	
-	public int getMinecraftHearts() { return (int) minecraftHearts; }
+	public int getPlayerHearts() { updateHearts(20); return finalHearts; }
+	public int getWitherHearts() { updateHearts(300); return finalHearts; }
+	public int getEnderDragonHearts() { updateHearts(200); return finalHearts; }
 	
-	public HealthConverter(double maxHealth, double currentHealth)
+	public HealthConverter(double maxHealth_, double currentHealth_)
+	{
+		maxHealth = maxHealth_;
+		currentHealth = currentHealth_;
+	}
+	
+	private void updateHearts(int maximumPossible)
 	{
 		double a;
 		double healthEquivolent;
@@ -14,36 +24,36 @@ public class HealthConverter
 		//For max health and no health, we just handle the cases of 0, and 20 health.
 		if (currentHealth >= maxHealth)
 		{
-			minecraftHearts = 20;
+			finalHearts = maximumPossible;
 			return;
 		}
 		
 		if (currentHealth <= 0)
 		{
-			minecraftHearts = 0;
+			finalHearts = 0;
 			return;
 		}
 		
 		//If health isn't 0, or 20, then we have to get a forumula for everything at 1-19
 		
-		a = maxHealth / 20; //We have to make sure to not include the 0 and 20. That's 1-19 aka or 0-18. Divide by 18 bitch.
+		a = maxHealth / maximumPossible; //We have to make sure to not include the 0 and 20. That's 1-19 aka or 0-18. Divide by 18 bitch.
 		healthEquivolent = currentHealth / a; //Then divide by current Health to get how many one-eighteightns faggot you get.
 		
 		//Enforce everything staying in the range of 1-19 super hardcore.
-		if (healthEquivolent >= 19)
+		if (healthEquivolent >= maximumPossible - 1)
 		{
-			minecraftHearts = 19;
+			finalHearts = maximumPossible - 1;
 			return;
 		}
 		
 		if (healthEquivolent <= 0)
 		{
-			minecraftHearts = 1;
+			finalHearts = 1;
 			return;
 		}
 		
 		//Store minecraft hearts to be accessed later.
-		minecraftHearts = healthEquivolent;
+		finalHearts = (int) healthEquivolent;
 	}
 }
 

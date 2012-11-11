@@ -1,9 +1,17 @@
-Version 1.0:
+Version 0.7:
 
 General:
 - Wound up adding tons of stuff I didn't expect to add, so 0.7. Still not a release build, sorry. There are just too many changes ^^.
-- Updated all lists to start at 1 now. This means you should very rarely have to use 0 as a list argument. Still will probably have to use 0 for config arguments though.
 - Updated combat display to show exp % remaining when you kill a mob.
+- Juiced up AOE mining now. It has compatibility for mcmmo! :D Pickaxes are still the tool of choice. Bunch of stuff added to the list of items that can't be destroyed by the pickaxe effect.
+- Fire resistance potions now offer very strong fire resistance bonuses! It's not 100%, but you get 95% for lava which is really really good!
+- Wither and Enderdragon now are completely checked in my code for damage, and yadayadayada. No longer errors from the Wither. ALSO, both of their boss health bars will update when damaged. Wither heals when spawned and starts in fly mode.
+- Default dungeon tool is bedrock now.
+- Better structured and organized exp/loot giving for players to be more efficient. Loot is now calculated per individual which means that if you are in a guild you no longer will receive exp/gold from other members killing monsters. This means there are no ways to power level now.
+- Can now customize item stat restrictions now.
+- Readded the phase change for pvp arenas. They may or may not work! No idea! I have nobody to test with, xD. Will do a "better pvp arena" upgrade in next version (release).
+- Enchanted armor no longer has infinite durability. ^^. Protection values were fixed, I had helmets being checked twice rather than an instance of leggings. So now enchants are looking good.
+- Can now add a configurable bonus number of levels to withers and enderdragons. No more level 1 bosses! >:D
 
 Commands:
 - Fixed major issue where some servers were unable to use commands due to players being treated as consoles.
@@ -16,22 +24,26 @@ Commands:
 - Fixed class selection again.
 - Fix fucking health regeneration again.
 - Can now switch class using class name.
+- Added a new /rpg sub-command to modify global experience rates on any server.
 
 Spells:
 - Updated Adreneline base spell. Check included default config to see new values. Most notable is duration is in seconds now and speed boost is in decimals.
+- Possible to have infinity spells now per class... Even the same spell more than once! Yeah, um. Have fun with that! Configs will automatically update for the changes that I made. Might be buggy, will be tested more before release.
 
-Parties: 
+Guilds (formerly known as parties): 
 - Parties are now known as "Guilds". Why? This no longer conflicts with other plugins that use /party if you still want that. Guilds will be expanded on in the future potentially. Everything is now '/guild' or 'guild', no more parties!
 - Guilds are persistent which means they don't go away anymore.
-- New file called Guilds created which stores all guilds.
+- New sub-directory called "guilds" which stores all guilds. Guilds.yml will hold a list of all existing guilds as well as have other settings as needed in the future.
 - All guild commands heavily optimized, updated, and modified.
 - Added the ability for admins to be able to manage and control guilds and use commands no matter what.
 - Added new sub-commands to guilds for player management of guilds.
 
 Configs:
 - Updated two faqConfig values. 'name' is now 'header' | 'tag' is now 'displayTag' | 'faqs1' is now 'faqList1' | 'faqs2' is now 'faqList2'. Update configs accordingly!
-- TODO, check to make sure fire res potion works, as well as make sure that protection works and all potion buffs (regen, etc.).
-- TODO, make it so that you can have more than 5 spells.
+
+WIP/TODO:
+- (WIP) - Updated all lists to start at 1 now. This means you should very rarely have to use 0 as a list argument. Still will probably have to use 0 for config arguments though.
+- (TODO) - Test PVP Arena. Upgrade more fully.
 
 Version 0.6:
 

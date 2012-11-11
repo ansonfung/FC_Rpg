@@ -127,6 +127,8 @@ public class PvpEvent extends GeneralEvent
 		if (phase != 0)
 			return;
 		
+		phase = 1;
+		
 		//Give players 30 seconds to type
 		bLib.standardBroadcast("Want $" + rewardAmount + "? Join The Pvp Event Starting In [60] seconds! Type: '/pvp join' To Enter!");
 		

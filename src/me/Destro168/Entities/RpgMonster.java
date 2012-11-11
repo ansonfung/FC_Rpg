@@ -13,8 +13,10 @@ import me.Destro168.Util.MobAggressionCheck;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Wither;
 import org.bukkit.inventory.ItemStack;
 
 public class RpgMonster extends RpgEntity
@@ -116,6 +118,11 @@ public class RpgMonster extends RpgEntity
 		{
 			//Set the modifier by mob location.
 			setModifierByArea();
+			
+			if (entity instanceof Wither)
+				levelBonus = levelBonus + FC_Rpg.generalConfig.getWitherLevelBonus();
+			else if (entity instanceof EnderDragon)
+				levelBonus = levelBonus + FC_Rpg.generalConfig.getEnderDragonLevelBonus();
 			
 			//Increase modifier by level bonus.
 			modifier = modifier + levelBonus;
