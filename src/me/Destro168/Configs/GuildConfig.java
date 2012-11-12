@@ -444,6 +444,12 @@ public class GuildConfig extends ConfigGod
 
 	public double getGuildBonus(String guildName, double loot) 
 	{
-		return loot * (1.0D + getOnlineGuildPlayerList(guildName).size() * 0.0025D);
+		List<Player> guildPlayers = getOnlineGuildPlayerList(guildName);
+		int size = 1;
+		
+		if (!(guildPlayers == null))
+			size = guildPlayers.size();
+		
+		return loot * (1.0D + size * 0.0025D);
 	}
 }
