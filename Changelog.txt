@@ -1,3 +1,7 @@
+Version 0.82:
+
+- Fixed major bug with guilds causing all mobs to be invulnerable.
+
 Version 0.81:
 
 - Check FC_Suite_Shared changelog! <- Main reason for update.

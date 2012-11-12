@@ -195,9 +195,9 @@ public class GeneralConfig extends ConfigGod
 			setEnderDragonLevelBonus(50);
 		}
 		
-		if (getVersion() < 0.71)
+		if (getVersion() < 0.82)
 		{
-			setVersion(0.71);
+			setVersion(0.82);
 		}
 		
 		//Load up timed items.
