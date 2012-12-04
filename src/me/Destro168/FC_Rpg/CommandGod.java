@@ -8,22 +8,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import me.Destro168.Configs.DungeonConfig;
-import me.Destro168.Configs.FaqConfig;
-import me.Destro168.Configs.GroupConfig;
-import me.Destro168.Configs.PlayerConfig;
-import me.Destro168.Configs.SpellConfig;
-import me.Destro168.Configs.WarpConfig;
-import me.Destro168.Configs.WorldConfig;
-import me.Destro168.Entities.RpgPlayer;
+import me.Destro168.FC_Rpg.Configs.DungeonConfig;
+import me.Destro168.FC_Rpg.Configs.FaqConfig;
+import me.Destro168.FC_Rpg.Configs.GroupConfig;
+import me.Destro168.FC_Rpg.Configs.PlayerConfig;
+import me.Destro168.FC_Rpg.Configs.SpellConfig;
+import me.Destro168.FC_Rpg.Configs.WarpConfig;
+import me.Destro168.FC_Rpg.Configs.WorldConfig;
+import me.Destro168.FC_Rpg.Entities.RpgPlayer;
+import me.Destro168.FC_Rpg.Events.DungeonEvent;
+import me.Destro168.FC_Rpg.LoadedObjects.Group;
+import me.Destro168.FC_Rpg.LoadedObjects.RpgClass;
+import me.Destro168.FC_Rpg.Util.FC_RpgPermissions;
+import me.Destro168.FC_Rpg.Util.RpgMessageLib;
 import me.Destro168.FC_Suite_Shared.ArgParser;
 import me.Destro168.FC_Suite_Shared.NameMatcher;
-import me.Destro168.LoadedObjects.Group;
-import me.Destro168.LoadedObjects.RpgClass;
-import me.Destro168.TimeUtils.DateManager;
-import me.Destro168.Util.FC_RpgPermissions;
-import me.Destro168.Util.RpgMessageLib;
-import me.Destro168.events.DungeonEvent;
+import me.Destro168.FC_Suite_Shared.TimeUtils.DateManager;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -80,9 +80,6 @@ public class CommandGod implements CommandExecutor
 			DungeonCE cmd = new DungeonCE();
 			return cmd.execute();
 		}
-		
-		else if (command.getName().equalsIgnoreCase("d9"))
-			return msgLib.helpDungeonDefinition();
 		
 		else if (command.getName().equalsIgnoreCase("faq"))
 		{
@@ -161,6 +158,12 @@ public class CommandGod implements CommandExecutor
 			return cmd.execute();
 		}
 		
+		else if (command.getName().equalsIgnoreCase("world"))
+		{
+			WorldCE cmd = new WorldCE();
+			return cmd.execute();
+		}
+		
 		return true;
     }
 	
@@ -175,10 +178,11 @@ public class CommandGod implements CommandExecutor
 		if (sender instanceof Player)
 		{
 			player = (Player) sender;
-			rpgPlayer = FC_Rpg.rpgManager.getRpgPlayer(player);
+			rpgPlayer = FC_Rpg.rpgEntityManager.getRpgPlayer(player);
 			perms = new FC_RpgPermissions(player);
 			msgLib = new RpgMessageLib(player);
-			isActive = rpgPlayer.getPlayerConfig().getIsActive();
+			try { isActive = rpgPlayer.getPlayerConfig().getIsActive(); } catch (NullPointerException e) { 
+				return msgLib.standardError("You can't reset until you pick a class."); }
 			console = null;
 		}
 		else if (sender instanceof ColouredConsoleSender)
@@ -191,521 +195,11 @@ public class CommandGod implements CommandExecutor
 		}
 		else
 		{
-			FC_Rpg.plugin.getLogger().info("Unknown command sender, returning ban command.");
+			FC_Rpg.plugin.getLogger().info("Unknown command sender, returning rpg command.");
 			return false;
 		}
 		
 		return true;
-	}
-	
-	public class ClassCE
-	{
-		public ClassCE() { }
-		
-		public boolean execute()
-	    {
-			//Variable declarations.
-			if (args[0].equalsIgnoreCase(""))
-				return msgLib.helpClass();
-			if (args[0].equalsIgnoreCase("spec"))
-				return specSubCommand();
-			else if (args[0].equalsIgnoreCase("view"))
-				return viewSubCommand();
-			else if (args[0].equalsIgnoreCase("list"))
-				return listSubCommand();
-			else if (args[0].equalsIgnoreCase("allocate"))
-				return allocateSubCommand();
-			else if (args[0].equalsIgnoreCase("switch"))
-				return switchSubCommand();
-			
-			return true;
-		}
-		
-		//Let the player add stat points.
-		private boolean specSubCommand()
-		{
-			if (console != null)
-				return msgLib.errorConsoleCantUseCommand();
-			
-			try
-			{
-				if (args[1].equalsIgnoreCase("attack") || args[1].equalsIgnoreCase("strength"))
-				{
-					//Send success message to user
-					if (rpgPlayer.useStats(1, Integer.valueOf(args[2])) == true)
-						msgLib.standardMessage("Successfully used stat points!");
-				}
-				else if (args[1].equalsIgnoreCase("constitution") || args[1].equalsIgnoreCase("health"))
-				{
-					//Send success message to user
-					if (rpgPlayer.useStats(2, Integer.valueOf(args[2])) == true)
-						msgLib.standardMessage("Successfully used stat points!");
-				}
-				else if (args[1].equalsIgnoreCase("magic"))
-				{
-					//Send success message to user
-					if (rpgPlayer.useStats(3, Integer.valueOf(args[2])) == true)
-						msgLib.standardMessage("Successfully used stat points!");
-				}
-				else if (args[1].equalsIgnoreCase("intelligence") || args[1].equalsIgnoreCase("mana"))
-				{
-					//Send success message to user
-					if (rpgPlayer.useStats(4, Integer.valueOf(args[2])) == true)
-						msgLib.standardMessage("Successfully used stat points!");
-				}
-				else
-					return msgLib.errorInvalidCommand();
-			}
-			catch (NumberFormatException e)
-			{
-				return msgLib.helpRpg();
-			}
-			
-			return true;
-		}
-		
-		//Let the player view their stat points, experience, just all statistics really.
-		private boolean viewSubCommand()
-		{
-			//Variable Declarations
-			PlayerConfig rpgPlayerFile;
-			DateManager dm = new DateManager();
-			
-			String curHealth = "";
-			String maxHealth = "";
-			String curMana = "";
-			String maxMana = "";
-			String baseKeyWord = " Base: ";
-			String totalKeyWord = " Total: ";
-			
-			//Check to see if we are viewing somebody elses's file
-			if (!args[1].equalsIgnoreCase(""))
-			{
-				//If so load the file
-				rpgPlayerFile = new PlayerConfig(args[1]);
-				
-				//Also set the rpgPlayer.
-				if (Bukkit.getServer().getPlayer(args[1]) != null)
-					rpgPlayer = FC_Rpg.rpgManager.getRpgPlayer(Bukkit.getServer().getPlayer(args[1]));
-				else
-					rpgPlayer = null;
-			}
-			else
-			{
-				if (console != null)
-					return msgLib.standardError("The Console Must Enter A Player Name To Use This Command.");
-				
-				//If so load the file
-				rpgPlayerFile = rpgPlayer.getPlayerConfig();
-			}
-			
-			//If rpgPlayer isn't null, then...
-			if (rpgPlayer != null)
-				rpgPlayer.updateTimePlayed(); //update time played.
-			
-			//Begin displaying stats.
-			msgLib.standardHeader("Character Information Sheet");
-			
-			msgLib.standardMessage("Name",rpgPlayerFile.getName());
-			msgLib.standardMessage("Time Played",String.valueOf(dm.getTimeStringFromTimeInteger(rpgPlayerFile.getSecondsPlayed())));
-			msgLib.standardMessage("Class",FC_Rpg.classConfig.getRpgClass(rpgPlayerFile.getCombatClass()).getName());
-			msgLib.standardMessage("Class Level",String.valueOf(rpgPlayerFile.getClassLevel()));
-			msgLib.standardMessage("Class Experience",FC_Rpg.df.format(rpgPlayerFile.getClassExperience()) +
-					" of " + FC_Rpg.df.format(rpgPlayerFile.getLevelUpAmount()) +
-					" (" + FC_Rpg.df.format(rpgPlayerFile.getRequiredExpPercent()) + "% Gathered)");
-			msgLib.standardMessage("Stat points",String.valueOf(rpgPlayerFile.getStats()));
-			msgLib.standardMessage("Lifetime Mob Kills",String.valueOf(rpgPlayerFile.getLifetimeMobKills()));
-			
-			if (rpgPlayerFile.isDonator())
-				msgLib.standardHeader("Stats ~ " + FC_Rpg.generalConfig.getDonatorBonusStatPercent() * 100 + "% Donator Bonus!");
-			else
-				msgLib.standardHeader("Stats");
-			
-			List<String> attackDisplay = getMessageList(baseKeyWord, rpgPlayerFile.getAttack());
-			List<String> constDisplay = getMessageList(baseKeyWord, rpgPlayerFile.getConstitution());
-			List<String> magicDisplay = getMessageList(baseKeyWord, rpgPlayerFile.getMagic());
-			List<String> intelligenceDisplay = getMessageList(baseKeyWord, rpgPlayerFile.getIntelligence());
-			
-			//Begin formulating the stat display message.
-			if (rpgPlayer != null)
-			{
-				attackDisplay.add(totalKeyWord);
-				constDisplay.add(totalKeyWord);
-				magicDisplay.add(totalKeyWord);
-				intelligenceDisplay.add(totalKeyWord);
-				
-				attackDisplay.add(String.valueOf(rpgPlayer.getTotalAttack()));
-				constDisplay.add(String.valueOf(rpgPlayer.getTotalConstitution()));
-				magicDisplay.add(String.valueOf(rpgPlayer.getTotalMagic()));
-				intelligenceDisplay.add(String.valueOf(rpgPlayer.getTotalIntelligence()));
-				
-				curHealth = FC_Rpg.df.format(rpgPlayer.getCurHealth());
-				maxHealth = FC_Rpg.df.format(rpgPlayer.getMaxHealth());
-				curMana = FC_Rpg.df.format(rpgPlayer.getCurMana());
-				maxMana = FC_Rpg.df.format(rpgPlayer.getMaxMana());
-			}
-			else
-			{
-				curHealth = FC_Rpg.df.format(rpgPlayerFile.getCurHealthFile());
-				maxHealth = FC_Rpg.df.format(rpgPlayerFile.getMaxHealthFile());
-				curMana = FC_Rpg.df.format(rpgPlayerFile.getCurManaFile());
-				maxMana = FC_Rpg.df.format(rpgPlayerFile.getMaxManaFile());
-			}
-			
-			msgLib.standardMessage("[Attack]",attackDisplay);
-			msgLib.standardMessage("[Constitution]",constDisplay);
-			msgLib.standardMessage("[Magic]",magicDisplay);
-			msgLib.standardMessage("[Intelligence]",intelligenceDisplay);
-			
-			msgLib.standardMessage(getMessageArray("[Health]: (", curHealth, "/", maxHealth, ")"));
-			msgLib.standardMessage(getMessageArray("[Mana]: (", curMana, "/", maxMana, ")"));
-			
-			//Display what the manual allocation setting is currently.
-			if (rpgPlayerFile.getManualAllocation() == true)
-				msgLib.standardMessage("- Allocation State", "Stats are automatically distributed.");
-			else
-				msgLib.standardMessage("- Allocation State", "Stats must be manually distributed.");
-			
-			return true;
-		}
-		
-		private boolean listSubCommand()
-		{
-			RpgClass[] classes = FC_Rpg.classConfig.getRpgClasses();
-			
-			msgLib.standardHeader("Server Classes List");
-			
-			for (int i = 0; i < classes.length; i++)
-				msgLib.standardMessage("#" + (i+1),classes[i].getName());
-			
-			return true;
-		}
-		
-		//Let the player view their stat points, experience, just all statistics really.
-		private boolean allocateSubCommand()
-		{
-			if (console != null)
-				return msgLib.standardError("The Console Must Enter A Player Name To Use This Command.");
-			
-			if (!args[1].equalsIgnoreCase(""))
-			{
-				if (args[1].equalsIgnoreCase("on"))
-				{
-					msgLib.standardMessage("Auto stat allocation enabled.");
-					rpgPlayer.getPlayerConfig().setAutomaticAllocation(false);
-					return true;
-				}
-				else if (args[1].equalsIgnoreCase("off"))
-				{
-					msgLib.standardMessage("Auto stat allocation disabled.");
-					rpgPlayer.getPlayerConfig().setAutomaticAllocation(true);
-					return true;
-				}
-			}
-			
-			if (rpgPlayer.getPlayerConfig().getManualAllocation() == true)
-			{
-				msgLib.standardMessage("Auto stat allocation enabled.");
-				rpgPlayer.getPlayerConfig().setAutomaticAllocation(false);
-				return true;
-			}
-			else
-			{
-				msgLib.standardMessage("Auto stat allocation disabled.");
-				rpgPlayer.getPlayerConfig().setAutomaticAllocation(true);
-				return true;
-			}
-		}
-		
-		//Attempt to switch class for players with class change tickets.
-		private boolean switchSubCommand()
-		{
-			//Only consoles can use the switch command.
-			if (console != null)
-				return msgLib.errorConsoleCantUseCommand();
-			
-			//Switch to the new class.
-			rpgPlayer.switchClass(args[1]);
-			
-			//Message success.
-			return msgLib.successCommand();
-		}
-		
-		private List<String> getMessageList(String p1, int p2)
-		{
-			List<String> messageList = new ArrayList<String>();
-			
-			messageList.add(p1);
-			messageList.add(String.valueOf(p2));
-			
-			return messageList;
-		}
-		
-		private String[] getMessageArray(String p1, String p2, String p3, String p4, String p5)
-		{
-			String[] messageArray = new String[5];
-			
-			messageArray[0] = p1;
-			messageArray[1] = p2;
-			messageArray[2] = p3;
-			messageArray[3] = p4;
-			messageArray[4] = p5;
-			
-			return messageArray;
-		}
-	}
-
-	public class DonatorCE
-	{
-		public DonatorCE() { }
-		
-		public boolean execute()
-		{
-			//Prevent console from using donator command.
-			if (console != null)
-				return msgLib.errorConsoleCantUseCommand();
-			
-			if (rpgPlayer.getPlayerConfig().isDonator() == false)
-				return msgLib.errorNoPermission();
-			
-			if (args[0].equalsIgnoreCase(""))
-			{
-				//Display the players donation information.
-				msgLib.standardHeader("Donator Information");
-				msgLib.standardMessage("Thank you for donating!");
-				msgLib.standardMessage("Donation Perks End On: " + ChatColor.YELLOW + FC_Rpg.dfm.format(rpgPlayer.getPlayerConfig().getDonatorTime()));
-				msgLib.helpDonator();
-			}
-			else if (args[0].equalsIgnoreCase("respecialize"))
-			{
-				rpgPlayer.respecAll();
-				msgLib.standardMessage("Successfully refunded stat and spell points. Remember to use them!");
-			}
-			
-			return true;
-		}
-	}
-	
-	public class DungeonCE
-	{
-		int dungeonNumber = 0;
-		DungeonEvent dungeon;
-		DungeonConfig dc = new DungeonConfig();
-		Location pLoc = player.getLocation();
-		
-		public boolean execute()
-	    {
-			//Only admins and console can use dungeon command.
-			if (perms.isAdmin() == false)
-				return msgLib.errorNoPermission();
-			
-			if (args[0].equalsIgnoreCase(""))
-				return msgLib.helpDungeon();
-			
-			//Commands that require only an argument.
-			if (args[0].equalsIgnoreCase("list"))
-			{
-				for (int i = 0; i < FC_Rpg.dungeonEventArray.length; i++)
-				{
-					updateDungeonInfo(i);
-					msgLib.standardMessage("Dungeon: " + i + " [N]: " +  dungeon.getDungeonName() + " [S]: " + dungeon.isHappening());
-				}
-				
-				return true;
-			}
-			
-			//Commands that require a dungeon number
-			if (args[1] == null) 
-				return msgLib.errorInvalidCommand();
-			else
-				try { dungeonNumber = Integer.valueOf(args[1]); } catch (NumberFormatException e) { }
-			
-			if (args[0].equalsIgnoreCase("name"))
-			{
-				if (dungeonNumber == -1 || args[2] == null)
-					return msgLib.errorInvalidCommand();
-				
-				dc.setName(dungeonNumber, args[2]);
-				return msgLib.successCommand();
-			}
-			
-			//Commands that require an existing dungeon.
-			updateDungeonInfo(dungeonNumber);
-			
-			if (args[0].equalsIgnoreCase("info"))
-			{
-				//If the dungeon number is -1 we return.
-				if (dungeonNumber == -1)
-					return msgLib.errorInvalidCommand();
-				
-				msgLib.standardHeader("The Dungeon: " + FC_Rpg.dungeonEventArray[dungeonNumber].getDungeonName());
-				msgLib.standardMessage("In Use?",String.valueOf(FC_Rpg.dungeonEventArray[dungeonNumber].isHappening()));
-				msgLib.standardMessage("Current Phase",String.valueOf(FC_Rpg.dungeonEventArray[dungeonNumber].getPhase()));
-				msgLib.standardMessage("Lowest Level",String.valueOf(FC_Rpg.dungeonEventArray[dungeonNumber].getLowestLevel()));
-				
-				//Attempt to list partcipants.
-				int pSize = FC_Rpg.dungeonEventArray[dungeonNumber].getParticipants().size();
-				
-				if (pSize > 0)
-				{
-					String[] names = new String[pSize];
-					List<Player> p =  FC_Rpg.dungeonEventArray[dungeonNumber].getParticipants();
-					
-					for (int i = 0; i < pSize; i++)
-						names[i] = p.get(i).getName();
-					
-					msgLib.standardMessage("Participants: ",names);
-				}
-				else
-					msgLib.standardMessage("Participants","Currently Empty.");
-				
-				return true;
-			}
-			else if (args[0].equalsIgnoreCase("stop") || args[0].equalsIgnoreCase("end"))
-			{
-				if (dungeonNumber == -1)
-					return msgLib.errorInvalidCommand();
-				
-				dungeon.end(false);
-				return true;
-			}
-			else if (args[0].equalsIgnoreCase("start") || args[0].equalsIgnoreCase("init"))
-			{
-				if (dungeonNumber == -1)
-					return msgLib.errorInvalidCommand();
-				
-				dungeon.initialize(dungeonNumber);
-				return true;
-			}
-			else if (args[0].equalsIgnoreCase("check"))
-			{
-				if (dungeonNumber == -1)
-					return msgLib.errorInvalidCommand();
-				
-				//Check if there are any mobs left in a dungeon.
-				dungeon.checkMobDeath(null);
-				return msgLib.successCommand();
-			}
-			else if (args[0].equalsIgnoreCase("kick"))
-			{
-				if (dungeonNumber == -1)
-					return msgLib.errorInvalidCommand();
-				
-				if (args[2].equalsIgnoreCase(""))
-					return msgLib.errorInvalidCommand();
-				
-				Player p2 = Bukkit.getServer().getPlayer(args[2]);
-				
-				if (p2 == null)
-					return msgLib.errorPlayerNotOnline();
-				
-				dungeon.removeDungeoneer(player, p2, true);
-				
-				return true;
-			}
-			
-			//Commands can't be used by console
-			if (console != null)
-				return msgLib.errorConsoleCantUseCommand();
-			
-			if (args[0].equalsIgnoreCase("ranges"))
-			{
-				Location loc1 = FC_Rpg.sv.getBlockLoc1(player);
-				Location loc2 = FC_Rpg.sv.getBlockLoc2(player);
-				int index;
-				
-				if (loc1 == null || loc2 == null)
-					return msgLib.errorInvalidSelection();
-				
-				index = dc.setRange1(dungeonNumber, loc1.getWorld().getName(), loc1.getX(), loc1.getY(), loc1.getZ(), loc1.getYaw(), loc1.getPitch());
-				dc.setRange2(dungeonNumber, index, loc2.getWorld().getName(), loc2.getX(), loc2.getY(), loc2.getZ(), loc2.getYaw(), loc2.getPitch());
-				
-				return msgLib.successCommand();
-			}
-			
-			else if (args[0].equalsIgnoreCase("lobby"))
-			{
-				dc.setLobby(dungeonNumber, pLoc.getWorld().getName(), pLoc.getX(), pLoc.getY(), pLoc.getZ(), pLoc.getPitch(), pLoc.getYaw());
-				return msgLib.successCommand();
-			}
-			
-			else if (args[0].equalsIgnoreCase("playerStart"))
-			{
-				dc.setStart(dungeonNumber, pLoc.getWorld().getName(), pLoc.getX(), pLoc.getY(), pLoc.getZ(), pLoc.getPitch(), pLoc.getYaw());
-				return msgLib.successCommand();
-			}
-			
-			else if (args[0].equalsIgnoreCase("playerEnd"))
-			{
-				dc.setExit(dungeonNumber, pLoc.getWorld().getName(), pLoc.getX(), pLoc.getY(), pLoc.getZ(), pLoc.getPitch(), pLoc.getYaw());
-				return msgLib.successCommand();
-			}
-			
-			else if (args[0].equalsIgnoreCase("boss"))
-			{
-				dc.setBossSpawn(dungeonNumber, pLoc.getWorld().getName(), pLoc.getX(), pLoc.getY(), pLoc.getZ(), pLoc.getPitch(), pLoc.getYaw());
-				return msgLib.successCommand();
-			}
-			
-			else if (args[0].equalsIgnoreCase("treasure"))
-			{
-				dc.setTreasureChest(dungeonNumber, pLoc.getWorld().getName(), pLoc.getX(), pLoc.getY(), pLoc.getZ(), pLoc.getPitch(), pLoc.getYaw());
-				return msgLib.successCommand();
-			}
-			
-			//Commands that require a second part.
-			if (args[2].equalsIgnoreCase(""))
-				return msgLib.helpDungeon();
-			
-			if (args[0].equalsIgnoreCase("cost"))
-			{
-				try { dc.setCost(dungeonNumber, Double.valueOf(args[2])); } catch (NumberFormatException e) { return msgLib.errorInvalidCommand(); }
-				return msgLib.successCommand();
-			}
-			
-			else if (args[0].equalsIgnoreCase("lmin"))
-			{
-				try { dc.setLevelMin(dungeonNumber, Integer.valueOf(args[2])); } catch (NumberFormatException e) { return msgLib.errorInvalidCommand(); }
-				return msgLib.successCommand();
-			}
-			
-			else if (args[0].equalsIgnoreCase("lmax"))
-			{
-				try { dc.setLevelMax(dungeonNumber, Integer.valueOf(args[2])); } catch (NumberFormatException e) { return msgLib.errorInvalidCommand(); }
-				return msgLib.successCommand();
-			}
-			
-			else if (args[0].equalsIgnoreCase("spawncount"))
-			{
-				try { dc.setSpawnCount(dungeonNumber, Integer.valueOf(args[2])); } catch (NumberFormatException e) { return msgLib.errorInvalidCommand(); }
-				return msgLib.successCommand();
-			}
-			
-			//Commands that require a third part.
-			if (args[3].equalsIgnoreCase(""))
-				return msgLib.helpDungeonDefinition();
-			else if (args[0].equalsIgnoreCase("spawnchance"))
-				dc.setSpawnChance(dungeonNumber, Integer.valueOf(args[2]), Integer.valueOf(args[3]));
-			else
-				return msgLib.helpDungeonDefinition();
-			
-			//Dungeon help.
-			return msgLib.successCommand();
-	    }
-		
-		private boolean updateDungeonInfo(int newDungeonNumber)
-		{
-			//Convert dungeon number.
-			dungeonNumber = newDungeonNumber;
-			
-			if (!FC_Rpg.trueDungeonNumbers.containsKey(dungeonNumber))
-				return false;
-			
-			//Store dungeon for convenient use.
-			dungeon = FC_Rpg.dungeonEventArray[FC_Rpg.trueDungeonNumbers.get(dungeonNumber)];
-			
-			return true;
-		}
 	}
 	
 	public class FaqCE
@@ -713,23 +207,26 @@ public class CommandGod implements CommandExecutor
 		FaqConfig fc = new FaqConfig();
 		
 		public FaqCE() { }
-			
+		
 		public boolean execute()
 	    {
-			if (args[0].equalsIgnoreCase("add"))
-				return addSubCommand();
+			if (!perms.commandFAQ())
+				return perms.commandFAQ();
+			
+			if (args[0].equalsIgnoreCase("new"))
+				return newSubCommand();
 			else if (args[0].equalsIgnoreCase("del"))
 				return delSubCommand();
 			else if (args[0].equalsIgnoreCase("eProperty"))
 				return editPropertySubCommand();
 			else if (args[0].equalsIgnoreCase("eLine"))
 				return editLineSubCommand();
-			else
-				return displaySubTopic();
+			
+			return displaySubTopic();
 	    }
 		
-		// /faq add [displayTag] 
-		private boolean addSubCommand()
+		// /faq new [displayTag] 
+		private boolean newSubCommand()
 		{
 			if (args[1].equalsIgnoreCase(""))
 				return msgLib.errorInvalidCommand();
@@ -740,7 +237,7 @@ public class CommandGod implements CommandExecutor
 			fc.editFaqLines(args[1], 0, 1, "Example");
 			fc.editFaqLines(args[1], 0, 2, "Example");
 			
-			return msgLib.standardMessage("Success! Remember to use the /faq edit (good luck) command on this faq to set it up!!!");
+			return msgLib.successCommand();
 		}
 		
 		// /faq del [displayTag] <line> <half>
@@ -861,35 +358,618 @@ public class CommandGod implements CommandExecutor
 		}
 	}
 	
-	public class QuickCE
+	public class ClassCE
 	{
-		public boolean execute(String commandName)
+		public ClassCE() { }
+		
+		public boolean execute()
+	    {
+			if (!perms.commandClass())
+				return msgLib.errorNoPermission();
+			
+			//Variable declarations.
+			if (args[0].equalsIgnoreCase(""))
+				return msgLib.helpClass();
+			if (args[0].equalsIgnoreCase("spec"))
+				return specSubCommand();
+			else if (args[0].equalsIgnoreCase("view"))
+				return viewSubCommand();
+			else if (args[0].equalsIgnoreCase("list"))
+				return listSubCommand();
+			else if (args[0].equalsIgnoreCase("allocate"))
+				return allocateSubCommand();
+			else if (args[0].equalsIgnoreCase("switch"))
+				return switchSubCommand();
+			
+			return true;
+		}
+		
+		//Let the player add stat points.
+		private boolean specSubCommand()
 		{
 			if (console != null)
 				return msgLib.errorConsoleCantUseCommand();
 			
+			try
+			{
+				if (args[1].equalsIgnoreCase("attack") || args[1].equalsIgnoreCase("strength"))
+				{
+					//Send success message to user
+					if (rpgPlayer.useStats(1, Integer.valueOf(args[2])) == true)
+						msgLib.standardMessage("Successfully used stat points!");
+				}
+				else if (args[1].equalsIgnoreCase("constitution") || args[1].equalsIgnoreCase("health"))
+				{
+					//Send success message to user
+					if (rpgPlayer.useStats(2, Integer.valueOf(args[2])) == true)
+						msgLib.standardMessage("Successfully used stat points!");
+				}
+				else if (args[1].equalsIgnoreCase("magic"))
+				{
+					//Send success message to user
+					if (rpgPlayer.useStats(3, Integer.valueOf(args[2])) == true)
+						msgLib.standardMessage("Successfully used stat points!");
+				}
+				else if (args[1].equalsIgnoreCase("intelligence") || args[1].equalsIgnoreCase("mana"))
+				{
+					//Send success message to user
+					if (rpgPlayer.useStats(4, Integer.valueOf(args[2])) == true)
+						msgLib.standardMessage("Successfully used stat points!");
+				}
+				else
+					return msgLib.errorInvalidCommand();
+			}
+			catch (NumberFormatException e)
+			{
+				return msgLib.helpRpg();
+			}
+			
+			return true;
+		}
+		
+		//Let the player view their stat points, experience, just all statistics really.
+		private boolean viewSubCommand()
+		{
+			//Variable Declarations
+			PlayerConfig rpgPlayerFile;
+			DateManager dm = new DateManager();
+			
+			String curHealth = "";
+			String maxHealth = "";
+			String curMana = "";
+			String maxMana = "";
+			String baseKeyWord = " Base: ";
+			String totalKeyWord = " Total: ";
+			
+			//Check to see if we are viewing somebody elses's file
+			if (!args[1].equalsIgnoreCase(""))
+			{
+				if (!perms.commandClassViewOther())
+					return msgLib.errorNoPermission();
+				
+				//If so load the file
+				rpgPlayerFile = new PlayerConfig(args[1]);
+				
+				//Also set the rpgPlayer.
+				if (Bukkit.getServer().getPlayer(args[1]) != null)
+					rpgPlayer = FC_Rpg.rpgEntityManager.getRpgPlayer(Bukkit.getServer().getPlayer(args[1]));
+				else
+					rpgPlayer = null;
+			}
+			else
+			{
+				if (console != null)
+					return msgLib.standardError("The Console Must Enter A Player Name To Use This Command.");
+				
+				//If so load the file
+				rpgPlayerFile = rpgPlayer.getPlayerConfig();
+			}
+			
+			//If rpgPlayer isn't null, then...
+			if (rpgPlayer != null)
+				rpgPlayer.updateTimePlayed(); //update time played.
+			
+			//Begin displaying stats.
+			msgLib.standardHeader("Character Information Sheet");
+			
+			msgLib.standardMessage("Name",rpgPlayerFile.getName());
+			msgLib.standardMessage("Time Played",String.valueOf(dm.getTimeStringFromTimeInteger(rpgPlayerFile.getSecondsPlayed())));
+			msgLib.standardMessage("Class",FC_Rpg.classConfig.getRpgClass(rpgPlayerFile.getCombatClass()).getName());
+			msgLib.standardMessage("Class Level",String.valueOf(rpgPlayerFile.getClassLevel()));
+			msgLib.standardMessage("Class Experience",FC_Rpg.df.format(rpgPlayerFile.getClassExperience()) +
+					" of " + FC_Rpg.df.format(rpgPlayerFile.getLevelUpAmount()) +
+					" (" + FC_Rpg.df.format(rpgPlayerFile.getRequiredExpPercent()) + "% Gathered)");
+			msgLib.standardMessage("Stat points",String.valueOf(rpgPlayerFile.getStats()));
+			msgLib.standardMessage("Lifetime Mob Kills",String.valueOf(rpgPlayerFile.getLifetimeMobKills()));
+			
+			if (rpgPlayerFile.isDonator())
+				msgLib.standardHeader("Stats ~ " + FC_Rpg.generalConfig.getDonatorBonusStatPercent() * 100 + "% Donator Bonus!");
+			else
+				msgLib.standardHeader("Stats");
+			
+			List<String> attackDisplay = getMessageList(baseKeyWord, rpgPlayerFile.getAttack());
+			List<String> constDisplay = getMessageList(baseKeyWord, rpgPlayerFile.getConstitution());
+			List<String> magicDisplay = getMessageList(baseKeyWord, rpgPlayerFile.getMagic());
+			List<String> intelligenceDisplay = getMessageList(baseKeyWord, rpgPlayerFile.getIntelligence());
+			
+			//Begin formulating the stat display message.
+			if (rpgPlayer != null)
+			{
+				attackDisplay.add(totalKeyWord);
+				constDisplay.add(totalKeyWord);
+				magicDisplay.add(totalKeyWord);
+				intelligenceDisplay.add(totalKeyWord);
+				
+				attackDisplay.add(String.valueOf(rpgPlayer.getTotalAttack()));
+				constDisplay.add(String.valueOf(rpgPlayer.getTotalConstitution()));
+				magicDisplay.add(String.valueOf(rpgPlayer.getTotalMagic()));
+				intelligenceDisplay.add(String.valueOf(rpgPlayer.getTotalIntelligence()));
+				
+				curHealth = FC_Rpg.df.format(rpgPlayer.getCurHealth());
+				maxHealth = FC_Rpg.df.format(rpgPlayer.getMaxHealth());
+				curMana = FC_Rpg.df.format(rpgPlayer.getCurMana());
+				maxMana = FC_Rpg.df.format(rpgPlayer.getMaxMana());
+			}
+			else
+			{
+				curHealth = FC_Rpg.df.format(rpgPlayerFile.getCurHealthFile());
+				maxHealth = FC_Rpg.df.format(rpgPlayerFile.getMaxHealthFile());
+				curMana = FC_Rpg.df.format(rpgPlayerFile.getCurManaFile());
+				maxMana = FC_Rpg.df.format(rpgPlayerFile.getMaxManaFile());
+			}
+			
+			msgLib.standardMessage("[Attack]",attackDisplay);
+			msgLib.standardMessage("[Constitution]",constDisplay);
+			msgLib.standardMessage("[Magic]",magicDisplay);
+			msgLib.standardMessage("[Intelligence]",intelligenceDisplay);
+			
+			msgLib.standardMessage(getMessageArray("[Health]: (", curHealth, "/", maxHealth, ")"));
+			msgLib.standardMessage(getMessageArray("[Mana]: (", curMana, "/", maxMana, ")"));
+			
+			//Display what the manual allocation setting is currently.
+			if (rpgPlayerFile.getManualAllocation() == true)
+				msgLib.standardMessage("- Allocation State", "Stats are automatically distributed.");
+			else
+				msgLib.standardMessage("- Allocation State", "Stats must be manually distributed.");
+			
+			return true;
+		}
+		
+		//Allow a player to list server classes.
+		private boolean listSubCommand()
+		{
+			RpgClass[] classes = FC_Rpg.classConfig.getRpgClasses();
+			
+			msgLib.standardHeader("Server Classes List");
+			
+			for (int i = 0; i < classes.length; i++)
+				msgLib.standardMessage("#" + (i+1),classes[i].getName());
+			
+			return true;
+		}
+		
+		//Let the player view their stat points, experience, just all statistics really.
+		private boolean allocateSubCommand()
+		{
+			if (console != null)
+				return msgLib.standardError("The Console Must Enter A Player Name To Use This Command.");
+			
+			if (!args[1].equalsIgnoreCase(""))
+			{
+				if (args[1].equalsIgnoreCase("on"))
+				{
+					msgLib.standardMessage("Auto stat allocation enabled.");
+					rpgPlayer.getPlayerConfig().setAutomaticAllocation(false);
+					return true;
+				}
+				else if (args[1].equalsIgnoreCase("off"))
+				{
+					msgLib.standardMessage("Auto stat allocation disabled.");
+					rpgPlayer.getPlayerConfig().setAutomaticAllocation(true);
+					return true;
+				}
+			}
+			
+			if (rpgPlayer.getPlayerConfig().getManualAllocation() == true)
+			{
+				msgLib.standardMessage("Auto stat allocation enabled.");
+				rpgPlayer.getPlayerConfig().setAutomaticAllocation(false);
+				return true;
+			}
+			else
+			{
+				msgLib.standardMessage("Auto stat allocation disabled.");
+				rpgPlayer.getPlayerConfig().setAutomaticAllocation(true);
+				return true;
+			}
+		}
+		
+		//Attempt to switch class for players with class change tickets.
+		private boolean switchSubCommand()
+		{
+			//Only consoles can use the switch command.
+			if (console != null)
+				return msgLib.errorConsoleCantUseCommand();
+			
+			//Switch to the new class.
+			return rpgPlayer.switchClass(args[1]);
+			
+			//Message success.
+			// msgLib.successCommand();
+		}
+		
+		private List<String> getMessageList(String p1, int p2)
+		{
+			List<String> messageList = new ArrayList<String>();
+			
+			messageList.add(p1);
+			messageList.add(String.valueOf(p2));
+			
+			return messageList;
+		}
+		
+		private String[] getMessageArray(String p1, String p2, String p3, String p4, String p5)
+		{
+			String[] messageArray = new String[5];
+			
+			messageArray[0] = p1;
+			messageArray[1] = p2;
+			messageArray[2] = p3;
+			messageArray[3] = p4;
+			messageArray[4] = p5;
+			
+			return messageArray;
+		}
+	}
+
+	public class DonatorCE
+	{
+		public DonatorCE() { }
+		
+		public boolean execute()
+		{
+			//Prevent console from using donator command.
+			if (console != null)
+				return msgLib.errorConsoleCantUseCommand();
+			
+			//Check for command permission.
+			if (!perms.commandDonator())
+				return msgLib.errorNoPermission();
+			
+			//Check if they are a donator to use the command.
+			if (rpgPlayer.getPlayerConfig().isDonator() == false)
+				return msgLib.errorNoPermission();
+			
+			if (args[0].equalsIgnoreCase(""))
+			{
+				//Display the players donation information.
+				msgLib.standardHeader("Donator Information");
+				msgLib.standardMessage("Thank you for donating!");
+				
+				String timeRemaining = "Never";
+				
+				if (perms.isInfiniteDonator() == true)
+					timeRemaining = FC_Rpg.dfm.format(rpgPlayer.getPlayerConfig().getDonatorTime());
+					
+				msgLib.standardMessage("Donation Perks End On",timeRemaining);
+				msgLib.helpDonator();
+			}
+			else if (args[0].equalsIgnoreCase("respecialize"))
+			{
+				rpgPlayer.respecAll();
+				msgLib.standardMessage("Successfully refunded stat and spell points. Remember to use them!");
+			}
+			
+			return true;
+		}
+	}
+	
+	public class DungeonCE
+	{
+		int dungeonNumber = 0;
+		DungeonEvent dungeon;
+		DungeonConfig dc = new DungeonConfig();
+		
+		public boolean execute()
+	    {
+			//Only admins and console can use dungeon command.
 			if (perms.isAdmin() == false)
 				return msgLib.errorNoPermission();
 			
+			//0 argument commands.
+			if (args[0].equalsIgnoreCase(""))
+				return msgLib.helpDungeon();
+			else if (args[0].equalsIgnoreCase("extra"))
+				return msgLib.helpDungeonDefinition();
+			else if (args[0].equalsIgnoreCase("list"))
+			{
+				String[] msg = new String[5];
+				msgLib.standardHeader("Dungeon List");
+				
+				for (int i = 0; i < FC_Rpg.dungeonEventArray.length; i++)
+				{
+					updateDungeonInfo(i);
+					
+					msg[0] = "#" + (i+1) + ": ";
+					msg[1] = "[N]: ";
+					msg[2] = dungeon.getDungeonName();
+					msg[3] = " [S]: ";
+					msg[4] = dungeon.isHappening() + "";
+					
+					msgLib.standardMessage(msg);
+				}
+				
+				return true;
+			}
+			
+			//Commands that require a dungeon number and 1 argument.
+			if (args[1].equalsIgnoreCase(""))
+				return msgLib.errorInvalidCommand();
+			else
+				try { dungeonNumber = Integer.valueOf(args[1]) - 1; } catch (NumberFormatException e) { }
+			
+			if (args[0].equalsIgnoreCase("name"))
+			{
+				if (dungeonNumber == -1 || args[2] == null)
+					return msgLib.errorInvalidCommand();
+				
+				dc.setName(dungeonNumber, args[2]);
+				return msgLib.successCommand();
+			}
+			//1 argument commands.
+			else if (args[0].equalsIgnoreCase("new"))
+			{
+				dc.addNewDungeon(args[1]);
+				return msgLib.successCommand();
+			}
+			
+			//Commands that require an existing dungeon.
+			updateDungeonInfo(dungeonNumber);
+			
+			if (args[0].equalsIgnoreCase("info"))
+			{
+				//If the dungeon number is -1 we return.
+				if (dungeonNumber == -1)
+					return msgLib.errorInvalidCommand();
+				
+				msgLib.standardHeader("The Dungeon: " + FC_Rpg.dungeonEventArray[dungeonNumber].getDungeonName());
+				msgLib.standardMessage("In Use?",String.valueOf(FC_Rpg.dungeonEventArray[dungeonNumber].isHappening()));
+				msgLib.standardMessage("Current Phase",String.valueOf(FC_Rpg.dungeonEventArray[dungeonNumber].getPhase()));
+				msgLib.standardMessage("Lowest Level",String.valueOf(FC_Rpg.dungeonEventArray[dungeonNumber].getLowestLevel()));
+				
+				//Attempt to list partcipants.
+				int pSize = FC_Rpg.dungeonEventArray[dungeonNumber].getParticipants().size();
+				
+				if (pSize > 0)
+				{
+					String[] names = new String[pSize];
+					List<Player> p =  FC_Rpg.dungeonEventArray[dungeonNumber].getParticipants();
+					
+					for (int i = 0; i < pSize; i++)
+						names[i] = p.get(i).getName();
+					
+					msgLib.standardMessage("Participants: ",names);
+				}
+				else
+					msgLib.standardMessage("Participants","Currently Empty.");
+				
+				return true;
+			}
+			else if (args[0].equalsIgnoreCase("stop") || args[0].equalsIgnoreCase("end"))
+			{
+				if (dungeonNumber == -1)
+					return msgLib.errorInvalidCommand();
+				
+				dungeon.end(false);
+				return true;
+			}
+			else if (args[0].equalsIgnoreCase("start") || args[0].equalsIgnoreCase("init"))
+			{
+				if (dungeonNumber == -1)
+					return msgLib.errorInvalidCommand();
+				
+				dungeon.initialize(dungeonNumber);
+				return msgLib.successCommand();
+			}
+			else if (args[0].equalsIgnoreCase("check"))
+			{
+				if (dungeonNumber == -1)
+					return msgLib.errorInvalidCommand();
+				
+				//Check if there are any mobs left in a dungeon.
+				dungeon.checkMobDeath(null);
+				return msgLib.successCommand();
+			}
+			else if (args[0].equalsIgnoreCase("kick"))
+			{
+				if (dungeonNumber == -1)
+					return msgLib.errorInvalidCommand();
+				
+				if (args[2].equalsIgnoreCase(""))
+					return msgLib.errorInvalidCommand();
+				
+				Player p2 = Bukkit.getServer().getPlayer(args[2]);
+				
+				if (p2 == null)
+					return msgLib.errorPlayerNotOnline();
+				
+				dungeon.removeDungeoneer(player, p2, true);
+				
+				return true;
+			}
+			
+			//Commands can't be used by console
+			if (console != null)
+				return msgLib.errorConsoleCantUseCommand();
+			
+			if (args[0].equalsIgnoreCase("ranges"))
+			{
+				Location loc1 = FC_Rpg.sv.getBlockLoc1(player);
+				Location loc2 = FC_Rpg.sv.getBlockLoc2(player);
+				int index;
+				
+				if (loc1 == null || loc2 == null)
+					return msgLib.errorInvalidSelection();
+				
+				index = dc.setRange1(dungeonNumber, loc1.getWorld().getName(), loc1.getX(), loc1.getY(), loc1.getZ(), loc1.getYaw(), loc1.getPitch());
+				dc.setRange2(dungeonNumber, index, loc2.getWorld().getName(), loc2.getX(), loc2.getY(), loc2.getZ(), loc2.getYaw(), loc2.getPitch());
+				
+				return msgLib.successCommand();
+			}
+			
+			else if (args[0].equalsIgnoreCase("lobby"))
+			{
+				if (console != null)
+					return msgLib.errorConsoleCantUseCommand();
+				
+				Location pLoc = player.getLocation();
+				
+				dc.setLobby(dungeonNumber, pLoc.getWorld().getName(), pLoc.getX(), pLoc.getY(), pLoc.getZ(), pLoc.getPitch(), pLoc.getYaw());
+				return msgLib.successCommand();
+			}
+			
+			else if (args[0].equalsIgnoreCase("playerStart"))
+			{
+				if (console != null)
+					return msgLib.errorConsoleCantUseCommand();
+				
+				Location pLoc = player.getLocation();
+				
+				dc.setStart(dungeonNumber, pLoc.getWorld().getName(), pLoc.getX(), pLoc.getY(), pLoc.getZ(), pLoc.getPitch(), pLoc.getYaw());
+				return msgLib.successCommand();
+			}
+			
+			else if (args[0].equalsIgnoreCase("playerEnd"))
+			{
+				if (console != null)
+					return msgLib.errorConsoleCantUseCommand();
+				
+				Location pLoc = player.getLocation();
+				
+				dc.setExit(dungeonNumber, pLoc.getWorld().getName(), pLoc.getX(), pLoc.getY(), pLoc.getZ(), pLoc.getPitch(), pLoc.getYaw());
+				return msgLib.successCommand();
+			}
+			
+			else if (args[0].equalsIgnoreCase("boss"))
+			{
+				if (console != null)
+					return msgLib.errorConsoleCantUseCommand();
+				
+				Location pLoc = player.getLocation();
+				
+				dc.setBossSpawn(dungeonNumber, pLoc.getWorld().getName(), pLoc.getX(), pLoc.getY(), pLoc.getZ(), pLoc.getPitch(), pLoc.getYaw());
+				return msgLib.successCommand();
+			}
+			
+			else if (args[0].equalsIgnoreCase("treasure"))
+			{
+				if (console != null)
+					return msgLib.errorConsoleCantUseCommand();
+				
+				Location pLoc = player.getLocation();
+				
+				dc.setTreasureChest(dungeonNumber, pLoc.getWorld().getName(), pLoc.getX(), pLoc.getY(), pLoc.getZ(), pLoc.getPitch(), pLoc.getYaw());
+				return msgLib.successCommand();
+			}
+			
+			//Commands that require a second part.
+			if (args[2].equalsIgnoreCase(""))
+				return msgLib.helpDungeon();
+			
+			if (args[0].equalsIgnoreCase("cost"))
+			{
+				try { dc.setCost(dungeonNumber, Double.valueOf(args[2])); } catch (NumberFormatException e) { return msgLib.errorInvalidCommand(); }
+				return msgLib.successCommand();
+			}
+			
+			else if (args[0].equalsIgnoreCase("lmin"))
+			{
+				try { dc.setLevelMin(dungeonNumber, Integer.valueOf(args[2])); } catch (NumberFormatException e) { return msgLib.errorInvalidCommand(); }
+				return msgLib.successCommand();
+			}
+			
+			else if (args[0].equalsIgnoreCase("lmax"))
+			{
+				try { dc.setLevelMax(dungeonNumber, Integer.valueOf(args[2])); } catch (NumberFormatException e) { return msgLib.errorInvalidCommand(); }
+				return msgLib.successCommand();
+			}
+			
+			else if (args[0].equalsIgnoreCase("spawncount"))
+			{
+				try { dc.setSpawnCount(dungeonNumber, Integer.valueOf(args[2])); } catch (NumberFormatException e) { return msgLib.errorInvalidCommand(); }
+				return msgLib.successCommand();
+			}
+			
+			//Commands that require a third part.
+			if (args[3].equalsIgnoreCase(""))
+				return msgLib.helpDungeonDefinition();
+			else if (args[0].equalsIgnoreCase("spawnchance"))
+				dc.setSpawnChance(dungeonNumber, Integer.valueOf(args[2]), Integer.valueOf(args[3]));
+			else
+				return msgLib.helpDungeonDefinition();
+			
+			//Dungeon help.
+			return msgLib.successCommand();
+	    }
+		
+		private boolean updateDungeonInfo(int newDungeonNumber)
+		{
+			//Convert dungeon number.
+			dungeonNumber = newDungeonNumber;
+			
+			if (!FC_Rpg.trueDungeonNumbers.containsKey(dungeonNumber))
+				return false;
+			
+			//Store dungeon for convenient use.
+			dungeon = FC_Rpg.dungeonEventArray[FC_Rpg.trueDungeonNumbers.get(dungeonNumber)];
+			
+			return true;
+		}
+	}
+	
+	public class QuickCE
+	{
+		public boolean execute(String commandName)
+		{
+			//Deny console access to this command.
+			if (console != null)
+				return msgLib.errorConsoleCantUseCommand();
+			
+			//Variable Declaration
+			boolean useG = false;
+			boolean useH = false;
+			boolean canG = perms.commandG();
+			boolean canH = perms.commandH();
+			
+			//Evaluate what the player wants to use and ensure that the player has permission.
+			if (commandName.equalsIgnoreCase("g") && canG)
+				useG = true;
+			
+			else if (commandName.equalsIgnoreCase("h") && canH)
+				useH = true;
+			
+			else if ((commandName.equalsIgnoreCase("gh") || commandName.equalsIgnoreCase("hg")) && (canG && canH))
+			{
+				useG = true;
+				useH = true;
+			}
+			
+			else
+				return msgLib.errorNoPermission();
+			
+			//Make sure player is online.
 			if (args[0].equalsIgnoreCase(""))
 				args[0] = player.getName();
 			
 			if (Bukkit.getServer().getPlayer(args[0]) == null)
 				return msgLib.errorPlayerNotOnline();
 			
-			if (commandName.equalsIgnoreCase("g"))
-			{
+			//Execute what was set to true.
+			if (useG)
 				quick_Gamemode();
-			}
-			else if (commandName.equalsIgnoreCase("h"))
-			{
+			
+			if (useH)
 				quick_Heal();
-			}
-			else if (commandName.equalsIgnoreCase("gh") || commandName.equalsIgnoreCase("hg"))
-			{
-				quick_Heal();
-				quick_Gamemode();
-			}
 			
 			return true;
 		}
@@ -910,7 +990,7 @@ public class CommandGod implements CommandExecutor
 		
 		private void quick_Heal()
 	    {
-			FC_Rpg.rpgManager.getRpgPlayer(Bukkit.getServer().getPlayer(args[0])).healFull();
+			FC_Rpg.rpgEntityManager.getRpgPlayer(Bukkit.getServer().getPlayer(args[0])).healFull();
 			
 			//Restore health and food
 			player.setHealth(20);
@@ -930,7 +1010,18 @@ public class CommandGod implements CommandExecutor
 			if (console != null)
 				return msgLib.errorConsoleCantUseCommand();
 			
-			if (rpgPlayer.getPlayerConfig().isDonator() || perms.commandHat())
+			//Variable Declaration
+			boolean canHat = false;
+			
+			//If donators can hat, then check if the player is donator.
+			if (FC_Rpg.generalConfig.getDonatorsCanHat())
+				canHat = rpgPlayer.getPlayerConfig().isDonator();
+			
+			//If they can't hat or aren't a donator, then check if they have perm.
+			if (canHat == false)
+				canHat = perms.commandHat();
+			
+			if (canHat)
 			{
 				if (player.getInventory().getHelmet() != null)
 					Bukkit.getServer().getWorld(player.getWorld().getName()).dropItem(player.getLocation(), player.getInventory().getHelmet());
@@ -951,6 +1042,9 @@ public class CommandGod implements CommandExecutor
 		
 		public boolean execute()
 	    {
+			if (!perms.commandJob())
+				return msgLib.errorNoPermission();
+			
 			//Only let active players use this command.
 			if (isActive == false)
 				return msgLib.errorCreateCharacter();
@@ -968,7 +1062,7 @@ public class CommandGod implements CommandExecutor
 				{
 					if (Bukkit.getServer().getPlayer(args[1]) != null)
 					{
-						rpgPlayer = FC_Rpg.rpgManager.getRpgPlayer(Bukkit.getServer().getPlayer(args[1]));
+						rpgPlayer = FC_Rpg.rpgEntityManager.getRpgPlayer(Bukkit.getServer().getPlayer(args[1]));
 						playerFile = rpgPlayer.getPlayerConfig();
 					}
 					else
@@ -1060,6 +1154,9 @@ public class CommandGod implements CommandExecutor
 		
 		public boolean execute()
 	    {
+			if (!perms.commandList())
+				return msgLib.errorNoPermission();
+			
 			GroupConfig conf = new GroupConfig();
 			List<Group> groups = conf.getGroups();
 			List<String> groupMembers = new ArrayList<String>();
@@ -1138,6 +1235,9 @@ public class CommandGod implements CommandExecutor
 		
 		public boolean execute()
 	    {
+			if (!perms.commandGuild())
+				return msgLib.errorNoPermission();
+			
 			//Variable declarations
 			boolean success = true;
 			
@@ -1281,6 +1381,9 @@ public class CommandGod implements CommandExecutor
 	{
 		public boolean execute()
 	    {
+			if (!perms.commandPvp())
+				return msgLib.errorNoPermission();
+			
 			Player target;
 			boolean isHappening = FC_Rpg.pvp.isHappening();
 			
@@ -1402,6 +1505,9 @@ public class CommandGod implements CommandExecutor
 		
 		public boolean execute()
 	    {
+			if (!perms.commandReset())
+				return msgLib.errorNoPermission();
+			
 			//Variable declarations
 			PlayerConfig rpgPlayerFile;
 			Player target;
@@ -1411,47 +1517,44 @@ public class CommandGod implements CommandExecutor
 				if (console != null)
 					return msgLib.errorConsoleCantUseCommand();
 				
-				args[0] = player.getName();
-			}
-			
-			rpgPlayerFile = new PlayerConfig(args[0]);
-			
-			//Only let active players use this command.
-			if (isActive == false)
-				return msgLib.errorCreateCharacter();
-			
-			//Store target.
-			target = Bukkit.getServer().getPlayer(args[0]);
-			
-			if (perms.isAdmin())
-			{
-				//Set to inactive
-				rpgPlayer.getPlayerConfig().setDefaults();
+				rpgPlayerFile = new PlayerConfig(player.getName());
 				
-				//Stop the players tasks.
-				FC_Rpg.rpgManager.unregisterRpgPlayer(player);
+				//Only let active players use this command.
+				if (rpgPlayerFile.getIsActive() == false)
+					return msgLib.errorCreateCharacter();
 				
-				//Send confirmation message.
-				msgLib.standardMessage("Successfully reset",rpgPlayer.getPlayerConfig().getName());
-				
-				if (target != null)
-					FC_Rpg.rpgManager.unregisterRpgPlayer(target);
+				//Set target.
+				target = player;
 			}
 			else
 			{
-				//We want to return if the player is attempting to reset somebody else.
-				if (!rpgPlayerFile.getName().equalsIgnoreCase(player.getName()))
-					return true;
+				if (perms.isAdmin() == false)
+					return msgLib.errorNoPermission();
 				
-				//Set to inactive
-				rpgPlayerFile.setDefaults();
+				rpgPlayerFile = new PlayerConfig(args[0]);
 				
-				//Send confirmation message.
-				msgLib.standardMessage("You have successfully reset yourself.");
+				//Only let active players use this command.
+				if (rpgPlayerFile.getIsActive() == false)
+					return msgLib.standardError("This player can't be reset because they aren't active.");
 				
-				//Unregister
-				FC_Rpg.rpgManager.unregisterRpgPlayer(player);
+				//Set target.
+				target = Bukkit.getServer().getPlayer(args[0]);
 			}
+			
+			//Set to inactive
+			rpgPlayer.getPlayerConfig().setDefaults();
+			
+			//Unregister the player.
+			FC_Rpg.rpgEntityManager.unregisterRpgPlayer(player);
+			
+			//Send confirmation message.
+			msgLib.standardMessage("The reset has been performed successfully.");
+			
+			//Stop the targets tasks.
+			if (target != null)
+				FC_Rpg.rpgEntityManager.unregisterRpgPlayer(target);
+			
+			FC_Rpg.plugin.getLogger().info("A: " + rpgPlayerFile.getName() + " player: " + player.getName());
 			
 			return true;
 		}
@@ -1465,6 +1568,9 @@ public class CommandGod implements CommandExecutor
 		
 		public boolean execute()
 		{
+			if (!perms.commandModify())
+				return msgLib.errorNoPermission();
+			
 			//THE ALMIGHTTY MODIFY COMMAND.
 			String name = args[0];
 			String modifable = args[1];
@@ -1483,8 +1589,8 @@ public class CommandGod implements CommandExecutor
 			 * Set up playerfile
 			 ********************/
 			
-			if (FC_Rpg.rpgManager.getRpgPlayer(Bukkit.getServer().getPlayer(name)) != null)
-				playerFile = FC_Rpg.rpgManager.getRpgPlayer(Bukkit.getServer().getPlayer(name)).getPlayerConfig();
+			if (FC_Rpg.rpgEntityManager.getRpgPlayer(Bukkit.getServer().getPlayer(name)) != null)
+				playerFile = FC_Rpg.rpgEntityManager.getRpgPlayer(Bukkit.getServer().getPlayer(name)).getPlayerConfig();
 			else
 				playerFile = new PlayerConfig(name);
 			
@@ -1565,6 +1671,9 @@ public class CommandGod implements CommandExecutor
 		
 		public boolean execute()
 	    {
+			if (!perms.commandRpg())
+				return msgLib.errorNoPermission();
+			
 			//Variable declarations.
 			int eventLength = 3600;
 			
@@ -1637,42 +1746,7 @@ public class CommandGod implements CommandExecutor
 			else if (args[0].equalsIgnoreCase("go"))
 				teleportAdmin(args);
 			
-			//List worlds
-			else if (args[0].equalsIgnoreCase("listworld") || args[0].equalsIgnoreCase("listworlds"))
-			{
-				int count = 0;
-				String[] msg = new String[2];
-				
-				//Give a header
-				msgLib.standardHeader("World List");
-				
-				//List all the worlds.
-				for (World world : Bukkit.getServer().getWorlds())
-				{
-					msg[0] = "#" + count + ": ";
-					msg[1] = world.getName();
-					
-					msgLib.standardMessage(msg);
-					count++;
-				}
-			}
-			
-			//Teleport to different worlds.
-			else if (args[0].equalsIgnoreCase("tpworld"))
-			{
-				//Teleport the player to the world they specify if it exists.
-				for (World world : Bukkit.getServer().getWorlds())
-				{
-					if (world.getName().contains(args[1]))
-					{
-						Location tpLoc = FC_Rpg.worldConfig.getWorldSpawn(args[1]);
-						
-						if (tpLoc != null)
-							player.teleport(tpLoc);
-					}
-				}
-			}
-			
+			//Change global experience multiplier
 			else if (args[0].equalsIgnoreCase("expMult"))
 			{
 				if (args[1].equalsIgnoreCase(""))
@@ -1690,69 +1764,12 @@ public class CommandGod implements CommandExecutor
 			//Handle wall generation command that will create a wall with signs!
 			else if (args[0].equalsIgnoreCase("wall"))
 			{
-				if (perms.isOwner())
-				{
-					createBoard();
-					msgLib.standardMessage("Successfully generated wall.");
-				}
-				else
-				{
-					return msgLib.helpOwner();
-				}
-			}
-			
-			//Handle setting world spawns.
-			else if (args[0].equalsIgnoreCase("spawn")) //rpg spawn [here] OR //rpg spawn [worldname] [x] [y] [z] [yaw] [pitch]
-			{
-				if (perms.isOwner())
-				{
-					WorldConfig wm = new WorldConfig();
-					
-					if (args[1].equalsIgnoreCase("here"))
-					{
-						wm.setWorldSpawn(player.getWorld().getName(), player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(),
-								player.getLocation().getYaw(), player.getLocation().getPitch());
-					}
-					else
-					{
-						//Make sure all arguments are valid.
-						for (int i = 1; i < 7; i++)
-							if (args[i].equalsIgnoreCase("")) return msgLib.helpOwner();
-						
-						try
-						{
-							wm.setWorldSpawn(args[1], Double.valueOf(args[2]), Double.valueOf(args[3]), Double.valueOf(args[4]), Float.valueOf(args[5]), Float.valueOf(args[6]));
-						}
-						catch (NumberFormatException e)
-						{
-							return msgLib.errorInvalidCommand();
-						}
-					}
-					
-					
-					msgLib.standardMessage("Successfully changed world spawn.");
-				}
-				else
-				{
-					return msgLib.helpOwner();
-				}
-			}
-			
-			else if (args[0].equalsIgnoreCase("levelone"))
-			{
-				WorldConfig worldConfig = new WorldConfig();
-				
-				worldConfig.setLevelOne(player.getWorld().getName(), player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(),
-						player.getLocation().getYaw(), player.getLocation().getPitch());
-				
-				return msgLib.successCommand();
+				createBoard();
+				msgLib.standardMessage("Successfully generated wall.");
 			}
 			
 			else if (args[0].equalsIgnoreCase("tp"))
 			{
-				if (perms.isOwner() == false)
-					return msgLib.errorNoPermission();
-				
 				if (args[1].equalsIgnoreCase(""))
 					return msgLib.errorInvalidCommand();
 				
@@ -1767,9 +1784,6 @@ public class CommandGod implements CommandExecutor
 			
 			else if (args[0].equalsIgnoreCase("sudo"))
 			{
-				if (perms.isOwner() == false)
-					return msgLib.errorNoPermission();
-				
 				if (args[1].equalsIgnoreCase(""))	//Name
 					return msgLib.errorInvalidCommand();
 				
@@ -1795,12 +1809,6 @@ public class CommandGod implements CommandExecutor
 			else if (args[0].equalsIgnoreCase("admin"))
 			{
 				return msgLib.helpAdmin();
-			}
-			
-			//Show owner help.
-			else if (args[0].equalsIgnoreCase("owner"))
-			{
-				return msgLib.helpOwner();
 			}
 			
 			//Save configuration
@@ -1984,6 +1992,9 @@ public class CommandGod implements CommandExecutor
 		
 		public boolean execute()
 	    {
+			if (!perms.commandSpell())
+				return msgLib.errorNoPermission();
+			
 			//Only let active players use this command.
 			if (isActive == false)
 				return msgLib.errorCreateCharacter();
@@ -2053,35 +2064,34 @@ public class CommandGod implements CommandExecutor
 			
 			msgLib.standardMessage("Current Spell Points",String.valueOf(rpgPlayer.getPlayerConfig().getSpellPoints()));
 			
-			String[] msg = new String[10];
+			String[] msg = new String[9];
 			int spellLevel;
 			
 			for (int i = 0; i < rpgPlayer.getPlayerConfig().getRpgClass().getSpellBook().size(); i++)
 			{
 				spellLevel = rpgPlayer.getPlayerConfig().getSpellLevels().get(i);
 				
-				msg[0] = "#";
-				msg[1] = String.valueOf(i+1) + ": ";
+				msg[0] = "#" + String.valueOf(i+1) + ": ";
 				
-				msg[2] = "[N]: ";
-				msg[3] = rpgPlayer.getPlayerConfig().getRpgClass().getSpell(i).getName();
+				msg[1] = "[N]: ";
+				msg[2] = rpgPlayer.getPlayerConfig().getRpgClass().getSpell(i).getName();
 				
-				msg[4] = " [L]: ";
-				msg[5] = String.valueOf(spellLevel);
+				msg[3] = " [L]: ";
+				msg[4] = String.valueOf(spellLevel);
 				
 				if (rpgPlayer.getPlayerConfig().getSpellLevels().get(i) > 0)
 				{
-					msg[6] = " [MC]: ";
-					msg[7] = String.valueOf(rpgPlayer.getPlayerConfig().getRpgClass().getSpell(i).getManaCost().get(spellLevel));
+					msg[5] = " [MC]: ";
+					msg[6] = String.valueOf(rpgPlayer.getPlayerConfig().getRpgClass().getSpell(i).getManaCost().get(spellLevel));
 				}
 				else
 				{
-					msg[6] = " [MC]: ";
-					msg[7] = "0";
+					msg[5] = " [MC]: ";
+					msg[6] = "0";
 				}
 				
-				msg[8] = " [D]: ";
-				msg[9] = rpgPlayer.getPlayerConfig().getRpgClass().getSpell(i).getDescription();
+				msg[7] = " [D]: ";
+				msg[8] = rpgPlayer.getPlayerConfig().getRpgClass().getSpell(i).getDescription();
 				
 				msgLib.standardMessage(msg);
 			}
@@ -2192,6 +2202,9 @@ public class CommandGod implements CommandExecutor
 		
 		public boolean execute()
 		{
+			if (!perms.commandWarp())
+				return msgLib.errorNoPermission();
+			
 			wc = new WarpConfig();
 			
 			//One argument commands.
@@ -2213,6 +2226,8 @@ public class CommandGod implements CommandExecutor
 				return delSubCommand();
 			else if (args[0].equalsIgnoreCase("tp"))
 				return tpSubCommand();
+			else if (args[0].equalsIgnoreCase("new"))
+				return newSubCommand();
 			
 			//Four argument commands.
 			if (args[2].equalsIgnoreCase("") || args[3].equalsIgnoreCase(""))
@@ -2232,7 +2247,7 @@ public class CommandGod implements CommandExecutor
 			String[] msg = new String[5];
 			
 			if (!args[1].equalsIgnoreCase(""))
-				try { startPoint = Integer.valueOf(args[1]); } catch (NumberFormatException e) { }
+				try { startPoint = Integer.valueOf(args[1]) - 1; } catch (NumberFormatException e) { }
 			
 			msgLib.standardHeader("Warp List");
 			
@@ -2240,7 +2255,7 @@ public class CommandGod implements CommandExecutor
 			{
 				if (wc.getName(i) != null)
 				{
-					msg[0] = "#" + i + ": ";
+					msg[0] = "#" + (i+1) + ": ";
 					msg[1] = "[N]: ";
 					msg[2] = wc.getName(i);
 					msg[3] = " [D]: ";
@@ -2326,6 +2341,13 @@ public class CommandGod implements CommandExecutor
 			return msgLib.successCommand();
 		}
 		
+		//w new~0 [name]~1
+		private boolean newSubCommand()
+		{
+			FC_Rpg.warpConfig.addNewWarp(args[1]);
+			return msgLib.successCommand();
+		}
+		
 		// /w edit~0 [name]~1 [modifiable]~2 [new value]~3
 		private boolean editSubCommand()
 		{
@@ -2361,7 +2383,14 @@ public class CommandGod implements CommandExecutor
 		{
 			DecimalFormat df = new DecimalFormat("#.#");
 			
-			return df.format(wc.getDestination(warpNumber).getX()) + ", " + df.format(wc.getDestination(warpNumber).getY()) + ", " + df.format(wc.getDestination(warpNumber).getZ());
+			try
+			{
+				return df.format(wc.getDestination(warpNumber).getX()) + ", " + df.format(wc.getDestination(warpNumber).getY()) + ", " + df.format(wc.getDestination(warpNumber).getZ());
+			}
+			catch (NullPointerException e)
+			{
+				return "[Broken Warp, Fix In Config]";
+			}
 		}
 	}
 	
@@ -2375,17 +2404,35 @@ public class CommandGod implements CommandExecutor
 		{
 			initializePEMap();
 			
+			//Make sure the starting argument isn't empty.
 			if (args[0].equals(""))
-				return msgLib.helpBuff();
+			{
+				if (perms.commandBuff() || perms.commandBuffSelf())
+					return msgLib.helpBuff();
+				else
+					msgLib.errorNoPermission();
+			}
 			
 			if (args[0].equalsIgnoreCase("self"))
+			{
+				if (!perms.commandBuffSelf())
+					return msgLib.errorNoPermission();
+				
 				return selfSubCommand();
-			
-			else if (args[0].equalsIgnoreCase("all"))
-				return allSubCommand();
-			
-			else if (args[0].equalsIgnoreCase("clear"))
-				return clearSubCommand();
+			}
+			else
+			{
+				//Check permission.
+				if (!perms.commandBuff())
+					return msgLib.errorNoPermission();
+				
+				//Check subcommand.
+				if (args[0].equalsIgnoreCase("all"))
+					return allSubCommand();
+				
+				else if (args[0].equalsIgnoreCase("clear"))
+					return clearSubCommand();
+			}
 			
 			return msgLib.errorInvalidCommand();
 		}
@@ -2420,7 +2467,7 @@ public class CommandGod implements CommandExecutor
 			PotionEffect pickedPE = getRandomPotionEffect();
 			
 			//Lets admin put potions on theirself.
-			if (perms.isAdmin() == true && !args[1].equals("") && !args[2].equals("") && !args[3].equals(""))
+			if (!args[1].equals("") && !args[2].equals("") && !args[3].equals(""))
 				try { pickedPE = new PotionEffect(PotionEffectType.getByName(args[1]), Integer.valueOf(args[2]), Integer.valueOf(args[3])); } catch (NumberFormatException e) { }
 			
 			//Add the potion effect.
@@ -2483,6 +2530,116 @@ public class CommandGod implements CommandExecutor
 		{
 			Random rand = new Random();
 			return rand.nextInt(3) + 1;	//rand.nextInt((maxStrength - 1)) + 1;
+		}
+	}
+	
+	public class WorldCE
+	{
+		public WorldCE() { }
+		
+		public boolean execute()
+		{
+			if (args[0].equalsIgnoreCase(""))
+				return msgLib.helpWorld();
+			
+			//List worlds
+			if (args[0].equalsIgnoreCase("list"))
+			{
+				int count = 0;
+				String[] msg = new String[3];
+				
+				//Give a header
+				msgLib.standardHeader("World List");
+				
+				//List all the worlds.
+				for (World world : Bukkit.getServer().getWorlds())
+				{
+					msg[0] = "#" + (count+1) + ": ";
+					msg[1] = world.getName();
+					
+					if (FC_Rpg.worldConfig.isCreated(world.getName()))
+						msg[2] = " [In Config]";
+					else
+						msg[2] = " [Not In Config]";
+					
+					msgLib.standardMessage(msg);
+					count++;
+				}
+				
+				return true;
+			}
+			
+			else if (args[0].equalsIgnoreCase("levelone"))
+			{
+				WorldConfig worldConfig = new WorldConfig();
+				
+				worldConfig.setLevelOne(player.getWorld().getName(), player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(),
+						player.getLocation().getYaw(), player.getLocation().getPitch());
+				
+				return msgLib.successCommand();
+			}
+			
+			if (args[1].equalsIgnoreCase(""))
+				return msgLib.errorInvalidCommand();
+			
+			//Teleport to different worlds.
+			else if (args[0].equalsIgnoreCase("tp"))
+			{
+				//Teleport the player to the world they specify if it exists.
+				for (World world : Bukkit.getServer().getWorlds())
+				{
+					if (world.getName().contains(args[1]))
+					{
+						Location tpLoc = FC_Rpg.worldConfig.getWorldSpawn(args[1]);
+						
+						if (tpLoc != null)
+							player.teleport(tpLoc);
+					}
+				}
+			}
+			
+			//Load up a world into the world config and warp config.
+			else if (args[0].equalsIgnoreCase("new"))
+			{
+				 if (FC_Rpg.worldConfig.addNewWorld(args[1]))
+					 return msgLib.successCommand();
+				 else
+					 return msgLib.standardError("Unable to detect world.");
+			}
+			
+			//Handle setting world spawns.
+			else if (args[0].equalsIgnoreCase("spawn")) //rpg spawn [here] OR //rpg spawn [worldname] [x] [y] [z] [yaw] [pitch]
+			{
+				WorldConfig worldConfig = new WorldConfig();
+				
+				if (args[1].equalsIgnoreCase("here"))
+				{
+					if (console != null)
+						return msgLib.errorConsoleCantUseCommand();
+					
+					worldConfig.setWorldSpawn(player.getWorld().getName(), player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(),
+							player.getLocation().getYaw(), player.getLocation().getPitch());
+				}
+				else
+				{
+					//Make sure all arguments are valid.
+					for (int i = 1; i < 7; i++)
+						if (args[i].equalsIgnoreCase("")) return msgLib.helpWorld();
+					
+					try
+					{
+						worldConfig.setWorldSpawn(args[1], Double.valueOf(args[2]), Double.valueOf(args[3]), Double.valueOf(args[4]), Float.valueOf(args[5]), Float.valueOf(args[6]));
+					}
+					catch (NumberFormatException e)
+					{
+						return msgLib.errorInvalidCommand();
+					}
+				}
+				
+				return msgLib.standardMessage("Successfully changed world spawn.");
+			}
+			
+			return msgLib.successCommand();
 		}
 	}
 }

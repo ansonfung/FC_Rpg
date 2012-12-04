@@ -1,6 +1,6 @@
 name: FC_Rpg
 main: me.Destro168.FC_Rpg.FC_Rpg
-version: 0.82
+version: 1.0
 description: Handles RPG aspects of the server.
 commands:
    bighelp:
@@ -11,8 +11,6 @@ commands:
       description: This command accesses donator commands.
    dungeon:
       description: This command accesses dungeon commands.
-   d9:
-      description: This command accesses dungeon definition commands.
    faq:
       description: This command accesses server faq topics.
    g:
@@ -45,5 +43,7 @@ commands:
       description: This command accesses warp commands.
    buff:
       description: This command accesses buff commands.
+   world:
+      description: This command accesses world commands.
 softdepend: [Multiverse, mcMMO]
 depend: [FC_Suite_Shared]

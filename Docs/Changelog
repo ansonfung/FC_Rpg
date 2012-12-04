@@ -1,0 +1,269 @@
+~ FC_Rpg Changelog ~
+
+Version 1.0:
+
+General:
+- Fixed non-ops being unable to pick a new class.
+- Fixed files to actually be deleted now after the auto-delete date.
+- Ability to load in new worlds with a command to the config. Also optimized the world/warp config generations a tad.
+- Slimes now start full gold at max size. The first split (1/2 size) = 1/4th rewards. Baby = 1/8th rewards. Slimes still drop items, they are kind of a "super loot / party drop" style mob if you will. I want to preserve this but they were blatantly op for gold/leveling before. Now they are great for finding loot
+- Mobs will now drop experience orbs if you have experience enabled in your general config.
+- Items will drop from mobs/animals if you enable them with "defaultItemDrops" set to true (true by default).
+- Optimized material lib to only initialize one object ever from now on. ~Just a bit of foreseeing on making sure monster spawns stay speedy.
+- Mobs will now spawn with items based on level! And lets not forget about the bonuses to stats that they get from it... OH BABY!
+- Renamed rpgManager to rpgEntityManager (just code rename internally).
+- Fixed a concurrent modification during boss spawns.
+- Added handling for a few damage types that weren't being handled before.
+- Fixed dungeons not ending when the last player leaves but ending whenever anybody leaves.
+
+Commands:
+
+	Overall:
+	- Permissions added for commands. Check the included file Permissions.txt in the jar.
+	- Various list color updates and scheme upgrades.
+	- Updated all lists to start at 1 now. This means you should very rarely have to use 0 as an argument.
+	- (TODO) Lists now all default to desiring words now in commands instead of numbers. BUT, you can use names if you want. This should make all the commands feel more unified.
+	
+	Rpg:
+	- No longer has the mute message at the top. Updated the faq command to no longer be red.
+	- Moved world related commands to new world command.
+	- No more "owner" sub-class under /rpg owner. Everything just put into /rpg admin. Removed /rpg tp.
+	
+	Class:
+	- Fixed /class switch sub-command to no longer present success message on errors.
+	- Added command /rpg expMult [x], can be found in /rpg admin. Allows you to change exp.
+	
+	Donator:
+	- New infinite donator permission which gives permanent donator status.
+	
+	Warp:
+	- Warp list starts at 1 now.
+	- Warp new [name] added which allows you to create a new warp template in configuration.
+	
+	Dungeon:
+	- Updated list to start at 1 as well as have a header and better format.
+	- Fixed /dungeon to work via console now.
+	- Added /dungeon new to create blank dungeon template.
+	
+	World:
+	- Added new world command and associated help, perms, etc.
+	- Please note that world does conflict with essentials so you should take the steps provided by Essentials to disable the command... assuming you want to use mine. (Delete the command from the Essentials.jar plugin.yml file). :)
+	- World list starts at 1 now, added format, shows if it's loaded in config or not.
+	
+	Faq:
+	- Renamed /faq add to /faq new to keep with the trend of "new" which will allow one to add a empty entry to configuration.
+	
+Configurations:
+- Brand new BALANCE CONFIG! Huzzah! Allows custimization over even more balance related features. Enjoy!
+- Treasure config now sets version so that it won't overwrite each time you load up your server.
+
+Installation:
+- FC_Suite_Shared is now it's own seperate plugin! Check it out -> http://dev.bukkit.org/server-mods/fc_suite_shared/
+
+Test:
+
+- Play around with /buff command hard.
+- Full permissions support. "Buff command needs perm most important"
+
+Todo:
+
+- Add enchantments to mob items.
+- Customizable enviromental damage multiplier based on distance modifier.
+- Optional knockback enabled.
+- Customizable chat format.
+- Bind poisons to player skill so that normal poisons can be reenabled.
+- Customizable auto-delete player file time.
+
+Long-Term Todo:
+- Class requirement / Job Rank minimum / Minimum level requirement for warps.
+- Explain in help: The purpose of jobs is to be able to have a way for players to be able to pay to gain ranks that give access to better warps.
+- Multiple loot chests inside of dungeons.
+- Test PVP Arena. Upgrade more fully.
+
+Version 0.82:
+
+- Fixed major bug with guilds causing all mobs to be invulnerable.
+
+Version 0.81:
+
+- Check FC_Suite_Shared changelog! <- Main reason for update.
+- Fixed ghost drops that can't be picked up.
+- Fixed issue with infinite 10k warps being created when you use /w add command.
+
+Version 0.7:
+
+General:
+- Wound up adding tons of stuff I didn't expect to add, so 0.7. Still not a release build, sorry. There are just too many changes ^^.
+- Updated combat display to show exp % remaining when you kill a mob.
+- Juiced up AOE mining now. It has compatibility for mcmmo! :D Pickaxes are still the tool of choice. Bunch of stuff added to the list of items that can't be destroyed by the pickaxe effect.
+- Fire resistance potions now offer very strong fire resistance bonuses! It's not 100%, but you get 95% for lava which is really really good!
+- Wither and Enderdragon now are completely checked in my code for damage, and yadayadayada. No longer errors from the Wither. ALSO, both of their boss health bars will update when damaged. Wither heals when spawned and starts in fly mode.
+- Default dungeon tool is bedrock now.
+- Better structured and organized exp/loot giving for players to be more efficient. Loot is now calculated per individual which means that if you are in a guild you no longer will receive exp/gold from other members killing monsters. This means there are no ways to power level now.
+- Can now customize item stat restrictions now.
+- Readded the phase change for pvp arenas. They may or may not work! No idea! I have nobody to test with, xD. Will do a "better pvp arena" upgrade in next version (release).
+- Enchanted armor no longer has infinite durability. ^^. Protection values were fixed, I had helmets being checked twice rather than an instance of leggings. So now enchants are looking good.
+- Can now add a configurable bonus number of levels to withers and enderdragons. No more level 1 bosses! >:D
+
+Commands:
+- Fixed major issue where some servers were unable to use commands due to players being treated as consoles.
+- Updated modify command. It had a few issues, just fixed it up and now it's good to go.
+- Added subcommand list to /class. This lets you see available server classes!
+- Added new commands to /faq for the editing of them in game. How did I not think of this before? *Hours after Coding* Oh yeah, holy f*** that was brutal. Heavily upgraded.
+- Removed case checking for over 58 instances of command related string checking.
+- Added /buff command with appropriate help.
+- Had to remove bighelp... there is just too much help now ^^.
+- Fixed class selection again.
+- Fix fucking health regeneration again.
+- Can now switch class using class name.
+- Added a new /rpg sub-command to modify global experience rates on any server.
+
+Spells:
+- Updated Adreneline base spell. Check included default config to see new values. Most notable is duration is in seconds now and speed boost is in decimals.
+- Possible to have infinity spells now per class... Even the same spell more than once! Yeah, um. Have fun with that! Configs will automatically update for the changes that I made. Might be buggy, will be tested more before release.
+
+Guilds (formerly known as parties): 
+- Parties are now known as "Guilds". Why? This no longer conflicts with other plugins that use /party if you still want that. Guilds will be expanded on in the future potentially. Everything is now '/guild' or 'guild', no more parties!
+- Guilds are persistent which means they don't go away anymore.
+- New sub-directory called "guilds" which stores all guilds. Guilds.yml will hold a list of all existing guilds as well as have other settings as needed in the future.
+- All guild commands heavily optimized, updated, and modified.
+- Added the ability for admins to be able to manage and control guilds and use commands no matter what.
+- Added new sub-commands to guilds for player management of guilds.
+
+Configs:
+- Updated two faqConfig values. 'name' is now 'header' | 'tag' is now 'displayTag' | 'faqs1' is now 'faqList1' | 'faqs2' is now 'faqList2'. Update configs accordingly!
+
+Version 0.6:
+
+- General:
+- The next version should be release. Everything needs tested thoroughly in 0.6 before I go to release. I don't plan to add many (if any) new features during the transition to 1.0, I just go through and make sure everything is perfect. If I need to do a 0.7 I will, but I just want things perfect. :)
+- Removed potion code stuff, useless with creative potion inventory.
+- World Edit and World Guard requirements have been removed.
+- FC_Suite_Shared hasn't been changed and as such this version should be compatible with other FC plugins.
+
+- Updated Commands:
+- Added new command /d9.
+- /dungeon updated to account for new command.
+- Upgraded /fullhelp to include new helps that weren't added before.
+- Added new command for managing warps, /w.
+
+Dungeons:
+- Fixed several stupid mob death checks not working due to failed swap function, failed coordinate checking, etc. etc. Just mob spawn checking works now.
+
+Version 0.5:
+
+- Please note that this build is again, a really fast rushed build, I'm working as fast as possible to push these builds out! Reporting issues is fantastic for me! Thanks :D
+- Heal command and gm commands will no longer say success while at the same time saying successfully healed/gamemoded a player.
+- Added a new general config setting that allows you to prevent ender pearl teleportation. Allows me to delete my seperate project FC_NoEnderPearls, xD :D!
+- Had a lot of doubles relating to exp scaling set to return ints when they should be doubles! REALLY GLAD I CAUGHT THIS, LOL. Fixed now.
+- Artificial damage cause added to players in damagelistener. As well, eventpriority set to high. This means other plugins should be able to cancel/override FC_RPG is at lower ep's and can hook in at higher EP's. (Allows FC_Bounties compatibility for example).
+- Fixed double loot event never ending.
+- Fixed mob spawning levels going negative direction and negative levels. Should work fine always now.
+- Fixed treasure config issue with getting drop chance never resetting number of items dropped. Also updated default item drop chances. Finally fixed checking mob level for item drops.
+- Fixed improperly reading exp/gold value multipliers from config for mob money. Also updated the anti-powerleveling to prevent giving exp/gold.
+- Did a good bit of updating to commands again to make even more commands usable via console. Also fixed some bugs/errors with them.
+- Organized and Optimized the /dungeon command.
+- Dungeon command now has several dungeon sub-commands.
+- Heavily improved the /dungeon command. Now you can create dungeons in-game by selecting points to define regions for them.
+- Going to be working on this hard for 0.6 to let you change more settings in-game.
+
+- Organized and Optimized the rpg command.
+- Moved /rpg modify to be just /modify now.
+- Console can use both now. Maybe bugs with console getting errors still, I'm always working on these but if you find one feel free to make a ticket.
+
+- Organized and Optimized the reset command.
+- Console can use to reset other players now.
+
+
+(INCOMPLETE, 1.4 DEV BUILD INTERUPT, will be in 0.6)
+- Organized and Optimized the dungeon command.
+- I changed the implementation for pvp arena around a lot. It's untested entirely so yeah it could be really really buggy. Just a warning. I need to test it.
+
+Version 0.4:
+
+- This version is NOT compatible with other FC plugins currently (unless you recently recieved a custom version from me). Just a heads up.
+- Wolves are now considered passive mobs because I can't figure out how to make them aggressive, :S
+- Configurable item restrictions.
+- Fixed Stat Growth for all classes being broken.
+- New config "Passives" to update passives. Might change into something else more expansive.
+- Mob Money is 100% configurable.
+- Exp Growth is 100% configurable
+- Dungeon treasure is now 100% configurable
+- Alchemy will NOT be made configurable. But I do take suggestions on the skill! I want this to be a skill that brings in a diverse range of items to all servers, I don't want people to be able to limit this range so if you don't like the skill don't use it! XD :D
+- Fixed a loot issue that may or may not been an issue.
+- Made dungeons that work without rpg mode enabled.
+- All locations now require a yaw and pitch, even if you have to put 0.0 in each spot. The default warp generation didn't put the 2 0's for yaw/patch and as such you will have to manually fill them in if you want default warps to work.
+- Fixed list to never mess up. Can only show player names once now which makes it work perfectly :)
+- Mob strength properly adjusts to world's spawn.
+- promote alias for "upgrade" for skill points.
+- Updated the /rpg wall to now add warps as well as new updated finish signs. It's not as obvious that I coded the manual respec into selection and the gold color can be hard to see on certain texture packs. As well it puts all the warp signs down for easy copy+paste.
+- Put /reset requirement display notifcation on actual class selection.
+- Added small message when you select a class that tells you to actually hit a finish sign.
+- ResetLoc has been entirely disabled. The teleport it gives has been removed. I can do this now because players who don't have an rpg class should be restricted from doing a lot of things now so there isn't as much of a "forced" requirement to actually have an rpg class. Will be monitered and updated as needed if bugs arise.
+- 0.4 was mostly a bug fix and customization version imo. It adds a few things but a lot of changes were to fix bugs. As always I aim to achieve as few bugs as possible. 0.5 will bring even more customization to the table. Everything is getting closer and closer now to being extremely configurable. I think that the last version will require a complete reset, because there are lots of fragments of code getting spewn about. However, everything is getting really close to release ready. I just need to basically expand on the existing features already to make them more accessible outside of editing configs via more commands. 0.4's documentation will be done tonight.
+
+Version 0.31:
+
+- Fixed /list command.
+
+Version 0.3:
+
+- Please understand, all of the changes in this are from the last two days. There are definately many bugs. I'm coding as fast as possible to fix/add features and the cost of this is bugginess. I try to test what I can but not everything is fully tested. This version is EXTREMELY rushed, and I mean EXTREMELY. So please bear with it. I tried to test everything once but I didn't test comprehensively.
+
+- Fixed the resetting of player classes so that they can use sign walls to pick classes again. This was a conflict from the new spell system and optimized player mangement system that I had created (didn't mention in changelog for 0.2).
+- Removed everything regarding hunters. It was a remanence from my old server and doesn't serve a purpose.
+- Removed a few remnances of jobs from error messages as well from comments/code.
+
+- Organized and optimized all commands. They may be buggy in the next version, I tried to test them all but some bugs may have gotten through. The focus was on making commands more efficient, organized, powerful, and feature-rich. As well, console now has access to select commands. ALL HAIL THE CONSOLE!
+
+- Organized and Optimized the class command.
+- Recoded class switching a bit. Now, admins will now always see the ticket dialog. Also, admins have infinite class switch tickets now.
+- (Note To Self) Test /class view (on and offline)
+
+- Organized and Optimized the donator command.
+- Console can't use donator command.
+
+- Organized and Optimized the dungeon command.
+- Organized and Optimized the FaqCE command.
+
+- Organized and Optimized the /g and /h commands. 
+- Now you can use /g, /h, /gh, or /hg to get gamemode and/or heal. This allows you to mix them to get both effects at once. I know, I know, put it back in your pants.
+
+- Organized and Optimized the hat command.
+- Organized and Optimized the job command.
+
+- Organized and Optimized the list command.
+- List now properly works hand in hand with the groups config unlike previously.
+
+- Organized and Optimized the party command.
+
+- Organized and Optimized the rpg command.
+- Fixed /rpg modify stat to work properly now.
+
+- Group file now automatically generates. This should help with the confusion that for some reason my plugin is being a permissions provider. IT ISN'T! However, the groups are used for automatic promotions and chat. I will elaborate more on these in documenation. As well, rank freeze was removed. To freeze a rank set the jobReq and timeReq's to -1.
+- Can now set the rate at which mob strength scales from world spawns.
+- Mob y depth based strength is now capped at 3x as high by default. As well, it is a formula so mob strength will transition very smoothly as you go deeper rather than double, triple, pentouple etc. instantly. (Customizable ofc)
+- Can now disable the rpg chat setting.
+- Reduced calls to general config substantially which improves performance a lot (well probably not noticibly ^^). Effects startup time and playerjoins.
+- Hourly items are now entirely customizable. They are now called "Timed items" and you can set them to anything! Default = 5 steak + 1 GAPPLE:1
+- New world setting "LevelOne" which is where level one monsters will spawn.
+- Updated the admin help to be smaller and updated based on commands.
+
+Version 0.2:
+
+- A lot of the focus on this version is to get things into a more permanent state. I realized that there are quite a few broken pieces of code from back when I was running FC_RPG on my server as well as misnamed stuff. A big example is that when I started the plugin the stat 'Attack' was referred to as 'Strength'. However, I changed it from strength to attack which meant that like 1/2 the code was saying strength another half was saying attacked. The main goal of this release is to fix a lot of issues like this other things from the 0.1 version. So, as such, a lot of stuff broke, as you could imagine. I could write up an upgrade guide but the amount of work people would have to do is highly unreasonable. And as such, I sadly have to say that you have to wipe out everything from before. I would keep a backup though, as a lot of settings are the same when you have to redo them. The main thing is that on my FC_Announcer, FC_Bans, and FC_Bounties plugin, I recently had to do a lot of configuration options post-release which I am actually kind of ashamed of. I don't think it's acceptable to make such changes post-release and so I focused very hard on making it so that all the configuration files are seperate now and all past improperly named code/config settings are more appropriate now. Here's to hoping I never have to ask for file wips in the future *toasts air*. However, it's still beta, I give no garuntees yet. :P
+- The donator stat percent now updates properly for /class view.
+- Renamed "Overlord" section of config to "General" section now.
+- All configuration files are now seperated into what they each respectively handle.
+- Redid spells and classes entirely so that they are totally customizable. This was a "MASSIVE" project and took easily 100+ hours to do alone. I hope you guys enjoy the work! ^^. A lot of changes to magic, spells, and classes are pretty much why the delete everything is absolutely necessary.
+- h now has premissions on it to prevent everybody from using.
+- Monster levels now scale away from spawn based on world spawns rather than the previous 0,0,0 coords. This allows you to define where you want level 1 monsters to spawn at now.
+- Reordered player file to be a subclass of the configgod class which allowed me to better order the code and make it more readable at the cost of optimization (Extremely unnoticable deoptimization though).
+- Pvp config will always be generated, moved pvp arena reward to there.
+- Knockback works now on swords! Thanks Njol in this thread -> http://forums.bukkit.org/threads/knockback-entity-to-entity.61053/. Simple? Dear god, impossible! LOL
+- Began first phase of customizing treasure. Mob and dungeon loot are now fully customizable. Alchemy customization will come with the next "skill customization" file in the next update.
+- Remember this is still beta, so there may be bugs, particularly with the spells. If you find any feel free to open up a ticket or leave a comment. I plan to keep working on the next version but I want to get this out so people can report bugs. :)
+
+Version 0.1
+
+- First release of the plugin. Woot.
