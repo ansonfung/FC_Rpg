@@ -21,11 +21,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 
 public class RpgPlayer extends RpgEntity
 {
@@ -137,7 +135,7 @@ public class RpgPlayer extends RpgEntity
     		player_.setHealth(hc.getPlayerHearts());
 		
 		//Check and apply donator bonuses
-		donatorStatUpdate();
+		updateDonatorStats();
 	}
 	
 	public void loadCriticalInformation()
@@ -166,10 +164,10 @@ public class RpgPlayer extends RpgEntity
 		playerConfig.setPlayerDefaults(pickedClass, manualDistribution);
 		
 		//Update health and mana based on stats.
-		calcMaxHM();
+		calculateHealthAndMana();
 		
 		//Check and apply donator bonuses
-		donatorStatUpdate();
+		updateDonatorStats();
 		
 		if (manualDistribution == true)
 		{
@@ -251,7 +249,7 @@ public class RpgPlayer extends RpgEntity
 		playerConfig.offlineSetDonator(periods);
 		
 		//Update stats to account for new bonuses if a donator.
-		donatorStatUpdate();
+		updateDonatorStats();
 	}
 	
 	public void addClassExperience(double x, boolean displayLevelUpMessage)
@@ -260,14 +258,14 @@ public class RpgPlayer extends RpgEntity
 		playerConfig.addOfflineClassExperience(x, displayLevelUpMessage);
 		
 		//Update Donator Stats
-		donatorStatUpdate();
+		updateDonatorStats();
 		
 		//Message the player a reminder to use stat points.
 		if (playerConfig.getManualAllocation() == false)
 			msgLib.standardMessage("Remember to assign stat points. Use /class for help!");
 	}
 	
-	public void donatorStatUpdate()
+	public void updateDonatorStats()
 	{
 		double donatorBonusPercent = FC_Rpg.generalConfig.getDonatorBonusStatPercent();
 		
@@ -280,7 +278,7 @@ public class RpgPlayer extends RpgEntity
 			tempMagic = (int) (playerConfig.getMagic() * donatorBonusPercent);
 			tempIntelligence = (int) (playerConfig.getIntelligence() * donatorBonusPercent);
 			
-			calcMaxHM();
+			calculateHealthAndMana();
 		}
 	}
 	
@@ -386,7 +384,7 @@ public class RpgPlayer extends RpgEntity
 		msgLib.standardMessage("The support spell has been applied to you!");
 		
 		//Recalculate health and mana.
-		calcMaxHM();
+		calculateHealthAndMana();
 		
 		Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable() 
 		{
@@ -400,7 +398,7 @@ public class RpgPlayer extends RpgEntity
 				tempIntelligence = base[3];
 				
 				//Recalculate health and mana.
-				calcMaxHM();
+				calculateHealthAndMana();
 				
 				//Remove support buff status.
 				isSupportBuffed = false;
@@ -412,16 +410,23 @@ public class RpgPlayer extends RpgEntity
 	}
 	
 	//Remember when changing this to change the RPGPLAYERFILE version! -> calculateHealthAndManaOffline()
-	public void calcMaxHM()
+	public void calculateHealthAndMana()
 	{
-		maxHealth = FC_Rpg.balanceConfig.getBasePlayerHealth() + getTotalConstitution() * FC_Rpg.balanceConfig.getConstitutionImpact();
-		maxMana = FC_Rpg.balanceConfig.getBasePlayerMana() + getTotalIntelligence() * FC_Rpg.balanceConfig.getIntelligenceImpact();
+		maxHealth = FC_Rpg.balanceConfig.getPlayerBaseHealth() + getTotalConstitution() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeConstitution();
+		maxMana = FC_Rpg.balanceConfig.getPlayerBaseMana() + getTotalIntelligence() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeIntelligence();
+		
+		//Prevent overflow of health/mana.
+		if (curHealth > maxHealth)
+			curHealth = maxHealth;
+		
+		if (curMana > maxMana)
+			curMana = maxMana;
 	}
 	
 	public void heal(double d)
 	{
 		//Update health and mana.
-		calcMaxHM();
+		calculateHealthAndMana();
 		
 		restoreHealth(d);
 		restoreMana(d);
@@ -430,7 +435,7 @@ public class RpgPlayer extends RpgEntity
 	public void healFull()
 	{
 		//Update health and mana.
-		calcMaxHM();
+		calculateHealthAndMana();
 		
 		curHealth = maxHealth;
 		curMana = maxMana;
@@ -439,7 +444,7 @@ public class RpgPlayer extends RpgEntity
 	public double dealDamage(double damage)
 	{
 		//Update health and mana.
-		calcMaxHM();
+		calculateHealthAndMana();
 		
 		curHealth -= damage;
 		
@@ -451,7 +456,7 @@ public class RpgPlayer extends RpgEntity
 	private boolean drainMana(double d)
 	{
 		//Update health and mana.
-		calcMaxHM();
+		calculateHealthAndMana();
 		
 		if (curMana >= d)
 		{
@@ -465,7 +470,7 @@ public class RpgPlayer extends RpgEntity
 	public void restoreManaTick()
 	{
 		//Update health and mana.
-		calcMaxHM();
+		calculateHealthAndMana();
 		
 		//5% mana regeneration per 5 seconds (1% per sec)
 		restoreMana(maxMana * .05);
@@ -478,7 +483,7 @@ public class RpgPlayer extends RpgEntity
 	public void restoreHealth(double amount) 
 	{
 		//Update health and mana.
-		calcMaxHM();
+		calculateHealthAndMana();
 		
 		//Actually add in new amount.
 		curHealth = curHealth + amount;
@@ -491,7 +496,7 @@ public class RpgPlayer extends RpgEntity
 	public void restoreMana(double amount) 
 	{
 		//Update health and mana.
-		calcMaxHM();
+		calculateHealthAndMana();
 		
 		//Actually add in new amount.
 		curMana = curMana + amount;
@@ -568,10 +573,10 @@ public class RpgPlayer extends RpgEntity
 		}
 		
 		//Handle donator stat updates
-		donatorStatUpdate();
+		updateDonatorStats();
 		
 		//Calculate health and mana.
-		calcMaxHM();
+		calculateHealthAndMana();
 		
 		return true;
 	}
@@ -597,11 +602,11 @@ public class RpgPlayer extends RpgEntity
 		msg[0] = "[";
 		msg[1] = "You Hit";
 		msg[2] = "] Level: ";
-		msg[3] = String.valueOf(level);
+		msg[3] = level + "";
 		msg[4] = " / Remaining Health: ";
 		msg[5] = FC_Rpg.df.format(health);
 		msg[6] = " / Damage: ";
-		msg[7] = String.valueOf(FC_Rpg.df.format(damage));
+		msg[7] = FC_Rpg.df.format(damage);
 		
 		msgLib.standardMessage(msg);
 		lastAttackNotification = new Date();
@@ -809,10 +814,10 @@ public class RpgPlayer extends RpgEntity
 			if (handItemDurability >= 122)
 				player.getInventory().getItem(player.getInventory().getHeldItemSlot()).setDurability((short) 0);
 			
-			if (playerConfig.getAttack() < FC_Rpg.generalConfig.getChainReq())
+			if (playerConfig.getAttack() < FC_Rpg.balanceConfig.getArmorWearRequirementChain())
 			{
 				success = false;
-				msgLib.standardMessage("Without " + FC_Rpg.generalConfig.getChainReq() + "+ Attack, Stone Swords Are USELESS TO YOU!");
+				msgLib.standardMessage("Without " + FC_Rpg.balanceConfig.getArmorWearRequirementChain() + "+ Attack, Stone Swords Are USELESS TO YOU!");
 			}
 		}
 		
@@ -821,22 +826,22 @@ public class RpgPlayer extends RpgEntity
 			if (handItemDurability >= 241)
 				player.getInventory().getItem(player.getInventory().getHeldItemSlot()).setDurability((short) 0);
 			
-			if (playerConfig.getAttack() < FC_Rpg.generalConfig.getIronReq())
+			if (playerConfig.getAttack() < FC_Rpg.balanceConfig.getArmorWearRequirementIron())
 			{
 				success = false;
-				msgLib.standardMessage("Without " + FC_Rpg.generalConfig.getIronReq() + "+ Attack, Iron Swords Are USELESS TO YOU!");
+				msgLib.standardMessage("Without " + FC_Rpg.balanceConfig.getArmorWearRequirementIron() + "+ Attack, Iron Swords Are USELESS TO YOU!");
 			}
 		}
 	
 		if (handItemType == Material.DIAMOND_SWORD)
 		{
-			if (handItemDurability >= FC_Rpg.generalConfig.getDiamondReq())
+			if (handItemDurability >= FC_Rpg.balanceConfig.getArmorWearRequirementDiamond())
 				player.getInventory().getItem(player.getInventory().getHeldItemSlot()).setDurability((short) 0);
 			
-			if (playerConfig.getAttack() < FC_Rpg.generalConfig.getDiamondReq())
+			if (playerConfig.getAttack() < FC_Rpg.balanceConfig.getArmorWearRequirementDiamond())
 			{
 				success = false;
-				msgLib.standardMessage("Without " + FC_Rpg.generalConfig.getDiamondReq() + "+ Attack, Diamond Swords Are USELESS TO YOU!");
+				msgLib.standardMessage("Without " + FC_Rpg.balanceConfig.getArmorWearRequirementDiamond() + "+ Attack, Diamond Swords Are USELESS TO YOU!");
 			}
 		}
 		
@@ -845,10 +850,10 @@ public class RpgPlayer extends RpgEntity
 			if (handItemDurability >= 23)
 				player.getInventory().getItem(player.getInventory().getHeldItemSlot()).setDurability((short) 0);
 			
-			if (playerConfig.getAttack() < FC_Rpg.generalConfig.getGoldReq())
+			if (playerConfig.getAttack() < FC_Rpg.balanceConfig.getArmorWearRequirementGold())
 			{
 				success = false;
-				msgLib.standardMessage("Without " + FC_Rpg.generalConfig.getGoldReq() + "+ Attack, Gold Swords Are USELESS TO YOU!");
+				msgLib.standardMessage("Without " + FC_Rpg.balanceConfig.getArmorWearRequirementGold() + "+ Attack, Gold Swords Are USELESS TO YOU!");
 			}
 		}
 		
@@ -878,38 +883,38 @@ public class RpgPlayer extends RpgEntity
 		else
 			headType = helmet.getType();
 		
-		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getChainReq())
+		if (playerConfig.getConstitution() < FC_Rpg.balanceConfig.getArmorWearRequirementChain())
 		{
 			if (headType == Material.CHAINMAIL_HELMET)
 			{
-				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getChainReq() + "+ Constitution To Wear Chain Helmets!");
+				msgLib.standardMessage("You Need " + FC_Rpg.balanceConfig.getArmorWearRequirementChain() + "+ Constitution To Wear Chain Helmets!");
 				success = false;
 			}
 		}
 		
-		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getIronReq())
+		if (playerConfig.getConstitution() < FC_Rpg.balanceConfig.getArmorWearRequirementIron())
 		{
 			if (headType == Material.IRON_HELMET)
 			{
-				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getIronReq() + "+ Constitution To Wear Iron Helmets!");
+				msgLib.standardMessage("You Need " + FC_Rpg.balanceConfig.getArmorWearRequirementIron() + "+ Constitution To Wear Iron Helmets!");
 				success = false;
 			}
 		}
 		
-		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getDiamondReq())
+		if (playerConfig.getConstitution() < FC_Rpg.balanceConfig.getArmorWearRequirementDiamond())
 		{
 			if (headType == Material.DIAMOND_HELMET)
 			{
-				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getDiamondReq() + "+ Constitution To Wear Diamond Helmets!");
+				msgLib.standardMessage("You Need " + FC_Rpg.balanceConfig.getArmorWearRequirementDiamond() + "+ Constitution To Wear Diamond Helmets!");
 				success = false;
 			}
 		}
 		
-		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getGoldReq())
+		if (playerConfig.getConstitution() < FC_Rpg.balanceConfig.getArmorWearRequirementGold())
 		{
 			if (headType == Material.GOLD_HELMET)
 			{
-				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getGoldReq() + "+ Constitution To Wear Gold Helmets!");
+				msgLib.standardMessage("You Need " + FC_Rpg.balanceConfig.getArmorWearRequirementGold() + "+ Constitution To Wear Gold Helmets!");
 				success = false;
 			}
 		}
@@ -934,38 +939,38 @@ public class RpgPlayer extends RpgEntity
 		else
 			chestType = chest.getType();
 		
-		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getChainReq())
+		if (playerConfig.getConstitution() < FC_Rpg.balanceConfig.getArmorWearRequirementChain())
 		{
 			if (chestType == Material.CHAINMAIL_CHESTPLATE)
 			{
-				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getChainReq() + "+ + Constitution To Wear Chain ChestPlates!");
+				msgLib.standardMessage("You Need " + FC_Rpg.balanceConfig.getArmorWearRequirementChain() + "+ + Constitution To Wear Chain ChestPlates!");
 				success = false;
 			}
 		}
 		
-		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getIronReq())
+		if (playerConfig.getConstitution() < FC_Rpg.balanceConfig.getArmorWearRequirementIron())
 		{
 			if (chestType == Material.IRON_CHESTPLATE)
 			{
-				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getIronReq() + "+ Constitution To Wear Iron ChestPlates!");
+				msgLib.standardMessage("You Need " + FC_Rpg.balanceConfig.getArmorWearRequirementIron() + "+ Constitution To Wear Iron ChestPlates!");
 				success = false;
 			}
 		}
 		
-		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getDiamondReq())
+		if (playerConfig.getConstitution() < FC_Rpg.balanceConfig.getArmorWearRequirementDiamond())
 		{
 			if (chestType == Material.DIAMOND_CHESTPLATE)
 			{
-				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getDiamondReq() + "+ Constitution To Wear Diamond ChestPlates!");
+				msgLib.standardMessage("You Need " + FC_Rpg.balanceConfig.getArmorWearRequirementDiamond() + "+ Constitution To Wear Diamond ChestPlates!");
 				success = false;
 			}
 		}
 		
-		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getGoldReq())
+		if (playerConfig.getConstitution() < FC_Rpg.balanceConfig.getArmorWearRequirementGold())
 		{
 			if (chestType == Material.GOLD_CHESTPLATE)
 			{
-				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getGoldReq() + "+ Constitution To Wear Gold ChestPlates!");
+				msgLib.standardMessage("You Need " + FC_Rpg.balanceConfig.getArmorWearRequirementGold() + "+ Constitution To Wear Gold ChestPlates!");
 				success = false;
 			}
 		}
@@ -990,38 +995,38 @@ public class RpgPlayer extends RpgEntity
 		else
 			leggingsType = leggings.getType();
 		
-		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getChainReq())
+		if (playerConfig.getConstitution() < FC_Rpg.balanceConfig.getArmorWearRequirementChain())
 		{
 			if (leggingsType == Material.CHAINMAIL_LEGGINGS)
 			{
-				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getChainReq() + "+ Constitution To Wear Chain Leggings!");
+				msgLib.standardMessage("You Need " + FC_Rpg.balanceConfig.getArmorWearRequirementChain() + "+ Constitution To Wear Chain Leggings!");
 				success = false;
 			}
 		}
 		
-		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getIronReq())
+		if (playerConfig.getConstitution() < FC_Rpg.balanceConfig.getArmorWearRequirementIron())
 		{
 			if (leggingsType == Material.IRON_LEGGINGS)
 			{
-				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getIronReq() + "+ Constitution To Wear Iron Leggings!");
+				msgLib.standardMessage("You Need " + FC_Rpg.balanceConfig.getArmorWearRequirementIron() + "+ Constitution To Wear Iron Leggings!");
 				success = false;
 			}
 		}
 		
-		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getDiamondReq())
+		if (playerConfig.getConstitution() < FC_Rpg.balanceConfig.getArmorWearRequirementDiamond())
 		{
 			if (leggingsType == Material.DIAMOND_LEGGINGS)
 			{
-				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getDiamondReq() + "+ Constitution To Wear Diamond Leggings!");
+				msgLib.standardMessage("You Need " + FC_Rpg.balanceConfig.getArmorWearRequirementDiamond() + "+ Constitution To Wear Diamond Leggings!");
 				success = false;
 			}
 		}
 		
-		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getGoldReq())
+		if (playerConfig.getConstitution() < FC_Rpg.balanceConfig.getArmorWearRequirementGold())
 		{
 			if (leggingsType == Material.GOLD_LEGGINGS)
 			{
-				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getGoldReq() + "+ Constitution To Wear Gold Leggings!");
+				msgLib.standardMessage("You Need " + FC_Rpg.balanceConfig.getArmorWearRequirementGold() + "+ Constitution To Wear Gold Leggings!");
 				success = false;
 			}
 		}
@@ -1046,37 +1051,37 @@ public class RpgPlayer extends RpgEntity
 		else
 			bootsType = boots.getType();
 		
-		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getChainReq())
+		if (playerConfig.getConstitution() < FC_Rpg.balanceConfig.getArmorWearRequirementChain())
 		{
 			if (bootsType == Material.CHAINMAIL_BOOTS)
 			{
-				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getChainReq() + "+ Constitution To Wear Chain Boots!");
+				msgLib.standardMessage("You Need " + FC_Rpg.balanceConfig.getArmorWearRequirementChain() + "+ Constitution To Wear Chain Boots!");
 				success = false;
 			}
 		}
 		
-		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getIronReq())
+		if (playerConfig.getConstitution() < FC_Rpg.balanceConfig.getArmorWearRequirementIron())
 		{
 			if (bootsType == Material.IRON_BOOTS)
 			{
-				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getIronReq() + "+ Constitution To Wear Iron Boots!");
+				msgLib.standardMessage("You Need " + FC_Rpg.balanceConfig.getArmorWearRequirementIron() + "+ Constitution To Wear Iron Boots!");
 				success = false;
 			}
 		}
 		
-		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getDiamondReq())
+		if (playerConfig.getConstitution() < FC_Rpg.balanceConfig.getArmorWearRequirementDiamond())
 		{
 			if (bootsType == Material.DIAMOND_BOOTS)
 			{
-				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getDiamondReq() + "+ Constitution To Wear Diamond Boots!");
+				msgLib.standardMessage("You Need " + FC_Rpg.balanceConfig.getArmorWearRequirementDiamond() + "+ Constitution To Wear Diamond Boots!");
 				success = false;
 			}
 		}
-		if (playerConfig.getConstitution() < FC_Rpg.generalConfig.getGoldReq())
+		if (playerConfig.getConstitution() < FC_Rpg.balanceConfig.getArmorWearRequirementGold())
 		{
 			if (bootsType == Material.GOLD_BOOTS)
 			{
-				msgLib.standardMessage("You Need " + FC_Rpg.generalConfig.getGoldReq() + "+ Constitution To Wear Gold Boots!");
+				msgLib.standardMessage("You Need " + FC_Rpg.balanceConfig.getArmorWearRequirementGold() + "+ Constitution To Wear Gold Boots!");
 				success = false;
 			}
 		}
@@ -1235,109 +1240,10 @@ public class RpgPlayer extends RpgEntity
 		rpgLib.errorOutOfMana();
 	}
 	
-	public double calculateBonusEnchantmentDefense(Player player, Enchantment enchant, double damage)
-	{
-		damage = damage * getEnchantmentDefenseBonuses(player, enchant);
-		
-		return damage;
-	}
-	
-	public double getEnchantmentDefenseBonuses(Player player, Enchantment enchant)
-	{
-		double bonus = 1;
-		PlayerInventory inv = player.getInventory();
-		
-		if (inv.getHelmet() != null)
-			bonus = getDefenseBonuses(inv.getHelmet(), bonus, enchant);
-		
-		if (inv.getChestplate() != null)
-			bonus = getDefenseBonuses(inv.getChestplate(), bonus, enchant);
-		
-		if (inv.getLeggings() != null)
-			bonus = getDefenseBonuses(inv.getLeggings(), bonus, enchant);
-		
-		if (inv.getBoots() != null)
-			bonus = getDefenseBonuses(inv.getBoots(), bonus, enchant);
-		
-		return bonus;
-	}
-	
-	 public double getWeaponModifier(Material weapon, int strength)
-	{
-		if (weapon.equals(Material.WOOD_SWORD))
-		{
-			return FC_Rpg.balanceConfig.getWoodSwordMultiplier();
-		}
-		else if (weapon.equals(Material.STONE_SWORD))
-		{
-			if (strength > FC_Rpg.balanceConfig.getStoneSwordAttackReq())
-				return FC_Rpg.balanceConfig.getStoneSwordMultiplier();
-		}
-		else if (weapon.equals(Material.IRON_SWORD))
-		{
-			if (strength > FC_Rpg.balanceConfig.getIronSwordAttackReq())
-				return FC_Rpg.balanceConfig.getIronSwordMultiplier();
-		}
-		else if (weapon.equals(Material.DIAMOND_SWORD))
-		{
-			if (strength > FC_Rpg.balanceConfig.getDiamondSwordAttackReq())
-				return FC_Rpg.balanceConfig.getDiamondSwordMultiplier();
-		}
-		else if (weapon.equals(Material.GOLD_SWORD))
-		{
-			if (strength > FC_Rpg.balanceConfig.getGoldSwordAttackReq())
-				return FC_Rpg.balanceConfig.getGoldSwordMultiplier();
-		}
-		
-		return 1;
-	}
-	
-	private double getDefenseBonuses(ItemStack armorPiece, double bonus, Enchantment enchant)
-	{
-		final double baseProtectionPercentPerPoint = 0.0025;
-		
-		if (armorPiece.containsEnchantment(enchant))
-			bonus = bonus - (baseProtectionPercentPerPoint * armorPiece.getEnchantmentLevel(enchant));
-		
-		return bonus;
-	}
-	
-	public double getEnchantmentOffensiveBonuses(Enchantment enchant)
-	{
-		double bonus = 1;
-		PlayerInventory inv = player.getInventory();
-		
-		if (inv.getItemInHand() != null)
-		{
-			if (inv.getItemInHand().getType() == Material.WOOD_SWORD)
-				bonus = getOffensiveBonuses(inv.getItemInHand(), bonus, enchant);
-			else if (inv.getItemInHand().getType() == Material.STONE_SWORD)
-				bonus = getOffensiveBonuses(inv.getItemInHand(), bonus, enchant);
-			else if (inv.getItemInHand().getType() == Material.IRON_SWORD)
-				bonus = getOffensiveBonuses(inv.getItemInHand(), bonus, enchant);
-			else if (inv.getItemInHand().getType() == Material.DIAMOND_SWORD)
-				bonus = getOffensiveBonuses(inv.getItemInHand(), bonus, enchant);
-			else if (inv.getItemInHand().getType() == Material.GOLD_SWORD)
-				bonus = getOffensiveBonuses(inv.getItemInHand(), bonus, enchant);
-		}
-		
-		return bonus;
-	}
-	
-	private double getOffensiveBonuses(ItemStack armorPiece, double bonus, Enchantment enchant)
-	{
-		final double baseProtectionPercentPerPoint = 0.005;
-		
-		if (armorPiece.containsEnchantment(enchant))
-			bonus = bonus + (baseProtectionPercentPerPoint * armorPiece.getEnchantmentLevel(enchant));
-		
-		return bonus;
-	}
-	
 	public double getMissingHealthDecimal()
 	{
 		//Update health and mana.
-		calcMaxHM();
+		calculateHealthAndMana();
 		
 		double percent = curMana * 100 / maxHealth;
 		

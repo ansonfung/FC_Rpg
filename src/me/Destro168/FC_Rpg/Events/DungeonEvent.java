@@ -14,9 +14,12 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.inventory.ItemStack;
 
 import me.Destro168.FC_Rpg.FC_Rpg;
+import me.Destro168.FC_Rpg.FC_Rpg.CreatureSpawnListener;
 import me.Destro168.FC_Rpg.Configs.DungeonConfig;
 import me.Destro168.FC_Rpg.Util.RpgMessageLib;
 import me.Destro168.FC_Suite_Shared.SuiteConfig;
@@ -185,6 +188,7 @@ public class DungeonEvent extends GeneralEvent
 			{
 				Location randomSpawnLocation = getRandomMobSpawnLocation(dungeonStart.getWorld());
 				spawnedMobs[i] = (LivingEntity) dungeonWorld.spawnEntity(randomSpawnLocation, returnRandomLivingEntity());
+				FC_Rpg.rpgEntityManager.getRpgMonster(spawnedMobs[i]).checkEquipment();
 			}
 		}
 		
@@ -199,6 +203,12 @@ public class DungeonEvent extends GeneralEvent
 		{
 			//Register the custom monster.
 			FC_Rpg.rpgEntityManager.registerCustomLevelEntity(spawnedMobs[mobCountMinusOne], 5, true);
+			
+			CreatureSpawnListener l = FC_Rpg.plugin.new CreatureSpawnListener();
+			CreatureSpawnEvent event = new CreatureSpawnEvent(spawnedMobs[mobCountMinusOne], SpawnReason.CUSTOM);
+			l.onCreaturespawn(event);
+			
+			FC_Rpg.rpgEntityManager.getRpgMonster(spawnedMobs[mobCountMinusOne]).checkEquipment();
 		}
 		
 		tid[2] = Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable()
@@ -613,7 +623,9 @@ public class DungeonEvent extends GeneralEvent
 			for (Entity mob : spawnedMobs)
 			{
 				if (mob != null)
+				{
 					mob.remove();
+				}
 			}
 		}
 		

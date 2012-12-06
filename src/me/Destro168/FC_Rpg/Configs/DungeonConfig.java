@@ -105,13 +105,9 @@ public class DungeonConfig extends ConfigGod
 			setBossSpawn(0,worldName,342,90,15.5,90,0);
 			setTreasureChest(0,worldName,344,87,15,0,0);
 			
-			maxIndex = setRange1(0,worldName,345,89,26.5,0,0);
-			setRange2(0,maxIndex,worldName,141,89,4.5,0,0);
-			setSpawnChance(0,maxIndex,80);
-			
-			maxIndex = setRange1(0,worldName,-63.3,127,-71.3,0,0);
-			setRange2(0,maxIndex,worldName,-93.7,127,-101.7,0,0);
-			setSpawnChance(0,maxIndex,20);
+			maxIndex = setRange1(0,worldName,344.0,97.0,28.0,0.0F,0.0F);
+			setRange2(0,maxIndex,worldName,141.0,86.0,3.0,0.0F,0.0F);
+			setSpawnChance(0,maxIndex,100);
 			
 			setName(1,"Stronghold");
 			setCost(1,200);

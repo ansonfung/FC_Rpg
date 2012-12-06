@@ -15,6 +15,25 @@ General:
 - Fixed a concurrent modification during boss spawns.
 - Added handling for a few damage types that weren't being handled before.
 - Fixed dungeons not ending when the last player leaves but ending whenever anybody leaves.
+- Mob level flucatuates +-1 to prevent stagnation when fighting. Configurable.
+- Fixed dungeon bosses not really being "bosses". Level bonus + enchants for bosses from now on.
+- Updated default treasure config to generate items (gold tier items, bows, bread) with max level of 999999 to prevent item drop errors for monsters above level 100. Recommended that players update their treasure config to account for this (put items at like level 99999, or just delete the config to generate a new default one)
+- New general config setting to enable arrow knockback if you want. Bow knockback (I believe punch) now works and adds knockback.
+- Sharpness now works against other players.
+- Player class level is now shown when you attack them rather than their actual player levels.
+- 2 general config settings. Set player chat, set admin chat formats. Complete control of chat formats. Don't like my custom chat? Make it blank and my custom chat is disabled. Sup?
+- Customizable auto-delete player file time. Before it was set to like 30 days, or something, I don't really know. Set to whatever you want! Don't want it to ever delete? Set to 0.
+- Default dungeon updated a bit to only have one region.
+- Bosses ignore power level prevention. The Wither + Enderdragon are now considered bosses now!
+- Updated the loot %'s so that there is a customizable setting for exp/gold loss for mobs below your level as well as one for mobs stronger than you. Fixes an issue where mobs 5 levels below you were technically in the proper power level range but didn't give exp, now you lose 16.6% exp/gold per level a mob is below you. Entirely customizable of course.
+- Added new bonus loot % cap. This exists to prevent leveling much too fast by killing bosses. Can get 300% regular exp with it set at the default of 3 though vs. the like 1500% fighting a boss 50 levels higher than you, of course calculated before bonuses.
+- Monster rpg settings are now created on creation rather than upon being first attacked. This prevents monsters being dragged from one area to another so that you can fight it at a lower level and mob levels won't change in dungeons anymore after initialized.
+- Mob armor/weapons provide same armor values to mobs as to players.
+- Enchantments provide same values to mobs as to players.
+- Enchantment types bound to respective damage types, like sharpness only benefits melee attacks.
+- Heavily optimized armor and enchantment bonus calculations.
+- Arrow power enchantment added and calculated now. Only applies to arrows of course. Requires arrow knockback setting as well.
+- Made sure that fails to cast entities to living entities on attack will no longer throw errors and sends a nice debugging message.
 
 Commands:
 
@@ -53,26 +72,30 @@ Commands:
 	Faq:
 	- Renamed /faq add to /faq new to keep with the trend of "new" which will allow one to add a empty entry to configuration.
 	
+	Modify:
+	- Correctly updates player health and donator stats now if player is online.
+	
 Configurations:
-- Brand new BALANCE CONFIG! Huzzah! Allows custimization over even more balance related features. Enjoy!
+- Brand new BALANCE CONFIG! Huzzah! Allows custimization over pretty much every balance related feature of FC_Rpg. You wanted entirely custom balance? Enjoy!
 - Treasure config now sets version so that it won't overwrite each time you load up your server.
+
+Sooo, a few configs had a lot of changes done. I highly recommend backing up the originals for the following listed configs, deleting them, letting a new one generate, then filling in the old fields with your backed up settings, while also configuring the new settings.
+- GeneralConfig
 
 Installation:
 - FC_Suite_Shared is now it's own seperate plugin! Check it out -> http://dev.bukkit.org/server-mods/fc_suite_shared/
 
 Test:
 
-- Play around with /buff command hard.
-- Full permissions support. "Buff command needs perm most important"
-
 Todo:
+- check boss invulnerability to fire arrow spell.
 
-- Add enchantments to mob items.
-- Customizable enviromental damage multiplier based on distance modifier.
-- Optional knockback enabled.
-- Customizable chat format.
-- Bind poisons to player skill so that normal poisons can be reenabled.
-- Customizable auto-delete player file time.
+- Enchantments for mob weapons.
+- Balanceconfig enchantment strength options.
+
+- Fix/Update/Test potion effects.
+- Don't show certain help topics based on permissions.
+- Check all permissions.
 
 Long-Term Todo:
 - Class requirement / Job Rank minimum / Minimum level requirement for warps.

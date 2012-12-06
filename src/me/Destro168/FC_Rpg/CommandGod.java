@@ -572,13 +572,13 @@ public class CommandGod implements CommandExecutor
 			
 			if (rpgPlayer.getPlayerConfig().getManualAllocation() == true)
 			{
-				msgLib.standardMessage("Auto stat allocation enabled.");
+				msgLib.standardMessage("Auto stat allocation disabled.");
 				rpgPlayer.getPlayerConfig().setAutomaticAllocation(false);
 				return true;
 			}
 			else
 			{
-				msgLib.standardMessage("Auto stat allocation disabled.");
+				msgLib.standardMessage("Auto stat allocation enabled.");
 				rpgPlayer.getPlayerConfig().setAutomaticAllocation(true);
 				return true;
 			}
@@ -1589,8 +1589,13 @@ public class CommandGod implements CommandExecutor
 			 * Set up playerfile
 			 ********************/
 			
+			RpgPlayer rpgTarget = null;
+			
 			if (FC_Rpg.rpgEntityManager.getRpgPlayer(Bukkit.getServer().getPlayer(name)) != null)
-				playerFile = FC_Rpg.rpgEntityManager.getRpgPlayer(Bukkit.getServer().getPlayer(name)).getPlayerConfig();
+			{
+				rpgTarget = FC_Rpg.rpgEntityManager.getRpgPlayer(Bukkit.getServer().getPlayer(name));
+				playerFile = rpgTarget.getPlayerConfig();
+			}
 			else
 				playerFile = new PlayerConfig(name);
 			
@@ -1659,6 +1664,12 @@ public class CommandGod implements CommandExecutor
 				
 				//Update the players health and mana
 				playerFile.calculateHealthAndManaOffline();
+				
+				if (rpgTarget != null)
+				{
+					rpgTarget.updateDonatorStats();
+					rpgTarget.calculateHealthAndMana();
+				}
 			}
 			
 			return msgLib.successCommand();
@@ -1752,7 +1763,7 @@ public class CommandGod implements CommandExecutor
 				if (args[1].equalsIgnoreCase(""))
 					return msgLib.errorInvalidCommand();
 				
-				try { FC_Rpg.generalConfig.setGlobalExpMultiplier(Integer.valueOf(args[1])); } catch (NumberFormatException e) { return msgLib.errorInvalidCommand(); }
+				try { FC_Rpg.balanceConfig.setGlobalExpMultiplier(Integer.valueOf(args[1])); } catch (NumberFormatException e) { return msgLib.errorInvalidCommand(); }
 				
 				return msgLib.successCommand();
 			}

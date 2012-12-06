@@ -125,7 +125,7 @@ public class PlayerConfig extends ConfigGod
 		temp.clearFileData();
 	}
 	public double getRequiredExpPercent() { return (getClassExperience() * 100) / getLevelUpAmount(); }
-	public int getLevelUpAmount() { return (int) (getClassLevel() * getClassLevel() * FC_Rpg.generalConfig.getExpScaleRate() + FC_Rpg.generalConfig.getExpScaleBase()); }
+	public int getLevelUpAmount() { return (int) (getClassLevel() * getClassLevel() * FC_Rpg.balanceConfig.getPlayerExpScaleRate() + FC_Rpg.balanceConfig.getPlayerExpScaleBase()); }
 	public void resetActiveSpell() { fcw.set(prefix + "activeSpell", "none"); }
 	
 	public void updateSpellLevel(int spellID, int newVal)
@@ -408,7 +408,7 @@ public class PlayerConfig extends ConfigGod
 			setClassLevel(getClassLevel() + 1);
 			
 			//Spell points.
-			if (getClassLevel() % FC_Rpg.generalConfig.getLevelsPerSkillPoint() == 0)
+			if (getClassLevel() % FC_Rpg.balanceConfig.getPlayerLevelsPerSkillPoint() == 0)
 				setSpellPoints(getSpellPoints() + 1);
 			
 			//Acount for level cap.
@@ -422,7 +422,7 @@ public class PlayerConfig extends ConfigGod
 			if (getManualAllocation() == true)
 				assignClassStatPoints(); 
 			else
-				setStats(getStats() + FC_Rpg.generalConfig.getStatsPerLevel());
+				setStats(getStats() + FC_Rpg.balanceConfig.getPlayerStatsPerLevel());
 			
 			if (displayLevelUpMessage == true)
 				FC_Rpg.bLib.standardBroadcast(name + " is now level [" + String.valueOf(getClassLevel()) + "]");	//Broadcast that he leveled up
@@ -454,8 +454,8 @@ public class PlayerConfig extends ConfigGod
     
     public void calculateHealthAndManaOffline()
 	{
-		setMaxHealthFile(FC_Rpg.balanceConfig.getBasePlayerHealth() + getConstitution() * FC_Rpg.balanceConfig.getConstitutionImpact());
-		setMaxManaFile(FC_Rpg.balanceConfig.getBasePlayerMana() + getIntelligence() * FC_Rpg.balanceConfig.getIntelligenceImpact());
+		setMaxHealthFile(FC_Rpg.balanceConfig.getPlayerBaseHealth() + getConstitution() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeConstitution());
+		setMaxManaFile(FC_Rpg.balanceConfig.getPlayerBaseMana() + getIntelligence() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeIntelligence());
 	}
     
     public void offlineSetDonator(int periods)

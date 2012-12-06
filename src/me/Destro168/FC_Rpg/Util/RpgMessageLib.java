@@ -130,9 +130,6 @@ public class RpgMessageLib extends MessageLib
 			standardMessage("[A] /rpg admin","Admin Commands.");
 		}
 		
-		if (perms.isOwner())
-			standardMessage("[A] /rpg owner","Owner Commands!");
-		
 		return true;
 	}
 	
@@ -397,11 +394,11 @@ public class RpgMessageLib extends MessageLib
 		
 		standardHeader("Admin Commands");
 		standardMessage("/rpg event [type]","loot,exp,off");
-		standardMessage("/h - /g - /hg - /gh [name]","Heal/Gamemode single/hybrid commands.");
-		standardMessage("/rpg go [u [amount] | d [amount] | (coords)]","Teleport anywhere.");
-		standardMessage("/rpg expMult [x]","Change current global exp multiplier. Currently: " + FC_Rpg.generalConfig.getGlobalExpMultiplier());
+		standardMessage("/h,/g,/hg,/gh [name]","Heal/Gamemode single/hybrid commands.");
+		standardMessage("/rpg go [u [amount],d [amount],(coords)]","Teleport anywhere.");
+		standardMessage("/rpg expMult [x]","Change current global exp multiplier. Currently: " + FC_Rpg.balanceConfig.getGlobalExpMultiplier());
 		standardMessage("/rpg wall","Creates wall with all classes/jobs/start sign.");
-		standardMessage("/rpg sudo","Make somebody say anything/use any command.");
+		standardMessage("/rpg sudo [name]","Make somebody say anything/use any command.");
 		
 		return true;
 	}

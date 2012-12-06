@@ -53,7 +53,7 @@ public class RpgEntityManager
 				public void run()
 				{
 					rpgPlayer.attemptFeedSteak();
-					rpgPlayer.calcMaxHM();
+					rpgPlayer.calculateHealthAndMana();
 					rpgPlayer.updateTimePlayed();
 				}
 			}, 0, 1200);
@@ -199,22 +199,27 @@ public class RpgEntityManager
     	//If the player information isn't stored, then store.
     	if (!(miMap.containsKey(entity)))
     	{
-    		RpgMonster mob = new RpgMonster(entity, 0);
+    		RpgMonster mob = new RpgMonster(entity, 0, false);
     		miMap.put(entity, mob);
     	}
     }
     
     public RpgMonster registerCustomLevelEntity(LivingEntity entity, int levelBonus, boolean isBoss)
     {
-    	//If the player information isn't stored, then store.
-    	if (!(miMap.containsKey(entity)))
-    	{
-    		RpgMonster mob = new RpgMonster(entity, levelBonus, isBoss);
-    		miMap.put(entity, mob);
-    		return miMap.get(entity);
-    	}
+    	//If the entity is already in miMap, then we remote it.
+    	if (miMap.containsKey(entity))
+    		miMap.remove(entity);
     	
-    	return null;
+    	//Register the new entity and return it.
+    	RpgMonster mob = new RpgMonster(entity, levelBonus, isBoss);
+    	
+		miMap.put(entity, mob);
+		return miMap.get(entity);
+    }
+    
+    public boolean containsMonster(LivingEntity entity)
+    {
+    	return miMap.containsKey(entity);
     }
     
     public RpgMonster getRpgMonster(LivingEntity entity)
@@ -302,8 +307,9 @@ public class RpgEntityManager
 			if (file.getIsActive() == true)
 			{
 				timeDifference = now.getTime() - player.getLastPlayed();
+				long deleteTime = FC_Rpg.generalConfig.getInactivePlayerFileDeleteTime();
 				
-				if (timeDifference >= 1209600000)
+				if ((deleteTime > 0) && (timeDifference >= deleteTime))
 				{
 					file.clearAllData();
 					bLib.broadcastToAdmins(player.getName() + " has had his/her configuration file deleted due to inactivity.");

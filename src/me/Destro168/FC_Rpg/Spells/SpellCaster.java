@@ -405,7 +405,7 @@ public class SpellCaster
 					{
 						if (rpgMobDefender != null)
 						{
-							edm.attackMobDefender(finalMobDefender, rpgCaster, finalDamage);
+							edm.attackMobDefender(finalMobDefender, rpgCaster, finalDamage, damageType);
 						}
 					}
 				}, i * 20);
@@ -425,7 +425,7 @@ public class SpellCaster
 					{
 						if (rpgMobDefender != null)
 						{
-							edm.attackPlayerDefender(rpgCaster, finalPlayerDefender, null, finalDamage);
+							edm.attackPlayerDefender(rpgCaster, finalPlayerDefender, null, finalDamage, 3);
 						}
 					}
 				}, i * 20);
@@ -461,7 +461,7 @@ public class SpellCaster
 					{
 						if (rpgMobDefender != null)
 						{
-							edm.attackMobDefender(finalMobDefender, rpgCaster, finalDamage);
+							edm.attackMobDefender(finalMobDefender, rpgCaster, finalDamage, damageType);
 						}
 					}
 				}, i * 20 + 40);
@@ -479,7 +479,7 @@ public class SpellCaster
 					{
 						if (rpgMobDefender != null)
 						{
-							edm.attackPlayerDefender(rpgCaster, finalPlayerDefender, null, finalDamage);
+							edm.attackPlayerDefender(rpgCaster, finalPlayerDefender, null, finalDamage, 3);
 						}
 					}
 				}, i * 20 + 40);
@@ -529,7 +529,7 @@ public class SpellCaster
 				return false;
 			
 			rpgMobDefender.setConstitution((int) (rpgMobDefender.getConstitution() * (1 - finalSpellMagnitude)));
-			rpgMobDefender.setStrength((int) (rpgMobDefender.getAttack() * (1 - finalSpellMagnitude)));
+			rpgMobDefender.setAttack((int) (rpgMobDefender.getAttack() * (1 - finalSpellMagnitude)));
 			rpgMobDefender.setCurHealth((int) (rpgMobDefender.getCurHealth() * (1 - finalSpellMagnitude)));
 			rpgMobDefender.setMaxHealth((int) (rpgMobDefender.getMaxHealth() * (1 - finalSpellMagnitude)));
 			

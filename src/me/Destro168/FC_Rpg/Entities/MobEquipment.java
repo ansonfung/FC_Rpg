@@ -18,6 +18,9 @@ public class MobEquipment
 	
 	public static void setWeapon(LivingEntity mob, org.bukkit.inventory.ItemStack item)
 	{
+		if (item == null)
+			return;
+		
 		EntityLiving ent = ((CraftLivingEntity) mob).getHandle();
 		net.minecraft.server.ItemStack itemStack = ((CraftItemStack) toCraftBukkit(item)).getHandle();
 		ent.setEquipment(0, itemStack);
@@ -25,6 +28,9 @@ public class MobEquipment
 
 	public static void setHelmet(LivingEntity mob, org.bukkit.inventory.ItemStack item)
 	{
+		if (item == null)
+			return;
+		
 		EntityLiving ent = ((CraftLivingEntity) mob).getHandle();
 		net.minecraft.server.ItemStack itemStack = ((CraftItemStack) toCraftBukkit(item)).getHandle();
 		ent.setEquipment(4, itemStack);
@@ -32,6 +38,9 @@ public class MobEquipment
 
 	public static void setChestplate(LivingEntity mob, org.bukkit.inventory.ItemStack item)
 	{
+		if (item == null)
+			return;
+		
 		EntityLiving ent = ((CraftLivingEntity) mob).getHandle();
 		net.minecraft.server.ItemStack itemStack = ((CraftItemStack) toCraftBukkit(item)).getHandle();
 		ent.setEquipment(3, itemStack);
@@ -39,6 +48,9 @@ public class MobEquipment
 
 	public static void setPants(LivingEntity mob, org.bukkit.inventory.ItemStack item)
 	{
+		if (item == null)
+			return;
+		
 		EntityLiving ent = ((CraftLivingEntity) mob).getHandle();
 		net.minecraft.server.ItemStack itemStack = ((CraftItemStack) toCraftBukkit(item)).getHandle();
 		ent.setEquipment(2, itemStack);
@@ -46,6 +58,9 @@ public class MobEquipment
 
 	public static void setBoots(LivingEntity mob, org.bukkit.inventory.ItemStack item)
 	{
+		if (item == null)
+			return;
+		
 		EntityLiving ent = ((CraftLivingEntity) mob).getHandle();
 		net.minecraft.server.ItemStack itemStack = ((CraftItemStack) toCraftBukkit(item)).getHandle();
 		ent.setEquipment(1, itemStack);
@@ -60,24 +75,24 @@ public class MobEquipment
 	public static org.bukkit.inventory.ItemStack getHelmet(LivingEntity mob)
 	{
 		EntityLiving ent = ((CraftLivingEntity) mob).getHandle();
-		return new CraftItemStack(ent.getEquipment(1));
+		return new CraftItemStack(ent.getEquipment(4));
 	}
 
 	public static org.bukkit.inventory.ItemStack getChestplate(LivingEntity mob)
 	{
 		EntityLiving ent = ((CraftLivingEntity) mob).getHandle();
-		return new CraftItemStack(ent.getEquipment(2));
+		return new CraftItemStack(ent.getEquipment(3));
 	}
 
 	public static org.bukkit.inventory.ItemStack getPants(LivingEntity mob)
 	{
 		EntityLiving ent = ((CraftLivingEntity) mob).getHandle();
-		return new CraftItemStack(ent.getEquipment(3));
+		return new CraftItemStack(ent.getEquipment(2));
 	}
 
 	public static org.bukkit.inventory.ItemStack getBoots(LivingEntity mob)
 	{
 		EntityLiving ent = ((CraftLivingEntity) mob).getHandle();
-		return new CraftItemStack(ent.getEquipment(4));
+		return new CraftItemStack(ent.getEquipment(1));
 	}
 }

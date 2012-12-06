@@ -13,11 +13,10 @@ import me.Destro168.FC_Suite_Shared.TimeUtils.DateManager;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.EnderDragon;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Wither;
 import org.bukkit.inventory.ItemStack;
 
 public class RpgMonster extends RpgEntity
@@ -35,101 +34,26 @@ public class RpgMonster extends RpgEntity
 	private boolean isWeak;
 	private long statusDisabled;
 
-	public LivingEntity getEntity()
-	{
-		return entity;
-	}
-
-	public int getAttack()
-	{
-		return attack;
-	}
-
-	public int getConstitution()
-	{
-		return constitution;
-	}
-
-	public double getMaxHealth()
-	{
-		return maxHealth;
-	}
-
-	public double getCurHealth()
-	{
-		return curHealth;
-	}
-
-	public int getMobId()
-	{
-		return mobId;
-	}
-
-	public int getLevel()
-	{
-		return level;
-	}
-
-	public MobAggressionCheck getMobAggressionCheck()
-	{
-		return mac;
-	}
-
-	public boolean getIsBoss()
-	{
-		return isBoss;
-	}
-
-	public boolean getIsWeak()
-	{
-		return isWeak;
-	}
-
-	public long getStatusDisabled()
-	{
-		return statusDisabled;
-	}
-
-	public void setStrength(int x)
-	{
-		attack = x;
-	}
-
-	public void setConstitution(int x)
-	{
-		constitution = x;
-	}
-
-	public void setCurHealth(int x)
-	{
-		curHealth = x;
-	}
-
-	public void setMaxHealth(int x)
-	{
-		maxHealth = x;
-	}
-
-	public void setMobId(int x)
-	{
-		mobId = x;
-	}
-
-	public void setLevel(int x)
-	{
-		level = x;
-	}
-
-	public void setIsBoss(boolean x)
-	{
-		isBoss = x;
-	}
+	public LivingEntity getEntity() { return entity; }
+	public int getAttack() { return attack; }
+	public int getConstitution() { return constitution; }
+	public double getMaxHealth() { return maxHealth; }
+	public double getCurHealth() { return curHealth; }
+	public int getMobId() { return mobId; }
+	public int getLevel() { return level; }
+	public MobAggressionCheck getMobAggressionCheck() { return mac; }
+	public boolean getIsBoss() { return isBoss; }
+	public boolean getIsWeak() { return isWeak; }
+	public long getStatusDisabled() { return statusDisabled; }
 	
-	public void setIsWeak(boolean x)
-	{
-		isWeak = x;
-	}
-
+	public void setAttack(int x) { attack = x; }
+	public void setConstitution(int x) { constitution = x; }
+	public void setCurHealth(int x) { curHealth = x; }
+	public void setMaxHealth(int x) { maxHealth = x; }
+	public void setMobId(int x) { mobId = x; }
+	public void setLevel(int x) { level = x; }
+	public void setIsBoss(boolean x) { isBoss = x; }
+	public void setIsWeak(boolean x) { isWeak = x; }
 	public void setStatusDisabled(int x)
 	{
 		DateManager dm = new DateManager();
@@ -145,18 +69,12 @@ public class RpgMonster extends RpgEntity
 	{
 		setDefaults();
 	}
-
-	public RpgMonster(LivingEntity entity_, int levelBonus)
-	{
-		setDefaults();
-		create(entity_, levelBonus);
-	}
 	
 	public RpgMonster(LivingEntity entity_, int levelBonus, boolean isBoss_)
 	{
 		setDefaults();
-		create(entity_, levelBonus);
 		isBoss = isBoss_;
+		create(entity_, levelBonus);
 	}
 	
 	public void setDefaults()
@@ -207,12 +125,18 @@ public class RpgMonster extends RpgEntity
 		{
 			// Set the modifier by mob location.
 			setModifierByArea();
-
-			if (entity instanceof Wither)
-				levelBonus = levelBonus + FC_Rpg.generalConfig.getWitherLevelBonus();
-			else if (entity instanceof EnderDragon)
-				levelBonus = levelBonus + FC_Rpg.generalConfig.getEnderDragonLevelBonus();
-
+			
+			if (entity.getType() == EntityType.WITHER)
+			{
+				levelBonus = levelBonus + FC_Rpg.balanceConfig.getWitherLevelBonus();
+				isBoss = true;
+			}
+			else if (entity.getType() == EntityType.ENDER_DRAGON)
+			{
+				levelBonus = levelBonus + FC_Rpg.balanceConfig.getEnderDragonLevelBonus();
+				isBoss = true;
+			}
+			
 			// Increase modifier by level bonus.
 			modifier = modifier + levelBonus;
 		}
@@ -230,28 +154,57 @@ public class RpgMonster extends RpgEntity
 
 		// Stat stats
 		attack = (int) FC_Rpg.balanceConfig.getMobAttackMultiplier() * modifier * difficultyCoefficient;
-
+		
 		// Only set constitution for hostile mobs.
 		if (mac.isHostile() == true)
 			constitution = (int) (FC_Rpg.balanceConfig.getMobConstitutionMultiplier() * modifier * difficultyCoefficient);
 		else
 			constitution = 1;
-
-		// TODO
-		// Add potential weapon/armor
-		//
-
-		// Add armor to mobs
-		// if (level > 19)
-		// {
-		// }
 		
-		
-		// Update health.
+		setStartingHealth();
+	}
+	
+	private void setStartingHealth()
+	{
 		maxHealth = constitution;
 		curHealth = maxHealth;
 	}
-
+	
+	public void checkEquipment()
+	{
+		//Variable declarations.
+		double constitutionModifier = 1;
+		
+		//Update attack by weapon.
+		checkWeapon(MobEquipment.getWeapon(entity));
+		
+		//Update constitution and attack based on equipment.
+		constitutionModifier += checkItem(MobEquipment.getBoots(entity));
+		constitutionModifier += checkItem(MobEquipment.getChestplate(entity));
+		constitutionModifier += checkItem(MobEquipment.getHelmet(entity));
+		constitutionModifier += checkItem(MobEquipment.getPants(entity));
+		
+		//Update constitution.
+		constitution = (int) (constitution * constitutionModifier);
+		
+		//Update starting health.
+		setStartingHealth();
+	}
+	
+	private double checkItem(ItemStack itemStack)
+	{
+		if (itemStack.containsEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL))
+			return itemStack.getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) * 0.01;
+		
+		return 0;
+	}
+	
+	private void checkWeapon(ItemStack itemStack)
+	{
+		if (itemStack.containsEnchantment(Enchantment.DAMAGE_ALL))
+			attack = (int) (attack * (itemStack.getEnchantmentLevel(Enchantment.DAMAGE_ALL) * 0.005));
+	}
+	
 	public double dealDamage(double x)
 	{
 		curHealth = curHealth - x;
@@ -297,13 +250,13 @@ public class RpgMonster extends RpgEntity
 	public void handleHostileMobDrops(Location dropSpot)
 	{
 		List<ItemStack> drops = FC_Rpg.treasureConfig.getRandomDrops(level);
-
+		
 		for (ItemStack drop : drops)
 			dropSpot.getWorld().dropItem(dropSpot, drop); // Drop the item.
-
+		
 		dropExperience();
 	}
-
+	
 	public void handlePassiveMobDrops(Location dropSpot)
 	{
 		EntityType entityType = getEntity().getType();
@@ -327,12 +280,6 @@ public class RpgMonster extends RpgEntity
 		{
 			dropPassiveItem(Material.RAW_FISH, dropSpot);
 		}
-
-		/*
-		 * Drop emerald later else if (entityType == EntityType.VILLAGER)) {
-		 * dropPassiveItems(Material.DIAMOND, modifier, dropSpot); }
-		 */
-		
 		else if (entityType == EntityType.SQUID)
 		{
 			dropPassiveItem(Material.INK_SACK, dropSpot);
@@ -361,23 +308,26 @@ public class RpgMonster extends RpgEntity
 
 	public void dropExperience()
 	{
+		//Variable Declaration
+		Random rand = new Random();
+		
 		// If experience is enabled, then...
 		if (FC_Rpg.generalConfig.getExpCancelled() == false)
 		{
-			// Drop experience orbs.
+			// Drop 3 experience orbs.
 			for (int i = 0; i < 3; i++)
 			{
 				ExperienceOrb orb = (ExperienceOrb) entity.getWorld().spawnEntity(entity.getLocation(), EntityType.EXPERIENCE_ORB);
-				orb.setExperience(5 * FC_Rpg.generalConfig.getGlobalExpMultiplier());
+				orb.setExperience(rand.nextInt(3) + 1);
 			}
 		}
 	}
-
+	
 	private void dropPassiveItem(Material material, Location dropSpot)
 	{
 		Random rand = new Random();
 		ItemStack loot = new ItemStack(material, rand.nextInt(2) + 1);
-
+		
 		dropSpot.getWorld().dropItemNaturally(dropSpot, loot);
 	}
 
@@ -408,14 +358,7 @@ public class RpgMonster extends RpgEntity
 // Bukkit.getServer().broadcastMessage("(Create Function) Active for " +
 // String.valueOf(mobId));
 /*
- * if (entity.getType() == EntityType.CREEPER) { defense = 3; dexterity = 1;
- * constitution = 3; } else if (entity.getType() == EntityType.SPIDER) { defense
- * = 3; dexterity = 1; constitution = 3; } //Projectiles need to be strong so it
- * goes above the 10 point spec. else if (entity.getType() ==
- * EntityType.SKELETON) { defense = 3; dexterity = 1; constitution = 3; } else
- * if (entity.getType() == EntityType.ZOMBIE) { defense = 3; dexterity = 1;
- * constitution = 3; }
+ * if (entity.getType() == EntityType.CREEPER) { defense = 3; dexterity = 1; constitution = 3; } else if (entity.getType() == EntityType.SPIDER) { defense = 3; dexterity = 1; constitution = 3; } //Projectiles need to be strong so it goes above the 10 point spec. else if (entity.getType() == EntityType.SKELETON) { defense = 3; dexterity = 1; constitution = 3; } else if (entity.getType() == EntityType.ZOMBIE) { defense = 3; dexterity = 1; constitution = 3; }
  * 
- * defense = defense * modifier; dexterity = dexterity * modifier; constitution
- * = constitution * modifier;
+ * defense = defense * modifier; dexterity = dexterity * modifier; constitution = constitution * modifier;
  */

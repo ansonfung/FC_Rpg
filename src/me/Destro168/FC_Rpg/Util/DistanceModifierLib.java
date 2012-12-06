@@ -55,9 +55,9 @@ public class DistanceModifierLib
 	
 	private int calculateXYZModifier()
 	{
-		double xScale = FC_Rpg.generalConfig.getXScale();
-		double zScale = FC_Rpg.generalConfig.getZScale();
-		double yScale = FC_Rpg.generalConfig.getYScale();
+		double xScale = FC_Rpg.generalConfig.getScaleX();
+		double zScale = FC_Rpg.generalConfig.getScaleZ();
+		double yScale = FC_Rpg.generalConfig.getScaleY();
 		double xFinal;
 		double zFinal;
 		double yFinal;

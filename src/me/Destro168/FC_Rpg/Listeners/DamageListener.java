@@ -6,6 +6,7 @@ import java.util.Random;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.Configs.WorldConfig;
 import me.Destro168.FC_Rpg.Entities.EntityDamageManager;
+import me.Destro168.FC_Rpg.Entities.MobEquipment;
 import me.Destro168.FC_Rpg.Entities.RpgMonster;
 import me.Destro168.FC_Rpg.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.LoadedObjects.Spell;
@@ -16,6 +17,7 @@ import me.Destro168.FC_Rpg.Util.MobAggressionCheck;
 
 import org.bukkit.GameMode;
 import org.bukkit.craftbukkit.entity.CraftArrow;
+import org.bukkit.craftbukkit.entity.CraftExperienceOrb;
 import org.bukkit.craftbukkit.entity.CraftItem;
 import org.bukkit.craftbukkit.entity.CraftLargeFireball;
 import org.bukkit.craftbukkit.entity.CraftLightningStrike;
@@ -37,6 +39,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 
 public class DamageListener implements Listener
@@ -64,7 +67,7 @@ public class DamageListener implements Listener
 	int memberCount;
 	int posX;
 	int posZ;
-	int damageType; // 0 = melee, 1 = arrow, 2 = meteor
+	int damageType; // 0 = melee, 1 = arrow, 2 = meteor, 3 = spell
 
 	LivingEntity creatureAttacker;
 	LivingEntity mobDefender;
@@ -118,7 +121,6 @@ public class DamageListener implements Listener
 
 				// Prevent damage done to already dead players
 				if (FC_Rpg.rpgEntityManager.getRpgPlayer(player).getPlayerConfig().getIsActive() == true)
-					;
 				{
 					if (FC_Rpg.rpgEntityManager.getRpgPlayer(player).getIsAlive() == false)
 						return;
@@ -133,7 +135,7 @@ public class DamageListener implements Listener
 					return;
 
 				// Attack the player with enviromental damage.
-				edm.attackPlayerDefender(rpgDefender, null, null, damage);
+				edm.attackPlayerDefender(rpgDefender, null, null, damage, damageType);
 			}
 			else
 			{
@@ -193,13 +195,18 @@ public class DamageListener implements Listener
 
 		LivingEntity entity;
 		Entity eEntity = ed.getEntity();
-
+		
 		if (eEntity instanceof CraftArrow)
 		{
 			CraftArrow ca = (CraftArrow) eEntity;
 			entity = ca.getShooter();
 		}
 		else if (eEntity instanceof CraftLargeFireball)
+		{
+			CraftLargeFireball cf = (CraftLargeFireball) eEntity;
+			entity = cf.getShooter();
+		}
+		else if (eEntity instanceof CraftExperienceOrb)
 		{
 			CraftLargeFireball cf = (CraftLargeFireball) eEntity;
 			entity = cf.getShooter();
@@ -212,7 +219,12 @@ public class DamageListener implements Listener
 		else
 		{
 			// Set entity equal to the entity that got hit.
-			entity = (LivingEntity) ed.getEntity();
+			try { 
+				entity = (LivingEntity) ed.getEntity(); 
+			} catch (ClassCastException e) {
+				FC_Rpg.plugin.getLogger().info("Failed to cast an entity to living entity, damage cancelled -> " + eEntity.toString() + " <- report to a FC_Rpg developer via a ticket please.");
+				return;
+			}
 		}
 		
 		// Prepare the defender and attacker variables.
@@ -270,8 +282,8 @@ public class DamageListener implements Listener
 			}
 
 			// Attack the mob defender
-			edm.attackMobDefender(rpgMobDefender, rpgAttacker, damage);
-
+			edm.attackMobDefender(rpgMobDefender, rpgAttacker, damage, damageType);
+			
 			// Make creatures forcibly attack attacker.
 			if (playerAttacker != null && mobDefender != null)
 			{
@@ -290,9 +302,9 @@ public class DamageListener implements Listener
 		{
 			// Attack the player Defender.
 			if (rpgAttacker != null)
-				edm.attackPlayerDefender(rpgDefender, rpgAttacker, null, damage);
+				edm.attackPlayerDefender(rpgDefender, rpgAttacker, null, damage, damageType);
 			else if (rpgMobAttacker != null)
-				edm.attackPlayerDefender(rpgDefender, null, rpgMobAttacker, damage);
+				edm.attackPlayerDefender(rpgDefender, null, rpgMobAttacker, damage, damageType);
 		}
 	}
 
@@ -325,7 +337,7 @@ public class DamageListener implements Listener
 			cancelRpgDamage = true;
 			return 0;
 		}
-
+		
 		else if (e.getDamager() instanceof Fish)
 		{
 			cancelRpgDamage = true;
@@ -382,10 +394,10 @@ public class DamageListener implements Listener
 		{
 			// Set damage type to arrow
 			damageType = 1;
-
+			
 			// Store the arrow.
 			arrow = (Arrow) e.getDamager();
-
+			
 			// If the player shot the arrow, set damage to player stuff.
 			if (arrow.getShooter() instanceof Player)
 			{
@@ -396,7 +408,7 @@ public class DamageListener implements Listener
 				rpgAttacker = FC_Rpg.rpgEntityManager.getRpgPlayer(playerAttacker);
 
 				// Set damage of arrows.
-				damage = rpgAttacker.getPlayerConfig().getAttack() * FC_Rpg.balanceConfig.getAttackImpact();
+				damage = rpgAttacker.getPlayerConfig().getAttack() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeAttack();
 			}
 			else
 			{
@@ -405,10 +417,10 @@ public class DamageListener implements Listener
 
 				// Get the shooter entity monster and store.
 				rpgMobAttacker = FC_Rpg.rpgEntityManager.getRpgMonster(arrow.getShooter());
-
+				
 				// Set the damage to the monsters strength.
 				if (rpgMobAttacker != null)
-					damage = rpgMobAttacker.getAttack() * FC_Rpg.balanceConfig.getAttackImpact();
+					damage = rpgMobAttacker.getAttack() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeAttack();
 			}
 
 			// Remove all arrows.
@@ -420,54 +432,57 @@ public class DamageListener implements Listener
 			// Initialize rpgMobAttacker;
 			rpgMobAttacker = new RpgMonster();
 
-			damage = rpgMobAttacker.getAttack() * FC_Rpg.balanceConfig.getAttackImpact();
+			damage = rpgMobAttacker.getAttack() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeAttack();
 		}
 
 		// Melee player attacks
 		else if (e.getDamager() instanceof Player)
 		{
 			playerAttacker = (Player) e.getDamager();
-
+			
 			// Store the attacker
 			rpgAttacker = FC_Rpg.rpgEntityManager.getRpgPlayer(playerAttacker);
-
+			
 			if (rpgAttacker == null)
 				return -1;
 
 			// Get base damage.
-			damage = rpgAttacker.getTotalAttack() * FC_Rpg.balanceConfig.getAttackImpact();
-
+			damage = rpgAttacker.getTotalAttack() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeAttack();
+			
 			// Add weapon Bonus
-			damage = damage * rpgAttacker.getWeaponModifier(playerAttacker.getItemInHand().getType(), rpgAttacker.getTotalAttack());
+			damage = damage * FC_Rpg.battleCalculations.getWeaponModifier(playerAttacker.getItemInHand().getType(), rpgAttacker.getTotalAttack());
 		}
-
-		// Regular mob damage gets set to mob damage.
+		
+		// If the entity is a living entity we want to store it.
+		else if (e.getDamager() instanceof LivingEntity)
+		{
+			//Set creature attacker.
+			creatureAttacker = (LivingEntity) e.getDamager();
+			
+			// Initialize rpgMobAttacker;
+			rpgMobAttacker = FC_Rpg.rpgEntityManager.getRpgMonster(creatureAttacker);
+			
+			damage = rpgMobAttacker.getAttack() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeAttack();
+			
+			// Account for mob weapon type for damage.
+			ItemStack mobWeapon = MobEquipment.getWeapon(creatureAttacker);
+			
+			if (mobWeapon != null)
+				damage = damage * FC_Rpg.battleCalculations.getWeaponModifier(mobWeapon.getType(),999999);
+		}
+		
+		// Else if not it's an error and return the monster strength.
 		else
 		{
-			// If the entity is a living entity we want to store it.
-			if (e.getDamager() instanceof LivingEntity)
-			{
-				creatureAttacker = (LivingEntity) e.getDamager();
-
-				// Initialize rpgMobAttacker;
-				rpgMobAttacker = new RpgMonster();
-				rpgMobAttacker = FC_Rpg.rpgEntityManager.getRpgMonster(creatureAttacker);
-				damage = rpgMobAttacker.getAttack() * FC_Rpg.balanceConfig.getAttackImpact();
-			}
-
-			// Else if not it's an error and return the monster strength.
-			else
-			{
-				FC_Rpg.plugin.getLogger().info("Error: PrepareAttacker(), undefined entity type: " + e.getDamager().toString());
-
-				// Initialize rpgMobAttacker;
-				rpgMobAttacker = new RpgMonster();
-
-				damage = rpgMobAttacker.getAttack() * FC_Rpg.balanceConfig.getAttackImpact();
-			}
+			FC_Rpg.plugin.getLogger().info("Error: PrepareAttacker(), undefined entity type: " + e.getDamager().toString());
+			
+			// Initialize rpgMobAttacker;
+			rpgMobAttacker = new RpgMonster();
+			
+			damage = rpgMobAttacker.getAttack() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeAttack();
 		}
 
-		// Cancel damage for stunned persons.
+		// Cancel damage for stunned stuff.
 		if (rpgAttacker != null)
 		{
 			// If disabled cancel attack
@@ -485,7 +500,7 @@ public class DamageListener implements Listener
 				return 0;
 			}
 		}
-
+		
 		return damage;
 	}
 
@@ -499,78 +514,77 @@ public class DamageListener implements Listener
 		// No damage for creative players.
 		if (player.getGameMode() == GameMode.CREATIVE)
 			return 0;
-
+		
 		// Deal damage to the player based on the type of damage.
 		if (event.getCause().equals(DamageCause.ENTITY_EXPLOSION))
 		{
-			damage = distanceModifier * 9;
-			damage = rpgDefender.calculateBonusEnchantmentDefense(player, Enchantment.PROTECTION_EXPLOSIONS, damage);
+			damage = distanceModifier * FC_Rpg.balanceConfig.getDamageExplosion();
+			FC_Rpg.battleCalculations.updateDamageByArmorEnchantments(player, Enchantment.PROTECTION_EXPLOSIONS, damage);
 		}
 		else if (event.getCause().equals(DamageCause.FALL))
 		{
-			damage = distanceModifier * 1;
-			damage = rpgDefender.calculateBonusEnchantmentDefense(player, Enchantment.PROTECTION_FALL, damage);
+			damage = distanceModifier * FC_Rpg.balanceConfig.getDamageFall();
+			FC_Rpg.battleCalculations.updateDamageByArmorEnchantments(player, Enchantment.PROTECTION_FALL, damage);
 		}
 		else if (event.getCause().equals(DamageCause.CONTACT))
 		{
-			damage = distanceModifier * 1;
+			damage = distanceModifier * FC_Rpg.balanceConfig.getDamageContact();
 		}
 		else if (event.getCause().equals(DamageCause.ENTITY_ATTACK))
 		{
-			damage = distanceModifier * 3;
+			damage = distanceModifier * FC_Rpg.balanceConfig.getDamageEntityAttack();
 		}
 		else if (event.getCause().equals(DamageCause.LIGHTNING))
 		{
-			damage = distanceModifier * 50;
-		}
-		else if (event.getCause().equals(DamageCause.PROJECTILE))
-		{
-			damage = 0;
-			damage = rpgDefender.calculateBonusEnchantmentDefense(player, Enchantment.PROTECTION_PROJECTILE, damage);
+			damage = distanceModifier * FC_Rpg.balanceConfig.getDamageLightning();
 		}
 		else if (event.getCause().equals(DamageCause.FIRE))
 		{
-			damage = distanceModifier * 2;
-			damage = rpgDefender.calculateBonusEnchantmentDefense(player, Enchantment.PROTECTION_FIRE, damage);
-
+			damage = distanceModifier * FC_Rpg.balanceConfig.getDamageFire();
+			FC_Rpg.battleCalculations.updateDamageByArmorEnchantments(player, Enchantment.PROTECTION_FIRE, damage);
+			
 			// 95% damage reduction from fire resistance.
 			if (rpgDefender.getPlayer().getActivePotionEffects().contains(PotionEffectType.FIRE_RESISTANCE))
 				damage = damage * .05;
 		}
 		else if (event.getCause().equals(DamageCause.FIRE_TICK))
 		{
-			damage = distanceModifier * 2;
-			damage = rpgDefender.calculateBonusEnchantmentDefense(player, Enchantment.PROTECTION_FIRE, damage);
+			damage = distanceModifier * FC_Rpg.balanceConfig.getDamageFireTick();
+			FC_Rpg.battleCalculations.updateDamageByArmorEnchantments(player, Enchantment.PROTECTION_FIRE, damage);
 
-			// 25% damage reduction from fire resistance.
+			// 95% damage reduction from fire resistance.
 			if (rpgDefender.getPlayer().getActivePotionEffects().contains(PotionEffectType.FIRE_RESISTANCE))
-				damage = damage * .25;
+				damage = damage * .05;
 		}
 		else if (event.getCause().equals(DamageCause.LAVA))
 		{
-			damage = distanceModifier * 1;
-			damage = rpgDefender.calculateBonusEnchantmentDefense(player, Enchantment.PROTECTION_FIRE, damage);
-
+			damage = distanceModifier * FC_Rpg.balanceConfig.getDamageLava();
+			FC_Rpg.battleCalculations.updateDamageByArmorEnchantments(player, Enchantment.PROTECTION_FIRE, damage);
+			
 			// 95% damage reduction from fire resistance.
 			if (rpgDefender.getPlayer().getActivePotionEffects().contains(PotionEffectType.FIRE_RESISTANCE))
 				damage = damage * .05;
 		}
 		else if (event.getCause().equals(DamageCause.STARVATION))
 		{
-			damage = distanceModifier * .3;
+			damage = distanceModifier * FC_Rpg.balanceConfig.getDamageStarvation();
+		}
+		if (event.getCause().equals(DamageCause.POISON))
+		{
+			damage = distanceModifier * FC_Rpg.balanceConfig.getDamagePoison();
 		}
 		else if (event.getCause().equals(DamageCause.SUICIDE))
 		{
-			damage = 99999999;
+			return 99999999;
 		}
 		else if (event.getCause().equals(DamageCause.VOID))
 		{
-			damage = 99999999;
+			return 99999999;
 		}
 
-		if (damage < 1 && damage > 0 || damage < 0)
+		if (damage < 1)
 			damage = 1;
-
+		
 		return damage;
 	}
 }

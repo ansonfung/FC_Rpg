@@ -122,7 +122,12 @@ public class TreasureConfig extends ConfigGod
 					a.add(mLib.tierList.get(i).get(j).getId());
 					b.add(1);
 					c.add(i * 20);
-					d.add(i * 20 + 20);
+					
+					if (i == 4)
+						d.add(999999);
+					else
+						d.add(i * 20 + 20);
+					
 					e.add(1);
 					f.add(0);
 				}
@@ -131,21 +136,21 @@ public class TreasureConfig extends ConfigGod
 			a.add(Material.BOW.getId());
 			b.add(1);
 			c.add(0);
-			d.add(100);
+			d.add(999999);
 			e.add(1);
 			f.add(0);
 			
 			a.add(Material.BREAD.getId());
 			b.add(1);
 			c.add(0);
-			d.add(100);
+			d.add(999999);
 			e.add(1);
 			f.add(1);
 			
 			a.add(Material.COOKED_BEEF.getId());
 			b.add(1);
 			c.add(0);
-			d.add(100);
+			d.add(999999);
 			e.add(1);
 			f.add(1);
 			

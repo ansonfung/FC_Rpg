@@ -94,6 +94,8 @@ public class RpgEntity
 		//Return false if not contained.
 		return false;
 	}
+	
+	
 }
 
 
