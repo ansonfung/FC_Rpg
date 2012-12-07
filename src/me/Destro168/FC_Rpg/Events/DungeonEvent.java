@@ -20,7 +20,6 @@ import org.bukkit.inventory.ItemStack;
 
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.FC_Rpg.CreatureSpawnListener;
-import me.Destro168.FC_Rpg.Configs.DungeonConfig;
 import me.Destro168.FC_Rpg.Util.RpgMessageLib;
 import me.Destro168.FC_Suite_Shared.SuiteConfig;
 
@@ -33,8 +32,8 @@ public class DungeonEvent extends GeneralEvent
 	private World dungeonWorld;
 	private LivingEntity[] spawnedMobs;
 	private int lowestLevel;
-	private DungeonConfig dm;
 	private boolean isRpgDungeon;
+	int randomSpawnRange;
 	
 	public String getDungeonName() { return dungeonName; }
 	public int getLowestLevel() { updateLowestLevel(); return lowestLevel; }
@@ -58,7 +57,6 @@ public class DungeonEvent extends GeneralEvent
 		//Reset variables.
 		tid = new int[8];
 		lowestLevel = 999999;
-		dm = new DungeonConfig();
 		
 		//Set the dungeon number.
 		setDungeonNumber(dungeonNumber_);
@@ -74,7 +72,7 @@ public class DungeonEvent extends GeneralEvent
 		setDungeonNumber(dungeonNumber);
 		
 		//Check to make sure they are in the correct level range.
-		if (level < dm.getLevelMin(dungeonNumber) || level > dm.getLevelMax(dungeonNumber))
+		if (level < FC_Rpg.dungeonConfig.getPlayerLevelRequirementMinimum(dungeonNumber) || level > FC_Rpg.dungeonConfig.getPlayerLevelRequirementMaximum(dungeonNumber))
 		{
 			msgLib.errorLevelOutOfRange();
 			return false;
@@ -113,9 +111,9 @@ public class DungeonEvent extends GeneralEvent
 			wait1 = 1;
 			wait2 = 2;
 		}
-		
+	
 		//After 30 seconds announce 30 seconds to join.
-		tid[0] = Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable() 
+		tid[0] = Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable() 
 		{
 			@Override
 			public void run()
@@ -126,7 +124,7 @@ public class DungeonEvent extends GeneralEvent
 		}, wait1);
 		
 		//After 30 seconds start the  lobby phase.
-		tid[1] = Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable() 
+		tid[1] = Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable() 
 		{ 
 			@Override
 			public void run()
@@ -156,7 +154,7 @@ public class DungeonEvent extends GeneralEvent
 		//Variable Declarations
 		Location dungeonStart = null;
 		Location bossLocation = null;
-		int mobSpawnCount = dm.getSpawnCount(dungeonNumber);
+		int mobSpawnCount = FC_Rpg.dungeonConfig.getMobsToSpawnCount(dungeonNumber);
 		int mobCountMinusOne = mobSpawnCount - 1;
 		
 		//Set that the event is has gone through lobby phase and people are fighting in the dungeon now.
@@ -172,8 +170,8 @@ public class DungeonEvent extends GeneralEvent
 		kickTooStrong();
 		
 		//Load up spawn point and boss spawn.
-		dungeonStart = dm.getStart(dungeonNumber);
-		bossLocation = dm.getBossSpawn(dungeonNumber);
+		dungeonStart = FC_Rpg.dungeonConfig.getStart(dungeonNumber);
+		bossLocation = FC_Rpg.dungeonConfig.getBossSpawn(dungeonNumber);
 		
 		//Teleport the players in now.
 		super.teleportAllParticipants(dungeonStart);
@@ -199,6 +197,10 @@ public class DungeonEvent extends GeneralEvent
 		//Spawn a boss monster.
 		spawnedMobs[mobCountMinusOne] = (LivingEntity) dungeonWorld.spawnEntity(bossLocation, returnRandomLivingEntity());
 		
+		//Add loot to chests.
+		addChestLoot(true);
+		
+		//Begin tasks to notify end of dungeon.
 		if (FC_Rpg.worldConfig.getIsRpgWorld(dungeonStart.getWorld().getName()))
 		{
 			//Register the custom monster.
@@ -211,7 +213,7 @@ public class DungeonEvent extends GeneralEvent
 			FC_Rpg.rpgEntityManager.getRpgMonster(spawnedMobs[mobCountMinusOne]).checkEquipment();
 		}
 		
-		tid[2] = Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable()
+		tid[2] = Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
 		{
 			public void run()
 			{
@@ -220,7 +222,7 @@ public class DungeonEvent extends GeneralEvent
 			}
 		}, 3000); //7:30 minutes to beat the dungeon.
 		
-		tid[3] = Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable()
+		tid[3] = Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
 		{
 			public void run()
 			{
@@ -229,7 +231,7 @@ public class DungeonEvent extends GeneralEvent
 			}
 		}, 6000); //5 minutes to beat the dungeon.
 		
-		tid[4] =  Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable()
+		tid[4] =  Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
 		{
 			public void run()
 			{
@@ -239,7 +241,7 @@ public class DungeonEvent extends GeneralEvent
 		}, 9000); //2:30 minutes to beat the dungeon.
 		
 		//Start timer for when the dungeon has to be beat by.
-		tid[5] = Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable()
+		tid[5] = Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
 		{
 			public void run()
 			{
@@ -258,8 +260,8 @@ public class DungeonEvent extends GeneralEvent
 			return;
 		
 		dungeonNumber = FC_Rpg.trueDungeonNumbers.get(dungeonNumber_);
-		dungeonName = dm.getName(dungeonNumber);
-		dungeonWorld = dm.getLobby(dungeonNumber).getWorld();
+		dungeonName = FC_Rpg.dungeonConfig.getName(dungeonNumber);
+		dungeonWorld = FC_Rpg.dungeonConfig.getLobby(dungeonNumber).getWorld();
 		isRpgDungeon = FC_Rpg.worldConfig.getIsRpgWorld(dungeonWorld.getName());
 	}
 	
@@ -304,7 +306,7 @@ public class DungeonEvent extends GeneralEvent
 				if (FC_Rpg.rpgEntityManager.getRpgPlayer(player).getPlayerConfig().getClassLevel() > lowestLevel + 5)
 				{
 					//Refund players
-					FC_Rpg.economy.depositPlayer(player.getName(), dm.getCost(dungeonNumber));
+					FC_Rpg.economy.depositPlayer(player.getName(), FC_Rpg.dungeonConfig.getEntryFee(dungeonNumber));
 					
 					//Remove the player
 					removeDungeoneer(player,player,true);
@@ -317,8 +319,8 @@ public class DungeonEvent extends GeneralEvent
 	{
 		//Variable Declarations
 		Random rand = new Random();
-		int spawnRangeCount = dm.getSpawnCount(dungeonNumber);
-		int randomSpawnRange = 0;
+		int spawnRangeCount = FC_Rpg.dungeonConfig.getMobsToSpawnCount(dungeonNumber);
+		randomSpawnRange  = 0;
 		boolean success = false;
 		int b = 0;
 		
@@ -343,14 +345,14 @@ public class DungeonEvent extends GeneralEvent
 				randomSpawnRange = rand.nextInt(spawnRangeCount);
 				
 				//Check if the spawnRate check passes for that area.
-				if (rand.nextInt(100) < dm.getSpawnChance(dungeonNumber, randomSpawnRange))
+				if (rand.nextInt(100) < FC_Rpg.dungeonConfig.getSpawnChance(dungeonNumber, randomSpawnRange))
 					success = true;
 			}
 		}
 		
 		//Store the bounds for the spawn region.
-		Location spawnRangeMax = dm.getRange2(dungeonNumber, randomSpawnRange);
-		Location spawnRangeMin = dm.getRange1(dungeonNumber, randomSpawnRange);
+		Location spawnRangeMin = FC_Rpg.dungeonConfig.getSpawnBox1(dungeonNumber, randomSpawnRange);
+		Location spawnRangeMax = FC_Rpg.dungeonConfig.getSpawnBox2(dungeonNumber, randomSpawnRange);
 		
 		//Check if spawnrange min is null.
 		if (spawnRangeMin == null)
@@ -406,7 +408,7 @@ public class DungeonEvent extends GeneralEvent
 			
 			if (b > 300)
 			{
-				FC_Rpg.plugin.getLogger().info("Forced Mob Spawn Break At - X: " + dbl_X + " Y: " + dbl_Y + " Z: " + dbl_Z);
+				FC_Rpg.plugin.getLogger().info("Forced Mob Spawn Break At - X: " + dbl_X + " Y: " + dbl_Y + " Z: " + dbl_Z + ". Check that there are safe spots for mobs to spawn in your dungeon.");
 				break;
 			}
 		}
@@ -457,31 +459,39 @@ public class DungeonEvent extends GeneralEvent
 		return true;
 	}
 	
-	private void addChestLoot()
+	private void addChestLoot(boolean isStart)
+	{
+		List<Location> loot;
+		
+		if (isStart)
+			loot = FC_Rpg.dungeonConfig.getTreasureStart(dungeonNumber);
+		else
+			loot = FC_Rpg.dungeonConfig.getTreasureEnd(dungeonNumber);
+		
+		for (Location l : loot)
+			addLoot(l);
+	}
+	
+	private void addLoot(Location chestLocation)
 	{
 		//Variable Declarations
-		Location chestLocation = null;
-		Random rand = new Random();
 		List<ItemStack> drops = null;
+		Random rand = new Random();
 		Block chestBlock;
 		Chest chest;
 		
-		//Set chest location
-		chestLocation = dm.getTreasureChest(dungeonNumber);
-		
-		//Add chest loot.
+		// Create the chest.
 		chestBlock = Bukkit.getServer().getWorld(chestLocation.getWorld().getName()).getBlockAt((int) chestLocation.getX(), (int) chestLocation.getY(), (int) chestLocation.getZ());
 		chestBlock.setType(Material.CHEST);
-		
 		chest = (Chest) chestBlock.getState();
 		
-		//Clear the chest out from other runs.
+		// Clear the chest inventory.
 		chest.getInventory().clear();
 		
-		//Get the list of random treasure.
+		// Get the list of random treasure.
 		drops = FC_Rpg.treasureConfig.getRandomTreasure(lowestLevel, rand.nextInt(5) + 1);
 		
-		//Add items to the inventory.
+		// Add items to the chest inventory.
 		for (ItemStack drop : drops)
 			chest.getInventory().addItem(drop);
 	}
@@ -489,16 +499,8 @@ public class DungeonEvent extends GeneralEvent
 	private EntityType returnRandomLivingEntity()
 	{
 		Random rand = new Random();
-		int number = rand.nextInt(4);
-		
-		if (number == 0)
-			return EntityType.SPIDER;
-		else if (number == 1)
-			return EntityType.ZOMBIE;
-		else if (number == 2)
-			return EntityType.PIG_ZOMBIE;
-		else
-			return EntityType.SKELETON;
+		List<EntityType> a = FC_Rpg.dungeonConfig.getMobList(dungeonNumber, randomSpawnRange);
+		return a.get(rand.nextInt(a.size()));
 	}
 	
 	public void checkMobDeath(Entity entity)
@@ -514,7 +516,7 @@ public class DungeonEvent extends GeneralEvent
 			}
 		}
 		
-		tid[6] = Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable()
+		tid[6] = Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
 		{
 			public void run()
 			{
@@ -568,13 +570,13 @@ public class DungeonEvent extends GeneralEvent
 			dMin = null;
 			
 			//Store the minimum for faster reference later.
-			try { dMin = dm.getRange1(dungeonNumber, i); } catch (NullPointerException e) { }
+			try { dMin = FC_Rpg.dungeonConfig.getSpawnBox1(dungeonNumber, i); } catch (NullPointerException e) { }
 			
 			//If not null, evaluate
 			if (dMin != null)
 			{
 				//Store the area it would spawn.
-				dMax = dm.getRange2(dungeonNumber, i);
+				dMax = FC_Rpg.dungeonConfig.getSpawnBox2(dungeonNumber, i);
 				
 				//Check if x is in range.
 				if (isInsideRange(entityLocation.getX(), dMin.getX(), dMax.getX()) == true && isInsideRange(entityLocation.getZ(), dMin.getZ(), dMax.getZ()) == true)
@@ -607,6 +609,8 @@ public class DungeonEvent extends GeneralEvent
 			r2 = r1;
 			r1 = test;
 		}
+		
+		checkPos = Math.floor(checkPos);
 		
 		//If outside range, return true.
 		if (checkPos >= r1 && checkPos <= r2)
@@ -643,10 +647,10 @@ public class DungeonEvent extends GeneralEvent
 			super.messageAllParticipants("You will be teleported out in [60] seconds. Remember to loot the chest at the end of the dungeon! It's now full of loot!");
 			
 			//Add loot to the chest.
-			addChestLoot();
+			addChestLoot(false);
 			
 			//In 30 seconds end the event.
-			tid[7] = Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable()
+			tid[7] = Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
 			{
 				public void run()
 				{
@@ -655,7 +659,7 @@ public class DungeonEvent extends GeneralEvent
 						bLib.standardBroadcast("The Dungeon " + dungeonName + " Has Been Completed!");
 					
 					//Teleport all players out
-					teleportAllParticipants(dm.getExit(dungeonNumber));
+					teleportAllParticipants(FC_Rpg.dungeonConfig.getExit(dungeonNumber));
 					
 					//Reset everything.
 					setDungeonDefaults(-1);
@@ -668,7 +672,7 @@ public class DungeonEvent extends GeneralEvent
 			bLib.standardBroadcast("The Dungeon " + dungeonName + " Has Shut Down!");
 			
 			//Teleport all players out
-			teleportAllParticipants(dm.getExit(dungeonNumber));
+			teleportAllParticipants(FC_Rpg.dungeonConfig.getExit(dungeonNumber));
 			
 			//Reset everything.
 			setDungeonDefaults(dungeonNumber);

@@ -2,6 +2,8 @@
 
 Version 1.0:
 
+Disclaimer: There are a multitude of things changed in the 1.0 version. Do I expect this to be entirely bugfree? Nope! But I did my best to fix what I could. If you find a bug make a ticket! I'll be fixing up everything as fast as possible!
+
 General:
 - Fixed non-ops being unable to pick a new class.
 - Fixed files to actually be deleted now after the auto-delete date.
@@ -23,7 +25,6 @@ General:
 - Player class level is now shown when you attack them rather than their actual player levels.
 - 2 general config settings. Set player chat, set admin chat formats. Complete control of chat formats. Don't like my custom chat? Make it blank and my custom chat is disabled. Sup?
 - Customizable auto-delete player file time. Before it was set to like 30 days, or something, I don't really know. Set to whatever you want! Don't want it to ever delete? Set to 0.
-- Default dungeon updated a bit to only have one region.
 - Bosses ignore power level prevention. The Wither + Enderdragon are now considered bosses now!
 - Updated the loot %'s so that there is a customizable setting for exp/gold loss for mobs below your level as well as one for mobs stronger than you. Fixes an issue where mobs 5 levels below you were technically in the proper power level range but didn't give exp, now you lose 16.6% exp/gold per level a mob is below you. Entirely customizable of course.
 - Added new bonus loot % cap. This exists to prevent leveling much too fast by killing bosses. Can get 300% regular exp with it set at the default of 3 though vs. the like 1500% fighting a boss 50 levels higher than you, of course calculated before bonuses.
@@ -34,6 +35,18 @@ General:
 - Heavily optimized armor and enchantment bonus calculations.
 - Arrow power enchantment added and calculated now. Only applies to arrows of course. Requires arrow knockback setting as well.
 - Made sure that fails to cast entities to living entities on attack will no longer throw errors and sends a nice debugging message.
+- Fire arrow efffect can no longer instantly kill bosses.
+- Improved mob checking within dungeons. I realized that the decimals for blocks were what were messing up checks a lot of the time (god this was an annoying bug, and I know this is why my selection vector wasn't working for FC_Announcer probably...). A solid improvement!
+- Optimized creature spawn listener.
+- Various entities checked to make sure that they work. Tnt works now, splash potions, etc. etc.
+- Fixed bugs where spells couldn't be level 5 due to mana cost reading issue.
+
+Alchemy:
+- Remove debug message during alchemy.
+- Optimized alchemy item picking a lot.
+- Alchemy spell also now accounts for total number of items used in the reaction. This makes it a lot more viable to react, say, a stack of cobblestone for a chance at maybe some glass, or something. I don't know... LOL.
+- Fixed issue where spell restriction ids weren't being checked properly.
+- Alchemy also supports giving out more than a stack of items now.
 
 Commands:
 
@@ -63,6 +76,7 @@ Commands:
 	- Updated list to start at 1 as well as have a header and better format.
 	- Fixed /dungeon to work via console now.
 	- Added /dungeon new to create blank dungeon template.
+	- Removed /d9. There are just too many configuration options at this point, sorry. The commands would only complicate people, I'm 100% sure. They are more trouble than they are worth tbh.
 	
 	World:
 	- Added new world command and associated help, perms, etc.
@@ -75,12 +89,32 @@ Commands:
 	Modify:
 	- Correctly updates player health and donator stats now if player is online.
 	
+	Buff:
+	- Honestly not sure if this is new or not, been using it for so long... LOL.
+	- Removed instant damage and instant heal from buff lists.
+	- Reworked command entirely. Now requires permission to use the "1" command and can have a cost put on it.
+	
 Configurations:
 - Brand new BALANCE CONFIG! Huzzah! Allows custimization over pretty much every balance related feature of FC_Rpg. You wanted entirely custom balance? Enjoy!
 - Treasure config now sets version so that it won't overwrite each time you load up your server.
+- Dungeon configuration optimized so only one object is ever created.
+- Dungeon configuration now has a LOT! of new things and lots of fields were renamed to be more reader-friendly.
+- Default dungeons are now truly empty.
+- Tons of optimizations to fill access such that repetitive calls into flatfile will not be needed, check FC_Suite_Shared changelog.
+- Significantly buffed default enchantment strengths. 10x for the protection buffs (4% wasn't really that good imo, xD) and 5x for sharpness (2% wasn't too good, but 10% is much better).
 
 Sooo, a few configs had a lot of changes done. I highly recommend backing up the originals for the following listed configs, deleting them, letting a new one generate, then filling in the old fields with your backed up settings, while also configuring the new settings.
-- GeneralConfig
+- General config
+- Dungeon config
+- Warp config.
+
+Potion / Potion Effects:
+- Fire resistance still blocks all fire damage.
+- Splah damage potions will work and won't give out errors.
+- With poison fixed, poison potions work.
+- Weakness, damage resistance potion effect, and strength potions all work now. Customizable in balance config too of course. :)
+- Weakness potion makes it so you can't attack if you have VNP (at least that's how it is for me). I submitted a ticket.
+- Wither effect damage added and customizable.
 
 Installation:
 - FC_Suite_Shared is now it's own seperate plugin! Check it out -> http://dev.bukkit.org/server-mods/fc_suite_shared/
@@ -88,20 +122,12 @@ Installation:
 Test:
 
 Todo:
-- check boss invulnerability to fire arrow spell.
-
-- Enchantments for mob weapons.
-- Balanceconfig enchantment strength options.
-
-- Fix/Update/Test potion effects.
-- Don't show certain help topics based on permissions.
-- Check all permissions.
+- Make sure all lists start at 1 and work properly.
 
 Long-Term Todo:
 - Class requirement / Job Rank minimum / Minimum level requirement for warps.
-- Explain in help: The purpose of jobs is to be able to have a way for players to be able to pay to gain ranks that give access to better warps.
-- Multiple loot chests inside of dungeons.
 - Test PVP Arena. Upgrade more fully.
+- Explain in help: The purpose of jobs is to be able to have a way for players to be able to pay to gain ranks that give access to better warps.
 
 Version 0.82:
 

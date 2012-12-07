@@ -4,6 +4,7 @@ import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.Configs.FaqConfig;
 import me.Destro168.FC_Rpg.Entities.RpgPlayer;
 import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
+
 import org.bukkit.craftbukkit.command.ColouredConsoleSender;
 import org.bukkit.entity.Player;
 
@@ -106,27 +107,44 @@ public class RpgMessageLib extends MessageLib
 		standardHeader("FC_Rpg Command Help!");
 		
 		if (perms.commandFAQ())
-			standardMessage("/faq", "Important Server Information!");
+			standardMessage("/faq","View Server Frequently Asked Questions.");
 		
 		if (perms.commandClass()) 
 			standardMessage("/class","Help for classes.");
 		
-		standardMessage("/job","Help for jobs.");
-		standardMessage("/guild","Help for guilds.");
-		standardMessage("/spell","Help for spells");
-		standardMessage("/pvp","Help for pvp events.");
-		standardMessage("/reset","Reset Your FC_RPG Character!");
-		standardMessage("/list","See who is online.");
-		standardMessage("/buff","Help with buffs.");
+		if (perms.commandJob())
+			standardMessage("/job","Help for jobs.");
 		
-		if (rpgPlayer.isDonatorOrAdmin())
-			standardMessage("/donator","Help for donators.");
+		if (perms.commandGuild())
+			standardMessage("/guild","Help for guilds.");
+		
+		if (perms.commandSpell())
+			standardMessage("/spell","Help for spells");
+		
+		if (perms.commandPvp())
+			standardMessage("/pvp","Help for pvp events.");
+		
+		if (perms.commandReset())
+			standardMessage("/reset","Reset Your FC_RPG Character!");
+		
+		if (perms.commandList())
+			standardMessage("/list","See who is online.");
+		
+		if (perms.commandBuff())
+			standardMessage("/buff","Help with buffs.");
+		
+		if (rpgPlayer != null)
+		{
+			if (rpgPlayer.isDonatorOrAdmin())
+				standardMessage("/donator","Help for donators.");
+		}
 		
 		if (perms.isAdmin())
 		{
 			standardMessage("[A] /w", "Help with warps.");
 			standardMessage("[A] /dungeon","Help for dungeons.");
 			standardMessage("[A] /modify","Help for modify command.");
+			standardMessage("[A] /world","Help for world command.");
 			standardMessage("[A] /rpg admin","Admin Commands.");
 		}
 		
@@ -135,9 +153,6 @@ public class RpgMessageLib extends MessageLib
 	
 	public boolean helpFaq()
 	{
-		if (!perms.commandFAQ())
-			return this.errorNoPermission();
-		
 		//Variable Declarations
 		FaqConfig fm = new FaqConfig();
 		String faq;
@@ -186,21 +201,21 @@ public class RpgMessageLib extends MessageLib
 		
 		//Display header and commands.
 		standardHeader("Class Commands");
-		standardMessage("/class view [name]","Show Character Information");
+		standardMessage("/class view [name]","Show FC_RPG Character Information.");
 		standardMessage("/class list","View a list of all server classes.");
 		
 		if (rpgPlayer != null)
 		{
-			standardMessage("/class spec [stat] [amount]","Distribute Stat Points");
+			standardMessage("/class spec [stat] [amount]","Distribute Stat Points.");
 			standardMessage("- Tip","If you have stat points, use this command.");
-			standardMessage("/class allocate [on,off]","Set auto stat distribution.");
+			standardMessage("/class allocate [<on>,<off>]","Set auto stat distribution.");
 			
 			//Variable Declaration
 			boolean hasInfiniteTickets = perms.hasInfiniteTickets();
 			
 			if (rpgPlayer.hasClassChangeTicket() == true || hasInfiniteTickets)
 			{
-				standardMessage("/class switch [<number>,<name>]","Use a class ticket to switch to a class specified by number or name.");
+				standardMessage("/class switch [num]","Use a class ticket to switch to a class specified by number or name.");
 				
 				//Set the ticket count.
 				if (hasInfiniteTickets)
@@ -209,46 +224,6 @@ public class RpgMessageLib extends MessageLib
 					standardMessage("- You have " + rpgPlayer.getPlayerConfig().getClassChangeTickets() + " tickets remaining.");
 			}
 		}
-		
-		return true;
-	}
-	
-	public boolean helpDungeon()
-	{
-		if (!perms.isAdmin())
-			return errorNoPermission();
-		
-		standardHeader("Dungeon Help");
-		standardMessage("/dungeon list","List dungeons.");
-		standardMessage("/dungeon info [num]","See information regarding a specific dungeon.");
-		standardMessage("/dungeon start [num]","Start a dungeon.");
-		standardMessage("/dungeon stop [num]","Stop a dungeon.");
-		standardMessage("/dungeon check [num]","Check if any mobs are left to update loot chest.");
-		standardMessage("/dungeon kick [num] [name]","Kick somebody from a dungeon.");
-		standardMessage("/dungeon define [num]","After selecting two dungeon points use this to define a dungeon.");
-		secondaryMessage("Want to define dungeons in-game? Use /dungeon extra");
-		
-		return true;
-	}
-	
-	public boolean helpDungeonDefinition()
-	{
-		standardHeader("Dungeon Definition Commands.");
-		standardHeader("BE CAREFUL ~ READ PLUGIN HELP!");
-		standardMessage("/dungeon new [name]","Creates a dungeon in dungeon config.");
-		standardMessage("/dungeon name [num]");
-		standardMessage("/dungeon ranges [num]");
-		standardMessage("/dungeon lobby [num]");
-		standardMessage("/dungeon playerStart [num]","NOT 'START'! Careful!");
-		standardMessage("/dungeon playerEnd [num]","NOT 'END'! Careful!");
-		standardMessage("/dungeon boss [num]");
-		standardMessage("/dungeon treasure [num]");
-		standardMessage("/dungeon ranges [num]");
-		standardMessage("/dungeon cost [num] [value]");
-		standardMessage("/dungeon lmin [num] [value]");
-		standardMessage("/dungeon lmax [num] [value]");
-		standardMessage("/dungeon spawnCount [num] [index]");
-		standardMessage("/dungeon spawnchance [num] [index] [value]");
 		
 		return true;
 	}
@@ -284,6 +259,9 @@ public class RpgMessageLib extends MessageLib
 	
 	public boolean helpGuild()
 	{
+		if (!perms.commandGuild())
+			return this.errorNoPermission();
+		
 		standardHeader("Guild Commands");
 		standardMessage("/guild list [page]","See a list of guilds.");
 		standardMessage("/guild create [guildName]","Create a guild.");
@@ -300,6 +278,9 @@ public class RpgMessageLib extends MessageLib
 	
 	public boolean helpJob()
 	{
+		if (!perms.commandJob())
+			return this.errorNoPermission();
+		
 		standardHeader("Job Commands");
 		standardMessage("/job view [name]","Shows Job Information");
 		
@@ -312,30 +293,36 @@ public class RpgMessageLib extends MessageLib
 	public boolean helpBuff()
 	{
 		standardHeader("Buff Commands");
-		standardMessage("/buff self","Apply a random buff to yourself.");
+		standardMessage("/buff random","Apply a random buff to yourself for &q" + FC_Rpg.generalConfig.getBuffCommandCost() + "&q");
 		
 		if (perms.isAdmin())
 		{
-			standardMessage("[A] /buff self [name] [length] [level]","Apply a specific buff with specified characteristics to yourself.");
+			standardMessage("[A] /buff random [name] [length] [level]","Apply a specific buff with specified characteristics to yourself.");
 			standardMessage("[A] /buff all","Buff everybody online.");
 			standardMessage("[A] /buff clear [name]","Clear target of buffs.");
+			standardMessage("[A] /buff max [name]","Put all buffs on target.");
 		}
 		
 		return true;
 	}
 	
-	public void helpDonator()
+	public boolean helpDonator()
 	{
-		if (rpgPlayer != null)
-		{
-			if (rpgPlayer.isDonatorOrAdmin())
-			{
-				standardHeader("Donator Commands");
-				standardMessage("/hat", "Wear a block like a hat!");
-				standardMessage("/donator respecialize", "Redistribute stat points on the fly!");
-				standardMessage("- Have a suggestion? Ask Destro168!");
-			}
-		}
+		if (rpgPlayer == null)
+			return errorCreateCharacter();
+		
+		if (!rpgPlayer.isDonatorOrAdmin())
+			return errorNoPermission();
+		
+		standardHeader("Donator Commands");
+		
+		if (FC_Rpg.generalConfig.getDonatorsCanHat() || perms.commandHat())
+			standardMessage("/hat", "Wear a block as a hat!");
+		
+		standardMessage("/donator respecialize", "Redistribute stat points on the fly!");
+		standardMessage("- Have a suggestion? Ask Destro168!");
+		
+		return true;
 	}
 	
 	public boolean helpWarp()
@@ -356,10 +343,27 @@ public class RpgMessageLib extends MessageLib
 		return true;
 	}
 	
+	public boolean helpDungeon()
+	{
+		if (!perms.isAdmin())
+			return errorNoPermission();
+		
+		standardHeader("Dungeon Help");
+		standardMessage("/dungeon list","List dungeons.");
+		standardMessage("/dungeon print","Prints out information for dungeon setup.");
+		standardMessage("/dungeon info [num]","See information regarding a specific dungeon.");
+		standardMessage("/dungeon start [num]","Start a dungeon.");
+		standardMessage("/dungeon stop [num]","Stop a dungeon.");
+		standardMessage("/dungeon check [num]","Check if any mobs are left to update loot chest.");
+		standardMessage("/dungeon kick [num] [name]","Kick somebody from a dungeon.");
+		
+		return true;
+	}
+	
 	public boolean helpModify()
 	{
 		if (!perms.isAdmin())
-			return true;
+			return errorNoPermission();
 		
 		standardHeader("Modify Command ~ Modifiables");
 		standardMessage("/modify [name] [modifiable] [newValue]", "Modify player settings in-game.");
@@ -374,8 +378,12 @@ public class RpgMessageLib extends MessageLib
 		return true;
 	}
 	
+	
 	public boolean helpWorld()
 	{
+		if (!perms.isAdmin())
+			return errorNoPermission();
+		
 		standardHeader("World Commands");
 		standardMessage("/world list","List all worlds on your server.");
 		standardMessage("/world tp [worldname]","Teleport to a worlds spawn.");

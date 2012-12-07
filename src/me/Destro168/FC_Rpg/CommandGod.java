@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import me.Destro168.FC_Rpg.Configs.DungeonConfig;
 import me.Destro168.FC_Rpg.Configs.FaqConfig;
 import me.Destro168.FC_Rpg.Configs.GroupConfig;
 import me.Destro168.FC_Rpg.Configs.PlayerConfig;
@@ -56,7 +55,7 @@ public class CommandGod implements CommandExecutor
     {
 		if (initialize(sender, args2) == false)
 		{
-			msgLib.standardMessage("Failed to initialize key variables for continued command execution.");
+			msgLib.standardError("Command failed to initialize.");
 			return true;
 		}
 		
@@ -182,7 +181,8 @@ public class CommandGod implements CommandExecutor
 			perms = new FC_RpgPermissions(player);
 			msgLib = new RpgMessageLib(player);
 			try { isActive = rpgPlayer.getPlayerConfig().getIsActive(); } catch (NullPointerException e) { 
-				return msgLib.standardError("You can't reset until you pick a class."); }
+				msgLib.standardError("You can't use commands until you pick a class."); return false; }
+			
 			console = null;
 		}
 		else if (sender instanceof ColouredConsoleSender)
@@ -213,14 +213,17 @@ public class CommandGod implements CommandExecutor
 			if (!perms.commandFAQ())
 				return perms.commandFAQ();
 			
-			if (args[0].equalsIgnoreCase("new"))
-				return newSubCommand();
-			else if (args[0].equalsIgnoreCase("del"))
-				return delSubCommand();
-			else if (args[0].equalsIgnoreCase("eProperty"))
-				return editPropertySubCommand();
-			else if (args[0].equalsIgnoreCase("eLine"))
-				return editLineSubCommand();
+			if (perms.isAdmin())
+			{
+				if (args[0].equalsIgnoreCase("new"))
+					return newSubCommand();
+				else if (args[0].equalsIgnoreCase("del"))
+					return delSubCommand();
+				else if (args[0].equalsIgnoreCase("eProperty"))
+					return editPropertySubCommand();
+				else if (args[0].equalsIgnoreCase("eLine"))
+					return editLineSubCommand();
+			}
 			
 			return displaySubTopic();
 	    }
@@ -366,6 +369,9 @@ public class CommandGod implements CommandExecutor
 	    {
 			if (!perms.commandClass())
 				return msgLib.errorNoPermission();
+			
+			if (isActive == false)
+				return msgLib.errorCreateCharacter();
 			
 			//Variable declarations.
 			if (args[0].equalsIgnoreCase(""))
@@ -646,11 +652,13 @@ public class CommandGod implements CommandExecutor
 				msgLib.standardHeader("Donator Information");
 				msgLib.standardMessage("Thank you for donating!");
 				
-				String timeRemaining = "Never";
+				String timeRemaining;
 				
-				if (perms.isInfiniteDonator() == true)
+				if (perms.isInfiniteDonator())
+					timeRemaining = "Never";
+				else
 					timeRemaining = FC_Rpg.dfm.format(rpgPlayer.getPlayerConfig().getDonatorTime());
-					
+				
 				msgLib.standardMessage("Donation Perks End On",timeRemaining);
 				msgLib.helpDonator();
 			}
@@ -668,7 +676,6 @@ public class CommandGod implements CommandExecutor
 	{
 		int dungeonNumber = 0;
 		DungeonEvent dungeon;
-		DungeonConfig dc = new DungeonConfig();
 		
 		public boolean execute()
 	    {
@@ -679,8 +686,6 @@ public class CommandGod implements CommandExecutor
 			//0 argument commands.
 			if (args[0].equalsIgnoreCase(""))
 				return msgLib.helpDungeon();
-			else if (args[0].equalsIgnoreCase("extra"))
-				return msgLib.helpDungeonDefinition();
 			else if (args[0].equalsIgnoreCase("list"))
 			{
 				String[] msg = new String[5];
@@ -701,6 +706,19 @@ public class CommandGod implements CommandExecutor
 				
 				return true;
 			}
+			else if (args[0].equalsIgnoreCase("print"))
+			{
+				//Console can't use print command.
+				if (console != null)
+					return msgLib.errorConsoleCantUseCommand();
+				
+				msgLib.standardHeader("Location Information");
+				msgLib.displayLocation("Selection 1",FC_Rpg.sv.getBlockLoc1(player));
+				msgLib.displayLocation("Selection 1",FC_Rpg.sv.getBlockLoc2(player));
+				msgLib.displayLocation("Your Location",player.getLocation());
+				
+				return true;
+			}
 			
 			//Commands that require a dungeon number and 1 argument.
 			if (args[1].equalsIgnoreCase(""))
@@ -708,18 +726,10 @@ public class CommandGod implements CommandExecutor
 			else
 				try { dungeonNumber = Integer.valueOf(args[1]) - 1; } catch (NumberFormatException e) { }
 			
-			if (args[0].equalsIgnoreCase("name"))
-			{
-				if (dungeonNumber == -1 || args[2] == null)
-					return msgLib.errorInvalidCommand();
-				
-				dc.setName(dungeonNumber, args[2]);
-				return msgLib.successCommand();
-			}
 			//1 argument commands.
-			else if (args[0].equalsIgnoreCase("new"))
+			if (args[0].equalsIgnoreCase("new"))
 			{
-				dc.addNewDungeon(args[1]);
+				FC_Rpg.dungeonConfig.addNewDungeon(args[1]);
 				return msgLib.successCommand();
 			}
 			
@@ -798,116 +808,6 @@ public class CommandGod implements CommandExecutor
 				return true;
 			}
 			
-			//Commands can't be used by console
-			if (console != null)
-				return msgLib.errorConsoleCantUseCommand();
-			
-			if (args[0].equalsIgnoreCase("ranges"))
-			{
-				Location loc1 = FC_Rpg.sv.getBlockLoc1(player);
-				Location loc2 = FC_Rpg.sv.getBlockLoc2(player);
-				int index;
-				
-				if (loc1 == null || loc2 == null)
-					return msgLib.errorInvalidSelection();
-				
-				index = dc.setRange1(dungeonNumber, loc1.getWorld().getName(), loc1.getX(), loc1.getY(), loc1.getZ(), loc1.getYaw(), loc1.getPitch());
-				dc.setRange2(dungeonNumber, index, loc2.getWorld().getName(), loc2.getX(), loc2.getY(), loc2.getZ(), loc2.getYaw(), loc2.getPitch());
-				
-				return msgLib.successCommand();
-			}
-			
-			else if (args[0].equalsIgnoreCase("lobby"))
-			{
-				if (console != null)
-					return msgLib.errorConsoleCantUseCommand();
-				
-				Location pLoc = player.getLocation();
-				
-				dc.setLobby(dungeonNumber, pLoc.getWorld().getName(), pLoc.getX(), pLoc.getY(), pLoc.getZ(), pLoc.getPitch(), pLoc.getYaw());
-				return msgLib.successCommand();
-			}
-			
-			else if (args[0].equalsIgnoreCase("playerStart"))
-			{
-				if (console != null)
-					return msgLib.errorConsoleCantUseCommand();
-				
-				Location pLoc = player.getLocation();
-				
-				dc.setStart(dungeonNumber, pLoc.getWorld().getName(), pLoc.getX(), pLoc.getY(), pLoc.getZ(), pLoc.getPitch(), pLoc.getYaw());
-				return msgLib.successCommand();
-			}
-			
-			else if (args[0].equalsIgnoreCase("playerEnd"))
-			{
-				if (console != null)
-					return msgLib.errorConsoleCantUseCommand();
-				
-				Location pLoc = player.getLocation();
-				
-				dc.setExit(dungeonNumber, pLoc.getWorld().getName(), pLoc.getX(), pLoc.getY(), pLoc.getZ(), pLoc.getPitch(), pLoc.getYaw());
-				return msgLib.successCommand();
-			}
-			
-			else if (args[0].equalsIgnoreCase("boss"))
-			{
-				if (console != null)
-					return msgLib.errorConsoleCantUseCommand();
-				
-				Location pLoc = player.getLocation();
-				
-				dc.setBossSpawn(dungeonNumber, pLoc.getWorld().getName(), pLoc.getX(), pLoc.getY(), pLoc.getZ(), pLoc.getPitch(), pLoc.getYaw());
-				return msgLib.successCommand();
-			}
-			
-			else if (args[0].equalsIgnoreCase("treasure"))
-			{
-				if (console != null)
-					return msgLib.errorConsoleCantUseCommand();
-				
-				Location pLoc = player.getLocation();
-				
-				dc.setTreasureChest(dungeonNumber, pLoc.getWorld().getName(), pLoc.getX(), pLoc.getY(), pLoc.getZ(), pLoc.getPitch(), pLoc.getYaw());
-				return msgLib.successCommand();
-			}
-			
-			//Commands that require a second part.
-			if (args[2].equalsIgnoreCase(""))
-				return msgLib.helpDungeon();
-			
-			if (args[0].equalsIgnoreCase("cost"))
-			{
-				try { dc.setCost(dungeonNumber, Double.valueOf(args[2])); } catch (NumberFormatException e) { return msgLib.errorInvalidCommand(); }
-				return msgLib.successCommand();
-			}
-			
-			else if (args[0].equalsIgnoreCase("lmin"))
-			{
-				try { dc.setLevelMin(dungeonNumber, Integer.valueOf(args[2])); } catch (NumberFormatException e) { return msgLib.errorInvalidCommand(); }
-				return msgLib.successCommand();
-			}
-			
-			else if (args[0].equalsIgnoreCase("lmax"))
-			{
-				try { dc.setLevelMax(dungeonNumber, Integer.valueOf(args[2])); } catch (NumberFormatException e) { return msgLib.errorInvalidCommand(); }
-				return msgLib.successCommand();
-			}
-			
-			else if (args[0].equalsIgnoreCase("spawncount"))
-			{
-				try { dc.setSpawnCount(dungeonNumber, Integer.valueOf(args[2])); } catch (NumberFormatException e) { return msgLib.errorInvalidCommand(); }
-				return msgLib.successCommand();
-			}
-			
-			//Commands that require a third part.
-			if (args[3].equalsIgnoreCase(""))
-				return msgLib.helpDungeonDefinition();
-			else if (args[0].equalsIgnoreCase("spawnchance"))
-				dc.setSpawnChance(dungeonNumber, Integer.valueOf(args[2]), Integer.valueOf(args[3]));
-			else
-				return msgLib.helpDungeonDefinition();
-			
 			//Dungeon help.
 			return msgLib.successCommand();
 	    }
@@ -935,20 +835,21 @@ public class CommandGod implements CommandExecutor
 			if (console != null)
 				return msgLib.errorConsoleCantUseCommand();
 			
+			if (!perms.isAdmin())
+				return msgLib.errorNoPermission();
+			
 			//Variable Declaration
 			boolean useG = false;
 			boolean useH = false;
-			boolean canG = perms.commandG();
-			boolean canH = perms.commandH();
 			
 			//Evaluate what the player wants to use and ensure that the player has permission.
-			if (commandName.equalsIgnoreCase("g") && canG)
+			if (commandName.equalsIgnoreCase("g"))
 				useG = true;
 			
-			else if (commandName.equalsIgnoreCase("h") && canH)
+			else if (commandName.equalsIgnoreCase("h"))
 				useH = true;
 			
-			else if ((commandName.equalsIgnoreCase("gh") || commandName.equalsIgnoreCase("hg")) && (canG && canH))
+			else if ((commandName.equalsIgnoreCase("gh") || commandName.equalsIgnoreCase("hg")))
 			{
 				useG = true;
 				useH = true;
@@ -1568,7 +1469,7 @@ public class CommandGod implements CommandExecutor
 		
 		public boolean execute()
 		{
-			if (!perms.commandModify())
+			if (!perms.isAdmin())
 				return msgLib.errorNoPermission();
 			
 			//THE ALMIGHTTY MODIFY COMMAND.
@@ -1641,7 +1542,7 @@ public class CommandGod implements CommandExecutor
 				else if (modifable.equalsIgnoreCase("class"))
 				{
 					if (intArg2 >= 0 && intArg2 < FC_Rpg.classConfig.getRpgClasses().length)
-						playerFile.setCombatClass(intArg2);
+						playerFile.setCombatClass(intArg2 - 1);
 				}
 				else if (modifable.equalsIgnoreCase("jobRank"))
 					playerFile.setJobRank(intArg2);
@@ -1688,15 +1589,15 @@ public class CommandGod implements CommandExecutor
 			//Variable declarations.
 			int eventLength = 3600;
 			
+			//Only let active players use this command.
+			if (isActive == false)
+				return msgLib.errorCreateCharacter();
+			
 			//We want to send help on empty commands.
 			if (args[0].equalsIgnoreCase(""))
 				return msgLib.helpRpg();
 			else if (args[0].equalsIgnoreCase("admin"))
 				return msgLib.helpAdmin();
-			
-			//Only let active players use this command.
-			if (isActive == false)
-				return msgLib.errorCreateCharacter();
 			
 			//Handle admin commands with /rpg.
 			if (!perms.isAdmin())
@@ -2093,7 +1994,7 @@ public class CommandGod implements CommandExecutor
 				if (rpgPlayer.getPlayerConfig().getSpellLevels().get(i) > 0)
 				{
 					msg[5] = " [MC]: ";
-					msg[6] = String.valueOf(rpgPlayer.getPlayerConfig().getRpgClass().getSpell(i).getManaCost().get(spellLevel));
+					msg[6] = String.valueOf(rpgPlayer.getPlayerConfig().getRpgClass().getSpell(i).getManaCost().get(spellLevel-1));
 				}
 				else
 				{
@@ -2213,7 +2114,7 @@ public class CommandGod implements CommandExecutor
 		
 		public boolean execute()
 		{
-			if (!perms.commandWarp())
+			if (!perms.isAdmin())
 				return msgLib.errorNoPermission();
 			
 			wc = new WarpConfig();
@@ -2408,30 +2309,30 @@ public class CommandGod implements CommandExecutor
 	public class BuffCE
 	{
 		Map<String, PotionEffect> peMap;
+		Player target;
 		
 		public BuffCE() {  }
 		
 		public boolean execute()
 		{
-			initializePEMap();
+			if (!perms.commandBuff())
+				return msgLib.errorNoPermission();
 			
 			//Make sure the starting argument isn't empty.
 			if (args[0].equals(""))
+				return msgLib.helpBuff();
+			
+			initializePEMap();
+			
+			if (args[0].equalsIgnoreCase("random"))
 			{
-				if (perms.commandBuff() || perms.commandBuffSelf())
-					return msgLib.helpBuff();
-				else
-					msgLib.errorNoPermission();
+				if (console != null)
+					return msgLib.errorConsoleCantUseCommand();
+				
+				return randomSubCommand();
 			}
 			
-			if (args[0].equalsIgnoreCase("self"))
-			{
-				if (!perms.commandBuffSelf())
-					return msgLib.errorNoPermission();
-				
-				return selfSubCommand();
-			}
-			else
+			if (perms.isAdmin())
 			{
 				//Check permission.
 				if (!perms.commandBuff())
@@ -2442,56 +2343,52 @@ public class CommandGod implements CommandExecutor
 					return allSubCommand();
 				
 				else if (args[0].equalsIgnoreCase("clear"))
+				{
+					if (updateTarget() == false)
+						return true;
+					
 					return clearSubCommand();
+				}
+				else if (args[0].equalsIgnoreCase("max"))
+				{
+					if (updateTarget() == false)
+						return true;
+					
+					return maxSubCommand();
+				}
 			}
 			
 			return msgLib.errorInvalidCommand();
 		}
 		
-		private void initializePEMap()
-		{
-			peMap = new HashMap<String, PotionEffect>();
-			
-			peMap.put("jump", new PotionEffect(PotionEffectType.JUMP, getRandomDuration(), getRandomPotionStrength()));
-			peMap.put("speed", new PotionEffect(PotionEffectType.SPEED, getRandomDuration(), getRandomPotionStrength()));
-			peMap.put("regeneration", new PotionEffect(PotionEffectType.REGENERATION, getRandomDuration(), getRandomPotionStrength()));
-			peMap.put("fireresistance", new PotionEffect(PotionEffectType.FIRE_RESISTANCE, getRandomDuration(), getRandomPotionStrength()));
-			peMap.put( "fastdigging", new PotionEffect(PotionEffectType.FAST_DIGGING, getRandomDuration(), getRandomPotionStrength()));
-			peMap.put("increasedamage", new PotionEffect(PotionEffectType.INCREASE_DAMAGE, getRandomDuration(), getRandomPotionStrength()));
-			peMap.put("damageresistance", new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, getRandomDuration(), getRandomPotionStrength()));
-			peMap.put( "heal", new PotionEffect(PotionEffectType.HEAL, getRandomDuration(), getRandomPotionStrength()));
-			peMap.put("invisibility", new PotionEffect(PotionEffectType.INVISIBILITY, getRandomDuration(), getRandomPotionStrength()));
-			peMap.put("nightvision", new PotionEffect(PotionEffectType.NIGHT_VISION, getRandomDuration(), getRandomPotionStrength()));
-			peMap.put("waterbreathing", new PotionEffect(PotionEffectType.WATER_BREATHING, getRandomDuration(), getRandomPotionStrength()));
-			peMap.put("slow", new PotionEffect(PotionEffectType.SLOW, getRandomDuration(), getRandomPotionStrength()));
-			peMap.put("blindness", new PotionEffect(PotionEffectType.BLINDNESS, getRandomDuration(), getRandomPotionStrength()));
-			peMap.put("poison", new PotionEffect(PotionEffectType.POISON, getRandomDuration(), getRandomPotionStrength()));
-			peMap.put("confusion", new PotionEffect(PotionEffectType.CONFUSION, getRandomDuration(), getRandomPotionStrength()));
-			peMap.put("hunger", new PotionEffect(PotionEffectType.HUNGER, getRandomDuration(), getRandomPotionStrength()));
-			peMap.put("harm", new PotionEffect(PotionEffectType.HARM, getRandomDuration(), getRandomPotionStrength()));
-			peMap.put("slowdigging", new PotionEffect(PotionEffectType.SLOW_DIGGING, getRandomDuration(), getRandomPotionStrength()));
-			peMap.put("weakness", new PotionEffect(PotionEffectType.WEAKNESS, getRandomDuration(), getRandomPotionStrength()));
-		}
-		
-		private boolean selfSubCommand()
+		private boolean randomSubCommand()
 		{
 			PotionEffect pickedPE = getRandomPotionEffect();
 			
 			//Lets admin put potions on theirself.
-			if (!args[1].equals("") && !args[2].equals("") && !args[3].equals(""))
-				try { pickedPE = new PotionEffect(PotionEffectType.getByName(args[1]), Integer.valueOf(args[2]), Integer.valueOf(args[3])); } catch (NumberFormatException e) { }
+			if (perms.isAdmin())
+			{
+				if (!args[1].equals("") && !args[2].equals("") && !args[3].equals(""))
+					try { pickedPE = new PotionEffect(PotionEffectType.getByName(args[1]), Integer.valueOf(args[2]), Integer.valueOf(args[3])); } catch (NumberFormatException e) { }
+				
+				if (updateTarget() == false)
+					return true;
+			}
+			else
+			{
+				FC_Rpg.economy.withdrawPlayer(player.getName(), FC_Rpg.generalConfig.getBuffCommandCost());
+				
+				target = player;
+			}
 			
 			//Add the potion effect.
-			player.addPotionEffect(pickedPE);
+			target.addPotionEffect(pickedPE);
 			
 			return msgLib.successCommand();
 		}
 		
 		public boolean allSubCommand()
 		{
-			if (!perms.isAdmin())
-				return msgLib.errorNoPermission();
-			
 			for (Player p : Bukkit.getServer().getOnlinePlayers())
 				p.addPotionEffect(getRandomPotionEffect());
 			
@@ -2502,21 +2399,50 @@ public class CommandGod implements CommandExecutor
 		
 		private boolean clearSubCommand()
 		{
-			if (!perms.isAdmin())
-				return msgLib.errorNoPermission();
-			
-			Player target = player;
-			
-			if (!args[1].equals(""))
-			{
-				if (Bukkit.getServer().getPlayer(args[1]) != null)
-					target = Bukkit.getServer().getPlayer(args[1]);
-			}
+			if (updateTarget() == false)
+				return true;
 			
 			for (PotionEffect p : target.getActivePotionEffects()) 
 				target.removePotionEffect(p.getType());
 			
 			return msgLib.standardMessage("Successfully cleared all buffs on player &p" + target.getName() + "&p!");
+		}
+		
+		private boolean maxSubCommand()
+		{
+			if (updateTarget() == false)
+				return true;
+			
+			for (PotionEffect p : peMap.values()) 
+				target.addPotionEffect(p);
+			
+			return msgLib.standardMessage("Successfully put all buffs player &p" + target.getName() + "&p!");
+		}
+		
+		private boolean updateTarget()
+		{
+			if (!args[1].equals(""))
+			{
+				if (Bukkit.getServer().getPlayer(args[1]) != null)
+					target = Bukkit.getServer().getPlayer(args[1]);
+				else
+				{
+					msgLib.errorPlayerNotFound();
+					return false;
+				}
+			}
+			else
+			{
+				if (player != null)
+					target = player;
+				else if (console != null)
+				{
+					msgLib.errorConsoleCantUseCommand();
+					return false;
+				}
+			}
+			
+			return true;
 		}
 		
 		private PotionEffect getRandomPotionEffect()
@@ -2531,6 +2457,7 @@ public class CommandGod implements CommandExecutor
 			return itr.next();
 		}
 		
+		
 		private int getRandomDuration()
 		{
 			Random rand = new Random();
@@ -2541,6 +2468,29 @@ public class CommandGod implements CommandExecutor
 		{
 			Random rand = new Random();
 			return rand.nextInt(3) + 1;	//rand.nextInt((maxStrength - 1)) + 1;
+		}
+		
+		private void initializePEMap()
+		{
+			peMap = new HashMap<String, PotionEffect>();
+			
+			peMap.put("jump", new PotionEffect(PotionEffectType.JUMP, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("speed", new PotionEffect(PotionEffectType.SPEED, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("regeneration", new PotionEffect(PotionEffectType.REGENERATION, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("fireresistance", new PotionEffect(PotionEffectType.FIRE_RESISTANCE, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("fastdigging", new PotionEffect(PotionEffectType.FAST_DIGGING, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("increasedamage", new PotionEffect(PotionEffectType.INCREASE_DAMAGE, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("damageresistance", new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("invisibility", new PotionEffect(PotionEffectType.INVISIBILITY, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("nightvision", new PotionEffect(PotionEffectType.NIGHT_VISION, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("waterbreathing", new PotionEffect(PotionEffectType.WATER_BREATHING, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("slow", new PotionEffect(PotionEffectType.SLOW, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("blindness", new PotionEffect(PotionEffectType.BLINDNESS, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("poison", new PotionEffect(PotionEffectType.POISON, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("confusion", new PotionEffect(PotionEffectType.CONFUSION, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("hunger", new PotionEffect(PotionEffectType.HUNGER, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("slowdigging", new PotionEffect(PotionEffectType.SLOW_DIGGING, getRandomDuration(), getRandomPotionStrength()));
+			peMap.put("weakness", new PotionEffect(PotionEffectType.WEAKNESS, getRandomDuration(), getRandomPotionStrength()));
 		}
 	}
 	

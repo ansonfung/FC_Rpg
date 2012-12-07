@@ -133,7 +133,7 @@ public class PvpEvent extends GeneralEvent
 		bLib.standardBroadcast("Want $" + rewardAmount + "? Join The Pvp Event Starting In [60] seconds! Type: '/pvp join' To Enter!");
 		
 		//After 30 seconds announce 30 seconds to join.
-		Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable() 
+		Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable() 
 		{ 
 			@Override
 			public void run()
@@ -144,7 +144,7 @@ public class PvpEvent extends GeneralEvent
 		}, 600);
 		
 		//After 30 seconds start the  lobby phase.
-		Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable() 
+		Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable() 
 		{ 
 			@Override
 			public void run()
@@ -206,7 +206,7 @@ public class PvpEvent extends GeneralEvent
 		messageAllParticipants("The Fight Begins In [30] Seconds, Prepare Yourself!");
 		
 		//Begin the pvp phase after 30 seconds
-		Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable() 
+		Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable() 
 		{ 
 			@Override
 			public void run()
@@ -260,7 +260,7 @@ public class PvpEvent extends GeneralEvent
 		//Announce every 30 seconds the amount of time left for the pvp event.
 		
 		//30 second warning
-		Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable() 
+		Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable() 
 		{ 
 			@Override
 			public void run()
@@ -271,7 +271,7 @@ public class PvpEvent extends GeneralEvent
 		}, 600);
 		
 		//60 second warning
-		Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable() 
+		Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable() 
 		{ 
 			@Override
 			public void run()
@@ -282,7 +282,7 @@ public class PvpEvent extends GeneralEvent
 		}, 1200);
 		
 		//90 second warning
-		Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable() 
+		Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable() 
 		{ 
 			@Override
 			public void run()
@@ -294,7 +294,7 @@ public class PvpEvent extends GeneralEvent
 		
 		
 		//After two minutes we want to teleport everybody out of the arena.
-		Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable() 
+		Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable() 
 		{ 
 			@Override
 			public void run()

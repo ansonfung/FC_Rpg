@@ -35,6 +35,7 @@ import me.Destro168.FC_Rpg.Util.DistanceModifierLib;
 import me.Destro168.FC_Rpg.Util.FC_RpgPermissions;
 import me.Destro168.FC_Rpg.Util.HealthConverter;
 import me.Destro168.FC_Rpg.Util.MaterialLib;
+import me.Destro168.FC_Suite_Shared.AutoUpdate;
 import me.Destro168.FC_Suite_Shared.ColorLib;
 import me.Destro168.FC_Suite_Shared.SelectionVector;
 import me.Destro168.FC_Suite_Shared.Messaging.BroadcastLib;
@@ -100,6 +101,7 @@ public class FC_Rpg extends JavaPlugin
 	public static TreasureConfig treasureConfig;
 	public static WarpConfig warpConfig;
 	public static BalanceConfig balanceConfig;
+	public static DungeonConfig dungeonConfig;
 	
 	public static ColorLib cl = new ColorLib();
 	public static PvpEvent pvp;
@@ -141,7 +143,7 @@ public class FC_Rpg extends JavaPlugin
 			if (dungeonEventArray[FC_Rpg.trueDungeonNumbers.get(i)].isHappening() == true)
 				dungeonEventArray[FC_Rpg.trueDungeonNumbers.get(i)].end(false);
 		}
-
+		
 		this.getLogger().info("Disabled");
 	}
 
@@ -157,6 +159,12 @@ public class FC_Rpg extends JavaPlugin
 		sv = new SelectionVector();
 		battleCalculations = new BattleCalculations();
 		generalConfig = new GeneralConfig();
+		
+		try {
+			new AutoUpdate(this);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		//Initialize a few things to let them attempt to generate configurations.
 		@SuppressWarnings("unused")
@@ -175,6 +183,7 @@ public class FC_Rpg extends JavaPlugin
 		treasureConfig = new TreasureConfig();
 		warpConfig = new WarpConfig();
 		balanceConfig = new BalanceConfig();
+		dungeonConfig = new DungeonConfig();
 		
 		// Set up the economy.
 		setupEconomy();
@@ -230,7 +239,7 @@ public class FC_Rpg extends JavaPlugin
 		getCommand("world").setExecutor(commandCE);
 		
 		// Handle tasks that happen every 30 minutes. Delay'd by 5 seconds.
-		Bukkit.getScheduler().scheduleAsyncRepeatingTask(this, new Runnable()
+		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable()
 		{
 			@Override
 			public void run()
@@ -252,7 +261,6 @@ public class FC_Rpg extends JavaPlugin
 	private void initializeDungeons()
 	{
 		// Variable Declarations/Initializations
-		DungeonConfig dm = new DungeonConfig();
 		String ref = "";
 		int count = 0;
 		trueDungeonNumbers = new HashMap<Integer, Integer>();
@@ -260,8 +268,8 @@ public class FC_Rpg extends JavaPlugin
 		// Attempt to store all dungeon names.
 		for (int i = 0; i < 1000; i++)
 		{
-			ref = dm.getName(i);
-
+			ref = FC_Rpg.dungeonConfig.getName(i);
+			
 			if (ref != null)
 			{
 				trueDungeonNumbers.put(i, count);
@@ -600,7 +608,7 @@ public class FC_Rpg extends JavaPlugin
 			// Variable Declarations
 			final Player player = event.getPlayer();
 
-			Bukkit.getServer().getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable()
+			Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
 			{
 				@Override
 				public void run()
@@ -638,10 +646,10 @@ public class FC_Rpg extends JavaPlugin
 			DistanceModifierLib dmm = null;
 			HealthConverter hc = null;
 			WorldConfig wm = new WorldConfig();
-
+			
 			if (!wm.getIsRpgWorld(entity.getWorld().getName()))
 				return;
-
+			
 			// Deal damage to the defender but the defender isn't type Player. The defender is type RpgEntity.
 			if (entity instanceof Player)
 			{
@@ -649,35 +657,35 @@ public class FC_Rpg extends JavaPlugin
 
 				// Cancel the event.
 				event.setCancelled(true);
-
+				
 				// Set the magnitude to heal by the players max health.
 				magnitudeModifier = rpgEntityManager.getRpgPlayer(player).getMaxHealth();
-
+				
 				// Heal the player different amounts for different things.
 				if (event.getRegainReason() == RegainReason.EATING)
 				{
-					magnitudeModifier = magnitudeModifier / 20; // 5%
+					magnitudeModifier = magnitudeModifier * FC_Rpg.balanceConfig.getHealPercentEating(); // 5%
 				}
 				else if (event.getRegainReason() == RegainReason.MAGIC)
 				{
-					magnitudeModifier = magnitudeModifier / 4; // 25%
+					magnitudeModifier = magnitudeModifier * FC_Rpg.balanceConfig.getHealPercentMagic(); // 25%
 				}
 				else if (event.getRegainReason() == RegainReason.MAGIC_REGEN)
 				{
-					magnitudeModifier = magnitudeModifier / 20; // 5%
+					magnitudeModifier = magnitudeModifier * FC_Rpg.balanceConfig.getHealPercentMagicRegen(); // 5%
 				}
 				else if (event.getRegainReason() == RegainReason.SATIATED)
 				{
-					magnitudeModifier = magnitudeModifier / 50; // 2%
+					magnitudeModifier = magnitudeModifier * FC_Rpg.balanceConfig.getHealPercentSatiated(); // 2%
 				}
-
+				
 				// Make sure to heal at least one
 				if (magnitudeModifier < 1)
 					magnitudeModifier = 1;
-
+				
 				// Restore health/mana to the player
 				rpgEntityManager.getRpgPlayer(player).restoreHealth(magnitudeModifier);
-
+				
 				// Update health
 				hc = new HealthConverter(rpgEntityManager.getRpgPlayer(player).getMaxHealth(), rpgEntityManager.getRpgPlayer(player).getCurHealth());
 				
@@ -687,7 +695,7 @@ public class FC_Rpg extends JavaPlugin
 			{
 				// Cancel the event.
 				event.setCancelled(true);
-
+				
 				// Find the attacker and deal damage from the attack to the defender.
 				dmm = new DistanceModifierLib();
 
@@ -700,19 +708,19 @@ public class FC_Rpg extends JavaPlugin
 					if (rpgEntityManager.getRpgMonster((LivingEntity) entity) != null)
 						rpgEntityManager.getRpgMonster((LivingEntity) entity).restoreHealth(MAX_HP);
 				}
-
+				
 				else if (event.getRegainReason() == RegainReason.MAGIC)
 				{
 					if (rpgEntityManager.getRpgMonster((LivingEntity) entity) != null)
 						rpgEntityManager.getRpgMonster((LivingEntity) entity).restoreHealth(magnitudeModifier * 5);
 				}
-
+				
 				else if (event.getRegainReason() == RegainReason.MAGIC_REGEN)
 				{
 					if (rpgEntityManager.getRpgMonster((LivingEntity) entity) != null)
 						rpgEntityManager.getRpgMonster((LivingEntity) entity).restoreHealth(magnitudeModifier);
 				}
-
+				
 				else if (event.getRegainReason() == RegainReason.WITHER_SPAWN)
 				{
 					if (rpgEntityManager.getRpgMonster((LivingEntity) entity) == null)
@@ -721,7 +729,7 @@ public class FC_Rpg extends JavaPlugin
 					rpgEntityManager.getRpgMonster((LivingEntity) entity).restoreHealth(999999999);
 					((LivingEntity) entity).setHealth(300);
 				}
-
+				
 				else if (event.getRegainReason() == RegainReason.WITHER)
 				{
 					if (rpgEntityManager.getRpgMonster((LivingEntity) entity) != null)
@@ -779,6 +787,9 @@ public class FC_Rpg extends JavaPlugin
 		@EventHandler(priority = EventPriority.HIGHEST)
 		public void onCreaturespawn(CreatureSpawnEvent event)
 		{
+			if (event.isCancelled() == true)
+				return;
+			
 			//If not an rpg world, cancel.
 			if (!worldConfig.getIsMobWorld(event.getEntity().getWorld().getName()) == false)
 				return;
@@ -876,7 +887,7 @@ public class FC_Rpg extends JavaPlugin
 					equipment.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, rand.nextInt(4) + 1);
 				
 				else if (refNumber == 4)
-					equipment.addEnchantment(Enchantment.DAMAGE_ALL, rand.nextInt(4) + 1);
+					equipment.addEnchantment(Enchantment.DAMAGE_ARTHROPODS, rand.nextInt(5) + 1);
 			}
 			
 			return equipment;

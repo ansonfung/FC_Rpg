@@ -93,16 +93,6 @@ public class FC_RpgPermissions extends PermissionManager
 		return getCanUseCommand("FC_Rpg.command.donator");
 	}
 	
-	public boolean commandG()
-	{
-		return getCanUseCommand("FC_Rpg.command.g");
-	}
-	
-	public boolean commandH()
-	{
-		return getCanUseCommand("FC_Rpg.command.h");
-	}
-	
 	public boolean commandHat()
 	{
 		return getCanUseCommand("FC_Rpg.command.hat");
@@ -133,11 +123,6 @@ public class FC_RpgPermissions extends PermissionManager
 		return getCanUseCommand("FC_Rpg.command.reset");
 	}
 	
-	public boolean commandModify()
-	{
-		return getCanUseCommand("FC_Rpg.command.modify");
-	}
-	
 	public boolean commandRpg()
 	{
 		return getCanUseCommand("FC_Rpg.command.rpg");
@@ -148,24 +133,9 @@ public class FC_RpgPermissions extends PermissionManager
 		return getCanUseCommand("FC_Rpg.command.spell");
 	}
 	
-	public boolean commandWarp()
-	{
-		return getCanUseCommand("FC_Rpg.command.warp");
-	}
-	
 	public boolean commandBuff()
 	{
 		return getCanUseCommand("FC_Rpg.command.buff");
-	}
-	
-	public boolean commandBuffSelf()
-	{
-		return getCanUseCommand("FC_Rpg.command.buff.self");
-	}
-	
-	public boolean commandWorld()
-	{
-		return getCanUseCommand("FC_Rpg.command.world");
 	}
 	
 	private boolean getCanUseCommand(String checkPerm)

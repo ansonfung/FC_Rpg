@@ -1,7 +1,6 @@
 package me.Destro168.FC_Rpg.Listeners;
 
 import me.Destro168.FC_Rpg.FC_Rpg;
-import me.Destro168.FC_Rpg.Configs.DungeonConfig;
 import me.Destro168.FC_Rpg.Configs.WarpConfig;
 import me.Destro168.FC_Rpg.Configs.WorldConfig;
 import me.Destro168.FC_Rpg.Entities.RpgPlayer;
@@ -352,14 +351,13 @@ public class PlayerInteractionListener implements Listener
 	private void dungeonTeleport(String text, int dNumber)
 	{
 		//Dungeon lobby
-		DungeonConfig dm = new DungeonConfig();
 		
 		//If we have a dungeon exit symbol, then,
 		if (text.contains("-"))
 		{
-			teleportMessage("You Have Exited The Dungeon " + dm.getName(dNumber) + "!","");
+			teleportMessage("You Have Exited The Dungeon " + FC_Rpg.dungeonConfig.getName(dNumber) + "!","");
 			FC_Rpg.dungeonEventArray[dNumber].removeDungeoneer(player, player,true);
-			player.teleport(dm.getExit(dNumber));
+			player.teleport(FC_Rpg.dungeonConfig.getExit(dNumber));
 			
 			//Also return for exiting.
 			return;
@@ -374,7 +372,7 @@ public class PlayerInteractionListener implements Listener
 		
 		if (dungeon.getPhase() == 0 || dungeon.getPhase() == 1)
 		{
-			double payAmount = dm.getCost(dNumber);
+			double payAmount = FC_Rpg.dungeonConfig.getEntryFee(dNumber);
 			
 			//Attempt to pay.
 			if (attemptPay(payAmount) == false)
@@ -388,10 +386,10 @@ public class PlayerInteractionListener implements Listener
 				return;
 			
 			//Welcome them.
-			teleportMessage("Welcome To The Dungeon " + dm.getName(dNumber) + "! ", "$" + payAmount + " Deducted.");
+			teleportMessage("Welcome To The Dungeon " + FC_Rpg.dungeonConfig.getName(dNumber) + "! ", "$" + payAmount + " Deducted.");
 			
 			//Teleport them to the lobby.
-			player.teleport(dm.getLobby(dNumber));
+			player.teleport(FC_Rpg.dungeonConfig.getLobby(dNumber));
 		}
 		else if (dungeon.getPhase() != 1)
 		{

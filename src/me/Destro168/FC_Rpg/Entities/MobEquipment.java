@@ -1,10 +1,10 @@
 package me.Destro168.FC_Rpg.Entities;
 
-import org.bukkit.entity.LivingEntity;
 import net.minecraft.server.EntityLiving;
 
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.entity.LivingEntity;
 
 public class MobEquipment
 {
@@ -25,7 +25,7 @@ public class MobEquipment
 		net.minecraft.server.ItemStack itemStack = ((CraftItemStack) toCraftBukkit(item)).getHandle();
 		ent.setEquipment(0, itemStack);
 	}
-
+	
 	public static void setHelmet(LivingEntity mob, org.bukkit.inventory.ItemStack item)
 	{
 		if (item == null)

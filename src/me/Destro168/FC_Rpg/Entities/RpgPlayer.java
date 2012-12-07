@@ -386,7 +386,7 @@ public class RpgPlayer extends RpgEntity
 		//Recalculate health and mana.
 		calculateHealthAndMana();
 		
-		Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable() 
+		Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable() 
 		{
 			@Override
 			public void run()
@@ -1179,10 +1179,10 @@ public class RpgPlayer extends RpgEntity
 	{
 		FC_RpgPermissions perms = new FC_RpgPermissions(player);
 		
-		if (playerConfig.isDonator() == true)
+		if (playerConfig.isDonator())
 			return true;
 		
-		if (perms.isAdmin() == true)
+		if (perms.isAdmin())
 			return true;
 		
 		return false;

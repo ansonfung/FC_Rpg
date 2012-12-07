@@ -47,7 +47,7 @@ public class RpgEntityManager
 			if (rpgPlayer.getPlayerConfig().getIsActive() == false)
 				return;
 			
-			updateTask = Bukkit.getScheduler().scheduleAsyncRepeatingTask(FC_Rpg.plugin, new Runnable()
+			updateTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(FC_Rpg.plugin, new Runnable()
 			{
 				@Override
 				public void run()
@@ -74,7 +74,7 @@ public class RpgEntityManager
 				return;
 			
 			//Start a new mana regeneration.
-			manaTask = Bukkit.getScheduler().scheduleAsyncRepeatingTask(FC_Rpg.plugin, new Runnable()
+			manaTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(FC_Rpg.plugin, new Runnable()
 			{
 				public void run()
 				{

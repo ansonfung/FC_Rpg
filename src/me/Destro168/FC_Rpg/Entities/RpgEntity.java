@@ -62,7 +62,7 @@ public class RpgEntity
 		
 		summon.add(entity);
 		
-		summonTIDMap.put(entity, Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable()
+		summonTIDMap.put(entity, Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
 		{
 			public void run()
 			{

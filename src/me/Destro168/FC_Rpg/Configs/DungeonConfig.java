@@ -1,26 +1,34 @@
 package me.Destro168.FC_Rpg.Configs;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import me.Destro168.FC_Suite_Shared.ConfigManagers.ConfigGod;
+import me.Destro168.FC_Suite_Shared.ConfigManagers.ListGetter;
 import me.Destro168.FC_Rpg.FC_Rpg;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.EntityType;
 
 public class DungeonConfig extends ConfigGod
 {
-	private WorldConfig wm;
+	private void setName(int dNum, String x) { fcw.set(getDP(dNum) + "name", x); }
+	private void setEntryFee(int dNum, double x) { fcw.set(getDP(dNum) + "entryFee", x); }
+	private void setTimerJoin(int dNum, int x) { fcw.set(getDP(dNum) + "timer.join", x); }
+	private void setTimerEnd(int dNum, int x) { fcw.set(getDP(dNum) + "timer.end", x); }
+	private void setMobsToSpawnCount(int dNum, int x) { fcw.set(getDP(dNum) + "mobsToSpawnCount", x); }
+	private void setPlayerLevelRequirementMinimum(int dNum, int x) { fcw.set(getDP(dNum) + "playerLevelRequirement.minimum", x); }
+	private void setPlayerLevelRequirementMaximum(int dNum, int x) { fcw.set(getDP(dNum) + "playerLevelRequirement.maximum", x); }
+	private void setLobby(int dNum, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"lobby",world,x,y,z,a,b); }
+	private void setStart(int dNum, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"start",world,x,y,z,a,b); }
+	private void setExit(int dNum, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"exit",world,x,y,z,a,b); }
+	private void setBossSpawn(int dNum, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"bossSpawn",world,x,y,z,a,b); }
 	
-	public void setName(int dNum, String x) { fcw.set(getDP(dNum) + "name", x); }
-	public void setCost(int dNum, double x) { fcw.set(getDP(dNum) + "cost", x); }
-	public void setSpawnCount(int dNum, int x) { fcw.set(getDP(dNum) + "spawnCount", x); }
-	public void setLevelMin(int dNum, int x) { fcw.set(getDP(dNum) + "levelMin", x); }
-	public void setLevelMax(int dNum, int x) { fcw.set(getDP(dNum) + "levelMax", x); }
-	public void setLobby(int dNum, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"lobby",world,x,y,z,a,b); }
-	public void setStart(int dNum, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"start",world,x,y,z,a,b); }
-	public void setExit(int dNum, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"exit",world,x,y,z,a,b); }
-	public void setBossSpawn(int dNum, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"bossSpawn",world,x,y,z,a,b); }
-	public void setTreasureChest(int dNum, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"treasure",world,x,y,z,a,b); }
-	public int setRange1(int dNum, String world, double x, double y, double z, float a, float b) 
+	private void setTreasureStart(int dNum, int index, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"treasure.start." + index,world,x,y,z,a,b); }
+	private void setTreasureEnd(int dNum, int index, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"treasure.end." + index,world,x,y,z,a,b); }
+	
+	private int setSpawnBox1(int dNum, String world, double x, double y, double z, float a, float b)
 	{
 		//Variable Declarations
 		int emptyIndex = 0;
@@ -29,52 +37,82 @@ public class DungeonConfig extends ConfigGod
 		try
 		{
 			//Store location 0.
-			loc = getLocation(dNum, "range1." + emptyIndex);
+			loc = getLocation(dNum, "spawnBox.selection1." + emptyIndex);
 			
 			//Make sure to put the new spawn point at the location.
 			while (loc != null)
 			{
 				emptyIndex++;
-				loc = getLocation(dNum, "range1." + emptyIndex);
+				loc = getLocation(dNum, "spawnBox.selection1." + emptyIndex);
 			}
 		}
 		catch (NullPointerException e) { }
 		
 		//Set the location
-		setLocation(dNum,"range1." + emptyIndex,world,x,y,z,a,b);
+		setLocation(dNum,"spawnBox.selection1." + emptyIndex,world,x,y,z,a,b);
 		
 		//Return an emptyIndex.
 		return emptyIndex;
 	}
-	public void setRange2(int dNum, int index, String world, double x, double y, double z, float a, float b) //The index is acquired from setMin()
+	private void setSpawnBox2(int dNum, int index, String world, double x, double y, double z, float a, float b) //The index is acquired from setMin()
 	{
-		String fullReferenceString = "range2." + index;
+		String fullReferenceString = "spawnBox.selection2." + index;
 		setLocation(dNum,fullReferenceString,world,x,y,z,a,b);
 	}
-	public void setSpawnChance(int dNum, int index, int x) //The index is acquired from setRange1()
+	private void setSpawnChance(int dNum, int index, int x)
 	{
-		fcw.set(getDP(dNum) + "spawnChance." + index, x);
+		fcw.set(getDP(dNum) + "spawnBox.spawnChance." + index, x);
+	}
+
+	private void setMobList(int dNum, int index, List<String> x)
+	{
+		fcw.setCustomList(getDP(dNum) + "spawnBox.mobList." + index, x);
 	}
 	
-	public String getName(int dNum) { return fcw.getString(getDP(dNum) + "name"); }
-	public double getCost(int dNum) { return fcw.getDouble(getDP(dNum) + "cost"); }
-	public int getSpawnCount(int dNum) { return fcw.getInt(getDP(dNum) + "spawnCount"); }
-	public int getLevelMin(int dNum) { return fcw.getInt(getDP(dNum) + "levelMin"); }
-	public int getLevelMax(int dNum) { return fcw.getInt(getDP(dNum) + "levelMax"); }
+	public void setLocation(int dNum, String field, String world, double x, double y, double z, float a, float b) { fcw.setLocation(getDP(dNum) + field, world, x, y, z, a, b); }
+	
+	public String getName(int dNum) { return fcw.getStringS(getDP(dNum) + "name"); }
+	public double getEntryFee(int dNum) { return fcw.getDoubleS(getDP(dNum) + "entryFee"); }
+	public int getTimerJoin(int dNum) { return fcw.getIntS(getDP(dNum) + "timer.join"); }
+	public int getTimerEnd(int dNum) { return fcw.getIntS(getDP(dNum) + "timer.end"); }
+	public int getMobsToSpawnCount(int dNum) { return fcw.getIntS(getDP(dNum) + "mobsToSpawnCount"); }
+	public int getPlayerLevelRequirementMinimum(int dNum) { return fcw.getIntS(getDP(dNum) + "playerLevelRequirement.minimum"); }
+	public int getPlayerLevelRequirementMaximum(int dNum) { return fcw.getIntS(getDP(dNum) + "playerLevelRequirement.maximum"); }
 	public Location getLobby(int dNum) { return getLocation(dNum,"lobby"); }
 	public Location getStart(int dNum) { return getLocation(dNum,"start"); }
 	public Location getExit(int dNum) { return getLocation(dNum,"exit"); }
 	public Location getBossSpawn(int dNum) { return getLocation(dNum,"bossSpawn"); }
-	public Location getTreasureChest(int dNum) { return getLocation(dNum,"treasure"); }
-	public Location getRange1(int dNum, int index) { return getLocation(dNum,"range1." + index); }
-	public Location getRange2(int dNum, int index) { return getLocation(dNum,"range2." + index); }
-	public int getSpawnChance(int dNum, int index) { return fcw.getInt(getDP(dNum) + "spawnChance." + index); }
+	public List<Location> getTreasureStart(int dNum) { ListGetter lg = new ListGetter(fcw, getDP(dNum) + "treasure.start"); return lg.getLocationList(); }
+	public List<Location> getTreasureEnd(int dNum) { ListGetter lg = new ListGetter(fcw, getDP(dNum) + "treasure.end"); return lg.getLocationList(); }
+	public Location getSpawnBox1(int dNum, int index) { return getLocation(dNum,"spawnBox.selection1." + index); }
+	public Location getSpawnBox2(int dNum, int index) { return getLocation(dNum,"spawnBox.selection2." + index); }
+	public int getSpawnChance(int dNum, int index) { return fcw.getIntS(getDP(dNum) + "spawnBox.spawnChance." + index); }
 	
-	public void setLocation(int dNum, String field, String world, double x, double y, double z, float a, float b)
+	public List<EntityType> getMobList(int dNum, int index) 
 	{
-		fcw.setLocation(getDP(dNum) + field, world, x, y, z, a, b);
+		List<String> entityTypeStringList = converter.getStringListFromString(fcw.getStringS(getDP(dNum) + "spawnBox.mobList." + index));
+		List<EntityType> entityTypeList = new ArrayList<EntityType>();
+		
+		for (String s : entityTypeStringList)
+		{
+			if (EntityType.fromName(s) == null)
+			{
+				FC_Rpg.plugin.getLogger().info("WARNING: " + s + " COULD NOT BE PARSED. Fix your moblist for this dungeon region.");
+				entityTypeList.clear();
+				entityTypeList.add(EntityType.ZOMBIE);
+				return entityTypeList;
+			}
+			
+			entityTypeList.add(EntityType.fromName(s));
+		}
+		
+		return entityTypeList;
 	}
+	
 	public Location getLocation(int dNum, String field) { return fcw.getLocation(getDP(dNum) + field); }
+	
+	//Get Dungeon Prefix
+	private String getDP(int dNum) { return prefix + dNum + "."; }
 	
 	public DungeonConfig()
 	{
@@ -84,52 +122,14 @@ public class DungeonConfig extends ConfigGod
 	
 	private void handleUpdates()
 	{
-		wm = new WorldConfig();
-		
-		String worldName = wm.getSpawnWorld().getName();
-		int maxIndex;
-		
-		if (getVersion() < 0.1)
+		//If no version established create new one.
+		if (getVersion() < 1.0)
 		{
-			setVersion(0.1);
+			setVersion(1.0);
 			
-			//Default Dungeon 1
-			setName(0,"Grasslands");
-			setCost(0,50);
-			setLevelMin(0,0);
-			setLevelMax(0,19);
-			setSpawnCount(0,50);
-			setLobby(0,worldName,134,83,11,270,0);
-			setStart(0,worldName,142.5,89,15.5,270,0);
-			setExit(0,worldName,128,84,15,270,0);
-			setBossSpawn(0,worldName,342,90,15.5,90,0);
-			setTreasureChest(0,worldName,344,87,15,0,0);
-			
-			maxIndex = setRange1(0,worldName,344.0,97.0,28.0,0.0F,0.0F);
-			setRange2(0,maxIndex,worldName,141.0,86.0,3.0,0.0F,0.0F);
-			setSpawnChance(0,maxIndex,100);
-			
-			setName(1,"Stronghold");
-			setCost(1,200);
-			setLevelMin(1,20);
-			setLevelMax(1,39);
-			setSpawnCount(1,50);
-			setLobby(1,worldName,134,83,-35,270,0);
-			setStart(1,worldName,149,98,-31.5,270,0);
-			setExit(1,worldName,128,84,-31,270,0);
-			setBossSpawn(1,worldName,351,114,-31.5,90,0);
-			setTreasureChest(1,worldName,354,114,-32,0,0);
-			
-			maxIndex = setRange1(1,worldName,352,100,-42,0,0);
-			setRange2(1,maxIndex,worldName,146,100,-21,0,0);
-			setSpawnChance(1,maxIndex,100);
+			//Add a default dungeon
+			addNewDungeon("Grasslands");
 		}
-	}
-	
-	//Get Dungeon Prefix
-	private String getDP(int dNum)
-	{
-		return prefix + dNum + ".";
 	}
 	
 	public int getSpawnRangeCount(int dungeonNumber)
@@ -140,7 +140,7 @@ public class DungeonConfig extends ConfigGod
 		{
 			try
 			{
-				getRange2(dungeonNumber, i);
+				getSpawnBox2(dungeonNumber, i);
 				count++;
 			}
 			catch (NullPointerException e)
@@ -161,19 +161,30 @@ public class DungeonConfig extends ConfigGod
 				String worldName = Bukkit.getServer().getWorlds().get(0).getName();
 				
 				setName(i, dungeonName);
-				setCost(i, 50);
-				setLevelMin(i,0);
-				setLevelMax(i,100);
-				setSpawnCount(i,50);
+				setEntryFee(i, 50);
+				setTimerJoin(i, 60);
+				setTimerEnd(i, 600);
+				setPlayerLevelRequirementMinimum(i,0);
+				setPlayerLevelRequirementMaximum(i,100);
+				setMobsToSpawnCount(i,50);
 				setLobby(i,worldName,0,0,0,0,0);
 				setStart(i,worldName,0,0,0,0,0);
 				setExit(i,worldName,0,0,0,0,0);
 				setBossSpawn(i,worldName,0,0,0,0,0);
-				setTreasureChest(i,worldName,0,0,0,0,0);
-				
-				int maxIndex = setRange1(i,worldName,0,0,0,0,0);
-				setRange2(i,maxIndex,worldName,0,0,0,0,0);
+				setTreasureStart(i,0,worldName,0,0,0,0,0);
+				setTreasureEnd(i,0,worldName,0,0,0,0,0);
+				int maxIndex = setSpawnBox1(i,worldName,0,0,0,0,0);
+				setSpawnBox2(i,maxIndex,worldName,0,0,0,0,0);
 				setSpawnChance(i,maxIndex,100);
+				
+				List<String> defaultMobs = new ArrayList<String>();
+				
+				defaultMobs.add("ZOMBIE");
+				defaultMobs.add("PIGZOMBIE");
+				defaultMobs.add("SKELETON");
+				defaultMobs.add("SPIDER");
+				
+				setMobList(i, maxIndex, defaultMobs);
 				
 				break;
 			}

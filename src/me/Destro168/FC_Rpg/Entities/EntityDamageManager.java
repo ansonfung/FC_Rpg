@@ -77,10 +77,12 @@ public class EntityDamageManager
 			
 			// Handle sharpness enchant.
 			if (damageType == 0)
-				damage = damage * FC_Rpg.battleCalculations.getEnchantmentOffensiveBonuses(rpgAttacker.getPlayer(), Enchantment.DAMAGE_ALL);
+				damage = damage * FC_Rpg.battleCalculations.getPlayerEnchantmentBonus(rpgAttacker.getPlayer(), Enchantment.DAMAGE_ALL);
 			
 			if (damageType == 1)
-				damage = damage * FC_Rpg.battleCalculations.getEnchantmentOffensiveBonuses(rpgAttacker.getPlayer(), Enchantment.ARROW_DAMAGE);
+				damage = damage * FC_Rpg.battleCalculations.getPlayerEnchantmentBonus(rpgAttacker.getPlayer(), Enchantment.ARROW_DAMAGE);
+			
+			damage = damage * FC_Rpg.battleCalculations.getPotionOffenseBonus(playerDefender);
 		}
 		else if (rpgMobAttacker != null)
 		{
@@ -89,17 +91,19 @@ public class EntityDamageManager
 			
 			// Handle sharpness enchant.
 			if (damageType == 0)
-				damage = damage * FC_Rpg.battleCalculations.getEnchantmentOffensiveBonuses(rpgMobAttacker.getEntity(), Enchantment.DAMAGE_ALL);
+				damage = damage * FC_Rpg.battleCalculations.getEntityEnchantmentBonus(rpgMobAttacker.getEntity(), Enchantment.DAMAGE_ARTHROPODS);
 			
 			if (damageType == 1)
-				damage = damage * FC_Rpg.battleCalculations.getEnchantmentOffensiveBonuses(rpgMobAttacker.getEntity(), Enchantment.ARROW_DAMAGE);
+				damage = damage * FC_Rpg.battleCalculations.getEntityEnchantmentBonus(rpgMobAttacker.getEntity(), Enchantment.ARROW_DAMAGE);
+			
+			damage = damage * FC_Rpg.battleCalculations.getPotionOffenseBonus(rpgMobAttacker.getEntity());
 		}
 		
 		// Deal thorns damage before anything is calculated.
 		if (rpgDefender.getStatusActiveRpgPlayer(EffectIDs.THORNS))
 		{
 			double thornsDamage = damage * rpgDefender.getPlayerConfig().getStatusMagnitude(EffectIDs.THORNS);
-
+			
 			// Attempt a dodge notification
 			rpgDefender.attemptThornsNotification(thornsDamage);
 
@@ -110,10 +114,15 @@ public class EntityDamageManager
 		}
 
 		// Calculate damage based on players armor.
-		damage = damage * FC_Rpg.battleCalculations.getRpgPlayerArmorBonus(rpgDefender);
+		damage = damage * FC_Rpg.battleCalculations.getArmorBonus(rpgDefender);
 		
 		// Add in enchantment bonuses.
-		FC_Rpg.battleCalculations.updateDamageByArmorEnchantments(playerDefender, Enchantment.PROTECTION_ENVIRONMENTAL, damage);
+		damage = damage * FC_Rpg.battleCalculations.getArmorEnchantmentBonus(playerDefender, Enchantment.PROTECTION_ENVIRONMENTAL);
+		
+		if (damageType == 1)
+			damage = damage * FC_Rpg.battleCalculations.getArmorEnchantmentBonus(playerDefender, Enchantment.PROTECTION_PROJECTILE);
+		
+		damage = damage * FC_Rpg.battleCalculations.getPotionDefenseBonus(playerDefender);
 		
 		// Handle block.
 		if (playerDefender.isBlocking() == true)
@@ -155,7 +164,7 @@ public class EntityDamageManager
 			rpgAttacker.attemptAttackNotification(rpgDefender.getPlayerConfig().getClassLevel(), rpgDefender.getCurHealth(), damage);
 			applyKnockback(rpgAttacker.getPlayer(), playerDefender, damageType);
 		}
-
+		
 		// Set the players health based current health out of maximum health.
 		hc = new HealthConverter(rpgDefender.getMaxHealth(), rpgDefender.getCurHealth());
 
@@ -348,15 +357,15 @@ public class EntityDamageManager
 		// If the player has the fire arrow status, then...
 		if (fireUses > 0)
 		{
-			// If the mob is alive...
-			if (rpgMobDefender.getIsAlive() == true)
+			// If the mob is alive and not a boss.
+			if (rpgMobDefender.getIsBoss() == false && rpgMobDefender.getIsAlive() == true)
 			{
 				// Put mob on fire
 				((LivingEntity) entityDefender).setFireTicks(20); // set the mob on fire!
 				
 				// Remove a fire arrow use.
 				rpgAttacker.getPlayerConfig().setStatusUses(EffectIDs.FIRE_ARROW, fireUses - 1);
-
+				
 				// Then return
 				return;
 			}
@@ -371,25 +380,32 @@ public class EntityDamageManager
 		
 		if (damageType == 0)
 		{
-			damage = damage * FC_Rpg.battleCalculations.getEnchantmentOffensiveBonuses(rpgAttacker.getPlayer(), Enchantment.DAMAGE_ALL);
+			damage = damage * FC_Rpg.battleCalculations.getPlayerEnchantmentBonus(rpgAttacker.getPlayer(), Enchantment.DAMAGE_ALL);
 			
 			if (entityDefender.getType() == EntityType.SPIDER || entityDefender.getType() == EntityType.CAVE_SPIDER)
-				damage = damage * FC_Rpg.battleCalculations.getEnchantmentOffensiveBonuses(rpgAttacker.getPlayer(), Enchantment.DAMAGE_ARTHROPODS);
+				damage = damage * FC_Rpg.battleCalculations.getPlayerEnchantmentBonus(rpgAttacker.getPlayer(), Enchantment.DAMAGE_ARTHROPODS);
 			else if (entityDefender.getType() == EntityType.ZOMBIE || entityDefender.getType() == EntityType.PIG_ZOMBIE || entityDefender.getType() == EntityType.SKELETON)
-				damage = damage * FC_Rpg.battleCalculations.getEnchantmentOffensiveBonuses(rpgAttacker.getPlayer(), Enchantment.DAMAGE_UNDEAD);
+				damage = damage * FC_Rpg.battleCalculations.getPlayerEnchantmentBonus(rpgAttacker.getPlayer(), Enchantment.DAMAGE_UNDEAD);
 		}
 		
 		if (damageType == 1)
-			damage = damage * FC_Rpg.battleCalculations.getEnchantmentOffensiveBonuses(rpgAttacker.getPlayer(), Enchantment.ARROW_DAMAGE);
+			damage = damage * FC_Rpg.battleCalculations.getPlayerEnchantmentBonus(rpgAttacker.getPlayer(), Enchantment.ARROW_DAMAGE);
 		
 		// Handle the passives for attacking players.
 		damage = handle_Offense_Passives(damage, rpgAttacker, playerAttacker);
 		
 		// Calculate damage based on monsters defense.
-		damage = damage * FC_Rpg.battleCalculations.getRpgMonsterArmorBonus(rpgMobDefender);
+		damage = damage * FC_Rpg.battleCalculations.getArmorBonus(rpgMobDefender);
 		
 		// Add in enchantment bonuses.
-		FC_Rpg.battleCalculations.updateDamageByArmorEnchantments(rpgMobDefender.getEntity(), Enchantment.PROTECTION_ENVIRONMENTAL, damage);
+		damage = damage * FC_Rpg.battleCalculations.getArmorEnchantmentBonus(rpgMobDefender.getEntity(), Enchantment.PROTECTION_ENVIRONMENTAL);
+		
+		if (damageType == 1)
+			damage = damage * FC_Rpg.battleCalculations.getArmorEnchantmentBonus(rpgMobDefender.getEntity(), Enchantment.PROTECTION_PROJECTILE);
+		
+		//Account for potions.
+		damage = damage * FC_Rpg.battleCalculations.getPotionOffenseBonus(playerAttacker);
+		damage = damage * FC_Rpg.battleCalculations.getPotionDefenseBonus(rpgMobDefender.getEntity());
 		
 		// Damage must always be 1 or 0. If it is negative it will heal the creature (not good).
 		if (damage < 0.1)
@@ -546,9 +562,6 @@ public class EntityDamageManager
 		// Send a message to the player showing experience and loot gains.
 		rpgLooter.sendMonsterDeathNotification(rpgMobDefender.getLevel(), exp, cash);
 	}
-
-	
-	
 	
 	// Handle player defense skills
 	private void handle_Defense_Passives(double damage, RpgPlayer rpgDefender, LivingEntity entityAttacker)

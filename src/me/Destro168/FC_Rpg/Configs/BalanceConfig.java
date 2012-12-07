@@ -16,7 +16,16 @@ public class BalanceConfig extends ConfigGod
 	private void setArrowKnockback(boolean x) { fcw.set(prefix + "arrowKnockback", x); }
 	private void setPowerLevelPrevention(int x) { fcw.set(prefix + "powerLevelPrevention", x); }
 	private void setBonusPercentCap(double x) { fcw.set(prefix + "bonusPercentCap", x); }
-
+	private void setEnchantmentMultiplierSharpness(double x) { fcw.set(prefix + "enchantmentMultiplier.sharpness", x); }
+	private void setEnchantmentMultiplierBane(double x) { fcw.set(prefix + "enchantmentMultiplier.bane", x); }
+	private void setEnchantmentMultiplierSmite(double x) { fcw.set(prefix + "enchantmentMultiplier.smite", x); }
+	private void setEnchantmentMultiplierPower(double x) { fcw.set(prefix + "enchantmentMultiplier.power", x); }
+	private void setEnchantmentMultiplierProtection(double x) { fcw.set(prefix + "enchantmentMultiplier.protection", x); }
+	private void setEnchantmentMultiplierFire(double x) { fcw.set(prefix + "enchantmentMultiplier.fire", x); }
+	private void setEnchantmentMultiplierExplosion(double x) { fcw.set(prefix + "enchantmentMultiplier.explosion", x); }
+	private void setEnchantmentMultiplierFall(double x) { fcw.set(prefix + "enchantmentMultiplier.fall", x); }
+	private void setEnchantmentMultiplierProjectile(double x) { fcw.set(prefix + "enchantmentMultiplier.projectile", x); }
+	
 	private void setArmorWearRequirementChain(int x) { fcw.set(prefix + "armor.wearRequirement.chain", x); }
 	private void setArmorWearRequirementIron(int x) { fcw.set(prefix + "armor.wearRequirement.iron", x); }
 	private void setArmorWearRequirementDiamond(int x) { fcw.set(prefix + "armor.wearRequirement.diamond", x); }
@@ -88,6 +97,18 @@ public class BalanceConfig extends ConfigGod
 	private void setDamageLava(double x) { fcw.set(prefix + "damage.lava", x); }
 	private void setDamageStarvation(double x) { fcw.set(prefix + "damage.starvation", x); }
 	private void setDamagePoison(double x) { fcw.set(prefix + "damage.poison", x); }
+	private void setDamageMagic(double x) { fcw.set(prefix + "damage.magic", x); }
+	private void setDamageBlockExplosion(double x) { fcw.set(prefix + "damage.blockExplosion", x); }
+	private void setDamageWither(double x) { fcw.set(prefix + "damage.wither", x); }
+	
+	private void setPotionMultiplierStrength(double x) { fcw.set(prefix + "potionMultiplier.strength", x); }
+	private void setPotionMultiplierWeakness(double x) { fcw.set(prefix + "potionMultiplier.weakness", x); }
+	private void setPotionMultiplierResistance(double x) { fcw.set(prefix + "potionMultiplier.resistance", x); }
+	
+	private void setHealPercentEating(double x) { fcw.set(prefix + "healMultiplier.eating", x); }
+	private void setHealPercentMagic(double x) { fcw.set(prefix + "healMultiplier.magic", x); }
+	private void setHealPercentMagicRegen(double x) { fcw.set(prefix + "healMultiplier.magicRegen", x); }
+	private void setHealPercentSatiated(double x) { fcw.set(prefix + "healMultiplier.satiated", x); }
 	
 	// Gets
 	public int getGlobalExpMultiplier() { return fcw.getInt(prefix + "globalExpMultiplier"); }
@@ -100,6 +121,15 @@ public class BalanceConfig extends ConfigGod
 	public int getDifficultyScalor() { return fcw.getIntS(prefix + "difficultyScalor"); }
 	public int getRandomMobLevelDeviation() { return fcw.getIntS(prefix + "randomMobLevelDeviation"); }
 	public double getBonusPercentCap() { return fcw.getDoubleS(prefix + "bonusPercentCap"); }
+	public double getEnchantmentMultiplierSharpness() { return fcw.getDoubleS(prefix + "enchantmentMultiplier.sharpness"); }
+	public double getEnchantmentMultiplierBane() { return fcw.getDoubleS(prefix + "enchantmentMultiplier.bane"); }
+	public double getEnchantmentMultiplierSmite() { return fcw.getDoubleS(prefix + "enchantmentMultiplier.smite"); }
+	public double getEnchantmentMultiplierPower() { return fcw.getDoubleS(prefix + "enchantmentMultiplier.power"); }
+	public double getEnchantmentMultiplierProtection() { return fcw.getDoubleS(prefix + "enchantmentMultiplier.protection"); }
+	public double getEnchantmentMultiplierFire() { return fcw.getDoubleS(prefix + "enchantmentMultiplier.fire"); }
+	public double getEnchantmentMultiplierExplosion() { return fcw.getDoubleS(prefix + "enchantmentMultiplier.explosion"); }
+	public double getEnchantmentMultiplierFall() { return fcw.getDoubleS(prefix + "enchantmentMultiplier.fall"); }
+	public double getEnchantmentMultiplierProjectile() { return fcw.getDoubleS(prefix + "enchantmentMultiplier.projectile"); }
 	
 	public int getArmorWearRequirementChain() { return fcw.getIntS(prefix + "armor.wearRequirement.chain"); }
 	public int getArmorWearRequirementIron() { return fcw.getIntS(prefix + "armor.wearRequirement.iron"); }
@@ -173,6 +203,18 @@ public class BalanceConfig extends ConfigGod
 	public double getDamageLava() { return fcw.getDoubleS(prefix + "damage.lava"); }
 	public double getDamageStarvation() { return fcw.getDoubleS(prefix + "damage.starvation"); }
 	public double getDamagePoison() { return fcw.getDoubleS(prefix + "damage.poison"); }
+	public double getDamageMagic() { return fcw.getDoubleS(prefix + "damage.magic"); }
+	public double getDamageBlockExplosion() { return fcw.getDoubleS(prefix + "damage.blockExplosion"); }
+	public double getDamageWither() { return fcw.getDoubleS(prefix + "damage.wither"); }
+	
+	public double getPotionMultiplierStrength() { return fcw.getDoubleS(prefix + "potionMultiplier.strength"); }
+	public double getPotionMultiplierWeakness() { return fcw.getDoubleS(prefix + "potionMultiplier.weakness"); }
+	public double getPotionMultiplierResistance() { return fcw.getDoubleS(prefix + "potionMultiplier.resistance"); }
+	
+	public double getHealPercentEating() { return fcw.getDoubleS(prefix + "healMultiplier.eating"); }
+	public double getHealPercentMagic() { return fcw.getDoubleS(prefix + "healMultiplier.magic"); }
+	public double getHealPercentMagicRegen() { return fcw.getDoubleS(prefix + "healMultiplier.magicRegen"); }
+	public double getHealPercentSatiated() { return fcw.getDoubleS(prefix + "healMultiplier.satiated"); }
 	
 	public BalanceConfig()
 	{
@@ -197,6 +239,15 @@ public class BalanceConfig extends ConfigGod
 			setDefaultItemDrops(true);
 			setArrowKnockback(false);
 			setBonusPercentCap(3);
+			setEnchantmentMultiplierSharpness(0.02);
+			setEnchantmentMultiplierBane(0.02);
+			setEnchantmentMultiplierSmite(0.02);
+			setEnchantmentMultiplierPower(0.02);
+			setEnchantmentMultiplierProtection(0.025);
+			setEnchantmentMultiplierFire(0.025);
+			setEnchantmentMultiplierExplosion(0.025);
+			setEnchantmentMultiplierFall(0.025);
+			setEnchantmentMultiplierProjectile(0.025);
 			
 			setPlayerBaseHealth(100);
 			setPlayerBaseMana(20);
@@ -275,7 +326,19 @@ public class BalanceConfig extends ConfigGod
 			setDamageFireTick(2);
 			setDamageLava(1);
 			setDamageStarvation(.3);
-			setDamagePoison(3);
+			setDamagePoison(.5);
+			setDamageMagic(3);
+			setDamageBlockExplosion(5);
+			setDamageWither(.7);
+			
+			setPotionMultiplierStrength(0.05);
+			setPotionMultiplierWeakness(0.05);
+			setPotionMultiplierResistance(0.05);
+			
+			setHealPercentEating(.05);
+			setHealPercentMagic(.2);
+			setHealPercentMagicRegen(.05);
+			setHealPercentSatiated(.02);
 		}
 	}
 }

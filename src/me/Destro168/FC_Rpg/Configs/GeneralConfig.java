@@ -43,32 +43,34 @@ public class GeneralConfig extends ConfigGod
 	private void setChatFormat(String x) { fcw.set(prefix + "chatFormat", x); }
 	private void setChatFormatAdmin(String x) { fcw.set(prefix + "chatFormatAdmin", x); }
 	private void setInactivePlayerFileDeleteTime(long x) { fcw.set(prefix + "inactivePlayerFileDeleteTime", x); }
+	private void setBuffCommandCost(double x) { fcw.set(prefix + "buffCommandCost", x); }
 	
-	public String getDefaultPrefix() { return fcw.getString(prefix + "defaultPrefix"); }
-	public boolean getPerfectBirch() { return fcw.getBoolean(prefix + "perfectBirch"); }
-	public boolean getCreativeControl() { return fcw.getBoolean(prefix + "creativeControl"); }
-	public boolean getHardcoreItemLoss() { return fcw.getBoolean(prefix + "hardcoreItemLoss"); }
-	public boolean getExpCancelled() { return fcw.getBoolean(prefix + "expCancelled"); }
-	public boolean getPerfectWheat() { return fcw.getBoolean(prefix + "perfectWheat"); }
-	public boolean getInfiniteGold() { return fcw.getBoolean(prefix + "infiniteGold"); }
-	public boolean getInfiniteDiamond() { return fcw.getBoolean(prefix + "infiniteDiamond"); }
-	public boolean getBetterFishing() { return fcw.getBoolean(prefix + "betterFishing"); }
-	public boolean getPreventSpongeBreak() { return fcw.getBoolean(prefix + "preventSpongeBreak"); }
-	public double getDonatorBonusStatPercent() { return fcw.getDouble(prefix + "donatorBonusStatPercent"); }
-	public double getDonatorLootBonusPercent() { return fcw.getDouble(prefix + "donatorLootBonusPercent"); }
-	public int getLevelCap() { return fcw.getInt(prefix + "levelCap"); }
-	public List<Double> getJobRankCosts() { return converter.getDoubleListFromString(fcw.getString(prefix + "jobRankCosts")); }
-	public int getNotifcationInterval() { return fcw.getInt(prefix + "notificationInterval"); }
-	public double getScaleX() { return fcw.getDouble(prefix + "scale.x"); }
-	public double getScaleY() { return fcw.getDouble(prefix + "scale.y"); }
-	public double getScaleZ() { return fcw.getDouble(prefix + "scale.z"); }
-	public long getTimedItemsInterval() { return fcw.getLong(prefix + "timedItems.interval"); }
-	public boolean getDisableEnderPearls() { return fcw.getBoolean(prefix + "disableEnderPearls"); }
-	public int getDungeonSelectionToolID() { return fcw.getInt(prefix + "dungeonSelectionToolID"); }
-	public boolean getDonatorsCanHat() { return fcw.getBoolean(prefix + "donatorsCanHat"); }
-	public String getChatFormat() { return fcw.getString(prefix + "chatFormat"); }
-	public String getChatFormatAdmin() { return fcw.getString(prefix + "chatFormatAdmin"); }
-	public long getInactivePlayerFileDeleteTime() { return fcw.getLong(prefix + "inactivePlayerFileDeleteTime"); }
+	public String getDefaultPrefix() { return fcw.getStringS(prefix + "defaultPrefix"); }
+	public boolean getPerfectBirch() { return fcw.getBooleanS(prefix + "perfectBirch"); }
+	public boolean getCreativeControl() { return fcw.getBooleanS(prefix + "creativeControl"); }
+	public boolean getHardcoreItemLoss() { return fcw.getBooleanS(prefix + "hardcoreItemLoss"); }
+	public boolean getExpCancelled() { return fcw.getBooleanS(prefix + "expCancelled"); }
+	public boolean getPerfectWheat() { return fcw.getBooleanS(prefix + "perfectWheat"); }
+	public boolean getInfiniteGold() { return fcw.getBooleanS(prefix + "infiniteGold"); }
+	public boolean getInfiniteDiamond() { return fcw.getBooleanS(prefix + "infiniteDiamond"); }
+	public boolean getBetterFishing() { return fcw.getBooleanS(prefix + "betterFishing"); }
+	public boolean getPreventSpongeBreak() { return fcw.getBooleanS(prefix + "preventSpongeBreak"); }
+	public double getDonatorBonusStatPercent() { return fcw.getDoubleS(prefix + "donatorBonusStatPercent"); }
+	public double getDonatorLootBonusPercent() { return fcw.getDoubleS(prefix + "donatorLootBonusPercent"); }
+	public int getLevelCap() { return fcw.getIntS(prefix + "levelCap"); }
+	public List<Double> getJobRankCosts() { return converter.getDoubleListFromString(fcw.getStringS(prefix + "jobRankCosts")); }
+	public int getNotifcationInterval() { return fcw.getIntS(prefix + "notificationInterval"); }
+	public double getScaleX() { return fcw.getDoubleS(prefix + "scale.x"); }
+	public double getScaleY() { return fcw.getDoubleS(prefix + "scale.y"); }
+	public double getScaleZ() { return fcw.getDoubleS(prefix + "scale.z"); }
+	public long getTimedItemsInterval() { return fcw.getLongS(prefix + "timedItems.interval"); }
+	public boolean getDisableEnderPearls() { return fcw.getBooleanS(prefix + "disableEnderPearls"); }
+	public int getDungeonSelectionToolID() { return fcw.getIntS(prefix + "dungeonSelectionToolID"); }
+	public boolean getDonatorsCanHat() { return fcw.getBooleanS(prefix + "donatorsCanHat"); }
+	public String getChatFormat() { return fcw.getStringS(prefix + "chatFormat"); }
+	public String getChatFormatAdmin() { return fcw.getStringS(prefix + "chatFormatAdmin"); }
+	public long getInactivePlayerFileDeleteTime() { return fcw.getLongS(prefix + "inactivePlayerFileDeleteTime"); }
+	public double getBuffCommandCost() { return fcw.getDoubleS(prefix + "buffCommandCost"); }
 	
 	public GeneralConfig()
 	{
@@ -113,6 +115,7 @@ public class GeneralConfig extends ConfigGod
 			setChatFormat("&7%time% [&6%level%&7] %prefix%&7%name%: %chat%");
 			setChatFormatAdmin("&e%time% [&6%level%&e] %prefix%&e%name%: %chat%");
 			setInactivePlayerFileDeleteTime(1209600000);
+			setBuffCommandCost(10);
 		}
 		
 		//Load up timed items.
@@ -121,9 +124,9 @@ public class GeneralConfig extends ConfigGod
 	
 	private void loadTimedItems() 
 	{
-		List<Integer> itemIDs = converter.getIntegerListFromString(fcw.getString(prefix + "timedItems.ids"));
-		List<Integer> itemCounts = converter.getIntegerListFromString(fcw.getString(prefix + ".timedItems.counts"));
-		List<Byte> itemDataValues = converter.getByteListFromString(fcw.getString(prefix + "timedItems.dataValues"));
+		List<Integer> itemIDs = converter.getIntegerListFromString(fcw.getStringS(prefix + "timedItems.ids"));
+		List<Integer> itemCounts = converter.getIntegerListFromString(fcw.getStringS(prefix + ".timedItems.counts"));
+		List<Byte> itemDataValues = converter.getByteListFromString(fcw.getStringS(prefix + "timedItems.dataValues"));
 		ItemStack newItem;
 		Material mat;
 		

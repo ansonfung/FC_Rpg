@@ -40,6 +40,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 public class DamageListener implements Listener
@@ -78,7 +79,7 @@ public class DamageListener implements Listener
 		// If the event is cancelled, then we want to return.
 		if (event_.isCancelled() == true)
 			return;
-
+		
 		// Block damage in creative world.
 		WorldConfig wm = new WorldConfig();
 
@@ -95,22 +96,26 @@ public class DamageListener implements Listener
 		event.setDamage(0);
 
 		boolean dealEnviromentalDamage = false;
-
+		
 		// For entity damage events we want to handle the attck normally.
 		if (event instanceof EntityDamageByEntityEvent)
 		{
 			Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
-
+			
 			if (damager.getType() == EntityType.WITHER)
 				dealEnviromentalDamage = true;
 			else if (damager.getType() == EntityType.WITHER_SKULL)
+				dealEnviromentalDamage = true;
+			else if (damager.getType() == EntityType.SPLASH_POTION)
+				dealEnviromentalDamage = true;
+			else if (damager.getType() == EntityType.PRIMED_TNT)
 				dealEnviromentalDamage = true;
 			else
 				entityAttack((EntityDamageByEntityEvent) event, -1);
 		}
 		else
 			dealEnviromentalDamage = true;
-
+		
 		// Else we want to deal the damage to the player/mob as though not from an entity.
 		if (dealEnviromentalDamage == true)
 		{
@@ -125,7 +130,7 @@ public class DamageListener implements Listener
 					if (FC_Rpg.rpgEntityManager.getRpgPlayer(player).getIsAlive() == false)
 						return;
 				}
-
+				
 				// Prepare the defender.
 				prepareDefender(player);
 
@@ -208,8 +213,8 @@ public class DamageListener implements Listener
 		}
 		else if (eEntity instanceof CraftExperienceOrb)
 		{
-			CraftLargeFireball cf = (CraftLargeFireball) eEntity;
-			entity = cf.getShooter();
+			FC_Rpg.plugin.getLogger().info("Exp Orb dealt damage, damage cancelled -> " + ((CraftExperienceOrb) eEntity).toString());
+			return;
 		}
 		else if (eEntity instanceof CraftItem)
 		{
@@ -519,12 +524,12 @@ public class DamageListener implements Listener
 		if (event.getCause().equals(DamageCause.ENTITY_EXPLOSION))
 		{
 			damage = distanceModifier * FC_Rpg.balanceConfig.getDamageExplosion();
-			FC_Rpg.battleCalculations.updateDamageByArmorEnchantments(player, Enchantment.PROTECTION_EXPLOSIONS, damage);
+			damage = damage * FC_Rpg.battleCalculations.getArmorEnchantmentBonus(player, Enchantment.PROTECTION_EXPLOSIONS);
 		}
 		else if (event.getCause().equals(DamageCause.FALL))
 		{
 			damage = distanceModifier * FC_Rpg.balanceConfig.getDamageFall();
-			FC_Rpg.battleCalculations.updateDamageByArmorEnchantments(player, Enchantment.PROTECTION_FALL, damage);
+			damage = damage * FC_Rpg.battleCalculations.getArmorEnchantmentBonus(player, Enchantment.PROTECTION_FALL);
 		}
 		else if (event.getCause().equals(DamageCause.CONTACT))
 		{
@@ -540,8 +545,11 @@ public class DamageListener implements Listener
 		}
 		else if (event.getCause().equals(DamageCause.FIRE))
 		{
+			if (hasFireResistance(player))
+				return 0;
+			
 			damage = distanceModifier * FC_Rpg.balanceConfig.getDamageFire();
-			FC_Rpg.battleCalculations.updateDamageByArmorEnchantments(player, Enchantment.PROTECTION_FIRE, damage);
+			damage = damage * FC_Rpg.battleCalculations.getArmorEnchantmentBonus(player, Enchantment.PROTECTION_FIRE);
 			
 			// 95% damage reduction from fire resistance.
 			if (rpgDefender.getPlayer().getActivePotionEffects().contains(PotionEffectType.FIRE_RESISTANCE))
@@ -549,8 +557,11 @@ public class DamageListener implements Listener
 		}
 		else if (event.getCause().equals(DamageCause.FIRE_TICK))
 		{
+			if (hasFireResistance(player))
+				return 0;
+			
 			damage = distanceModifier * FC_Rpg.balanceConfig.getDamageFireTick();
-			FC_Rpg.battleCalculations.updateDamageByArmorEnchantments(player, Enchantment.PROTECTION_FIRE, damage);
+			damage = damage * FC_Rpg.battleCalculations.getArmorEnchantmentBonus(player, Enchantment.PROTECTION_FIRE);
 
 			// 95% damage reduction from fire resistance.
 			if (rpgDefender.getPlayer().getActivePotionEffects().contains(PotionEffectType.FIRE_RESISTANCE))
@@ -558,8 +569,11 @@ public class DamageListener implements Listener
 		}
 		else if (event.getCause().equals(DamageCause.LAVA))
 		{
+			if (hasFireResistance(player))
+				return 0;
+			
 			damage = distanceModifier * FC_Rpg.balanceConfig.getDamageLava();
-			FC_Rpg.battleCalculations.updateDamageByArmorEnchantments(player, Enchantment.PROTECTION_FIRE, damage);
+			damage = damage * FC_Rpg.battleCalculations.getArmorEnchantmentBonus(player, Enchantment.PROTECTION_FIRE);
 			
 			// 95% damage reduction from fire resistance.
 			if (rpgDefender.getPlayer().getActivePotionEffects().contains(PotionEffectType.FIRE_RESISTANCE))
@@ -569,9 +583,21 @@ public class DamageListener implements Listener
 		{
 			damage = distanceModifier * FC_Rpg.balanceConfig.getDamageStarvation();
 		}
-		if (event.getCause().equals(DamageCause.POISON))
+		else if (event.getCause().equals(DamageCause.POISON))
 		{
 			damage = distanceModifier * FC_Rpg.balanceConfig.getDamagePoison();
+		}
+		else if (event.getCause().equals(DamageCause.MAGIC))
+		{
+			damage = distanceModifier * FC_Rpg.balanceConfig.getDamageMagic();
+		}
+		else if (event.getCause().equals(DamageCause.BLOCK_EXPLOSION))
+		{
+			damage = distanceModifier * FC_Rpg.balanceConfig.getDamageBlockExplosion();
+		}
+		else if (event.getCause().equals(DamageCause.WITHER))
+		{
+			damage = distanceModifier * FC_Rpg.balanceConfig.getDamageWither();
 		}
 		else if (event.getCause().equals(DamageCause.SUICIDE))
 		{
@@ -581,11 +607,22 @@ public class DamageListener implements Listener
 		{
 			return 99999999;
 		}
-
+		
 		if (damage < 1)
 			damage = 1;
 		
 		return damage;
+	}
+	
+	private boolean hasFireResistance(Player player)
+	{
+		for (PotionEffect pe : player.getActivePotionEffects())
+		{
+			if (pe.getType().equals(PotionEffectType.FIRE_RESISTANCE))
+				return true;
+		}
+		
+		return false;
 	}
 }
 

@@ -17,6 +17,7 @@ import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
@@ -24,6 +25,7 @@ import org.bukkit.entity.Fireball;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 public class SpellCaster
 {
@@ -137,7 +139,7 @@ public class SpellCaster
 			//Restricted spells also require a target.
 			for (RpgClass rpgClass : FC_Rpg.classConfig.getRpgClasses())
 			{
-				if (rpgClass.getName().equals(combatClass))
+				if (rpgClass.getID() == combatClass)
 				{
 					//If the damage is an arrow, and has the restriction id 0, and if restricted spell, then return false.
 					if (rpgClass.getRestrictionID() == 0 && damageType != 1)
@@ -336,7 +338,7 @@ public class SpellCaster
 		}
 		
 		//Revert after duration.
-		int tid = Bukkit.getServer().getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable()
+		int tid = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
 		{
 			@Override
 			public void run()
@@ -399,7 +401,7 @@ public class SpellCaster
 			
 			for (int i = 0; i < length; i++)
 			{
-				Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable()
+				Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
 				{
 					public void run()
 					{
@@ -419,7 +421,7 @@ public class SpellCaster
 			
 			for (int i = 0; i < length; i++)
 			{
-				Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable()
+				Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
 				{
 					public void run()
 					{
@@ -455,7 +457,7 @@ public class SpellCaster
 			
 			for (int i = 0; i < finalSpellMagnitude; i++)
 			{
-				Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable()
+				Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
 				{
 					public void run()
 					{
@@ -473,7 +475,7 @@ public class SpellCaster
 			
 			for (int i = 0; i < finalSpellMagnitude; i++)
 			{
-				Bukkit.getScheduler().scheduleAsyncDelayedTask(FC_Rpg.plugin, new Runnable()
+				Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
 				{
 					public void run()
 					{
@@ -594,8 +596,8 @@ public class SpellCaster
 	{
 		MaterialLib ml = FC_Rpg.mLib;
 		ItemStack item = rpgCaster.getPlayer().getItemInHand();
-		int quality = 0;
-		int enchantmentStrength = 0;
+		double quality = .1;
+		double enchantmentStrength = .1;
 		
 		if (item != null)
 		{
@@ -614,14 +616,25 @@ public class SpellCaster
 			{
 				if (item.containsEnchantment(enchant))
 				{
-					enchantmentStrength = enchantmentStrength + item.getEnchantmentLevel(enchant);
+					enchantmentStrength += item.getEnchantmentLevel(enchant);
 				}
 			}
 			
-			//TOOD - remove
-			FC_Rpg.plugin.getLogger().info("A: " + quality * enchantmentStrength * spellTier);
+			//TODO - todo always keep uncommented.
+			FC_Rpg.plugin.getLogger().info("A: " + (int) (quality * enchantmentStrength * spellTier * item.getAmount()));
 			
-			rpgCaster.getPlayer().setItemInHand(getRandomTieredItem(quality * enchantmentStrength * spellTier));
+			PlayerInventory casterInv = rpgCaster.getPlayer().getInventory();
+			World casterWorld = rpgCaster.getPlayer().getWorld();
+			
+			rpgCaster.getPlayer().getInventory().setItemInHand(new ItemStack(Material.AIR,0));
+			
+			for (ItemStack i : getItemStackList((int) (quality * enchantmentStrength * spellTier * item.getAmount())))
+			{
+				if (casterInv.getSize() == 36)
+					casterWorld.dropItemNaturally(rpgCaster.getPlayer().getLocation(), i);
+				else
+					casterInv.addItem(i);
+			}
 			
 			return true;
 		}
@@ -629,125 +642,137 @@ public class SpellCaster
 		return false;
 	}
 	
-	private ItemStack getRandomTieredItem(int enchantStrength)
+	private List<ItemStack> getItemStackList(int enchantStrength)
 	{
-		List<ItemStack> itemList = new ArrayList<ItemStack>();
-		Random rand = new Random();
-		int amount = (rand.nextInt((enchantStrength / 20) + 3) + 1);
+		List<Material> materialList = new ArrayList<Material>();
 		
-		itemList.add(new ItemStack(Material.ROTTEN_FLESH, amount));
-		itemList.add(new ItemStack(Material.STICK, amount));
-		itemList.add(new ItemStack(Material.DEAD_BUSH, amount));
+		materialList.add(Material.ROTTEN_FLESH);
+		materialList.add(Material.STICK);
+		materialList.add(Material.DEAD_BUSH);
 		
 		if (enchantStrength >= 0)
 		{
-			itemList.add(new ItemStack(Material.BOOK, amount));
-			itemList.add(new ItemStack(Material.WOOD, amount));
-			itemList.add(new ItemStack(Material.SAPLING, amount));
-			itemList.add(new ItemStack(Material.COBBLESTONE, amount));
+			materialList.add(Material.BOOK);
+			materialList.add(Material.WOOD);
+			materialList.add(Material.SAPLING);
+			materialList.add(Material.COBBLESTONE);
 		}
 		
 		if (enchantStrength >= 1)
 		{
-			itemList.add(new ItemStack(Material.COAL, amount));
-			itemList.add(new ItemStack(Material.EGG, amount));
-			itemList.add(new ItemStack(Material.INK_SACK, amount));
-			itemList.add(new ItemStack(Material.COOKIE, amount));
+			materialList.add(Material.COAL);
+			materialList.add(Material.EGG);
+			materialList.add(Material.INK_SACK);
+			materialList.add(Material.COOKIE);
 		}
 		
 		if (enchantStrength >= 2)
 		{
-			itemList.add(new ItemStack(Material.SHEARS, amount));
-			itemList.add(new ItemStack(Material.RAW_FISH, amount));
-			itemList.add(new ItemStack(Material.COAL, amount));
-			itemList.add(new ItemStack(Material.STONE, amount));
-			itemList.add(new ItemStack(Material.SMOOTH_BRICK, amount));
+			materialList.add(Material.SHEARS);
+			materialList.add(Material.RAW_FISH);
+			materialList.add(Material.COAL);
+			materialList.add(Material.STONE);
+			materialList.add(Material.SMOOTH_BRICK);
 		}
 		
 		if (enchantStrength >= 4)
 		{
-			itemList.add(new ItemStack(Material.GLASS_BOTTLE, amount));
-			itemList.add(new ItemStack(Material.ARROW, amount));
-			itemList.add(new ItemStack(Material.FEATHER, amount));
-			itemList.add(new ItemStack(Material.WOOL, amount));
-			itemList.add(new ItemStack(Material.RAW_CHICKEN, amount));
+			materialList.add(Material.GLASS_BOTTLE);
+			materialList.add(Material.ARROW);
+			materialList.add(Material.FEATHER);
+			materialList.add(Material.WOOL);
+			materialList.add(Material.RAW_CHICKEN);
 		}
 		
 		if (enchantStrength >= 6)
 		{
-			itemList.add(new ItemStack(Material.LADDER, amount));
-			itemList.add(new ItemStack(Material.GOLD_NUGGET, amount));
-			itemList.add(new ItemStack(Material.RAILS, amount));
-			itemList.add(new ItemStack(Material.CLAY, amount));
-			itemList.add(new ItemStack(Material.LEAVES, amount));
+			materialList.add(Material.LADDER);
+			materialList.add(Material.GOLD_NUGGET);
+			materialList.add(Material.RAILS);
+			materialList.add(Material.CLAY);
+			materialList.add(Material.LEAVES);
 		}
 		
 		if (enchantStrength >= 9)
 		{
-			itemList.add(new ItemStack(Material.REDSTONE, amount));
-			itemList.add(new ItemStack(Material.SUGAR, amount));
-			itemList.add(new ItemStack(Material.BONE, amount));
-			itemList.add(new ItemStack(Material.MELON, amount));
-			itemList.add(new ItemStack(Material.RAW_BEEF, amount));
+			materialList.add(Material.REDSTONE);
+			materialList.add(Material.SUGAR);
+			materialList.add(Material.BONE);
+			materialList.add(Material.MELON);
+			materialList.add(Material.RAW_BEEF);
 		}
 		
 		if (enchantStrength >= 15)
 		{
-			itemList.add(new ItemStack(Material.COOKED_FISH, amount));
-			itemList.add(new ItemStack(Material.COMPASS, amount));
-			itemList.add(new ItemStack(Material.STRING, amount));
-			itemList.add(new ItemStack(Material.RED_MUSHROOM, amount));
-			itemList.add(new ItemStack(Material.COCOA, amount));
-			itemList.add(new ItemStack(Material.SAND, amount));
+			materialList.add(Material.COOKED_FISH);
+			materialList.add(Material.COMPASS);
+			materialList.add(Material.STRING);
+			materialList.add(Material.RED_MUSHROOM);
+			materialList.add(Material.COCOA);
+			materialList.add(Material.SAND);
 		}
 		
 		if (enchantStrength >= 22)
 		{
-			itemList.add(new ItemStack(Material.SLIME_BALL, amount));
-			itemList.add(new ItemStack(Material.MINECART, amount));
-			itemList.add(new ItemStack(Material.RAILS, amount));
-			itemList.add(new ItemStack(Material.SULPHUR, amount));
-			itemList.add(new ItemStack(Material.MOSSY_COBBLESTONE, amount));
+			materialList.add(Material.SLIME_BALL);
+			materialList.add(Material.MINECART);
+			materialList.add(Material.RAILS);
+			materialList.add(Material.SULPHUR);
+			materialList.add(Material.MOSSY_COBBLESTONE);
 		}
 
 		if (enchantStrength >= 35)
 		{
-			itemList.add(new ItemStack(Material.CACTUS, amount));
-			itemList.add(new ItemStack(Material.BOOKSHELF, amount));
-			itemList.add(new ItemStack(Material.BUCKET, amount));
-			itemList.add(new ItemStack(Material.GLOWSTONE_DUST, amount));
-			itemList.add(new ItemStack(Material.GLASS, amount));
-			itemList.add(new ItemStack(Material.ICE, amount));
+			materialList.add(Material.CACTUS);
+			materialList.add(Material.BOOKSHELF);
+			materialList.add(Material.BUCKET);
+			materialList.add(Material.GLOWSTONE_DUST);
+			materialList.add(Material.GLASS);
+			materialList.add(Material.ICE);
 		}
 		
 		if (enchantStrength >= 50)
 		{
-			itemList.add(new ItemStack(Material.NETHERRACK, amount));
-			itemList.add(new ItemStack(Material.NETHER_BRICK, amount));
-			itemList.add(new ItemStack(Material.DIRT, amount));
-			itemList.add(new ItemStack(Material.IRON_INGOT, amount));
-			itemList.add(new ItemStack(Material.PISTON_BASE, amount));
+			materialList.add(Material.NETHERRACK);
+			materialList.add(Material.NETHER_BRICK);
+			materialList.add(Material.DIRT);
+			materialList.add(Material.IRON_INGOT);
+			materialList.add(Material.PISTON_BASE);
 		}
 		
 		if (enchantStrength >= 75)
 		{
-			itemList.add(new ItemStack(Material.OBSIDIAN, amount));
-			itemList.add(new ItemStack(Material.DIAMOND, amount));
-			itemList.add(new ItemStack(Material.SANDSTONE, amount));
-			itemList.add(new ItemStack(Material.TNT, amount));
+			materialList.add(Material.OBSIDIAN);
+			materialList.add(Material.DIAMOND);
+			materialList.add(Material.SANDSTONE);
+			materialList.add(Material.TNT);
 		}
 		
 		if (enchantStrength >= 90)
 		{
-			itemList.add(new ItemStack(Material.OBSIDIAN, amount));
-			itemList.add(new ItemStack(Material.GOLD_INGOT, amount));
-			itemList.add(new ItemStack(Material.GRASS, amount));
-			itemList.add(new ItemStack(Material.ENCHANTMENT_TABLE, amount));
-			itemList.add(new ItemStack(Material.GOLDEN_APPLE, amount));
+			materialList.add(Material.OBSIDIAN);
+			materialList.add(Material.GOLD_INGOT);
+			materialList.add(Material.GRASS);
+			materialList.add(Material.ENCHANTMENT_TABLE);
+			materialList.add(Material.GOLDEN_APPLE);
 		}
 		
+		//Variable Declarations
+		Random rand = new Random();
+		int amount = (rand.nextInt((enchantStrength / 20) + 3) + 1);
+		List<ItemStack> itemStackList = new ArrayList<ItemStack>();
+		Material chosenMaterial = materialList.get(rand.nextInt(materialList.size()));
+		
+		while (amount > 64)
+		{
+			itemStackList.add(new ItemStack(chosenMaterial, amount));
+			amount -= 64;
+		}
+		
+		itemStackList.add(new ItemStack(chosenMaterial, amount));
+		
 		//Return a random item.
-		return itemList.get(rand.nextInt(itemList.size()));
+		return itemStackList;
 	}
 }
 
