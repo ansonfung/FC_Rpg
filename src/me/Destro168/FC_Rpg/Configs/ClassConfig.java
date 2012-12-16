@@ -72,10 +72,11 @@ public class ClassConfig extends ConfigGod
 			fcw.set(prefix + 5 + ".spellIDs", getDebugClassString());
 			
 			//Set all the class passives
-			setPassiveID(0, PassiveConfig.passive_ScalingArrows);
-			setPassiveID(1, PassiveConfig.passive_CounterAttack);
-			setPassiveID(2, PassiveConfig.passive_StrongerParry);
-			setPassiveID(4, PassiveConfig.passive_BattleLust);
+			setPassiveID(0, BalanceConfig.passive_CounterAttack);
+			setPassiveID(1, BalanceConfig.passive_ScalingArrows);
+			setPassiveID(2, BalanceConfig.passive_StrongerParry);
+			setPassiveID(3, BalanceConfig.passive_InnerFire);
+			setPassiveID(4, BalanceConfig.passive_BattleLust);
 			
 			//Set restrictions for certain classes.
 			setRestrictionID(1,0); //Only can use bows for magic.

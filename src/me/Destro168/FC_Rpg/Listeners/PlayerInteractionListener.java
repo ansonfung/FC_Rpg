@@ -29,6 +29,12 @@ public class PlayerInteractionListener implements Listener
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onClick(PlayerInteractEvent event)
 	{
+		//Check world.
+		player = event.getPlayer();
+		
+		if (!FC_Rpg.worldConfig.getIsRpgWorld(player.getWorld().getName()))
+			return;
+		
 		//Variable Declerations
 		Sign sign;
 		Block block;
@@ -37,7 +43,6 @@ public class PlayerInteractionListener implements Listener
 		wm = new WorldConfig();
 		
 		//Initialize variables
-		player = event.getPlayer();
 		msgLib = new MessageLib(player);
 		
 		//Initialize the block.
@@ -93,9 +98,14 @@ public class PlayerInteractionListener implements Listener
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onClick2(PlayerInteractEvent event)
 	{
+		//Check world.
+		player = event.getPlayer();
+		
+		if (!FC_Rpg.worldConfig.getIsRpgWorld(player.getWorld().getName()))
+			return;
+		
 		//Variable declarations.
-		Player p = event.getPlayer();
-		RpgPlayer rp = FC_Rpg.rpgEntityManager.getRpgPlayer(p);
+		RpgPlayer rp = FC_Rpg.rpgEntityManager.getRpgPlayer(player);
 		boolean leftClick = false;
 		
 		//Act on left and right clicks only.
@@ -118,7 +128,6 @@ public class PlayerInteractionListener implements Listener
 				//Then cast the spell.
 				rp.castSpell(null, 0, 0);
 			}
-			
 			else if (rp.getPlayerConfig().getActiveSpell() != null)
 			{
 				//If a spell is ready to be cast, then...
@@ -138,14 +147,21 @@ public class PlayerInteractionListener implements Listener
 			if (!(event.getAction() == Action.RIGHT_CLICK_AIR) && (!(event.getAction() == Action.RIGHT_CLICK_BLOCK)))
 				return;
 			
-			//If everything succeeded, set the active spell.
-			rp.prepareSpell(true);
+			//If autocast is disabled, then you can prepare.
+			if (rp.getPlayerConfig().getAutoCast() == false)
+				rp.prepareSpell(true); //Prepare spell
 		}
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onClick3(PlayerInteractEvent event)
 	{
+		//Check world.
+		player = event.getPlayer();
+		
+		if (!FC_Rpg.worldConfig.getIsRpgWorld(player.getWorld().getName()))
+			return;
+		
 		boolean isLeft;
 		
 		if (event.getAction() == Action.LEFT_CLICK_BLOCK)
@@ -321,31 +337,12 @@ public class PlayerInteractionListener implements Listener
 	
 	private void teleportMessage(String msgP1, String msgP2)
 	{
-		//Variable Declarations
-		String msg = "";
-		String stringToEvaluate = "";
-		
-		if (msgP2.length() > msgP1.length())
-			stringToEvaluate = msgP2;
-		else
-			stringToEvaluate = msgP1;
-		
-		//Form the lines.
-		for (int i = 0; i < stringToEvaluate.length(); i++)
-		{
-			msg += "-";
-		}
-		
-		msg += "----";
-		
-		msgLib.standardMessage(msg);
+		msgLib.standardHeader("- You Have Teleported -");
 		msgLib.standardMessage("- " + msgP1 + " -");
 		
 		//Only show the second message part if not empty.
 		if (!msgP2.equals(""))
 			msgLib.standardMessage("- " + msgP2 + " -");
-		
-		msgLib.standardMessage(msg);
 	}
 	
 	private void dungeonTeleport(String text, int dNumber)
@@ -386,7 +383,10 @@ public class PlayerInteractionListener implements Listener
 				return;
 			
 			//Welcome them.
-			teleportMessage("Welcome To The Dungeon " + FC_Rpg.dungeonConfig.getName(dNumber) + "! ", "$" + payAmount + " Deducted.");
+			if (payAmount > 0)
+				teleportMessage("Welcome To The Dungeon " + FC_Rpg.dungeonConfig.getName(dNumber) + "! ", "&q" + payAmount + "&q Deducted.");
+			else
+				teleportMessage("Welcome To The Dungeon " + FC_Rpg.dungeonConfig.getName(dNumber) + "! ", "");
 			
 			//Teleport them to the lobby.
 			player.teleport(FC_Rpg.dungeonConfig.getLobby(dNumber));

@@ -52,17 +52,11 @@ public class RpgEntityManager
 				@Override
 				public void run()
 				{
-					rpgPlayer.attemptFeedSteak();
+					rpgPlayer.attemptGiveTimedItems();
 					rpgPlayer.calculateHealthAndMana();
 					rpgPlayer.updateTimePlayed();
 				}
 			}, 0, 1200);
-		}
-		
-		private void stopPlayerUpdates()
-		{
-			if (updateTask != -1)
-				Bukkit.getScheduler().cancelTask(updateTask);
 		}
 		
 		private void startManaRegen()
@@ -85,6 +79,12 @@ public class RpgEntityManager
 					catch (NullPointerException e) { }
 				}
 			}, 0, 100);
+		}
+		
+		private void stopPlayerUpdates()
+		{
+			if (updateTask != -1)
+				Bukkit.getScheduler().cancelTask(updateTask);
 		}
 		
 		private void cancelManaRegen()
@@ -114,15 +114,24 @@ public class RpgEntityManager
     	
     	//Check all online players registrations.
     	for (Player player : Bukkit.getServer().getOnlinePlayers())
-    		checkPlayerRegistration(player, true);
+    	{
+    		if (FC_Rpg.worldConfig.getIsRpg(player.getWorld().getName()))
+    			checkPlayerRegistration(player, true);
+    	}
     }
     
     public List<RpgPlayer> getOnlineRpgPlayers()
     {
     	List<RpgPlayer> onlinePlayers = new ArrayList<RpgPlayer>();
+    	RpgPlayer rpgPlayer;
     	
     	for (Player player : Bukkit.getServer().getOnlinePlayers())
-    		onlinePlayers.add(getRpgPlayer(player));
+    	{
+    		rpgPlayer = getRpgPlayer(player);
+    		
+    		if (rpgPlayer != null)
+    			onlinePlayers.add(rpgPlayer);
+    	}
     	
     	return onlinePlayers;
     }
@@ -156,12 +165,12 @@ public class RpgEntityManager
     //Functions
     public void checkPlayerRegistration(Player player, boolean forceStart)
     {
-    	//Variable Decalrations
-    	RpgPlayer rpgPlayer = new RpgPlayer(player);
-    	
     	//If the player information isn't stored, then store.
     	if (!(piMap.containsKey(player)))
     	{
+    		//Variable Decalrations
+        	RpgPlayer rpgPlayer = new RpgPlayer(player);
+        	
     		//We get the rpgPlayer.
     		PlayerInformation pi = new PlayerInformation(rpgPlayer);
     		
@@ -256,7 +265,7 @@ public class RpgEntityManager
     	int intClass = -1;
     	
 		//Tell the server that the class/job have been picked.
-    	FC_Rpg.bLib.standardBroadcast("Welcome " + player.getName() + ", the " + classSelection + "!");
+    	FC_Rpg.bLib.rpgBroadcast(player.getName() + " has picked " + classSelection + "!");
 		
     	//Convert stringClass to real class number.
     	for (int i = 0; i < FC_Rpg.classConfig.getRpgClasses().length; i++)
@@ -319,11 +328,8 @@ public class RpgEntityManager
 	}
 }
 
-
 //Bukkit.getServer().broadcastMessage("You never found mob: " + String.valueOf(x));
 //Bukkit.getServer().broadcastMessage("You never found player: " + name);
-
-
 
 /*
 public void registerEntityById(int id)

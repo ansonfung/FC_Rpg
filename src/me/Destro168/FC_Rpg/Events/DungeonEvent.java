@@ -1,5 +1,6 @@
 package me.Destro168.FC_Rpg.Events;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
@@ -22,18 +23,20 @@ import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.FC_Rpg.CreatureSpawnListener;
 import me.Destro168.FC_Rpg.Util.RpgMessageLib;
 import me.Destro168.FC_Suite_Shared.SuiteConfig;
+import me.Destro168.FC_Suite_Shared.TimeUtils.DateManager;
 
 public class DungeonEvent extends GeneralEvent
 {
 	//Variable Declarations
+	private DateManager dm = new DateManager();
+	private List<Integer> timers = new ArrayList<Integer>();
 	private int dungeonNumber;
 	private String dungeonName;
-	private int[] tid;
 	private World dungeonWorld;
 	private LivingEntity[] spawnedMobs;
 	private int lowestLevel;
 	private boolean isRpgDungeon;
-	int randomSpawnRange;
+	private int randomSpawnRange;
 	
 	public String getDungeonName() { return dungeonName; }
 	public int getLowestLevel() { updateLowestLevel(); return lowestLevel; }
@@ -48,15 +51,12 @@ public class DungeonEvent extends GeneralEvent
 		super.setDefaults();
 		
 		//Cancel any past tasks.
-		if (tid != null)
-		{
-			for (int i = 0; i < 8; i++)
-				Bukkit.getScheduler().cancelTask(tid[i]);
-		}
+		for (int time : timers)
+			Bukkit.getScheduler().cancelTask(time);
 		
 		//Reset variables.
-		tid = new int[8];
 		lowestLevel = 999999;
+		timers = new ArrayList<Integer>();
 		
 		//Set the dungeon number.
 		setDungeonNumber(dungeonNumber_);
@@ -98,44 +98,59 @@ public class DungeonEvent extends GeneralEvent
 		//Set that the event is happening.
 		phase = 1;
 		
-		//Give players 60 seconds to join.
-		bLib.standardBroadcast("The Dungeon " + dungeonName + " Has Been Activated. [60] Seconds Remain To Join In On The Action!");
-		
-		int wait1 = 600;
-		int wait2 = 1200;
-		
+		int waitTime = FC_Rpg.dungeonConfig.getTimerJoin(dungeonNumber);
+		int startDelay = 0;
+		int dungeonIncrement = 30;
 		SuiteConfig sc = new SuiteConfig();
 		
 		if (sc.getDebug())
+			waitTime = 1;
+		
+		//Give players 60 seconds to join.
+		rbLib.rpgBroadcast("The Dungeon " + dungeonName + " Has Been Activated. [" + waitTime + "] Seconds Remain To Join In On The Action!");
+		
+		if (waitTime >= dungeonIncrement)
 		{
-			wait1 = 1;
-			wait2 = 2;
-		}
-	
-		//After 30 seconds announce 30 seconds to join.
-		tid[0] = Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable() 
-		{
-			@Override
-			public void run()
+			while (waitTime >= dungeonIncrement)
 			{
-				if (phase == 1)
-					bLib.standardBroadcast("[30] Seconds Remaining To Join The Dungeon " + dungeonName + "!");
+				addStartTimer(waitTime,startDelay);
+				waitTime -= dungeonIncrement;
+				startDelay += dungeonIncrement;
 			}
-		}, wait1);
+		}
+		else
+			startDelay = waitTime;
 		
 		//After 30 seconds start the  lobby phase.
-		tid[1] = Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable() 
+		timers.add(Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable() 
 		{ 
 			@Override
 			public void run()
 			{
 				if (phase == 1)
 				{
-					bLib.standardBroadcast("The Dungeon " + dungeonName + " Has Started! It's Now Closed To Entry! Stick Around To Join Next Time!");
+					rbLib.rpgBroadcast("The Dungeon " + dungeonName + " Has Started! It's Now Closed To Entry! Stick Around To Join Next Time!");
 					initialize(dungeonNumber_);
 				}
 			}
-		}, wait2);
+		}, startDelay * 20));
+	}
+	
+	private void addStartTimer(final int waitTime, int startDelay)
+	{
+		//Prevent double notifications.
+		if (startDelay == 0)
+			return;
+		
+		timers.add(Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable() 
+		{
+			@Override
+			public void run()
+			{
+				if (phase == 1)
+					rbLib.rpgBroadcast("[" + waitTime + "] Seconds Remaining To Join The Dungeon " + dungeonName + "!");
+			}
+		}, startDelay * 20));
 	}
 	
 	public void removeDungeoneer(Player requester, Player playerToRemove, boolean displayMessages)
@@ -213,46 +228,51 @@ public class DungeonEvent extends GeneralEvent
 			FC_Rpg.rpgEntityManager.getRpgMonster(spawnedMobs[mobCountMinusOne]).checkEquipment();
 		}
 		
-		tid[2] = Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
-		{
-			public void run()
-			{
-				if (phase == 2)
-					messageAllParticipants("7 Minutes 30 Seconds To Beat The Dungeon!");
-			}
-		}, 3000); //7:30 minutes to beat the dungeon.
+		int endTime = FC_Rpg.dungeonConfig.getTimerEnd(dungeonNumber);
+		int endDelay = 0;
+		int endIncrement = 120;
 		
-		tid[3] = Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
+		if (endTime >= endIncrement)
 		{
-			public void run()
+			while (endTime >= endIncrement)
 			{
-				if (phase == 2)
-					messageAllParticipants("5 Minutes Remaining To Clear The Dungeon");
+				addEndTimer(endTime,endDelay);
+				endTime -= endIncrement;
+				endDelay += endIncrement;
 			}
-		}, 6000); //5 minutes to beat the dungeon.
-		
-		tid[4] =  Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
+		}
+		else
 		{
-			public void run()
-			{
-				if (phase == 2)
-					messageAllParticipants("2 Minutes 30 Seconds To Finish The Dungeon!");
-			}
-		}, 9000); //2:30 minutes to beat the dungeon.
+			addEndTimer(endTime,endDelay);
+			endDelay = endTime;
+		}
 		
 		//Start timer for when the dungeon has to be beat by.
-		tid[5] = Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
+		timers.add(Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
 		{
 			public void run()
 			{
 				if (phase == 2)
 				{
-					bLib.standardBroadcast("The Adventurers Were Too Slow! Dungeon " + dungeonName + " Has Reset And Is Ready For More Action!");
+					rbLib.rpgBroadcast("The Adventurers Were Too Slow! Dungeon " + dungeonName + " Has Reset And Is Ready For More Action!");
 					end(false);
 				}
 			}
-		}, 12000); //10 minutes to beat the dungeon.
+		}, endDelay * 20)); //10 minutes to beat the dungeon.
 	}
+	
+	private void addEndTimer(final int endTime, int endDelay)
+	{
+		timers.add(Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
+		{
+			public void run()
+			{
+				if (phase == 2)
+					messageAllParticipants("Time Remaining: " + dm.getTimeStringFromTimeInteger(endTime));
+			}
+		}, endDelay * 20));
+	}
+	
 	
 	private void setDungeonNumber(int dungeonNumber_)
 	{
@@ -512,11 +532,11 @@ public class DungeonEvent extends GeneralEvent
 			if (spawnedMobs != null)
 			{
 				if (spawnedMobs[spawnedMobs.length - 1] == entity)
-					bLib.standardBroadcast("The Dungeon " + dungeonName + " Boss Monster Has Been Slain!");
+					rbLib.rpgBroadcast("The Dungeon " + dungeonName + " Boss Monster Has Been Slain!");
 			}
 		}
 		
-		tid[6] = Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
+		timers.add(Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
 		{
 			public void run()
 			{
@@ -526,7 +546,7 @@ public class DungeonEvent extends GeneralEvent
 						end(true);
 				} catch (NullPointerException e) { } //Allows you to pass in nulls.
 			}
-		}, 20);
+		}, 20));
 	}
 	
 	public boolean checkEmpty()
@@ -644,19 +664,19 @@ public class DungeonEvent extends GeneralEvent
 			phase = 3;
 			
 			//Message the participants they will be tp'd out.
-			super.messageAllParticipants("You will be teleported out in [60] seconds. Remember to loot the chest at the end of the dungeon! It's now full of loot!");
+			super.messageAllParticipants("Dungeon Complete! All participants will be tp'd out in [" + FC_Rpg.dungeonConfig.getTimerEnd(dungeonNumber) + "] seconds.");
 			
 			//Add loot to the chest.
 			addChestLoot(false);
 			
 			//In 30 seconds end the event.
-			tid[7] = Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
+			timers.add(Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
 			{
 				public void run()
 				{
 					//Announce dungeon completion
 					if (normalEnd == true)
-						bLib.standardBroadcast("The Dungeon " + dungeonName + " Has Been Completed!");
+						rbLib.rpgBroadcast("The Dungeon " + dungeonName + " Has Been Completed!");
 					
 					//Teleport all players out
 					teleportAllParticipants(FC_Rpg.dungeonConfig.getExit(dungeonNumber));
@@ -664,12 +684,12 @@ public class DungeonEvent extends GeneralEvent
 					//Reset everything.
 					setDungeonDefaults(-1);
 				}
-			}, 1200);
+			}, 1200));
 		}
 		else
 		{
 			//Announce dungeon shut down.
-			bLib.standardBroadcast("The Dungeon " + dungeonName + " Has Shut Down!");
+			rbLib.rpgBroadcast("The Dungeon " + dungeonName + " Has Shut Down!");
 			
 			//Teleport all players out
 			teleportAllParticipants(FC_Rpg.dungeonConfig.getExit(dungeonNumber));

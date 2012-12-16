@@ -105,7 +105,7 @@ public class RpgMonster extends RpgEntity
 		int difficultyCoefficient;
 		int trueDungeonNumber;
 		int levelDev = FC_Rpg.balanceConfig.getRandomMobLevelDeviation();
-
+		
 		for (int i = 0; i < FC_Rpg.dungeonCount; i++)
 		{
 			trueDungeonNumber = FC_Rpg.trueDungeonNumbers.get(i);
@@ -144,14 +144,14 @@ public class RpgMonster extends RpgEntity
 		// Set all variables
 		mobId = entity.getEntityId();
 		level = modifier + (levelDeviation.nextInt(levelDev) - levelDeviation.nextInt(levelDev));
-
+		
 		// Ensure level is never below 1.
 		if (level < 1)
 			level = 1;
-
+		
 		// Increases stats based on monster level.
 		difficultyCoefficient = (1 + modifier / FC_Rpg.balanceConfig.getDifficultyScalor());
-
+		
 		// Stat stats
 		attack = (int) FC_Rpg.balanceConfig.getMobAttackMultiplier() * modifier * difficultyCoefficient;
 		
@@ -260,7 +260,7 @@ public class RpgMonster extends RpgEntity
 	public void handlePassiveMobDrops(Location dropSpot)
 	{
 		EntityType entityType = getEntity().getType();
-
+		
 		// Drop loot for passive mobs.
 		if (entityType == EntityType.COW)
 		{
@@ -302,31 +302,27 @@ public class RpgMonster extends RpgEntity
 		{
 			dropPassiveItem(Material.BONE, dropSpot);
 		}
-
+		
 		dropExperience();
 	}
-
+	
 	public void dropExperience()
 	{
-		//Variable Declaration
+		// Variable Declaration
 		Random rand = new Random();
 		
-		// If experience is enabled, then...
-		if (FC_Rpg.generalConfig.getExpCancelled() == false)
+		// Drop 3 experience orbs.
+		for (int i = 0; i < 3; i++)
 		{
-			// Drop 3 experience orbs.
-			for (int i = 0; i < 3; i++)
-			{
-				ExperienceOrb orb = (ExperienceOrb) entity.getWorld().spawnEntity(entity.getLocation(), EntityType.EXPERIENCE_ORB);
-				orb.setExperience(rand.nextInt(3) + 1);
-			}
+			ExperienceOrb orb = (ExperienceOrb) entity.getWorld().spawnEntity(entity.getLocation(), EntityType.EXPERIENCE_ORB);
+			orb.setExperience(rand.nextInt(3) + 1);
 		}
 	}
-	
+
 	private void dropPassiveItem(Material material, Location dropSpot)
 	{
 		Random rand = new Random();
-		ItemStack loot = new ItemStack(material, rand.nextInt(2) + 1);
+		ItemStack loot = new ItemStack(material, rand.nextInt(3));
 		
 		dropSpot.getWorld().dropItemNaturally(dropSpot, loot);
 	}

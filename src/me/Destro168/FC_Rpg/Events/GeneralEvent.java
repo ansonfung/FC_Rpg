@@ -3,7 +3,7 @@ package me.Destro168.FC_Rpg.Events;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.Destro168.FC_Suite_Shared.Messaging.BroadcastLib;
+import me.Destro168.FC_Rpg.Util.RpgBroadcast;
 import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 
 import org.bukkit.Location;
@@ -13,7 +13,7 @@ public class GeneralEvent
 {
 	//Variables
 	protected List<Player> participantList;
-	protected BroadcastLib bLib;
+	protected RpgBroadcast rbLib;
 	protected int phase; //The phase variable represents all the phases of the event. 1: Start, 2: Lobby Wait, 3: Fight, 0:, 4: Duel None
 	
 	//Gets
@@ -33,7 +33,7 @@ public class GeneralEvent
 		//Initialize globals.
 		phase = 0;
 		participantList = new ArrayList<Player>();
-		bLib = new BroadcastLib();
+		rbLib = new RpgBroadcast();
 	}
 	
 	public boolean isEventPlayer(Player player)
@@ -43,23 +43,6 @@ public class GeneralEvent
 		
 		return false;
 	}
-	
-	/*
-	protected int getEventPlayerId(Player player)
-	{
-		
-		for (int i = 0; i < participantArray.length; i++)
-		{
-			if (participantArray[i] != null)
-			{
-				if (participantArray[i] == player)
-					return i;
-			}
-		}
-		
-		return -1;
-	}
-	*/
 	
 	protected boolean addParticipant(Player player)
 	{

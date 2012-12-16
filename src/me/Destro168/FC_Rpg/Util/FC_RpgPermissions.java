@@ -63,6 +63,14 @@ public class FC_RpgPermissions extends PermissionManager
 		return isConsole;
 	}
 	
+	public boolean chatAdmin()
+	{
+		if (permission.has(player, "FC_Rpg.chatadmin"))
+			return true;
+		
+		return false;
+	}
+	
 	public boolean hasInfiniteTickets()
 	{
 		return getCanUseCommand("FC_Rpg.inifiniteTickets");

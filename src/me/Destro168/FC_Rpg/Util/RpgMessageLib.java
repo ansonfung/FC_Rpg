@@ -60,18 +60,6 @@ public class RpgMessageLib extends MessageLib
 		return true;
 	}
 	
-	public double errorOutOfMana()
-	{
-		standardMessage("Spell failed to cast because you don't have enough mana!");
-		return 0;
-	}
-	
-	public boolean errorOutOfManaBoolean()
-	{
-		standardMessage("Spell failed to cast because you don't have enough mana!");
-		return true;
-	}
-	
 	public boolean errorJobLevelTooLow()
 	{
 		standardMessage("Your job level is too low!");
@@ -121,23 +109,26 @@ public class RpgMessageLib extends MessageLib
 		if (perms.commandSpell())
 			standardMessage("/spell","Help for spells");
 		
-		if (perms.commandPvp())
-			standardMessage("/pvp","Help for pvp events.");
+		if (rpgPlayer != null)
+		{
+			if (rpgPlayer.getPlayerConfig().getHasAlchemy())
+				standardMessage("/alchemy","Help for alchemy");
+			
+			if (rpgPlayer.isDonatorOrAdmin())
+				standardMessage("/donator","Help for donators.");
+		}
 		
 		if (perms.commandReset())
 			standardMessage("/reset","Reset Your FC_RPG Character!");
+		
+		if (perms.commandPvp())
+			standardMessage("/pvp","Help for pvp events.");
 		
 		if (perms.commandList())
 			standardMessage("/list","See who is online.");
 		
 		if (perms.commandBuff())
 			standardMessage("/buff","Help with buffs.");
-		
-		if (rpgPlayer != null)
-		{
-			if (rpgPlayer.isDonatorOrAdmin())
-				standardMessage("/donator","Help for donators.");
-		}
 		
 		if (perms.isAdmin())
 		{
@@ -252,8 +243,27 @@ public class RpgMessageLib extends MessageLib
 		standardMessage("/spell bind [spellName]","Binds a spell to your held item.");
 		standardMessage("/spell upgrade [spellName]","Upgrade spells with spell points.");
 		standardMessage("/spell cast [spellName]","Cast your self-buff spells.");
-		standardMessage("/spell autocast","Toggles spell autocast on/off.");
 		standardMessage("/spell reset","Removes the spell bound to your current item.");
+		standardMessage("/spell autocast","Toggles spell autocast on/off.");
+		
+		if (rpgPlayer != null)
+			infiniteMessage("Automatic Casting Currently: ",rpgPlayer.getPlayerConfig().getAutoCast() + "");
+		
+		return true;
+	}
+	
+	public boolean helpAlchemy()
+	{
+		if (rpgPlayer == null || !rpgPlayer.getPlayerConfig().getHasAlchemy())
+			return true;
+		
+		standardHeader("Alchemy Commands");
+		standardMessage("/alchemy","Help for alchemy");
+		standardMessage("/alchemy [list] <startpoint>","List items purchasable with Arcanium.");
+		standardMessage("/alchemy [buy] [num] [count]","Buy items from the alchemy list.");
+		standardMessage("/alchemy [smelt] <all>","Break down an item in your hand or all of your items into Arcanium.");
+		infiniteMessage("You currently have ",FC_Rpg.df.format(rpgPlayer.getPlayerConfig().getArcanium())," Arcanium.");
+		
 		return true;
 	}
 	
@@ -360,6 +370,33 @@ public class RpgMessageLib extends MessageLib
 		return true;
 	}
 	
+	public boolean helpDungeonDefinition()
+	{
+		if (!perms.isAdmin())
+			return errorNoPermission();
+		
+		standardHeader("Dungeon Definition Commands.");
+		standardHeader("BE CAREFUL ~ READ PLUGIN HELP!");
+		standardMessage("/dungeon new [name]", "Creates empty dungeon in dungeon config.");
+		standardMessage("/dungeon name [num]");
+		standardMessage("/dungeon spawnBox [num]");
+		standardMessage("/dungeon lobby [num]");
+		standardMessage("/dungeon playerStart [num]", "NOT 'START'! Careful!");
+		standardMessage("/dungeon playerExit [num]", "NOT 'END'! Careful!");
+		standardMessage("/dungeon bossSpawn [num]");
+		standardMessage("/dungeon timerJoin [num] [value]");
+		standardMessage("/dungeon timerEnd [num] [value]");
+		standardMessage("/dungeon treasureStart [num] [index]");
+		standardMessage("/dungeon treasureEnd [num]  [index]");
+		standardMessage("/dungeon fee [num] [value]");
+		standardMessage("/dungeon lmin [num] [value]");
+		standardMessage("/dungeon lmax [num] [value]");
+		standardMessage("/dungeon spawnCount [num] [index]");
+		standardMessage("/dungeon spawnchance [num] [index] [value]");
+
+		return true;
+	}
+
 	public boolean helpModify()
 	{
 		if (!perms.isAdmin())
@@ -372,7 +409,7 @@ public class RpgMessageLib extends MessageLib
 		standardMessage("Levels/Exp","level, addlevel, exp, addexp");
 		standardMessage("Donator","donator, tickets");
 		standardMessage("Play Time","seconds, addseconds");
-		standardMessage("Misc","class, jobrank, spellPoint, prefix (use 'none' to reset')");
+		standardMessage("Misc","class, jobrank, spellPoint, prefix (use 'none' to reset'), arcanium");
 		secondaryMessage("Please note that most 's' characters can be ommited and there are many aliases for each modifiable.");
 		
 		return true;
@@ -404,6 +441,7 @@ public class RpgMessageLib extends MessageLib
 		standardMessage("/rpg event [type]","loot,exp,off");
 		standardMessage("/h,/g,/hg,/gh [name]","Heal/Gamemode single/hybrid commands.");
 		standardMessage("/rpg go [u [amount],d [amount],(coords)]","Teleport anywhere.");
+		standardMessage("/rpg tp","Teleport to anybody. Fully bypasses everything.");
 		standardMessage("/rpg expMult [x]","Change current global exp multiplier. Currently: " + FC_Rpg.balanceConfig.getGlobalExpMultiplier());
 		standardMessage("/rpg wall","Creates wall with all classes/jobs/start sign.");
 		standardMessage("/rpg sudo [name]","Make somebody say anything/use any command.");

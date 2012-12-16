@@ -19,7 +19,6 @@ public class GeneralConfig extends ConfigGod
 	private void setPerfectBirch(boolean x) { fcw.set(prefix + "perfectBirch", x); }
 	private void setCreativeControl(boolean x) { fcw.set(prefix + "creativeControl", x); }
 	private void setHardcoreItemLoss(boolean x) { fcw.set(prefix + "hardcoreItemLoss", x); }
-	private void setExpCancelled(boolean x) { fcw.set(prefix + "expCancelled", x); }
 	private void setPerfectWheat(boolean x) { fcw.set(prefix + "perfectWheat", x); }
 	private void setInfiniteGold(boolean x) { fcw.set(prefix + "infiniteGold", x); }
 	private void setInfiniteDiamond(boolean x) { fcw.set(prefix + "infiniteDiamond", x); }
@@ -44,12 +43,34 @@ public class GeneralConfig extends ConfigGod
 	private void setChatFormatAdmin(String x) { fcw.set(prefix + "chatFormatAdmin", x); }
 	private void setInactivePlayerFileDeleteTime(long x) { fcw.set(prefix + "inactivePlayerFileDeleteTime", x); }
 	private void setBuffCommandCost(double x) { fcw.set(prefix + "buffCommandCost", x); }
+	private void setBonusMobSpawns(boolean x) { fcw.set(prefix + "bonusMobSpawns", x); }
+	
+	private void setCommandKeyWordClass(String x) { fcw.set(prefix + "commandKeyWord.class", x); }
+	private void setCommandKeyWordDonator(String x) { fcw.set(prefix + "commandKeyWord.donator", x); }
+	private void setCommandKeyWordDungeon(String x) { fcw.set(prefix + "commandKeyWord.dungeon", x); }
+	private void setCommandKeyWordFaq(String x) { fcw.set(prefix + "commandKeyWord.faq", x); }
+	private void setCommandKeyWordG(String x) { fcw.set(prefix + "commandKeyWord.g", x); }
+	private void setCommandKeyWordH(String x) { fcw.set(prefix + "commandKeyWord.h", x); }
+	private void setCommandKeyWordGH(String x) { fcw.set(prefix + "commandKeyWord.gh", x); }
+	private void setCommandKeyWordHG(String x) { fcw.set(prefix + "commandKeyWord.hg", x); }
+	private void setCommandKeyWordHat(String x) { fcw.set(prefix + "commandKeyWord.hat", x); }
+	private void setCommandKeyWordJob(String x) { fcw.set(prefix + "commandKeyWord.job", x); }
+	private void setCommandKeyWordGuild(String x) { fcw.set(prefix + "commandKeyWord.guild", x); }
+	private void setCommandKeyWordPvp(String x) { fcw.set(prefix + "commandKeyWord.pvp", x); }
+	private void setCommandKeyWordReset(String x) { fcw.set(prefix + "commandKeyWord.reset", x); }
+	private void setCommandKeyWordRpg(String x) { fcw.set(prefix + "commandKeyWord.rpg", x); }
+	private void setCommandKeyWordSpell(String x) { fcw.set(prefix + "commandKeyWord.spell", x); }
+	private void setCommandKeyWordAlchemy(String x) { fcw.set(prefix + "commandKeyWord.alchemy", x); }
+	private void setCommandKeyWordModify(String x) { fcw.set(prefix + "commandKeyWord.modify", x); }
+	private void setCommandKeyWordW(String x) { fcw.set(prefix + "commandKeyWord.w", x); }
+	private void setCommandKeyWordBuff(String x) { fcw.set(prefix + "commandKeyWord.buff", x); }
+	private void setCommandKeyWordWorld(String x) { fcw.set(prefix + "commandKeyWord.world", x); }
+	private void setCommandKeyWordList(String x) { fcw.set(prefix + "commandKeyWord.list", x); }
 	
 	public String getDefaultPrefix() { return fcw.getStringS(prefix + "defaultPrefix"); }
 	public boolean getPerfectBirch() { return fcw.getBooleanS(prefix + "perfectBirch"); }
 	public boolean getCreativeControl() { return fcw.getBooleanS(prefix + "creativeControl"); }
 	public boolean getHardcoreItemLoss() { return fcw.getBooleanS(prefix + "hardcoreItemLoss"); }
-	public boolean getExpCancelled() { return fcw.getBooleanS(prefix + "expCancelled"); }
 	public boolean getPerfectWheat() { return fcw.getBooleanS(prefix + "perfectWheat"); }
 	public boolean getInfiniteGold() { return fcw.getBooleanS(prefix + "infiniteGold"); }
 	public boolean getInfiniteDiamond() { return fcw.getBooleanS(prefix + "infiniteDiamond"); }
@@ -71,6 +92,31 @@ public class GeneralConfig extends ConfigGod
 	public String getChatFormatAdmin() { return fcw.getStringS(prefix + "chatFormatAdmin"); }
 	public long getInactivePlayerFileDeleteTime() { return fcw.getLongS(prefix + "inactivePlayerFileDeleteTime"); }
 	public double getBuffCommandCost() { return fcw.getDoubleS(prefix + "buffCommandCost"); }
+	public boolean getBonusMobSpawns() { return fcw.getBooleanS(prefix + "bonusMobSpawns"); }
+	
+	public String getCommandKeyWordClass() { return fcw.getStringS(prefix + "commandKeyWord.class"); }
+	public String getCommandKeyWordDonator() { return fcw.getStringS(prefix + "commandKeyWord.donator"); }
+	public String getCommandKeyWordDungeon() { return fcw.getStringS(prefix + "commandKeyWord.dungeon"); }
+	public String getCommandKeyWordFaq() { return fcw.getStringS(prefix + "commandKeyWord.faq"); }
+	public String getCommandKeyWordG() { return fcw.getStringS(prefix + "commandKeyWord.g"); }
+	public String getCommandKeyWordH() { return fcw.getStringS(prefix + "commandKeyWord.h"); }
+	public String getCommandKeyWordGH() { return fcw.getStringS(prefix + "commandKeyWord.gh"); }
+	public String getCommandKeyWordHG() { return fcw.getStringS(prefix + "commandKeyWord.hg"); }
+	public String getCommandKeyWordHat() { return fcw.getStringS(prefix + "commandKeyWord.hat"); }
+	public String getCommandKeyWordJob() { return fcw.getStringS(prefix + "commandKeyWord.job"); }
+	public String getCommandKeyWordGuild() { return fcw.getStringS(prefix + "commandKeyWord.guild"); }
+	public String getCommandKeyWordPvp() { return fcw.getStringS(prefix + "commandKeyWord.pvp"); }
+	public String getCommandKeyWordReset() { return fcw.getStringS(prefix + "commandKeyWord.reset"); }
+	public String getCommandKeyWordRpg() { return fcw.getStringS(prefix + "commandKeyWord.rpg"); }
+	public String getCommandKeyWordSpell() { return fcw.getStringS(prefix + "commandKeyWord.spell"); }
+	
+	public String getCommandKeyWordAlchemy() { return fcw.getStringS(prefix + "commandKeyWord.alchemy"); }
+	
+	public String getCommandKeyWordModify() { return fcw.getStringS(prefix + "commandKeyWord.modify"); }
+	public String getCommandKeyWordW() { return fcw.getStringS(prefix + "commandKeyWord.w"); }
+	public String getCommandKeyWordBuff() { return fcw.getStringS(prefix + "commandKeyWord.buff"); }
+	public String getCommandKeyWordWorld() { return fcw.getStringS(prefix + "commandKeyWord.world"); }
+	public String getCommandKeyWordList() { return fcw.getStringS(prefix + "commandKeyWord.list"); }
 	
 	public GeneralConfig()
 	{
@@ -91,7 +137,6 @@ public class GeneralConfig extends ConfigGod
 			setPerfectBirch(false);
 			setCreativeControl(true);
 			setHardcoreItemLoss(true);
-			setExpCancelled(true);
 			setPerfectWheat(true);
 			setInfiniteGold(true);
 			setInfiniteDiamond(true);
@@ -116,6 +161,39 @@ public class GeneralConfig extends ConfigGod
 			setChatFormatAdmin("&e%time% [&6%level%&e] %prefix%&e%name%: %chat%");
 			setInactivePlayerFileDeleteTime(1209600000);
 			setBuffCommandCost(10);
+		}
+		
+		if (getVersion() < 1.061)
+		{
+			setVersion(1.061);
+			
+			setBonusMobSpawns(true);
+			setCommandKeyWordClass("class");
+			setCommandKeyWordDonator("donator");
+			setCommandKeyWordDungeon("dungeon");
+			setCommandKeyWordFaq("faq");
+			setCommandKeyWordG("g");
+			setCommandKeyWordH("h");
+			setCommandKeyWordGH("gh");
+			setCommandKeyWordHG("hg");
+			setCommandKeyWordHat("hat");
+			setCommandKeyWordJob("job");
+			setCommandKeyWordGuild("guild");
+			setCommandKeyWordPvp("pvp");
+			setCommandKeyWordReset("reset");
+			setCommandKeyWordRpg("rpg");
+			setCommandKeyWordSpell("spell");
+			setCommandKeyWordAlchemy("alchemy");
+			setCommandKeyWordModify("modify");
+			setCommandKeyWordW("w");
+			setCommandKeyWordBuff("buff");
+			setCommandKeyWordWorld("world");
+			setCommandKeyWordList("list");
+		}
+		
+		if (getVersion() < 1.1)
+		{
+			setVersion(1.1);
 		}
 		
 		//Load up timed items.

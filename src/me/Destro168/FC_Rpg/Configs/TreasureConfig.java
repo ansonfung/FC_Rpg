@@ -314,8 +314,13 @@ public class TreasureConfig extends ConfigGod
 		//Swords
 		if (ml.swords.contains(dropType))
 		{
+			int rollCount = 4;
+			
+			if (FC_Rpg.balanceConfig.getDefaultItemDrops() == true)
+				rollCount++;
+			
 			//Roll a type of enchantment to put on.
-			enchantmentType = rand.nextInt(4);
+			enchantmentType = rand.nextInt(rollCount);
 			
 			//Add that enchantment.
 			if (enchantmentType == 0)
@@ -326,9 +331,12 @@ public class TreasureConfig extends ConfigGod
 			
 			else if (enchantmentType == 2)
 				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.DAMAGE_ARTHROPODS);
-
+			
 			else if (enchantmentType == 3)
 				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.KNOCKBACK);
+			
+			else if (enchantmentType == 4)
+				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.LOOT_BONUS_MOBS);
 		}
 		
 		//Chest - Legging

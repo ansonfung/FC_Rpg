@@ -3,8 +3,10 @@ package me.Destro168.FC_Rpg;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -15,7 +17,6 @@ import me.Destro168.FC_Rpg.Configs.FaqConfig;
 import me.Destro168.FC_Rpg.Configs.GeneralConfig;
 import me.Destro168.FC_Rpg.Configs.GroupConfig;
 import me.Destro168.FC_Rpg.Configs.GuildConfig;
-import me.Destro168.FC_Rpg.Configs.PassiveConfig;
 import me.Destro168.FC_Rpg.Configs.SpellConfig;
 import me.Destro168.FC_Rpg.Configs.TreasureConfig;
 import me.Destro168.FC_Rpg.Configs.WarpConfig;
@@ -30,19 +31,21 @@ import me.Destro168.FC_Rpg.Listeners.BlockBreakListener;
 import me.Destro168.FC_Rpg.Listeners.DamageListener;
 import me.Destro168.FC_Rpg.Listeners.PlayerInteractionListener;
 import me.Destro168.FC_Rpg.LoadedObjects.RpgClass;
+import me.Destro168.FC_Rpg.Stores.AlchemyStore;
 import me.Destro168.FC_Rpg.Util.BattleCalculations;
 import me.Destro168.FC_Rpg.Util.DistanceModifierLib;
 import me.Destro168.FC_Rpg.Util.FC_RpgPermissions;
 import me.Destro168.FC_Rpg.Util.HealthConverter;
 import me.Destro168.FC_Rpg.Util.MaterialLib;
+import me.Destro168.FC_Rpg.Util.RpgBroadcast;
 import me.Destro168.FC_Suite_Shared.AutoUpdate;
 import me.Destro168.FC_Suite_Shared.ColorLib;
 import me.Destro168.FC_Suite_Shared.SelectionVector;
-import me.Destro168.FC_Suite_Shared.Messaging.BroadcastLib;
 import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 import net.milkbowl.vault.economy.Economy;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.TreeType;
@@ -81,23 +84,25 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.util.Vector;
 
+import com.earth2me.essentials.Essentials;
+import com.earth2me.essentials.User;
+
 public class FC_Rpg extends JavaPlugin
 {
 	final static double MAX_HP = 999999;
 	public final static DateFormat dfm = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	public static final DecimalFormat df = new DecimalFormat("#.#");
-
+	
 	public final static boolean debugModeEnabled = false;
-
+	
 	public static FC_Rpg plugin;
 	public static String dataFolderAbsolutePath;
-
+	
 	public static RpgEntityManager rpgEntityManager;
 	public static GuildConfig guildManager;
 	public static SpellConfig spellConfig;
 	public static ClassConfig classConfig;
 	public static GeneralConfig generalConfig;
-	public static PassiveConfig passiveConfig;
 	public static TreasureConfig treasureConfig;
 	public static WarpConfig warpConfig;
 	public static BalanceConfig balanceConfig;
@@ -105,12 +110,13 @@ public class FC_Rpg extends JavaPlugin
 	
 	public static ColorLib cl = new ColorLib();
 	public static PvpEvent pvp;
-	public static BroadcastLib bLib;
+	public static RpgBroadcast bLib;
 	public static WorldConfig worldConfig;
 	public static Economy economy = null;
 	public static DungeonEvent[] dungeonEventArray;
 	public static SelectionVector sv;
 	public static MaterialLib mLib;
+	public static AlchemyStore as;
 	public static BattleCalculations battleCalculations;
 	
 	public static int eventExpMultiplier = 1;
@@ -118,45 +124,62 @@ public class FC_Rpg extends JavaPlugin
 	public static int tid3;
 	public static int tid4;
 	public static int dungeonCount;
-
+	
 	public int tid;
 	public int tid2;
-
+	
 	public static Map<Player, String> classSelection = new HashMap<Player, String>();
 	public static Map<Integer, Integer> trueDungeonNumbers;
 	public static Map<Player, Boolean> aoeLock = new HashMap<Player, Boolean>();
-
+	
+	public static List<String> vanishedPlayers = new ArrayList<String>();
+	
 	private CommandGod commandCE;
-
+	private MobSpawnManager msm;
+	
+	
 	@Override
 	public void onDisable()
 	{
 		// Cancel all the tasks of this plugin.
 		plugin.getServer().getScheduler().cancelTasks(plugin);
-
+		
 		// Save all players times for being logged on.
 		for (Player player : Bukkit.getOnlinePlayers())
+		{
 			rpgEntityManager.unregisterRpgPlayer(player);
-
+			msm.endMobSpawns(player);
+		}
+		
 		for (int i = 0; i < dungeonCount; i++)
 		{
 			if (dungeonEventArray[FC_Rpg.trueDungeonNumbers.get(i)].isHappening() == true)
 				dungeonEventArray[FC_Rpg.trueDungeonNumbers.get(i)].end(false);
 		}
 		
+		for (String s : vanishedPlayers)
+		{
+			Player t = Bukkit.getServer().getPlayer(s);
+			
+			if (t != null)
+				t.sendMessage(ChatColor.RED + "[FC_RPG] Use /rpg vanish to rehide.");
+		}
+		
 		this.getLogger().info("Disabled");
 	}
-
+	
 	@Override
 	public void onEnable()
 	{
 		// Derp
 		plugin = this;
 		dataFolderAbsolutePath = FC_Rpg.plugin.getDataFolder().getAbsolutePath();
-
+		
 		// World manager = new world manager;
 		mLib = new MaterialLib();
 		sv = new SelectionVector();
+		as = new AlchemyStore();
+		
 		battleCalculations = new BattleCalculations();
 		generalConfig = new GeneralConfig();
 		
@@ -174,12 +197,11 @@ public class FC_Rpg extends JavaPlugin
 		GroupConfig gm = new GroupConfig();
 		
 		worldConfig = new WorldConfig();
-		bLib = new BroadcastLib();
+		bLib = new RpgBroadcast();
 		guildManager = new GuildConfig();
 		pvp = new PvpEvent();
 		spellConfig = new SpellConfig();
 		classConfig = new ClassConfig();
-		passiveConfig = new PassiveConfig();
 		treasureConfig = new TreasureConfig();
 		warpConfig = new WarpConfig();
 		balanceConfig = new BalanceConfig();
@@ -198,7 +220,7 @@ public class FC_Rpg extends JavaPlugin
 		getServer().getPluginManager().registerEvents(new RespawnListener(), plugin);
 		getServer().getPluginManager().registerEvents(new DamageListener(), plugin);
 		getServer().getPluginManager().registerEvents(new EntityDeathListener(), plugin);
-
+		
 		// Register chat listener if chat is enabled.
 		if (!generalConfig.getChatFormat().equalsIgnoreCase("") && !generalConfig.getChatFormatAdmin().equalsIgnoreCase(""))
 			getServer().getPluginManager().registerEvents(new AyncPlayerChatListener(), plugin);
@@ -213,30 +235,31 @@ public class FC_Rpg extends JavaPlugin
 		getServer().getPluginManager().registerEvents(new ExperienceChangeListener(), plugin);
 		getServer().getPluginManager().registerEvents(new ArrowFireListener(), plugin);
 		getServer().getPluginManager().registerEvents(new teleportListener(), plugin);
-
+		
 		// Register Commands
 		commandCE = new CommandGod();
-		getCommand("bighelp").setExecutor(commandCE);
-		getCommand("class").setExecutor(commandCE);
-		getCommand("donator").setExecutor(commandCE);
-		getCommand("dungeon").setExecutor(commandCE);
-		getCommand("faq").setExecutor(commandCE);
-		getCommand("g").setExecutor(commandCE);
-		getCommand("h").setExecutor(commandCE);
-		getCommand("gh").setExecutor(commandCE);
-		getCommand("hg").setExecutor(commandCE);
-		getCommand("hat").setExecutor(commandCE);
-		getCommand("job").setExecutor(commandCE);
-		getCommand("list").setExecutor(commandCE);
-		getCommand("guild").setExecutor(commandCE);
-		getCommand("pvp").setExecutor(commandCE);
-		getCommand("reset").setExecutor(commandCE);
-		getCommand("rpg").setExecutor(commandCE);
-		getCommand("spell").setExecutor(commandCE);
-		getCommand("modify").setExecutor(commandCE);
-		getCommand("w").setExecutor(commandCE);
-		getCommand("buff").setExecutor(commandCE);
-		getCommand("world").setExecutor(commandCE);
+		
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordClass()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordDonator()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordDungeon()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordFaq()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordG()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordH()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordGH()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordHG()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordHat()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordJob()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordGuild()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordPvp()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordReset()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordRpg()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordSpell()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordAlchemy()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordModify()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordW()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordBuff()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordWorld()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordList()).setExecutor(commandCE);
 		
 		// Handle tasks that happen every 30 minutes. Delay'd by 5 seconds.
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable()
@@ -247,13 +270,15 @@ public class FC_Rpg extends JavaPlugin
 				pvp.begin(); // Start pvp event.
 			}
 		}, 100, 36000);
-
+		
 		// Start an rpg manager.
 		rpgEntityManager = new RpgEntityManager();
 
 		// We want to delete records of all players that haven't logged on in a while.
 		rpgEntityManager.clearOldPlayerData();
-
+		
+		msm = new MobSpawnManager();
+		
 		// We want to perform promotion checks.
 		this.getLogger().info("Enabled");
 	}
@@ -264,7 +289,7 @@ public class FC_Rpg extends JavaPlugin
 		String ref = "";
 		int count = 0;
 		trueDungeonNumbers = new HashMap<Integer, Integer>();
-
+		
 		// Attempt to store all dungeon names.
 		for (int i = 0; i < 1000; i++)
 		{
@@ -287,7 +312,7 @@ public class FC_Rpg extends JavaPlugin
 		for (int i = 0; i < dungeonCount; i++)
 			dungeonEventArray[i] = new DungeonEvent(i);
 	}
-
+	
 	// Listen for block growth
 	public class CreativeControlListeners implements Listener
 	{
@@ -460,11 +485,7 @@ public class FC_Rpg extends JavaPlugin
 
 			if (!worldConfig.getIsRpgWorld(entity.getWorld().getName()))
 				return;
-
-			// If exp drops are cancelled, then...
-			if (generalConfig.getExpCancelled() == true)
-				event.setDroppedExp(0); // Disable exp drops.
-
+			
 			// Handle item loss if a player dies with hunger.
 			if (entity instanceof Player)
 			{
@@ -495,6 +516,13 @@ public class FC_Rpg extends JavaPlugin
 
 				if (FC_Rpg.balanceConfig.getDefaultItemDrops() == false)
 					event.getDrops().clear(); // Remove item drops from mobs.
+				else
+				{
+					Random rand = new Random();
+					
+					if (rand.nextInt(100) < 10)
+						event.getDrops().clear();
+				}
 			}
 		}
 
@@ -568,14 +596,19 @@ public class FC_Rpg extends JavaPlugin
 		public void onPlayerJoin(PlayerJoinEvent event)
 		{
 			// Variable Declarations
-			Player player = (Player) event.getPlayer();
-
+			final Player player = (Player) event.getPlayer();
+			
 			// If the player is null, we want to return.
 			if (player == null)
 				return;
-
+			
+			if (!FC_Rpg.worldConfig.getIsRpgWorld(player.getWorld().getName()))
+				return;
+			
 			// Register the player if needed.
 			FC_Rpg.rpgEntityManager.checkPlayerRegistration(player, true);
+			
+			msm.beginMobSpawns(player);
 		}
 	}
 
@@ -585,21 +618,23 @@ public class FC_Rpg extends JavaPlugin
 		public void onPlayerQuit(PlayerQuitEvent event)
 		{
 			// Variable Declaration
-			Player p = event.getPlayer();
+			Player player = event.getPlayer();
 
 			// Remove from any potential pvp events they may be in.
-			if (pvp.isEventPlayer(p))
-				pvp.removePvper(p, p, false);
+			if (pvp.isEventPlayer(player))
+				pvp.removePvper(player, player, false);
 
 			// Unregister the player from the object pool.
-			rpgEntityManager.unregisterRpgPlayer(p);
+			rpgEntityManager.unregisterRpgPlayer(player);
 
 			// Remove from any dungeons.
 			for (int i = 0; i < dungeonCount; i++)
-				dungeonEventArray[i].removeDungeoneer(p, p, false);
+				dungeonEventArray[i].removeDungeoneer(player, player, false);
+			
+			msm.endMobSpawns(player);
 		}
 	}
-
+	
 	public class RespawnListener implements Listener
 	{
 		@EventHandler(priority = EventPriority.HIGHEST)
@@ -608,6 +643,9 @@ public class FC_Rpg extends JavaPlugin
 			// Variable Declarations
 			final Player player = event.getPlayer();
 
+			if (!FC_Rpg.worldConfig.getIsRpgWorld(event.getPlayer().getWorld().getName()))
+				return;
+			
 			Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
 			{
 				@Override
@@ -744,37 +782,47 @@ public class FC_Rpg extends JavaPlugin
 		@EventHandler
 		public void onChat(AsyncPlayerChatEvent event)
 		{
-			// Variable Declaration
-			RpgPlayer rpgPlayer = rpgEntityManager.getRpgPlayer(event.getPlayer());
+			if (!FC_Rpg.worldConfig.getIsRpgWorld(event.getPlayer().getWorld().getName()))
+				return;
 			
-			// If rpg player is null don't continue.
+			RpgPlayer rpgPlayer = FC_Rpg.rpgEntityManager.getRpgPlayer(event.getPlayer());
+
 			if (rpgPlayer == null)
 				return;
 			
-			// Variable Declaration
 			Player player = event.getPlayer();
 			FC_RpgPermissions perms = new FC_RpgPermissions(player);
 			DateFormat timeStamp = new SimpleDateFormat("HH:mm:ss");
 			Date now = new Date();
 			String chatFormat;
 			
-			// Change features for admins.
-			if (perms.isAdmin() == true)
+			if (perms.chatAdmin())
 				chatFormat = FC_Rpg.generalConfig.getChatFormatAdmin();
 			else
 				chatFormat = FC_Rpg.generalConfig.getChatFormat();
-			
 			if (chatFormat.equalsIgnoreCase(""))
 				return;
 			
 			chatFormat = chatFormat.replaceAll("%time%", timeStamp.format(now));
 			chatFormat = chatFormat.replaceAll("%prefix%", rpgPlayer.updatePrefix());
-			chatFormat = chatFormat.replaceAll("%name%", rpgPlayer.getPlayerConfig().getName());
-			chatFormat = chatFormat.replaceAll("%chat%", event.getMessage()); //"\\%2\\$s"
+			
+			String name = rpgPlayer.getPlayerConfig().getName();
+			
+			Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
+			
+			if (ess != null)
+			{
+				User uPG = ess.getUser(player);
+
+				if (uPG != null)
+					name = uPG.getNick(true);
+			}
+			
+			chatFormat = chatFormat.replaceAll("%name%", name);
+			chatFormat = chatFormat.replaceAll("%chat%", "%2\\$s");
 			chatFormat = chatFormat.replaceAll("%level%", rpgPlayer.getPlayerConfig().getClassLevel() + "");
 			
-			// Set the message format.
-			event.setFormat(cl.parse(chatFormat));
+			event.setFormat(FC_Rpg.cl.parse(chatFormat));
 		}
 	}
 
@@ -790,8 +838,14 @@ public class FC_Rpg extends JavaPlugin
 			if (event.isCancelled() == true)
 				return;
 			
+			String worldName = event.getEntity().getWorld().getName();
+			
 			//If not an rpg world, cancel.
-			if (!worldConfig.getIsMobWorld(event.getEntity().getWorld().getName()) == false)
+			if (!FC_Rpg.worldConfig.getIsRpgWorld(worldName))
+				return;
+			
+			//If not a mob world, cancel.
+			if (!FC_Rpg.worldConfig.getIsMobWorld(worldName))
 				return;
 			
 			// Prevent dungeon mob spawns.
@@ -925,28 +979,11 @@ public class FC_Rpg extends JavaPlugin
 		@EventHandler
 		public void PlayerExpChangeEvent(PlayerExpChangeEvent event)
 		{
-			// If experience is cancelled, then cancel it.
-			if (generalConfig.getExpCancelled() == true)
-			{
-				// Variable declarations
-				Player player = event.getPlayer();
-
-				if (!worldConfig.getIsRpgWorld(player.getWorld().getName()))
-					return;
-
-				// Change everything we can to remove player experience.
-				event.setAmount(0);
-				player.setLevel(0);
-				player.setExp(0);
-				
-				return;
-			}
-			
 			// If experience isn't canceled, then we just alter by global exp multiplier.
 			event.setAmount(event.getAmount() * FC_Rpg.balanceConfig.getGlobalExpMultiplier());
 		}
 	}
-
+	
 	public class ArrowFireListener implements Listener
 	{
 		@EventHandler
@@ -955,15 +992,15 @@ public class FC_Rpg extends JavaPlugin
 			// Don't perform this event in non-rpg worlds.
 			if (!worldConfig.getIsRpgWorld(event.getEntity().getWorld().getName()))
 				return;
-
+			
 			// Variable Declarations
 			final Arrow arrow = (Arrow) event.getProjectile();
 			Vector speed;
-			RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(PassiveConfig.passive_ScalingArrows);
+			RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(BalanceConfig.passive_ScalingArrows);
 
 			// Make it so that arrows don't bounce.
 			arrow.setBounce(false);
-
+			
 			// Remove fired arrows after 60 seconds. Very nice cleanup function. :)
 			Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
 			{
@@ -972,25 +1009,24 @@ public class FC_Rpg extends JavaPlugin
 					arrow.remove();
 				}
 			}, 1200);
-
+			
 			// Now we want to check if a player is casting a spell.
 			if (!(event.getEntity() instanceof Player))
 				return;
-
+			
 			// Get rpgPlayer.
 			RpgPlayer rpgPlayer = FC_Rpg.rpgEntityManager.getRpgPlayer((Player) event.getEntity());
-
+			
 			// If the player has a class with the faster arrows passive, then give faster arrows.
-
 			if (rpgClass != null)
 			{
-				if (rpgClass.getName().equals(rpgPlayer.getPlayerConfig().getCombatClass()))
+				if (rpgClass.getPassiveID() == BalanceConfig.passive_ScalingArrows)
 				{
-					speed = arrow.getVelocity().multiply((rpgPlayer.getPlayerConfig().getClassLevel() / FC_Rpg.passiveConfig.getScalingArrow()) + 1);
+					speed = arrow.getVelocity().multiply((rpgPlayer.getPlayerConfig().getClassLevel() / FC_Rpg.balanceConfig.getPassivesScalingArrow()) + 1);
 					arrow.setVelocity(speed);
 				}
 			}
-
+			
 			// If auto-cast is enabled.
 			if (rpgPlayer.getPlayerConfig().getAutoCast() == true)
 				rpgPlayer.prepareSpell(false); // Prepare the spell.
@@ -1013,7 +1049,7 @@ public class FC_Rpg extends JavaPlugin
 			}
 		}
 	}
-
+	
 	private Boolean setupEconomy()
 	{
 		RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);

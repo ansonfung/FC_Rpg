@@ -5,6 +5,12 @@ import me.Destro168.FC_Suite_Shared.ConfigManagers.ConfigGod;
 
 public class BalanceConfig extends ConfigGod
 {
+	public static final int passive_ScalingArrows = 1;
+	public static final int passive_CounterAttack = 2;
+	public static final int passive_StrongerParry = 3;
+	public static final int passive_InnerFire = 4;
+	public static final int passive_BattleLust = 5;
+	
 	// Sets
 	public void setGlobalExpMultiplier(int x) { fcw.set(prefix + "globalExpMultiplier", x); }
 	
@@ -109,6 +115,12 @@ public class BalanceConfig extends ConfigGod
 	private void setHealPercentMagic(double x) { fcw.set(prefix + "healMultiplier.magic", x); }
 	private void setHealPercentMagicRegen(double x) { fcw.set(prefix + "healMultiplier.magicRegen", x); }
 	private void setHealPercentSatiated(double x) { fcw.set(prefix + "healMultiplier.satiated", x); }
+	
+	private void setPassivesScalingArrows(int x) { fcw.set(prefix + "passives.scalingArrows", x); }
+	private void setPassivesCounterAttack(int x) { fcw.set(prefix + "passives.counterAttack", x); }
+	private void setPassivesStrongerParry(double x) { fcw.set(prefix + "passives.strongerParry", x); }
+	private void setPassivesBattleLust(double x) { fcw.set(prefix + "passives.battleLust", x); }
+	private void setPassivesInnerFlame(double x) { fcw.set(prefix + "passives.innerFlame", x); }
 	
 	// Gets
 	public int getGlobalExpMultiplier() { return fcw.getInt(prefix + "globalExpMultiplier"); }
@@ -215,6 +227,12 @@ public class BalanceConfig extends ConfigGod
 	public double getHealPercentMagic() { return fcw.getDoubleS(prefix + "healMultiplier.magic"); }
 	public double getHealPercentMagicRegen() { return fcw.getDoubleS(prefix + "healMultiplier.magicRegen"); }
 	public double getHealPercentSatiated() { return fcw.getDoubleS(prefix + "healMultiplier.satiated"); }
+
+	public int getPassivesScalingArrow() { return fcw.getIntS(prefix + "passives.scalingArrows"); }
+	public int getPassivesCounterAttack() { return fcw.getIntS(prefix + "passives.counterAttack"); }
+	public double getPassivesStrongerParry() { return fcw.getDoubleS(prefix + "passives.strongerParry"); }
+	public double getPassivesBattleLust() { return fcw.getDoubleS(prefix + "passives.battleLust"); }
+	public double getPassivesInnerFlame() { return fcw.getDoubleS(prefix + "passives.innerFlame"); }
 	
 	public BalanceConfig()
 	{
@@ -277,16 +295,16 @@ public class BalanceConfig extends ConfigGod
 			setSwordMultiplierGold(2.5);
 			
 			setSwordAttackRequirementWood(0);
-			setSwordAttackRequirementStone(125);
-			setSwordAttackRequirementIron(250);
-			setSwordAttackRequirementDiamond(375);
-			setSwordAttackRequirementGold(500);
+			setSwordAttackRequirementStone(60);
+			setSwordAttackRequirementIron(120);
+			setSwordAttackRequirementDiamond(180);
+			setSwordAttackRequirementGold(240);
 			
-			setArmorWearRequirementChain(125);
-			setArmorWearRequirementIron(250);
-			setArmorWearRequirementDiamond(375);
-			setArmorWearRequirementGold(500);
-
+			setArmorWearRequirementChain(60);
+			setArmorWearRequirementIron(120);
+			setArmorWearRequirementDiamond(180);
+			setArmorWearRequirementGold(240);
+			
 			//LEATHER - 10% total, .5%, 1%, 1.5%, 2%
 			setArmorMultiplierLB(.005);
 			setArmorMultiplierLH(.01);
@@ -338,7 +356,24 @@ public class BalanceConfig extends ConfigGod
 			setHealPercentEating(.05);
 			setHealPercentMagic(.2);
 			setHealPercentMagicRegen(.05);
-			setHealPercentSatiated(.02);
+			setHealPercentSatiated(.05);
+		}
+		
+		if (getVersion() < 1.01)
+		{
+			setVersion(1.01);
+			
+			setPassivesScalingArrows(28);
+			setPassivesCounterAttack(10);
+			setPassivesStrongerParry(.75);
+			setPassivesBattleLust(.4);
+		}
+		
+		if (getVersion() < 1.05)
+		{
+			setVersion(1.05);
+			
+			setPassivesInnerFlame(.15);
 		}
 	}
 }

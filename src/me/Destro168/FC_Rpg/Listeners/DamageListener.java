@@ -54,7 +54,7 @@ public class DamageListener implements Listener
 
 	Random defendChance;
 	Random counterattackChance;
-
+	
 	MobAggressionCheck mac;
 	EntityDamageManager edm;
 
@@ -123,7 +123,7 @@ public class DamageListener implements Listener
 			if (event.getEntity() instanceof Player)
 			{
 				Player player = (Player) event.getEntity();
-
+				
 				// Prevent damage done to already dead players
 				if (FC_Rpg.rpgEntityManager.getRpgPlayer(player).getPlayerConfig().getIsActive() == true)
 				{
@@ -133,12 +133,12 @@ public class DamageListener implements Listener
 				
 				// Prepare the defender.
 				prepareDefender(player);
-
+				
 				double damage = getEnviromentalDamage(player);
 
 				if (damage == 0)
 					return;
-
+				
 				// Attack the player with enviromental damage.
 				edm.attackPlayerDefender(rpgDefender, null, null, damage, damageType);
 			}
@@ -211,16 +211,8 @@ public class DamageListener implements Listener
 			CraftLargeFireball cf = (CraftLargeFireball) eEntity;
 			entity = cf.getShooter();
 		}
-		else if (eEntity instanceof CraftExperienceOrb)
-		{
-			FC_Rpg.plugin.getLogger().info("Exp Orb dealt damage, damage cancelled -> " + ((CraftExperienceOrb) eEntity).toString());
-			return;
-		}
-		else if (eEntity instanceof CraftItem)
-		{
-			FC_Rpg.plugin.getLogger().info("CraftItem dealt damage, damage cancelled -> " + ((CraftItem) eEntity).toString());
-			return;
-		}
+		else if (eEntity instanceof CraftExperienceOrb) {return;}
+		else if (eEntity instanceof CraftItem) {return;}
 		else
 		{
 			// Set entity equal to the entity that got hit.
@@ -252,40 +244,46 @@ public class DamageListener implements Listener
 		 * 
 		 * 
 		 ***********************************************************/
-
+		
 		// We do a sword check for atttackers.
 		if (rpgAttacker != null)
 		{
 			// Check the attackers sword.
-			rpgAttacker.swordCheck();
-
+			rpgAttacker.swordAttackRequirementCheck();
+			
 			// We handle spells on non-fireball player attacks.
 			if (damageType != 2)
 			{
+				if (rpgAttacker.getPlayerConfig().getAutoCast() == true)
+					rpgAttacker.prepareSpell(false);
+				
 				if (rpgMobDefender != null)
 					damage = rpgAttacker.castSpell(rpgMobDefender.getEntity(), damage, damageType);
 				else
 					damage = rpgAttacker.castSpell(rpgDefender.getPlayer(), damage, damageType);
 			}
 		}
-
+		
 		// We do a armor check for defenders.
 		if (rpgDefender != null)
 			rpgDefender.fullArmorCheck();
-
+		
+		//Apply randomization to damage.
+		damage = getRandomDamageModifier(damage);
+		
 		if (rpgMobDefender != null)
 		{
 			// Prevent mobs from damaging friendly mobs.
 			if (rpgMobAttacker != null)
 				return;
-
+			
 			// If no player attacked, then we want to nuke the mob (enviromental damage).
 			if (rpgAttacker == null)
 			{
 				edm.nukeMob(rpgMobDefender.getEntity());
 				return;
 			}
-
+			
 			// Attack the mob defender
 			edm.attackMobDefender(rpgMobDefender, rpgAttacker, damage, damageType);
 			
@@ -313,6 +311,32 @@ public class DamageListener implements Listener
 		}
 	}
 
+	private double getRandomDamageModifier(double damage)
+	{
+		double damageMultiplier = damage * .05;
+		
+		Random rand;
+		
+		if (damageMultiplier >= 1)
+		{
+			rand = new Random();
+			
+			if (rand.nextBoolean() == true)
+				damage += rand.nextInt((int) damageMultiplier) + 1;
+			else
+				damage -= rand.nextInt((int) damageMultiplier) - 1;
+		}
+		
+		rand = new Random();
+		
+		if (rand.nextBoolean() == true)
+			damage += rand.nextDouble();
+		else
+			damage -= rand.nextDouble();
+		
+		return damage;
+	}
+	
 	public void prepareDefender(LivingEntity entityDefender)
 	{
 		// Set up all rpg information based on involved entities.
@@ -358,7 +382,7 @@ public class DamageListener implements Listener
 		else if (e.getDamager() instanceof Fireball)
 		{
 			boolean success = false;
-
+			
 			for (RpgPlayer rpgPlayer : FC_Rpg.rpgEntityManager.getOnlineRpgPlayers())
 			{
 				if (rpgPlayer.summon_Owns(e.getDamager()))
@@ -367,22 +391,17 @@ public class DamageListener implements Listener
 					rpgAttacker = rpgPlayer;
 					spellBook = rpgAttacker.getPlayerConfig().getRpgClass().getSpellBook();
 					damageType = 2;
-
+					
 					for (int i = 0; i < spellBook.size(); i++)
 					{
 						if (spellBook.get(i).getEffectID() == EffectIDs.FIREBALL)
 						{
 							SpellCaster sc = new SpellCaster();
-
-							FC_Rpg.plugin.getLogger().info("I: " + i);
-							FC_Rpg.plugin.getLogger().info("I: " + spellBook.get(i).getName());
-							FC_Rpg.plugin.getLogger().info("I: " + rpgAttacker.getPlayerConfig().getSpellLevels().get(i));
-
 							damage = sc.updatefinalSpellMagnitude(rpgAttacker, spellBook.get(i), (rpgAttacker.getPlayerConfig().getSpellLevels().get(i) - 1));
 							break;
 						}
 					}
-
+					
 					success = true;
 					break;
 				}

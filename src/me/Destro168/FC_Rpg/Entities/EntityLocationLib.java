@@ -67,9 +67,8 @@ public class EntityLocationLib
 		if (yaw < 0)
 			yaw = yaw * -1;
 		
-		//Cut by 360 until within 0-360
-		while (yaw >= 360)
-			yaw = yaw - 360;
+		//Set to within 0-360.
+		yaw = yaw % 360;
 		
 		//Determine location to move the player in based on the location of the facing direction of the monster.
 		if (yaw >= 315 || yaw < 45)

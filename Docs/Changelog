@@ -1,5 +1,89 @@
 ~ FC_Rpg Changelog ~
 
+Version 1.1:
+
+- Fixed various bugs, as usual.
+- VNP support dropped, Essentials support in /list removed. Nicks carry over into chat though still from Essentials.
+- Mage Upgrade:
+| PIMPED OUT ALCHEMY, so much. Alchemy is now amazingly godliek. In fact, I wouldn't be surprised if you ever find a player that doesn't want to use alchemy now.
+| Updated fireball and lighting mana costs and damage. Made mage overall a lot more powerful by default to balance out the fact that mages need to spec into 3 stats to be effective. Basically mages should be fun now.
+- Good bit of help updating.
+
+TODO:
+
+- Spell point notifications
+- Everything under level 6 gets access to all spells. ~ Configurable
+- Fix up that mobs spawn during the day. Allow to spawn during storms.
+- Rebalance classes.
+- Redo Treasure config. Numbers should scale down like 0: with fields.
+- Loot subdirectory with loot files that can be read.
+- Dungeons have "static level" field and "lootconfig" field.
+- Make sure all lists start at 1 and work properly.
+- Class requirement / Job Rank minimum / Minimum level requirement for warps.
+- Make passive mobs not count in dungeon finishing check.
+
+CraftBukkit Bugs:
+- Can't attack with weakness.
+- Skeletons don't change yaw when rotating.
+
+Version 1.061:
+
+- Added command keywords to all commands to be able to change commands.
+- All the passives for the classes have been changed. Check help for new passive information.
+
+Version 1.06:
+
+- Made sword check work on attack rather than constitution.
+- Fixed swords breaking. Now they truly have infinite durability and won't be all glitchy.
+- expDisabled setting in general config is outdated so you can remove it if you want.
+- New passiveID that can be set to 4, which will increase mana regeneration to the given class. Recommended to give to mage class.
+
+Version 1.04:
+
+- Heavily updated combat display. Much more nice and appealing.
+- Removed a few notification messages that damage was being cancelled due to the spam caused.
+- Ferocity confirmed as working. Just skeletons don't rotate, meh.
+- Updated dungeon completion message and timer.
+- Changed restriction ids from 0 and 1 to 1 and 2 to fix spell wonkiness.
+- Fixed spells being glitchy with not always casting.
+- Fixed first damage on monster/players not applying.
+- Fixed server crashing bug with vortex spell.
+- Put monster death notification on 100 ms timer.
+- Fixed notification interval not working.
+- Looting enchant will now be added to swords if mob drops are enabled.
+- Damage now fluctuates by 5%.
+- tp command was never removed, readded help to /rpg admin.
+- Plugin Hooks into Essentials now for /list command.
+- Added /rpg vanish command to hide yourself in /list.
+
+Version 1.03:
+
+- Update Groups.yml heavily.
+- Add colored names to chat.
+- Fireball checks.
+- Class selection message fixed.
+- Fixed double broadcast on dungeon joins.
+- Changed default balance config armor and weapon requirements by cutting them in half.
+- Increased default health regeneration from satiation to 0.05.
+
+Version 1.02:
+
+- Typo fix.
+- Message to assign stat points will only appear if you need to allocate stat points.
+- Power level prevention will now ONLY take effect when fighting monsters and you have a guild with more than just yourself. PowerLevel prevention was always targeted at preventing one player from leveling another extremely fast by killing super strong monsters. It was never meant to effect single players. Well, it was meant to prevent single players from leveling up super fast, but now there is the maximum bonus setting that I added.
+- Added destination modifiable to warp command.
+- SEVERAL IMPROVEMENTS TO SPELLS. Turns out bukkit gives you a double click every time you left-click! Fun facts! Everything else with spells fixed though. :)
+- Berserker spell that lifesteals now only lifesteals. Had it healing mana too which meant infinite mana *faceplam*. Wasted 3 hours fixing this. Got lots of spell impovements from it though.
+- World config generates world with rpg disabled by default.
+- Rpg Chat is multiworlded to only rpg worlds now.
+
+Version 1.01:
+
+- Fixed passive mobs dropping too much loot if you enable default mob loot. I just didn't think about this tbh.
+- Fixed chat breaking on % and $ characters.
+- New chat admin permissions.
+- Passive config options now in balance config.
+
 Version 1.0:
 
 Disclaimer: There are a multitude of things changed in the 1.0 version. Do I expect this to be entirely bugfree? Nope! But I did my best to fix what I could. If you find a bug make a ticket! I'll be fixing up everything as fast as possible!
@@ -118,16 +202,6 @@ Potion / Potion Effects:
 
 Installation:
 - FC_Suite_Shared is now it's own seperate plugin! Check it out -> http://dev.bukkit.org/server-mods/fc_suite_shared/
-
-Test:
-
-Todo:
-- Make sure all lists start at 1 and work properly.
-
-Long-Term Todo:
-- Class requirement / Job Rank minimum / Minimum level requirement for warps.
-- Test PVP Arena. Upgrade more fully.
-- Explain in help: The purpose of jobs is to be able to have a way for players to be able to pay to gain ranks that give access to better warps.
 
 Version 0.82:
 

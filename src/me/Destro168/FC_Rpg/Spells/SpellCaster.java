@@ -1,8 +1,6 @@
 package me.Destro168.FC_Rpg.Spells;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.Entities.EntityDamageManager;
@@ -11,21 +9,16 @@ import me.Destro168.FC_Rpg.Entities.RpgMonster;
 import me.Destro168.FC_Rpg.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.LoadedObjects.RpgClass;
 import me.Destro168.FC_Rpg.LoadedObjects.Spell;
-import me.Destro168.FC_Rpg.Util.MaterialLib;
 import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 
 public class SpellCaster
 {
@@ -41,6 +34,7 @@ public class SpellCaster
 	private Player playerDefender;
 	
 	private Spell spell;
+	private String name;
 	private double finalSpellMagnitude;
 	private double damage;
 	private int duration;
@@ -52,6 +46,7 @@ public class SpellCaster
 	private int radius;
 	private boolean targetParty;
 	
+	public String getName() { return name; }
 	public double getDamage() { return damage; }
 	public double getManaCost() { return manaCost; }
 	
@@ -69,6 +64,7 @@ public class SpellCaster
 		playerCaster = null;
 		playerDefender = null;
 		spell = null;
+		name = "";
 		finalSpellMagnitude = 0;
 		damage = 0;
 		duration = 0;
@@ -83,21 +79,26 @@ public class SpellCaster
 	
 	public boolean init_spellCast(RpgPlayer spellCaster_, LivingEntity target_, double damage_, int damageType_)
 	{
+		//Variable Initialization
+		rpgCaster = spellCaster_;
+		String activeSpell = rpgCaster.getPlayerConfig().getActiveSpell();
+		
+		//First check that the player has an active spell before continuing.
+		if (activeSpell == null)
+			return false; //Without one return.
+		
 		//Variable Initializations
 		target = target_;
-		rpgCaster = spellCaster_;
 		damage = damage_;
 		damageType = damageType_;
 		playerCaster = spellCaster_.getPlayer();
 		combatClass = rpgCaster.getPlayerConfig().getCombatClass();
 		
 		//Variable Declarations
-		String activeSpell = rpgCaster.getPlayerConfig().getActiveSpell();
 		MessageLib msgLib = new MessageLib(playerCaster);
 		List<Spell> spellBook = rpgCaster.getPlayerConfig().getRpgClass().getSpellBook();
 		
-		//If the player has no active spell return.
-		if (activeSpell == null)
+		if (rpgCaster.getIsCasting() == true)
 			return false;
 		
 		//If there is a target.
@@ -142,12 +143,12 @@ public class SpellCaster
 				if (rpgClass.getID() == combatClass)
 				{
 					//If the damage is an arrow, and has the restriction id 0, and if restricted spell, then return false.
-					if (rpgClass.getRestrictionID() == 0 && damageType != 1)
+					if (rpgClass.getRestrictionID() == 1 && damageType != 1)
 					{
 						msgLib.standardMessage("Please shoot arrows from a bow to cast spells.");
 						return false;
 					}
-					else if (rpgClass.getRestrictionID() == 1 && !(playerCaster.getItemInHand().getType() == Material.STICK))
+					else if (rpgClass.getRestrictionID() == 2 && !(playerCaster.getItemInHand().getType() == Material.STICK))
 					{
 						msgLib.standardMessage("Please use a wand (stick) to cast spells.");
 						return false;
@@ -159,7 +160,7 @@ public class SpellCaster
 		//If no valid spell was cast, then return.
 		if (spellNumber == -1)
 		{
-			FC_Rpg.plugin.getLogger().info("Invalid spell number");
+			FC_Rpg.plugin.getLogger().info("Invalid spell number. Fix your config yo.");
 			return false;
 		}
 		
@@ -179,9 +180,8 @@ public class SpellCaster
 		try { radius = spell.getRadius().get(spellTier); } catch (NullPointerException e) {  }
 		try { targetParty = spell.getTargetParty(); } catch (NullPointerException e) {  }
 		
-		//Tell the caster they cast the spell.
-		rpgCaster.attemptCastNotification(spell.getName());
-				
+		name = spell.getName();
+		
 		//Return success.
 		return true;
 	}
@@ -217,7 +217,7 @@ public class SpellCaster
 
 		else if (x == EffectIDs.AOE)
 			effect_AoE();
-
+		
 		else if (x == EffectIDs.BACKSTAB)
 			effect_Backstab();
 		
@@ -234,7 +234,7 @@ public class SpellCaster
 			effect_Fireball();
 		
 		else if (x == EffectIDs.ALCHEMY)
-			effect_Alchemy();
+			return false;
 		
 		else if (x == EffectIDs.LIGHTNING)
 			effect_Lightning();
@@ -437,6 +437,9 @@ public class SpellCaster
 	
 	private void effect_AoE()
 	{
+		//Disable spell from being cast further.
+		rpgCaster.switchIsCasting();
+		
 		for (Entity entity : playerCaster.getNearbyEntities(finalSpellMagnitude, finalSpellMagnitude, finalSpellMagnitude))
 		{
 			if (entity instanceof LivingEntity)
@@ -444,6 +447,9 @@ public class SpellCaster
 				((LivingEntity) entity).damage(1, playerCaster);
 			}
 		}
+		
+		//Allow spell to be cast again.
+		rpgCaster.switchIsCasting();
 	}
 	
 	private void effect_Poison()
@@ -589,190 +595,7 @@ public class SpellCaster
 	private void effect_Lightning()
 	{
 		playerCaster.getWorld().strikeLightningEffect(target.getLocation());
-		damage = damage * finalSpellMagnitude;
-	}
-	
-	private boolean effect_Alchemy()
-	{
-		MaterialLib ml = FC_Rpg.mLib;
-		ItemStack item = rpgCaster.getPlayer().getItemInHand();
-		double quality = .1;
-		double enchantmentStrength = .1;
-		
-		if (item != null)
-		{
-			if (ml.t0.contains(item))
-				quality = 1;
-			else if (ml.t1.contains(item))
-				quality = 2;
-			else if (ml.t2.contains(item))
-				quality = 3;
-			else if (ml.t3.contains(item))
-				quality = 4;
-			else if (ml.t4.contains(item))
-				quality = 5;
-			
-			for (Enchantment enchant : Enchantment.values())
-			{
-				if (item.containsEnchantment(enchant))
-				{
-					enchantmentStrength += item.getEnchantmentLevel(enchant);
-				}
-			}
-			
-			//TODO - todo always keep uncommented.
-			FC_Rpg.plugin.getLogger().info("A: " + (int) (quality * enchantmentStrength * spellTier * item.getAmount()));
-			
-			PlayerInventory casterInv = rpgCaster.getPlayer().getInventory();
-			World casterWorld = rpgCaster.getPlayer().getWorld();
-			
-			rpgCaster.getPlayer().getInventory().setItemInHand(new ItemStack(Material.AIR,0));
-			
-			for (ItemStack i : getItemStackList((int) (quality * enchantmentStrength * spellTier * item.getAmount())))
-			{
-				if (casterInv.getSize() == 36)
-					casterWorld.dropItemNaturally(rpgCaster.getPlayer().getLocation(), i);
-				else
-					casterInv.addItem(i);
-			}
-			
-			return true;
-		}
-		
-		return false;
-	}
-	
-	private List<ItemStack> getItemStackList(int enchantStrength)
-	{
-		List<Material> materialList = new ArrayList<Material>();
-		
-		materialList.add(Material.ROTTEN_FLESH);
-		materialList.add(Material.STICK);
-		materialList.add(Material.DEAD_BUSH);
-		
-		if (enchantStrength >= 0)
-		{
-			materialList.add(Material.BOOK);
-			materialList.add(Material.WOOD);
-			materialList.add(Material.SAPLING);
-			materialList.add(Material.COBBLESTONE);
-		}
-		
-		if (enchantStrength >= 1)
-		{
-			materialList.add(Material.COAL);
-			materialList.add(Material.EGG);
-			materialList.add(Material.INK_SACK);
-			materialList.add(Material.COOKIE);
-		}
-		
-		if (enchantStrength >= 2)
-		{
-			materialList.add(Material.SHEARS);
-			materialList.add(Material.RAW_FISH);
-			materialList.add(Material.COAL);
-			materialList.add(Material.STONE);
-			materialList.add(Material.SMOOTH_BRICK);
-		}
-		
-		if (enchantStrength >= 4)
-		{
-			materialList.add(Material.GLASS_BOTTLE);
-			materialList.add(Material.ARROW);
-			materialList.add(Material.FEATHER);
-			materialList.add(Material.WOOL);
-			materialList.add(Material.RAW_CHICKEN);
-		}
-		
-		if (enchantStrength >= 6)
-		{
-			materialList.add(Material.LADDER);
-			materialList.add(Material.GOLD_NUGGET);
-			materialList.add(Material.RAILS);
-			materialList.add(Material.CLAY);
-			materialList.add(Material.LEAVES);
-		}
-		
-		if (enchantStrength >= 9)
-		{
-			materialList.add(Material.REDSTONE);
-			materialList.add(Material.SUGAR);
-			materialList.add(Material.BONE);
-			materialList.add(Material.MELON);
-			materialList.add(Material.RAW_BEEF);
-		}
-		
-		if (enchantStrength >= 15)
-		{
-			materialList.add(Material.COOKED_FISH);
-			materialList.add(Material.COMPASS);
-			materialList.add(Material.STRING);
-			materialList.add(Material.RED_MUSHROOM);
-			materialList.add(Material.COCOA);
-			materialList.add(Material.SAND);
-		}
-		
-		if (enchantStrength >= 22)
-		{
-			materialList.add(Material.SLIME_BALL);
-			materialList.add(Material.MINECART);
-			materialList.add(Material.RAILS);
-			materialList.add(Material.SULPHUR);
-			materialList.add(Material.MOSSY_COBBLESTONE);
-		}
-
-		if (enchantStrength >= 35)
-		{
-			materialList.add(Material.CACTUS);
-			materialList.add(Material.BOOKSHELF);
-			materialList.add(Material.BUCKET);
-			materialList.add(Material.GLOWSTONE_DUST);
-			materialList.add(Material.GLASS);
-			materialList.add(Material.ICE);
-		}
-		
-		if (enchantStrength >= 50)
-		{
-			materialList.add(Material.NETHERRACK);
-			materialList.add(Material.NETHER_BRICK);
-			materialList.add(Material.DIRT);
-			materialList.add(Material.IRON_INGOT);
-			materialList.add(Material.PISTON_BASE);
-		}
-		
-		if (enchantStrength >= 75)
-		{
-			materialList.add(Material.OBSIDIAN);
-			materialList.add(Material.DIAMOND);
-			materialList.add(Material.SANDSTONE);
-			materialList.add(Material.TNT);
-		}
-		
-		if (enchantStrength >= 90)
-		{
-			materialList.add(Material.OBSIDIAN);
-			materialList.add(Material.GOLD_INGOT);
-			materialList.add(Material.GRASS);
-			materialList.add(Material.ENCHANTMENT_TABLE);
-			materialList.add(Material.GOLDEN_APPLE);
-		}
-		
-		//Variable Declarations
-		Random rand = new Random();
-		int amount = (rand.nextInt((enchantStrength / 20) + 3) + 1);
-		List<ItemStack> itemStackList = new ArrayList<ItemStack>();
-		Material chosenMaterial = materialList.get(rand.nextInt(materialList.size()));
-		
-		while (amount > 64)
-		{
-			itemStackList.add(new ItemStack(chosenMaterial, amount));
-			amount -= 64;
-		}
-		
-		itemStackList.add(new ItemStack(chosenMaterial, amount));
-		
-		//Return a random item.
-		return itemStackList;
+		damage = finalSpellMagnitude;
 	}
 }
 

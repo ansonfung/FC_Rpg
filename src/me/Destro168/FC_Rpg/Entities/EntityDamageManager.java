@@ -4,11 +4,10 @@ import java.util.Date;
 import java.util.Random;
 
 import me.Destro168.FC_Rpg.FC_Rpg;
-import me.Destro168.FC_Rpg.Configs.PassiveConfig;
+import me.Destro168.FC_Rpg.Configs.BalanceConfig;
 import me.Destro168.FC_Rpg.LoadedObjects.RpgClass;
 import me.Destro168.FC_Rpg.Spells.EffectIDs;
 import me.Destro168.FC_Rpg.Util.HealthConverter;
-import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 
 import org.bukkit.EntityEffect;
 import org.bukkit.Material;
@@ -59,7 +58,7 @@ public class EntityDamageManager
 		if (rpgDefender.getStatusActiveRpgPlayer(EffectIDs.DODGE))
 		{
 			Random rand = new Random();
-
+			
 			if (rand.nextInt(100) < rpgDefender.getPlayerConfig().getStatusMagnitude(EffectIDs.DODGE))
 			{
 				rpgDefender.attemptDamageAvoidNotification(false);
@@ -72,6 +71,8 @@ public class EntityDamageManager
 
 		if (rpgAttacker != null)
 		{
+			updateSwordDurabilities(rpgAttacker.getPlayer());
+			
 			edbe = new EntityDamageByEntityEvent(rpgAttacker.getPlayer(), playerDefender, DamageCause.ENTITY_ATTACK, 0);
 			playerDefender.setLastDamageCause(edbe);
 			
@@ -112,7 +113,7 @@ public class EntityDamageManager
 			else if (rpgMobAttacker != null)
 				rpgMobAttacker.dealDamage(thornsDamage);
 		}
-
+		
 		// Calculate damage based on players armor.
 		damage = damage * FC_Rpg.battleCalculations.getArmorBonus(rpgDefender);
 		
@@ -128,12 +129,12 @@ public class EntityDamageManager
 		if (playerDefender.isBlocking() == true)
 		{
 			// Variable Declaration.
-			RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(PassiveConfig.passive_StrongerParry);
+			RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(BalanceConfig.passive_StrongerParry);
 			
 			if (rpgClass != null)
 			{
 				if (rpgClass.getID() == rpgDefender.getPlayerConfig().getCombatClass())
-					damage = damage * FC_Rpg.passiveConfig.getStrongerParry(); // 25% damage reduction for blocking as defender.
+					damage = damage * FC_Rpg.balanceConfig.getPassivesStrongerParry(); // 25% damage reduction for blocking as defender.
 				else
 					damage = damage * .9; // 10% damage reduction for blocking.
 			}
@@ -151,17 +152,17 @@ public class EntityDamageManager
 		// Deal damage greater than 0.
 		if (damage < 0.1)
 			damage = 0.1;
-
+		
 		// Deal the damage to the player
 		rpgDefender.dealDamage(damage);
-
+		
 		// Perform damage effect.
 		playerDefender.playEffect(EntityEffect.HURT);
 
 		if (rpgAttacker != null)
 		{
 			handle_Postoffense_Buffs(rpgAttacker, playerDefender, damage);
-			rpgAttacker.attemptAttackNotification(rpgDefender.getPlayerConfig().getClassLevel(), rpgDefender.getCurHealth(), damage);
+			rpgAttacker.attemptAttackNotification(rpgDefender.getPlayer().getType(), rpgDefender.getPlayerConfig().getClassLevel(), rpgDefender.getCurHealth(), rpgDefender.getMaxHealth(), damage);
 			applyKnockback(rpgAttacker.getPlayer(), playerDefender, damageType);
 		}
 		
@@ -192,7 +193,27 @@ public class EntityDamageManager
 				handle_Defense_Passives(damage, rpgDefender, rpgMobAttacker.getEntity());
 		}
 	}
-
+	
+	private void updateSwordDurabilities(final Player p)
+	{
+		//Variable Declaration
+		ItemStack handItem = p.getItemInHand();
+		ItemStack newItem = handItem;
+		int handItemDurability = handItem.getDurability();
+		
+		//Adjust durability of sword.
+		if (FC_Rpg.mLib.swords.contains(handItem.getType()))
+		{
+			handItem.setDurability((short) (handItemDurability + 1));
+			
+			if (handItemDurability >= handItem.getType().getMaxDurability()-1)
+			{
+				newItem.setDurability((short) 0);
+				p.setItemInHand(newItem);
+			}
+		}
+	}
+	
 	private void increaseArmorDurabilities(Player p)
 	{
 		short currentDurability = 0;
@@ -349,11 +370,11 @@ public class EntityDamageManager
 		{
 			guild = FC_Rpg.guildManager.getGuildByMember(playerAttacker.getName());
 			partyMemberCount = FC_Rpg.guildManager.getOnlineGuildPlayerList(guild).size();
-
+			
 			if (canAttack(rpgMobDefender.getLastDamagedLong(), partyMemberCount) == false)
 				return;
 		}
-
+		
 		// If the player has the fire arrow status, then...
 		if (fireUses > 0)
 		{
@@ -370,7 +391,10 @@ public class EntityDamageManager
 				return;
 			}
 		}
-
+		
+		//Update sword durabilities.
+		updateSwordDurabilities(rpgAttacker.getPlayer());
+		
 		// If the player has the attack buff, then...
 		if (rpgAttacker.getStatusActiveRpgPlayer(EffectIDs.ATTACK))
 		{
@@ -416,7 +440,7 @@ public class EntityDamageManager
 
 		// Perform damage effect.
 		entityDefender.playEffect(EntityEffect.HURT);
-
+		
 		// Update health for ender dragon and wither bosses.
 		if (entityDefender.getType() == EntityType.ENDER_DRAGON)
 		{
@@ -428,16 +452,16 @@ public class EntityDamageManager
 			HealthConverter hc = new HealthConverter(rpgMobDefender.getMaxHealth(), rpgMobDefender.getCurHealth());
 			entityDefender.setHealth(hc.getWitherHearts());
 		}
-
+		
 		// Attempt to send an attack notification.
-		rpgAttacker.attemptAttackNotification(rpgMobDefender.getLevel(), rpgMobDefender.getCurHealth(), damage);
-
+		rpgAttacker.attemptAttackNotification(rpgMobDefender.getEntity().getType(), rpgMobDefender.getLevel(), rpgMobDefender.getCurHealth(),rpgMobDefender.getMaxHealth(),damage);
+		
 		// Handle berserker class spells
 		handle_Postoffense_Buffs(rpgAttacker, entityDefender, damage);
-
+		
 		if (playerAttacker != null)
 			applyKnockback(playerAttacker, entityDefender, damageType);
-
+		
 		// If the mob has 0 health handle it's death processes AND drop loot.
 		if (rpgMobDefender.getCurHealth() <= 0)
 		{
@@ -445,7 +469,7 @@ public class EntityDamageManager
 				return;
 
 			rpgMobDefender.setIsAlive(false);
-
+			
 			if (rpgMobDefender.getMobAggressionCheck().isHostile() == true)
 			{
 				// Give the attacker a mob kill
@@ -473,9 +497,10 @@ public class EntityDamageManager
 			else
 			{
 				// Drop items for non-hostile mobs.
-				rpgMobDefender.handlePassiveMobDrops(entityDefender.getLocation());
+				if (FC_Rpg.balanceConfig.getDefaultItemDrops() == false)
+					rpgMobDefender.handlePassiveMobDrops(entityDefender.getLocation());
 			}
-
+			
 			// Remove the mob
 			removeMob(entityDefender);
 		}
@@ -507,8 +532,7 @@ public class EntityDamageManager
 
 		if (levelDifference == DROP_FAIL_VALUE)
 		{
-			MessageLib msgLib = new MessageLib(playerLooter);
-			msgLib.standardMessage("That monster is outside your level range so you got nothing.");
+			rpgLooter.attemptMonsterOutOfRangeNotification();
 			return;
 		}
 
@@ -522,7 +546,7 @@ public class EntityDamageManager
 
 		if (bonusPercent > bonusPercentCap)
 			bonusPercent = bonusPercentCap;
-
+		
 		// Set up loot amounts.
 		cash = rpgMobDefender.getLevel() * bonusPercent * FC_Rpg.balanceConfig.getMobCashMultiplier();
 		exp = rpgMobDefender.getLevel() * bonusPercent * FC_Rpg.balanceConfig.getMobExpMultiplier();
@@ -558,9 +582,9 @@ public class EntityDamageManager
 
 		FC_Rpg.economy.depositPlayer(playerLooter.getName(), FC_Rpg.guildManager.getGuildBonus(guild, cash));
 		FC_Rpg.rpgEntityManager.getRpgPlayer(playerLooter).addClassExperience(FC_Rpg.guildManager.getGuildBonus(guild, exp), true);
-
+		
 		// Send a message to the player showing experience and loot gains.
-		rpgLooter.sendMonsterDeathNotification(rpgMobDefender.getLevel(), exp, cash);
+		rpgLooter.attemptMonsterDeathNotification(rpgMobDefender.getLevel(), exp, cash);
 	}
 	
 	// Handle player defense skills
@@ -568,14 +592,14 @@ public class EntityDamageManager
 	{
 		// Variable Declarations
 		Random rand = new Random();
-		RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(PassiveConfig.passive_CounterAttack);
+		RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(BalanceConfig.passive_CounterAttack);
 
 		if (rpgClass != null)
 		{
 			if (rpgClass.getName().equals(rpgDefender.getPlayerConfig().getCombatClass()))
 			{
 				// Handle counter-attack chance.
-				if (rand.nextInt(FC_Rpg.passiveConfig.getCounterAttack()) == 0)
+				if (rand.nextInt(FC_Rpg.balanceConfig.getPassivesCounterAttack()) == 0)
 					entityAttacker.damage(1, rpgDefender.getPlayer());
 			}
 		}
@@ -584,14 +608,14 @@ public class EntityDamageManager
 	private double handle_Offense_Passives(double damage, RpgPlayer rpgAttacker, LivingEntity entityDefender)
 	{
 		// Variable Declaration.
-		RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(PassiveConfig.passive_BattleLust);
+		RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(BalanceConfig.passive_BattleLust);
 
 		if (rpgClass != null)
 		{
 			if (rpgClass.getName().equals(rpgAttacker.getPlayerConfig().getCombatClass()))
 			{
 				// Scale damage by 1/4th
-				damage = damage * (1 + rpgAttacker.getMissingHealthDecimal() * FC_Rpg.passiveConfig.getBattleLust());
+				damage = damage * (1 + rpgAttacker.getMissingHealthDecimal() * FC_Rpg.balanceConfig.getPassivesBattleLust());
 			}
 		}
 
@@ -605,9 +629,9 @@ public class EntityDamageManager
 			double healAmount = damage * caster.getPlayerConfig().getStatusMagnitude(EffectIDs.LIFESTEAL);
 
 			caster.attemptHealSelfNotification(healAmount);
-			caster.heal(healAmount);
+			caster.restoreHealth(healAmount);
 		}
-
+		
 		if (caster.getStatusActiveRpgPlayer(EffectIDs.TELEPORT_STRIKE))
 		{
 			EntityLocationLib ell = new EntityLocationLib();
@@ -618,7 +642,7 @@ public class EntityDamageManager
 	public boolean canAttack(long time, int partySize)
 	{
 		Date now = new Date();
-
+		
 		// Check to see if entity was damage in last .25 seconds.
 		if ((now.getTime() - time) < (125 / partySize))
 			return false;
@@ -630,7 +654,7 @@ public class EntityDamageManager
 	{
 		// Get The Entity.
 		RpgMonster monster = FC_Rpg.rpgEntityManager.getRpgMonster(entity);
-
+		
 		if (monster == null)
 			entity.remove();
 		else
@@ -641,7 +665,7 @@ public class EntityDamageManager
 	{
 		// Unregister a mob.
 		FC_Rpg.rpgEntityManager.unregisterRpgMonster(entity);
-
+		
 		// Remove the mob.
 		entity.damage(99999);
 	}

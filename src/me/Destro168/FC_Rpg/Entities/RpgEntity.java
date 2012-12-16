@@ -1,7 +1,9 @@
 package me.Destro168.FC_Rpg.Entities;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,9 +37,12 @@ public class RpgEntity
 	
 	public RpgEntity()
 	{
-		lastDamaged = new Date();
-		lastAttackNotification = new Date();
-		lastDefenseNotification = new Date();
+		Calendar gc = new GregorianCalendar();
+		gc.setTimeInMillis(0);
+		
+		lastDamaged = gc.getTime();
+		lastAttackNotification = gc.getTime();
+		lastDefenseNotification = gc.getTime();
 		summon = new ArrayList<Entity>();
 		summonTIDMap = new HashMap<Entity, Integer>();
 		isAlive = true;
@@ -87,6 +92,9 @@ public class RpgEntity
 	
 	public boolean summon_Owns(Entity entity)
 	{
+		if (entity == null)
+			return false;
+		
 		//Return true if contained.
 		if (summon.contains(entity))
 			return true;
@@ -94,8 +102,6 @@ public class RpgEntity
 		//Return false if not contained.
 		return false;
 	}
-	
-	
 }
 
 

@@ -11,6 +11,8 @@ import me.Destro168.FC_Suite_Shared.ConfigManagers.ConfigGod;
 import me.Destro168.FC_Suite_Shared.ConfigManagers.FileConfigurationWrapper;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.LoadedObjects.RpgClass;
+import me.Destro168.FC_Rpg.LoadedObjects.Spell;
+import me.Destro168.FC_Rpg.Spells.EffectIDs;
 import me.Destro168.FC_Suite_Shared.NameMatcher;
 import me.Destro168.FC_Suite_Shared.TimeUtils.DateManager;
 
@@ -20,9 +22,12 @@ public class PlayerConfig extends ConfigGod
 	private int levelCap;
 	protected RpgClass rpgClass;
     protected String name;
+    protected boolean hasAlchemy;
     
 	public String getName() { return name; }
 	public RpgClass getRpgClass() { return rpgClass; }
+	
+	public boolean getHasAlchemy() { return hasAlchemy; }
 	
 	//Gets
 	public boolean getIsActive()  //Very important get so it gets to take up space.
@@ -60,6 +65,7 @@ public class PlayerConfig extends ConfigGod
 	public boolean getShowDamageGiven() { return fcw.getBoolean(prefix + "showDamageGiven"); }
 	public boolean getHunterCanKit() { return fcw.getBoolean(prefix + "hunterCanKit"); }
 	public boolean getAutoCast() { return fcw.getBoolean(prefix + "autoCast"); }
+	public double getArcanium() { return fcw.getDouble(prefix + "arcanium"); }
 	
 	public long getLastRecievedHourlyItems() { return fcw.getLong(prefix + "lastRecievedHourlyItems"); }
 	
@@ -94,6 +100,7 @@ public class PlayerConfig extends ConfigGod
 	public void setShowDamageTaken(boolean x) { fcw.set(prefix + "showDamageTaken",x); }
 	public void setShowDamageGiven(boolean x) { fcw.set(prefix + "showDamageGiven",x); }
 	public void setAutoCast(boolean x) { fcw.set(prefix + "autoCast",x); }
+	public void setArcanium(double x) { fcw.set(prefix + "arcanium",x); }
 	
 	public void setLastRecievedHourlyItems(long x) { fcw.set(prefix + "lastRecievedHourlyItems", x); }
 	
@@ -127,6 +134,8 @@ public class PlayerConfig extends ConfigGod
 	public double getRequiredExpPercent() { return (getClassExperience() * 100) / getLevelUpAmount(); }
 	public int getLevelUpAmount() { return (int) (getClassLevel() * getClassLevel() * FC_Rpg.balanceConfig.getPlayerExpScaleRate() + FC_Rpg.balanceConfig.getPlayerExpScaleBase()); }
 	public void resetActiveSpell() { fcw.set(prefix + "activeSpell", "none"); }
+	public void subtractArcanium(double x) { setArcanium(getArcanium() - x); }
+	public void addArcanium(double x) { setArcanium(getArcanium() + x); }
 	
 	public void updateSpellLevel(int spellID, int newVal)
 	{
@@ -184,6 +193,15 @@ public class PlayerConfig extends ConfigGod
 		
 		//Handle updates.
 		handleUpdates();
+		
+		for (Spell s : rpgClass.getSpellBook())
+		{
+			if (s.getEffectID() == EffectIDs.ALCHEMY)
+			{
+				hasAlchemy = true;
+				break;
+			}
+		}
 	}
 	
 	private void refreshClass()
@@ -259,6 +277,12 @@ public class PlayerConfig extends ConfigGod
 			
 			setSpellLevels(levels);
 			setSpellBinds(binds);
+		}
+		
+		if (getVersion() < 0.3)
+		{
+			setVersion(0.3);
+			setArcanium(0);
 		}
 	}
 	
@@ -425,7 +449,7 @@ public class PlayerConfig extends ConfigGod
 				setStats(getStats() + FC_Rpg.balanceConfig.getPlayerStatsPerLevel());
 			
 			if (displayLevelUpMessage == true)
-				FC_Rpg.bLib.standardBroadcast(name + " is now level [" + String.valueOf(getClassLevel()) + "]");	//Broadcast that he leveled up
+				FC_Rpg.bLib.rpgBroadcast(name + " is now level [" + String.valueOf(getClassLevel()) + "]");	//Broadcast that he leveled up
 		}
 		
 		//we now set player class experience to passed in experience.

@@ -1,16 +1,16 @@
 name: FC_Rpg
 main: me.Destro168.FC_Rpg.FC_Rpg
-version: 1.0
+version: 1.1
 description: Handles RPG aspects of the server.
 commands:
-   bighelp:
-      description: This command displays all the help topics in /help at once.
    class:
       description: This command accesses donator commands.
    donator:
       description: This command accesses donator commands.
    dungeon:
       description: This command accesses dungeon commands.
+   list:
+      description: This command displays online players.
    faq:
       description: This command accesses server faq topics.
    g:
@@ -25,8 +25,6 @@ commands:
       description: This command puts your held block on your head.
    job:
       description: This command accesses job commands.
-   list:
-      description: This command displays online players.
    guild:
       description: This command accesses guild commands.
    pvp:
@@ -37,6 +35,8 @@ commands:
       description: This command handles all admin commands.
    spell:
       description: This command accesses spell commands.
+   alchemy:
+      description: This command accesses alchemy command.
    modify:
       description: This command accesses modify commands.
    w:
@@ -45,5 +45,5 @@ commands:
       description: This command accesses buff commands.
    world:
       description: This command accesses world commands.
-softdepend: [Multiverse, mcMMO]
+softdepend: [Multiverse, mcMMO, Essentials]
 depend: [FC_Suite_Shared]

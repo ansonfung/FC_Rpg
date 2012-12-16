@@ -90,7 +90,7 @@ public class PvpEvent extends GeneralEvent
 	private List<Player> kickPlayer(List<Player> team, Player player)
 	{
 		//Tell the player they are getting kicked.
-		bLib.standardBroadcast(player.getName() + " Has Been Kicked From The Pvp Event");
+		rbLib.rpgBroadcast(player.getName() + " Has Been Kicked From The Pvp Event");
 		
 		//Find the player and remove him from the team.
 		for (int i = 0; i < team.size(); i++)
@@ -130,7 +130,7 @@ public class PvpEvent extends GeneralEvent
 		phase = 1;
 		
 		//Give players 30 seconds to type
-		bLib.standardBroadcast("Want $" + rewardAmount + "? Join The Pvp Event Starting In [60] seconds! Type: '/pvp join' To Enter!");
+		rbLib.rpgBroadcast("Want $" + rewardAmount + "? Join The Pvp Event Starting In [60] seconds! Type: '/pvp join' To Enter!");
 		
 		//After 30 seconds announce 30 seconds to join.
 		Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable() 
@@ -139,7 +139,7 @@ public class PvpEvent extends GeneralEvent
 			public void run()
 			{
 				if (phase == 1)
-					bLib.standardBroadcast("Want $" + rewardAmount + "? Pvp Event Starting In [30] seconds! Type: '/pvp join' To Enter!");
+					rbLib.rpgBroadcast("Want $" + rewardAmount + "? Pvp Event Starting In [30] seconds! Type: '/pvp join' To Enter!");
 			}
 		}, 600);
 		
@@ -186,7 +186,7 @@ public class PvpEvent extends GeneralEvent
 		}
 		
 		//Announce autobalance.
-		bLib.standardBroadcast("Autobalancing Teams! Somebody may be kicked!");
+		rbLib.rpgBroadcast("Autobalancing Teams! Somebody may be kicked!");
 		
 		//Check if teams are uneven and kick player to make player counts even.
 		if (redTeam.size() > yellowTeam.size())
@@ -363,11 +363,11 @@ public class PvpEvent extends GeneralEvent
 		{
 			//If there are no players on either team, then we want to just end the lobby phase.
 			if (onePlayer == true)
-				bLib.standardBroadcast("Not Enough Players To Start A Pvp Event.");
+				rbLib.rpgBroadcast("Not Enough Players To Start A Pvp Event.");
 			else if (winnerSlot > -1)
 			{
 				//Announce the winner!
-				bLib.standardBroadcast(participantList.get(winnerSlot).getName() + " Is The New Pvp Champion And Has Won $" + rewardAmount + "!");
+				rbLib.rpgBroadcast(participantList.get(winnerSlot).getName() + " Is The New Pvp Champion And Has Won $" + rewardAmount + "!");
 				
 				//Give the reward
 				FC_Rpg.economy.depositPlayer(participantList.get(winnerSlot).getName(), rewardAmount);

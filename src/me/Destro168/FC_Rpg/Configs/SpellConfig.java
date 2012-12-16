@@ -227,33 +227,33 @@ public class SpellConfig extends ConfigGod
 		setEffectID(15, EffectIDs.FIREBALL);
 		setName(15, "Fireball");
 		setDescription(15, "Release a fireball exploding an area for (x) damage.");
-		setManaCost(15, 3, 6, 9, 12, 15);
+		setManaCost(15,2,3,4,5,6);
 		setConstantMagnitude(15, 1, 1, 1, 1, 1);
-		setMagicMagnitude(15, .3333, .4166, .5, .5833, .6666);
+		setMagicMagnitude(15,1,1.25,1.5,1.75,2);
 		setRadius(15, 12, 12, 12, 12, 12);
 		setRestricted(15, false);
 		
 		setEffectID(16, EffectIDs.ALCHEMY);
 		setName(16, "Alchemy");
-		setDescription(16, "Destroy enchanted items for items. Read wiki for info.");
-		setManaCost(16, 10, 15, 20, 25, 30);
+		setDescription(16, "Destroy items for items. Grants /alchemy.");
+		setManaCost(16,0,0,0,0,0);
 		setConstantMagnitude(16, 1, 1.25, 1.5, 1.75, 2);
 		setRestricted(16, false);
 		
 		setEffectID(17, EffectIDs.LIGHTNING);
 		setName(17, "Lightning");
 		setDescription(17, "Strike a target with lightning for (x) damage.");
-		setManaCost(17, 1, 2, 3, 4, 5);
+		setManaCost(17, 1,1.5,2,2.5,3);
 		setConstantMagnitude(17, 1, 1, 1, 1, 1);
-		setMagicMagnitude(17, 1, 1.25, 1.5, 1.75, 2);
+		setMagicMagnitude(17,2,2.5,3,3.5,4);
 		setRestricted(17, true);
 		
 		setEffectID(18, EffectIDs.HEAL_OTHER);
 		setName(18, "Remedy");
 		setDescription(18, "Heal an ally for (x) health.");
 		setManaCost(18, 4, 8, 12, 16, 20);
-		setConstantMagnitude(18, 1, 1, 1, 1, 1);
-		setMagicMagnitude(18, 1, 1.25, 1.5, 1.75, 2);
+		setConstantMagnitude(18,1,1,1,1,1);
+		setMagicMagnitude(18,1,1.25,1.5,1.75,2);
 		setRestricted(18, true);
 		
 		setEffectID(19, EffectIDs.BOOST_STATS);

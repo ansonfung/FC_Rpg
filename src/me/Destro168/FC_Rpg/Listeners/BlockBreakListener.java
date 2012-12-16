@@ -113,10 +113,6 @@ public class BlockBreakListener implements Listener
 		if (!FC_Rpg.worldConfig.getIsRpgWorld(worldName))
 			return;
 		
-		//If exp drops are globally cancelled.
-		if (FC_Rpg.generalConfig.getExpCancelled() == true)
-			event.setExpToDrop(0);	//Cancel experience drops.
-		
 		//Handle perfect wheat if enabled.
 		if (FC_Rpg.generalConfig.getPerfectWheat() == true)
 		{

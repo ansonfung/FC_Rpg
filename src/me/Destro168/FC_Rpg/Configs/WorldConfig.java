@@ -1,5 +1,8 @@
 package me.Destro168.FC_Rpg.Configs;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import me.Destro168.FC_Suite_Shared.ConfigManagers.ConfigGod;
 import me.Destro168.FC_Rpg.FC_Rpg;
 
@@ -60,6 +63,19 @@ public class WorldConfig extends ConfigGod
 			//for (World world : Bukkit.getServer().getWorlds())
 				//setLevelOne(world.getName(),0,70,0,0,0);
 		}
+	}
+	
+	public List<World> getRpgWorlds()
+	{
+		List<World> worldList = new ArrayList<World>();
+		
+		for (World w: Bukkit.getServer().getWorlds())
+		{
+			if (getIsRpgWorld(w.getName()))
+				worldList.add(w);
+		}
+		
+		return worldList;
 	}
 	
 	public boolean getIsRpgWorld(String worldName)
@@ -133,7 +149,7 @@ public class WorldConfig extends ConfigGod
 		setWorldType(worldName,0);
 		
 		//Set all worlds to rpg by default.
-		setIsRpg(worldName, true);
+		setIsRpg(worldName, false);
 		
 		if (createNew == true)
 			setNewWorldSettings(worldName);

@@ -15,6 +15,7 @@
         <file path="/FC_Rpg/plugin.yml"/>
         <file path="/FC_Rpg/.classpath"/>
         <javaElement handleIdentifier="=FC_Rpg/src"/>
+        <folder path="/FC_Rpg/Docs"/>
         <file path="/FC_Rpg/.project"/>
     </selectedElements>
 </jardesc>

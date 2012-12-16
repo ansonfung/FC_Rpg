@@ -1,6 +1,6 @@
 package me.Destro168.FC_Rpg.LoadedObjects;
 
-import me.Destro168.FC_Suite_Shared.StringToY;
+import me.Destro168.FC_Suite_Shared.ConfigManagers.StringToY;
 
 public class Group 
 {

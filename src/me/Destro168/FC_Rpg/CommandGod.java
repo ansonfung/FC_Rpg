@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import me.Destro168.FC_Rpg.Configs.DungeonConfig;
 import me.Destro168.FC_Rpg.Configs.FaqConfig;
 import me.Destro168.FC_Rpg.Configs.GroupConfig;
 import me.Destro168.FC_Rpg.Configs.PlayerConfig;
@@ -18,6 +19,7 @@ import me.Destro168.FC_Rpg.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.Events.DungeonEvent;
 import me.Destro168.FC_Rpg.LoadedObjects.Group;
 import me.Destro168.FC_Rpg.LoadedObjects.RpgClass;
+import me.Destro168.FC_Rpg.Stores.Purchasable;
 import me.Destro168.FC_Rpg.Util.FC_RpgPermissions;
 import me.Destro168.FC_Rpg.Util.RpgMessageLib;
 import me.Destro168.FC_Suite_Shared.ArgParser;
@@ -36,7 +38,9 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.command.ColouredConsoleSender;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -59,13 +63,38 @@ public class CommandGod implements CommandExecutor
 			return true;
 		}
 		
-		else if (command.getName().equalsIgnoreCase("class"))
+		if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordFaq()))
+		{
+			FaqCE cmd = new FaqCE();
+			return cmd.execute();
+		}
+		
+		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordList()))
+		{
+			ListCE cmd = new ListCE();
+			return cmd.execute();
+		}
+		
+		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordReset()))
+		{
+			ResetCE cmd = new ResetCE();
+			return cmd.execute();
+		}
+		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordRpg()))
+		{
+			RpgCE cmd = new RpgCE();
+			return cmd.execute();
+		}
+		
+		if (isActive == false)
+			return msgLib.errorCreateCharacter();
+		
+		if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordClass()))
 		{
 			ClassCE cmd = new ClassCE();
 			return cmd.execute();
 		}
-		
-		else if (command.getName().equalsIgnoreCase("donator"))
+		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordDonator()))
 		{
 			if (console != null)
 				return msgLib.errorConsoleCantUseCommand();
@@ -73,91 +102,62 @@ public class CommandGod implements CommandExecutor
 			DonatorCE cmd = new DonatorCE();
 			return cmd.execute();
 		}
-		
-		else if (command.getName().equalsIgnoreCase("dungeon"))
+		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordDungeon()))
 		{
 			DungeonCE cmd = new DungeonCE();
 			return cmd.execute();
 		}
-		
-		else if (command.getName().equalsIgnoreCase("faq"))
-		{
-			FaqCE cmd = new FaqCE();
-			return cmd.execute();
-		}
-		
-		else if (command.getName().equalsIgnoreCase("g") || command.getName().equalsIgnoreCase("h") || command.getName().equalsIgnoreCase("gh") || command.getName().equalsIgnoreCase("hg"))
+		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordG()) || command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordH()) || command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordGH()) || command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordHG()))
 		{
 			QuickCE cmd = new QuickCE();
 			return cmd.execute(command.getName());
 		}
-		
-		else if (command.getName().equalsIgnoreCase("hat"))
+		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordHat()))
 		{
 			HatCE cmd = new HatCE();
 			return cmd.execute();
 		}
-		
-		else if (command.getName().equalsIgnoreCase("job"))
+		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordJob()))
 		{
 			JobCE cmd = new JobCE();
 			return cmd.execute();
 		}
-		else if (command.getName().equalsIgnoreCase("list"))
-		{
-			ListCE cmd = new ListCE();
-			return cmd.execute();
-		}
-		
-		else if (command.getName().equalsIgnoreCase("guild"))
+		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordGuild()))
 		{
 			GuildCE cmd = new GuildCE();
 			return cmd.execute();
 		}
-		
-		else if (command.getName().equalsIgnoreCase("pvp"))
+		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordPvp()))
 		{
 			PvpCE cmd = new PvpCE();
 			return cmd.execute();
 		}
-		
-		else if (command.getName().equalsIgnoreCase("reset"))
-		{
-			ResetCE cmd = new ResetCE();
-			return cmd.execute();
-		}
-		
-		else if (command.getName().equalsIgnoreCase("rpg"))
-		{
-			RpgCE cmd = new RpgCE();
-			return cmd.execute();
-		}
-		
-		else if (command.getName().equalsIgnoreCase("spell"))
+		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordSpell()))
 		{
 			SpellCE cmd = new SpellCE();
 			return cmd.execute();
 		}
-		
-		else if (command.getName().equalsIgnoreCase("modify"))
+		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordAlchemy()))
+		{
+			AlchemyCE cmd = new AlchemyCE();
+			return cmd.execute();
+		}
+		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordModify()))
 		{
 			ModifyCE cmd = new ModifyCE();
 			return cmd.execute();
 		}
-
-		else if (command.getName().equalsIgnoreCase("w"))
+		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordW()))
 		{
 			WarpCE cmd = new WarpCE();
 			return cmd.execute();
 		}
-
-		else if (command.getName().equalsIgnoreCase("buff"))
+		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordBuff()))
 		{
 			BuffCE cmd = new BuffCE();
 			return cmd.execute();
 		}
-		
-		else if (command.getName().equalsIgnoreCase("world"))
+		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordWorld()))
 		{
 			WorldCE cmd = new WorldCE();
 			return cmd.execute();
@@ -180,8 +180,8 @@ public class CommandGod implements CommandExecutor
 			rpgPlayer = FC_Rpg.rpgEntityManager.getRpgPlayer(player);
 			perms = new FC_RpgPermissions(player);
 			msgLib = new RpgMessageLib(player);
-			try { isActive = rpgPlayer.getPlayerConfig().getIsActive(); } catch (NullPointerException e) { 
-				msgLib.standardError("You can't use commands until you pick a class."); return false; }
+			
+			try { isActive = rpgPlayer.getPlayerConfig().getIsActive(); } catch (NullPointerException e) { isActive = false; }
 			
 			console = null;
 		}
@@ -211,7 +211,7 @@ public class CommandGod implements CommandExecutor
 		public boolean execute()
 	    {
 			if (!perms.commandFAQ())
-				return perms.commandFAQ();
+				return msgLib.errorNoPermission();
 			
 			if (perms.isAdmin())
 			{
@@ -686,6 +686,8 @@ public class CommandGod implements CommandExecutor
 			//0 argument commands.
 			if (args[0].equalsIgnoreCase(""))
 				return msgLib.helpDungeon();
+			if (args[0].equalsIgnoreCase("extra"))
+				return msgLib.helpDungeonDefinition();
 			else if (args[0].equalsIgnoreCase("list"))
 			{
 				String[] msg = new String[5];
@@ -714,7 +716,7 @@ public class CommandGod implements CommandExecutor
 				
 				msgLib.standardHeader("Location Information");
 				msgLib.displayLocation("Selection 1",FC_Rpg.sv.getBlockLoc1(player));
-				msgLib.displayLocation("Selection 1",FC_Rpg.sv.getBlockLoc2(player));
+				msgLib.displayLocation("Selection 2",FC_Rpg.sv.getBlockLoc2(player));
 				msgLib.displayLocation("Your Location",player.getLocation());
 				
 				return true;
@@ -807,6 +809,153 @@ public class CommandGod implements CommandExecutor
 				
 				return true;
 			}
+			
+			// Commands can't be used by console
+			if (console != null)
+				return msgLib.errorConsoleCantUseCommand();
+			
+			DungeonConfig dc = FC_Rpg.dungeonConfig;
+			Location pLoc = player.getLocation();
+			
+			if (args[0].equalsIgnoreCase("spawnBox"))
+			{
+				Location loc1 = FC_Rpg.sv.getBlockLoc1(player);
+				Location loc2 = FC_Rpg.sv.getBlockLoc2(player);
+				int index;
+
+				if (loc1 == null || loc2 == null)
+					return msgLib.errorInvalidSelection();
+
+				index = dc.setSpawnBox1(dungeonNumber, loc1.getWorld().getName(), loc1.getX(), loc1.getY(), loc1.getZ(), loc1.getYaw(), loc1.getPitch());
+				dc.setSpawnBox2(dungeonNumber, index, loc2.getWorld().getName(), loc2.getX(), loc2.getY(), loc2.getZ(), loc2.getYaw(), loc2.getPitch());
+
+				return msgLib.successCommand();
+			}
+			
+			else if (args[0].equalsIgnoreCase("lobby"))
+			{
+				dc.setLobby(dungeonNumber, pLoc.getWorld().getName(), pLoc.getX(), pLoc.getY(), pLoc.getZ(), pLoc.getPitch(), pLoc.getYaw());
+				return msgLib.successCommand();
+			}
+
+			else if (args[0].equalsIgnoreCase("playerStart"))
+			{
+				dc.setStart(dungeonNumber, pLoc.getWorld().getName(), pLoc.getX(), pLoc.getY(), pLoc.getZ(), pLoc.getPitch(), pLoc.getYaw());
+				return msgLib.successCommand();
+			}
+			
+			else if (args[0].equalsIgnoreCase("playerExit"))
+			{
+				dc.setExit(dungeonNumber, pLoc.getWorld().getName(), pLoc.getX(), pLoc.getY(), pLoc.getZ(), pLoc.getPitch(), pLoc.getYaw());
+				return msgLib.successCommand();
+			}
+
+			else if (args[0].equalsIgnoreCase("bossSpawn"))
+			{
+				dc.setBossSpawn(dungeonNumber, pLoc.getWorld().getName(), pLoc.getX(), pLoc.getY(), pLoc.getZ(), pLoc.getPitch(), pLoc.getYaw());
+				return msgLib.successCommand();
+			}
+			
+			else if (args[0].equalsIgnoreCase("timerJoin"))
+			{
+				try {
+					dc.setTimerJoin(dungeonNumber, Integer.valueOf(args[2]));
+					return msgLib.successCommand();
+				}
+				catch (NumberFormatException e)	{ return msgLib.errorInvalidCommand(); }
+			}
+			
+			else if (args[0].equalsIgnoreCase("timerEnd"))
+			{
+				try {
+					dc.setTimerEnd(dungeonNumber, Integer.valueOf(args[2]));
+					return msgLib.successCommand();
+				}
+				catch (NumberFormatException e)	{ return msgLib.errorInvalidCommand(); }
+			}
+			
+			else if (args[0].equalsIgnoreCase("treasureStart"))
+			{
+				try {
+					dc.setTreasureStart(dungeonNumber, Integer.valueOf(args[2]), pLoc.getWorld().getName(), pLoc.getX(), pLoc.getY(), pLoc.getZ(), pLoc.getPitch(), pLoc.getYaw());
+					return msgLib.successCommand();
+				}
+				catch (NumberFormatException e)	{ return msgLib.errorInvalidCommand(); }
+			}
+			
+			else if (args[0].equalsIgnoreCase("treasureEnd"))
+			{
+				try {
+					dc.setTreasureEnd(dungeonNumber, Integer.valueOf(args[2]), pLoc.getWorld().getName(), pLoc.getX(), pLoc.getY(), pLoc.getZ(), pLoc.getPitch(), pLoc.getYaw());
+					return msgLib.successCommand();
+				}
+				catch (NumberFormatException e)	{ return msgLib.errorInvalidCommand(); }
+			}
+			else if (args[0].equalsIgnoreCase("name"))
+			{
+				if (dungeonNumber == -1)
+					return msgLib.errorInvalidCommand();
+				
+				FC_Rpg.dungeonConfig.setName(dungeonNumber, args[2]);
+				return msgLib.successCommand();
+			}
+			
+			// Commands that require a second part.
+			if (args[2].equalsIgnoreCase(""))
+				return msgLib.helpDungeon();
+
+			if (args[0].equalsIgnoreCase("fee"))
+			{
+				try
+				{
+					dc.setEntryFee(dungeonNumber, Double.valueOf(args[2]));
+				} catch (NumberFormatException e)	{ return msgLib.errorInvalidCommand(); }
+				
+				return msgLib.successCommand();
+			}
+
+			else if (args[0].equalsIgnoreCase("lmin"))
+			{
+				try
+				{
+					dc.setPlayerLevelRequirementMinimum(dungeonNumber, Integer.valueOf(args[2]));
+				} catch (NumberFormatException e)	{ return msgLib.errorInvalidCommand(); }
+				
+				return msgLib.successCommand();
+			}
+
+			else if (args[0].equalsIgnoreCase("lmax"))
+			{
+				try
+				{
+					dc.setPlayerLevelRequirementMaximum(dungeonNumber, Integer.valueOf(args[2]));
+				} catch (NumberFormatException e)	{ return msgLib.errorInvalidCommand(); }
+				
+				return msgLib.successCommand();
+			}
+
+			else if (args[0].equalsIgnoreCase("spawncount"))
+			{
+				try
+				{
+					dc.setMobsToSpawnCount(dungeonNumber, Integer.valueOf(args[2]));
+				} catch (NumberFormatException e)	{ return msgLib.errorInvalidCommand(); }
+				
+				return msgLib.successCommand();
+			}
+			
+			// Commands that require a third part.
+			if (args[3].equalsIgnoreCase(""))
+				return msgLib.helpDungeonDefinition();
+			else if (args[0].equalsIgnoreCase("spawnchance"))
+			{
+				try
+				{
+					dc.setSpawnChance(dungeonNumber, Integer.valueOf(args[2]), Integer.valueOf(args[3]));
+				} catch (NumberFormatException e)	{ return msgLib.errorInvalidCommand(); }
+			}
+			else
+				return msgLib.helpDungeonDefinition();
 			
 			//Dungeon help.
 			return msgLib.successCommand();
@@ -1032,7 +1181,7 @@ public class CommandGod implements CommandExecutor
 						rpgPlayer.getPlayerConfig().setJobRank(rpgPlayer.getPlayerConfig().getJobRank() + 1);
 						
 						//Announce the promotion
-						FC_Rpg.bLib.standardBroadcast(player.getName() + " is now Job Rank [" + rpgPlayer.getPlayerConfig().getJobRank() + "]");
+						FC_Rpg.bLib.rpgBroadcast(player.getName() + " is now Job Rank [" + rpgPlayer.getPlayerConfig().getJobRank() + "]");
 					}
 					else
 					{
@@ -1049,28 +1198,29 @@ public class CommandGod implements CommandExecutor
 		}
 	}
 	
-	public class ListCE
+	public class ListCE 
 	{
-		public ListCE() { }
+		public ListCE()  { }
 		
 		public boolean execute()
 	    {
 			if (!perms.commandList())
 				return msgLib.errorNoPermission();
 			
+			//Variable Declarations
 			GroupConfig conf = new GroupConfig();
 			List<Group> groups = conf.getGroups();
-			List<String> groupMembers = new ArrayList<String>();
-			
-			//Begin displaying the information.
-			msgLib.standardHeader("Total Connected Players: " + ChatColor.GREEN + ChatColor.BOLD + Bukkit.getOnlinePlayers().length + ChatColor.GRAY + ChatColor.BOLD + "/" +
-					ChatColor.RED + ChatColor.BOLD + Bukkit.getServer().getMaxPlayers());
-			
+			List<Player> groupMembers = new ArrayList<Player>();
 			Player[] onlinePlayersArray = Bukkit.getServer().getOnlinePlayers();
 			Map<Integer, Player> onlinePlayersMap = new HashMap<Integer, Player>();
+			String message = "";
 			
 			for (int i = 0; i < onlinePlayersArray.length; i++) 
 				onlinePlayersMap.put(i,onlinePlayersArray[i]);
+			
+			//Begin displaying the information.
+			msgLib.standardHeader("Total Connected Players: " + ChatColor.GREEN + ChatColor.BOLD + (Bukkit.getOnlinePlayers().length - FC_Rpg.vanishedPlayers.size()) + ChatColor.GRAY + ChatColor.BOLD + "/" +
+					ChatColor.RED + ChatColor.BOLD + Bukkit.getServer().getMaxPlayers());
 			
 			for (int i = 0; i < groups.size(); i++)
 			{
@@ -1084,43 +1234,82 @@ public class CommandGod implements CommandExecutor
 						
 						if (perms.inGroup(groups.get(i).getName()))
 						{
-							groupMembers.add(onlinePlayersMap.get(j).getName());
+							groupMembers.add(onlinePlayersMap.get(j));
 							onlinePlayersMap.remove(j);
 						}
 					}
 				}
 				
 				if (groupMembers.size() > 0)
-					msgLib.standardMessage(groups.get(i).getDisplay(), specialConversion(groupMembers));
+				{
+					String conversion = specialConversion(groupMembers);
+					
+					if (!conversion.equals(""))
+						message += groups.get(i).getDisplay() + specialConversion(groupMembers) + " ";
+				}
 			}
+			
+			if (!message.equals(""))
+				msgLib.standardMessage(message);
 			
 			return true;
 		}
 		
-		protected String specialConversion(List<String> msg)
+		protected String specialConversion(List<Player> playerList)
 		{
 			//Variable Declarations
+			List<String> displayNameList = new ArrayList<String>();
+			
 			String message = "";
+			String displayNick = "";
 			int alternateState = 0;
 			
-			//We want to alternate the colors for the standard  message.
-			for (int i = 0; i < msg.size(); i++)
+			List<Player> newPlayerList = playerList;
+			List<String> vanishedPlayers = FC_Rpg.vanishedPlayers;
+			
+			//First don't add vanished players.
+			if (vanishedPlayers.size() > 0)
 			{
-				if (msg.get(i) != null)
+				for (int i = 0; i < playerList.size(); i++)
+				{
+					for (int j = 0; j < vanishedPlayers.size(); j++)
+					{
+						if (playerList.get(i).getName().equalsIgnoreCase(vanishedPlayers.get(j)))
+							newPlayerList.remove(playerList.get(i));
+					}
+				}
+			}
+			
+			//Get names and/or nicks from players if essentials is enabled.
+			for (Player p : playerList)
+			{
+				if (p != null)
+					displayNameList.add(p.getName());
+			}
+			
+			//Make list alphebetical.
+			java.util.Collections.sort(displayNameList);
+			
+			//We want to alternate the colors for the standard  message.
+			for (int i = 0; i < displayNameList.size(); i++)
+			{
+				displayNick = displayNameList.get(i);
+				
+				if (displayNick != null)
 				{
 					if (alternateState == 0)
 					{
-						message += ChatColor.WHITE + "" + msg.get(i);
+						message += ChatColor.WHITE + "" + displayNick;
 						alternateState = 1;
 					}
 					else if (alternateState == 1)
 					{
-						message += ChatColor.GRAY + ", " + msg.get(i);
+						message += ChatColor.GRAY + ", " + displayNick;
 						alternateState = 2;
 					}
 					else if (alternateState == 2)
 					{
-						message += ChatColor.WHITE + ", " + msg.get(i);
+						message += ChatColor.WHITE + ", " + displayNick;
 						alternateState = 1;
 					}
 				}
@@ -1333,7 +1522,7 @@ public class CommandGod implements CommandExecutor
 				
 				//Add the player
 				if (FC_Rpg.pvp.addPvper(player) == true)
-					FC_Rpg.bLib.standardBroadcast(player.getName() + " Has Joined The " + ChatColor.RED + "Arena");
+					FC_Rpg.bLib.rpgBroadcast(player.getName() + " Has Joined The " + ChatColor.RED + "Arena");
 				
 				return true;
 			}
@@ -1396,7 +1585,7 @@ public class CommandGod implements CommandExecutor
 		private void endPvpEvent()
 		{
 			FC_Rpg.pvp.end(true);
-			FC_Rpg.bLib.standardBroadcast("Pvp Events Ended By Admin.");
+			FC_Rpg.bLib.rpgBroadcast("Pvp Events Ended By Admin.");
 		}
 	}
 	
@@ -1417,6 +1606,9 @@ public class CommandGod implements CommandExecutor
 			{
 				if (console != null)
 					return msgLib.errorConsoleCantUseCommand();
+				
+				if (!FC_Rpg.worldConfig.getIsRpg(player.getWorld().getName()))
+					return msgLib.standardError("You can only use this command in rpg worlds.");
 				
 				rpgPlayerFile = new PlayerConfig(player.getName());
 				
@@ -1560,6 +1752,8 @@ public class CommandGod implements CommandExecutor
 				}
 				else if (modifable.equalsIgnoreCase("ticket") || modifable.equalsIgnoreCase("tickets"))
 					playerFile.setClassChangeTickets(intArg2);
+				else if (modifable.equalsIgnoreCase("arcanium"))
+					playerFile.setArcanium(intArg2);
 				else
 					return msgLib.errorInvalidCommand();
 				
@@ -1591,7 +1785,7 @@ public class CommandGod implements CommandExecutor
 			
 			//Only let active players use this command.
 			if (isActive == false)
-				return msgLib.errorCreateCharacter();
+				return msgLib.helpRpg();
 			
 			//We want to send help on empty commands.
 			if (args[0].equalsIgnoreCase(""))
@@ -1615,7 +1809,7 @@ public class CommandGod implements CommandExecutor
 					FC_Rpg.eventExpMultiplier = 2;
 					
 					//Announce the start of the event.
-					FC_Rpg.bLib.standardBroadcast("Double Experience Event For One Hour Started!");
+					FC_Rpg.bLib.rpgBroadcast("Double Experience Event For One Hour Started!");
 					
 					FC_Rpg.tid3 = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable() 
 					{
@@ -1623,7 +1817,7 @@ public class CommandGod implements CommandExecutor
 						public void run()
 						{
 							FC_Rpg.eventExpMultiplier = 1;
-							FC_Rpg.bLib.standardBroadcast("Double Experience Event Has Ended!");
+							FC_Rpg.bLib.rpgBroadcast("Double Experience Event Has Ended!");
 						}
 					} , eventLength * 20);
 				}
@@ -1631,14 +1825,14 @@ public class CommandGod implements CommandExecutor
 				{
 					FC_Rpg.eventCashMultiplier = 2;
 					
-					FC_Rpg.bLib.standardBroadcast("Double Money Event For One Hour Started!");
+					FC_Rpg.bLib.rpgBroadcast("Double Money Event For One Hour Started!");
 					
 					FC_Rpg.tid4 = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable() 
 					{
 						public void run()
 						{
 							FC_Rpg.eventCashMultiplier = 1;
-							FC_Rpg.bLib.standardBroadcast("Double Money Event Has Ended!");
+							FC_Rpg.bLib.rpgBroadcast("Double Money Event Has Ended!");
 						}
 					} , eventLength * 20);
 				}
@@ -1650,7 +1844,7 @@ public class CommandGod implements CommandExecutor
 					FC_Rpg.eventExpMultiplier = 1;
 					FC_Rpg.eventCashMultiplier = 1;
 					
-					FC_Rpg.bLib.standardBroadcast("All Bonus Events Have Been Stopped By An Admin!");
+					FC_Rpg.bLib.rpgBroadcast("All Bonus Events Have Been Stopped By An Admin!");
 				}
 			}
 			
@@ -1669,10 +1863,6 @@ public class CommandGod implements CommandExecutor
 				return msgLib.successCommand();
 			}
 			
-			/*******************************
-			//Owner only commmands.
-			*******************************/
-			
 			//Handle wall generation command that will create a wall with signs!
 			else if (args[0].equalsIgnoreCase("wall"))
 			{
@@ -1680,6 +1870,7 @@ public class CommandGod implements CommandExecutor
 				msgLib.standardMessage("Successfully generated wall.");
 			}
 			
+			//Teleport to a player.
 			else if (args[0].equalsIgnoreCase("tp"))
 			{
 				if (args[1].equalsIgnoreCase(""))
@@ -1715,6 +1906,40 @@ public class CommandGod implements CommandExecutor
 				}
 				else
 					return msgLib.errorPlayerNotFound();
+			}
+			
+			else if (args[0].equalsIgnoreCase("vanish"))
+			{
+				if (console != null)
+					return msgLib.errorConsoleCantUseCommand();
+				
+				String playerName = player.getName();
+				
+				if (args[1].equalsIgnoreCase("on"))
+				{
+					if (!FC_Rpg.vanishedPlayers.contains(playerName))
+						FC_Rpg.vanishedPlayers.add(playerName);
+				}
+				else if (args[1].equalsIgnoreCase("off"))
+				{
+					if (FC_Rpg.vanishedPlayers.contains(playerName))
+						FC_Rpg.vanishedPlayers.remove(playerName);
+				}
+				else
+				{
+					if (FC_Rpg.vanishedPlayers.contains(playerName))
+						FC_Rpg.vanishedPlayers.remove(playerName);
+					else
+						FC_Rpg.vanishedPlayers.add(playerName);
+				}
+				
+				return msgLib.successCommand();
+			}
+			
+			else if (args[0].equalsIgnoreCase("taskwipe"))
+			{
+				Bukkit.getScheduler().cancelTasks(FC_Rpg.plugin);
+				return msgLib.successCommand();
 			}
 			
 			//Show admin help.
@@ -1895,7 +2120,7 @@ public class CommandGod implements CommandExecutor
 				player.teleport(loc);	//Teleport to the location
 		}
 	}
-
+	
 	public class SpellCE
 	{
 		SpellConfig util = new SpellConfig();
@@ -1985,11 +2210,11 @@ public class CommandGod implements CommandExecutor
 				
 				msg[0] = "#" + String.valueOf(i+1) + ": ";
 				
-				msg[1] = "[N]: ";
-				msg[2] = rpgPlayer.getPlayerConfig().getRpgClass().getSpell(i).getName();
+				msg[1] = rpgPlayer.getPlayerConfig().getRpgClass().getSpell(i).getName() + "(";
+				msg[2] = String.valueOf(spellLevel);
 				
-				msg[3] = " [L]: ";
-				msg[4] = String.valueOf(spellLevel);
+				msg[3] = ")";
+				
 				
 				if (rpgPlayer.getPlayerConfig().getSpellLevels().get(i) > 0)
 				{
@@ -2056,19 +2281,32 @@ public class CommandGod implements CommandExecutor
 		
 		private boolean autocastSubCommand()
 		{
+			String enabled = "Auto-Cast has been enabled.";
+			String disabled = "Auto-Cast has been disabled.";
+			
 			if (args[1].equalsIgnoreCase("on"))
+			{
 				rpgPlayer.getPlayerConfig().setAutoCast(true);
+				return msgLib.standardMessage(enabled);
+			}
 			else if (args[1].equalsIgnoreCase("off"))
+			{
 				rpgPlayer.getPlayerConfig().setAutoCast(false);
+				return msgLib.standardMessage(disabled);
+			}
 			else
 			{
 				if (rpgPlayer.getPlayerConfig().getAutoCast() == false)
+				{
 					rpgPlayer.getPlayerConfig().setAutoCast(true);
+					return msgLib.standardMessage(enabled);
+				}
 				else
+				{
 					rpgPlayer.getPlayerConfig().setAutoCast(false);
+					return msgLib.standardMessage(disabled);
+				}
 			}
-			
-			return msgLib.successCommand();
 		}
 		
 		private int getSpellNumber(String spellArgument)
@@ -2103,6 +2341,211 @@ public class CommandGod implements CommandExecutor
 			}
 			
 			return intArg1;
+		}
+	}
+	
+	public class AlchemyCE
+	{
+		private List<Purchasable> store = new ArrayList<Purchasable>();
+		
+		public AlchemyCE() { }
+		
+		public boolean execute()
+		{
+			if (!rpgPlayer.getPlayerConfig().getHasAlchemy())
+				return msgLib.errorNoPermission();
+			
+			if (console != null)
+				return msgLib.errorConsoleCantUseCommand();
+			
+			if (args[0].equals(""))
+				return msgLib.helpAlchemy();
+			
+			store = FC_Rpg.as.getStore();
+			
+			if (args[0].equals("list"))
+				return listSubCommand();
+			else if (args[0].equals("buy"))
+			{
+				if (buySubCommand())
+					return true;
+				else
+					return msgLib.errorInvalidCommand();
+			}
+			
+			else if (args[0].equals("smelt"))
+				return smeltSubCommand();
+			
+			return true;
+		}
+		
+		private boolean listSubCommand()
+		{
+			int startPoint;
+			int endPoint;
+			int storeSize = store.size();
+			int buyableCount = FC_Rpg.as.getBuyableCount();
+			
+			if (!args[1].equalsIgnoreCase(""))
+				try { startPoint = Integer.valueOf(args[1])-1 ; } catch (NumberFormatException e) { startPoint = storeSize; }
+			else
+				startPoint = 0;
+			
+			endPoint = startPoint + 15;
+			
+			if (endPoint > storeSize)
+				endPoint = storeSize;
+			
+			if (startPoint > buyableCount - 15)
+				startPoint = buyableCount - 15;
+			
+			//Begin displaying.
+			msgLib.standardHeader("Alchemical Purchasables - " + buyableCount + " Items");
+			
+			for (int i = startPoint; i < endPoint; i++)
+			{
+				Purchasable p;
+				
+				try { p = store.get(i); } catch (IndexOutOfBoundsException e) { break; }
+				
+				if (p.canBuy)
+					msgLib.infiniteMessage("#" + (i+1) + ": ",p.material.toString()," for ",p.cost + ""," Arcanium.");
+				else
+					endPoint++;
+			}
+			
+			msgLib.standardMessage("Finished Listing.");
+			
+			return true;
+		}
+		
+		private boolean buySubCommand()
+		{
+			// Requires an item specified to buy.
+			if (args[1].equalsIgnoreCase(""))
+				return true;
+			
+			//Variable Declarations
+			Purchasable puchasable;
+			int intSelection = 0;
+			int count = 0;
+			boolean hasSelection = true;
+			
+			//User input storing and validation.
+			try { intSelection = Integer.valueOf(args[1]) - 1; } catch (NumberFormatException e) { hasSelection = false; }
+			try { count = Integer.valueOf(args[2]); } catch (NumberFormatException e) { count = 1; }
+			
+			if (hasSelection == false)
+			{
+				for (int i = 0; i < store.size(); i++)
+				{
+					if (args[1].equalsIgnoreCase(store.get(i).material.toString()))
+					{
+						intSelection = i;
+						hasSelection = true;
+						break;
+					}
+				}
+			}
+			
+			if (hasSelection == false)
+				return false;
+			
+			if (intSelection > store.size() || intSelection < 0)
+				return false;
+			
+			if (count < 1)
+				return false;
+			
+			puchasable = store.get(intSelection);
+			double cost = puchasable.cost * count;
+			
+			// Prevent purchase without enough money.
+			if (rpgPlayer.getPlayerConfig().getArcanium() < cost)
+				return false;
+			
+			// Take away arcanium.
+			rpgPlayer.getPlayerConfig().subtractArcanium(cost);
+			rpgPlayer.addItemToInventory(new ItemStack(puchasable.material, count));
+
+			msgLib.infiniteMessage("You have bought ",count + "x ",puchasable.material.toString(), " for " + FC_Rpg.df.format(cost)," Arcanium.");
+			
+			return true;
+		}
+		
+		private boolean smeltSubCommand()
+		{
+			double totalArcaniumRecieved = 0;
+			double arcaniumRecieved = 0;
+			ItemStack air = new ItemStack(Material.AIR,0);
+			
+			if (args[1].equalsIgnoreCase("all"))
+			{
+				ItemStack[] contents = player.getInventory().getContents();
+				
+				for (int i = 0; i < contents.length; i++)
+				{
+					arcaniumRecieved = smelt(contents[i]);
+					
+					if (arcaniumRecieved > 0)
+					{
+						player.getInventory().setItem(i, air);
+						totalArcaniumRecieved += arcaniumRecieved;
+					}
+				}
+			}
+			else
+			{
+				totalArcaniumRecieved = smelt(player.getItemInHand());
+				
+				if (totalArcaniumRecieved > -1)
+					player.setItemInHand(new ItemStack(Material.AIR,1));
+			}
+			
+			//Display how much arcanium they have recieved if it's above 0.
+			if (totalArcaniumRecieved > 0)
+				msgLib.infiniteMessage("You have earned ",FC_Rpg.df.format(totalArcaniumRecieved)," Arcanium.");
+			else
+				msgLib.standardError("You failed to react any items.");
+			
+			return true;
+		}
+		
+		private double smelt(ItemStack item)
+		{
+			Purchasable p = getPurchasable(item);
+			
+			if (p == null)
+				return 0;
+			
+			double arcaniumToGive = p.cost * 0.1 * item.getAmount();  //Items worth 1/10th true value.
+			int enchantmentStrength = 0;
+			
+			for (Enchantment enchant : Enchantment.values())
+			{
+				if (item.containsEnchantment(enchant))
+					enchantmentStrength = item.getEnchantmentLevel(enchant);
+			}
+			
+			arcaniumToGive = arcaniumToGive * (1 + (enchantmentStrength * .2));
+			
+			rpgPlayer.getPlayerConfig().addArcanium(arcaniumToGive);
+			
+			return arcaniumToGive;
+		}
+		
+		private Purchasable getPurchasable(ItemStack item)
+		{
+			if (item == null)
+				return null;
+			
+			for (Purchasable p : store)
+			{
+				if (p.material == item.getType())
+					return p;
+			}
+			
+			return null;
 		}
 	}
 	
@@ -2285,6 +2728,12 @@ public class CommandGod implements CommandExecutor
 				try { wc.setDonator(id, Boolean.valueOf(args[3])); } catch (NumberFormatException e) { return msgLib.errorInvalidCommand(); }
 			else if (args[2].equalsIgnoreCase("admin"))
 				try { wc.setAdmin(id, Boolean.valueOf(args[3])); } catch (NumberFormatException e) { return msgLib.errorInvalidCommand(); }
+			else if (args[2].equalsIgnoreCase("destination"))
+			{
+				try { wc.setDestination(id, new Location(player.getWorld(), Integer.valueOf(args[3]), Integer.valueOf(args[4])
+						, Integer.valueOf(args[5]), Float.valueOf(args[6]), Float.valueOf(args[7]))); } 
+				catch (NumberFormatException e) { return msgLib.errorInvalidCommand(); }
+			}
 			else
 				return msgLib.helpWarp();
 			
@@ -2392,7 +2841,7 @@ public class CommandGod implements CommandExecutor
 			for (Player p : Bukkit.getServer().getOnlinePlayers())
 				p.addPotionEffect(getRandomPotionEffect());
 			
-			msgLib.standardBroadcast("Everybody has been given a random (de)buff!");
+			FC_Rpg.bLib.standardBroadcast("Everybody has been given a random (de)buff!");
 			
 			return true;
 		}
