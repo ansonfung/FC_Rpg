@@ -129,11 +129,11 @@ public class EntityDamageManager
 		if (playerDefender.isBlocking() == true)
 		{
 			// Variable Declaration.
-			RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(BalanceConfig.passive_StrongerParry);
+			RpgClass rpgClass = rpgDefender.getPlayerConfig().getRpgClass();
 			
 			if (rpgClass != null)
 			{
-				if (rpgClass.getID() == rpgDefender.getPlayerConfig().getCombatClass())
+				if (rpgClass.getPassiveID() == BalanceConfig.passive_StrongerParry)
 					damage = damage * FC_Rpg.balanceConfig.getPassivesStrongerParry(); // 25% damage reduction for blocking as defender.
 				else
 					damage = damage * .9; // 10% damage reduction for blocking.
@@ -592,11 +592,11 @@ public class EntityDamageManager
 	{
 		// Variable Declarations
 		Random rand = new Random();
-		RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(BalanceConfig.passive_CounterAttack);
-
+		RpgClass rpgClass = rpgDefender.getPlayerConfig().getRpgClass();
+		
 		if (rpgClass != null)
 		{
-			if (rpgClass.getName().equals(rpgDefender.getPlayerConfig().getCombatClass()))
+			if (rpgClass.getPassiveID() == BalanceConfig.passive_CounterAttack)
 			{
 				// Handle counter-attack chance.
 				if (rand.nextInt(FC_Rpg.balanceConfig.getPassivesCounterAttack()) == 0)
@@ -608,11 +608,11 @@ public class EntityDamageManager
 	private double handle_Offense_Passives(double damage, RpgPlayer rpgAttacker, LivingEntity entityDefender)
 	{
 		// Variable Declaration.
-		RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(BalanceConfig.passive_BattleLust);
-
+		RpgClass rpgClass = rpgAttacker.getPlayerConfig().getRpgClass();
+		
 		if (rpgClass != null)
 		{
-			if (rpgClass.getName().equals(rpgAttacker.getPlayerConfig().getCombatClass()))
+			if (rpgClass.getPassiveID() == BalanceConfig.passive_BattleLust)
 			{
 				// Scale damage by 1/4th
 				damage = damage * (1 + rpgAttacker.getMissingHealthDecimal() * FC_Rpg.balanceConfig.getPassivesBattleLust());
@@ -627,7 +627,7 @@ public class EntityDamageManager
 		if (caster.getStatusActiveRpgPlayer(EffectIDs.LIFESTEAL))
 		{
 			double healAmount = damage * caster.getPlayerConfig().getStatusMagnitude(EffectIDs.LIFESTEAL);
-
+			
 			caster.attemptHealSelfNotification(healAmount);
 			caster.restoreHealth(healAmount);
 		}
@@ -638,7 +638,7 @@ public class EntityDamageManager
 			caster.getPlayer().teleport(ell.getLocationBehindEntity(defender.getLocation()));
 		}
 	}
-
+	
 	public boolean canAttack(long time, int partySize)
 	{
 		Date now = new Date();

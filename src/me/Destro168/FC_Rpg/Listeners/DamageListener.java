@@ -57,7 +57,7 @@ public class DamageListener implements Listener
 	
 	MobAggressionCheck mac;
 	EntityDamageManager edm;
-
+	
 	RpgPlayer rpgDefender;
 	RpgPlayer rpgAttacker;
 	RpgMonster rpgMobAttacker;

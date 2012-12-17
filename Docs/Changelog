@@ -8,6 +8,8 @@ Version 1.1:
 | PIMPED OUT ALCHEMY, so much. Alchemy is now amazingly godliek. In fact, I wouldn't be surprised if you ever find a player that doesn't want to use alchemy now.
 | Updated fireball and lighting mana costs and damage. Made mage overall a lot more powerful by default to balance out the fact that mages need to spec into 3 stats to be effective. Basically mages should be fun now.
 - Good bit of help updating.
+- Fixed all class passives to work again.
+- Fixed berserker always having 40% bonus roughly. 
 
 TODO:
 

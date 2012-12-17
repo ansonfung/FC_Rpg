@@ -131,17 +131,6 @@ public class ClassConfig extends ConfigGod
 		return count;
 	}
 	
-	public RpgClass getClassWithPassive(int passiveID)
-	{
-		for (RpgClass currentClass : rpgClass)
-		{
-			if (currentClass.getPassiveID() == passiveID)
-				return currentClass;
-		}
-		
-		return null;
-	}
-	
 	public RpgClass getClassByName(String className)
 	{
 		for (RpgClass currentClass : rpgClass)

@@ -1199,7 +1199,7 @@ public class RpgPlayer extends RpgEntity
 		//Update health and mana.
 		calculateHealthAndMana();
 		
-		double percent = curMana * 100 / maxHealth;
+		double percent = curHealth * 100 / maxHealth;
 		
 		//We have to inverse percent for lower hp = more damage.
 		percent = (percent - 100) * -1;

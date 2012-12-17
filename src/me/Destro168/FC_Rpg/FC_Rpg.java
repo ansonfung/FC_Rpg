@@ -30,7 +30,6 @@ import me.Destro168.FC_Rpg.Events.PvpEvent;
 import me.Destro168.FC_Rpg.Listeners.BlockBreakListener;
 import me.Destro168.FC_Rpg.Listeners.DamageListener;
 import me.Destro168.FC_Rpg.Listeners.PlayerInteractionListener;
-import me.Destro168.FC_Rpg.LoadedObjects.RpgClass;
 import me.Destro168.FC_Rpg.Stores.AlchemyStore;
 import me.Destro168.FC_Rpg.Util.BattleCalculations;
 import me.Destro168.FC_Rpg.Util.DistanceModifierLib;
@@ -996,8 +995,7 @@ public class FC_Rpg extends JavaPlugin
 			// Variable Declarations
 			final Arrow arrow = (Arrow) event.getProjectile();
 			Vector speed;
-			RpgClass rpgClass = FC_Rpg.classConfig.getClassWithPassive(BalanceConfig.passive_ScalingArrows);
-
+			
 			// Make it so that arrows don't bounce.
 			arrow.setBounce(false);
 			
@@ -1018,9 +1016,9 @@ public class FC_Rpg extends JavaPlugin
 			RpgPlayer rpgPlayer = FC_Rpg.rpgEntityManager.getRpgPlayer((Player) event.getEntity());
 			
 			// If the player has a class with the faster arrows passive, then give faster arrows.
-			if (rpgClass != null)
+			if (rpgPlayer.getPlayerConfig().getRpgClass() != null)
 			{
-				if (rpgClass.getPassiveID() == BalanceConfig.passive_ScalingArrows)
+				if (rpgPlayer.getPlayerConfig().getRpgClass().getPassiveID() == BalanceConfig.passive_ScalingArrows)
 				{
 					speed = arrow.getVelocity().multiply((rpgPlayer.getPlayerConfig().getClassLevel() / FC_Rpg.balanceConfig.getPassivesScalingArrow()) + 1);
 					arrow.setVelocity(speed);
