@@ -19,6 +19,9 @@ import me.Destro168.FC_Rpg.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.Events.DungeonEvent;
 import me.Destro168.FC_Rpg.LoadedObjects.Group;
 import me.Destro168.FC_Rpg.LoadedObjects.RpgClass;
+import me.Destro168.FC_Rpg.LoadedObjects.Spell;
+import me.Destro168.FC_Rpg.Spells.EffectIDs;
+import me.Destro168.FC_Rpg.Spells.SpellCaster;
 import me.Destro168.FC_Rpg.Stores.Purchasable;
 import me.Destro168.FC_Rpg.Util.FC_RpgPermissions;
 import me.Destro168.FC_Rpg.Util.RpgMessageLib;
@@ -657,7 +660,7 @@ public class CommandGod implements CommandExecutor
 				if (perms.isInfiniteDonator())
 					timeRemaining = "Never";
 				else
-					timeRemaining = FC_Rpg.dfm.format(rpgPlayer.getPlayerConfig().getDonatorTime());
+					timeRemaining = FC_Rpg.sdf.format(rpgPlayer.getPlayerConfig().getDonatorTime());
 				
 				msgLib.standardMessage("Donation Perks End On",timeRemaining);
 				msgLib.helpDonator();
@@ -2347,6 +2350,7 @@ public class CommandGod implements CommandExecutor
 	public class AlchemyCE
 	{
 		private List<Purchasable> store = new ArrayList<Purchasable>();
+		private double spellMagnitude;
 		
 		public AlchemyCE() { }
 		
@@ -2362,6 +2366,17 @@ public class CommandGod implements CommandExecutor
 				return msgLib.helpAlchemy();
 			
 			store = FC_Rpg.as.getStore();
+			SpellCaster sc = new SpellCaster();
+			List<Spell> sb = rpgPlayer.getPlayerConfig().getRpgClass().getSpellBook();
+			
+			for (int i = 0; i < sb.size(); i++)
+			{
+				if (sb.get(i).getEffectID() == EffectIDs.ALCHEMY)
+				{
+					spellMagnitude = sc.updatefinalSpellMagnitude(rpgPlayer, sb.get(i),(rpgPlayer.getPlayerConfig().getSpellLevels().get(i) - 1));
+					break;
+				}
+			}
 			
 			if (args[0].equals("list"))
 				return listSubCommand();
@@ -2504,7 +2519,7 @@ public class CommandGod implements CommandExecutor
 			
 			//Display how much arcanium they have recieved if it's above 0.
 			if (totalArcaniumRecieved > 0)
-				msgLib.infiniteMessage("You have earned ",FC_Rpg.df.format(totalArcaniumRecieved)," Arcanium.");
+				msgLib.infiniteMessage("You have earned ",FC_Rpg.df2.format(totalArcaniumRecieved)," Arcanium.");
 			else
 				msgLib.standardError("You failed to react any items.");
 			
@@ -2518,7 +2533,12 @@ public class CommandGod implements CommandExecutor
 			if (p == null)
 				return 0;
 			
-			double arcaniumToGive = p.cost * 0.1 * item.getAmount();  //Items worth 1/10th true value.
+			double multiplier = 0.1;
+			
+			if (spellMagnitude > 0)
+				multiplier = spellMagnitude;
+			
+			double arcaniumToGive = p.cost * multiplier * item.getAmount();  //Items worth 1/10th true value.
 			int enchantmentStrength = 0;
 			
 			for (Enchantment enchant : Enchantment.values())

@@ -89,8 +89,9 @@ import com.earth2me.essentials.User;
 public class FC_Rpg extends JavaPlugin
 {
 	final static double MAX_HP = 999999;
-	public final static DateFormat dfm = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+	public final static DateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	public static final DecimalFormat df = new DecimalFormat("#.#");
+	public static final DecimalFormat df2 = new DecimalFormat("#.##");
 	
 	public final static boolean debugModeEnabled = false;
 	

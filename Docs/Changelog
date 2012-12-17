@@ -9,7 +9,13 @@ Version 1.1:
 | Updated fireball and lighting mana costs and damage. Made mage overall a lot more powerful by default to balance out the fact that mages need to spec into 3 stats to be effective. Basically mages should be fun now.
 - Good bit of help updating.
 - Fixed all class passives to work again.
+
+1.1v2:
 - Fixed berserker always having 40% bonus roughly. 
+
+1.1v3:
+- Fixed dungeon timer reflecting dungeon ender timer setting.
+- Made it so that skill points in alchemy increase amount of reagants that are recieved from breaking down items. Default is .1*x where x is skill points. Reflected in new default spell config.
 
 TODO:
 

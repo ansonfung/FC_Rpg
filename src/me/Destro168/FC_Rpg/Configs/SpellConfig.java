@@ -237,7 +237,7 @@ public class SpellConfig extends ConfigGod
 		setName(16, "Alchemy");
 		setDescription(16, "Destroy items for items. Grants /alchemy.");
 		setManaCost(16,0,0,0,0,0);
-		setConstantMagnitude(16, 1, 1.25, 1.5, 1.75, 2);
+		setConstantMagnitude(16,.1,.2,.3,.4,.5);
 		setRestricted(16, false);
 		
 		setEffectID(17, EffectIDs.LIGHTNING);

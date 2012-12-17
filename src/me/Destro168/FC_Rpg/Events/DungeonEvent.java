@@ -664,7 +664,7 @@ public class DungeonEvent extends GeneralEvent
 			phase = 3;
 			
 			//Message the participants they will be tp'd out.
-			super.messageAllParticipants("Dungeon Complete! All participants will be tp'd out in [" + FC_Rpg.dungeonConfig.getTimerEnd(dungeonNumber) + "] seconds.");
+			super.messageAllParticipants("Dungeon Complete! All participants will be tp'd out in [60] seconds.");
 			
 			//Add loot to the chest.
 			addChestLoot(false);
