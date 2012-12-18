@@ -101,9 +101,9 @@ public class FC_RpgPermissions extends PermissionManager
 		return getCanUseCommand("FC_Rpg.command.donator");
 	}
 	
-	public boolean commandHat()
+	public boolean commandHead()
 	{
-		return getCanUseCommand("FC_Rpg.command.hat");
+		return getCanUseCommand("FC_Rpg.command.head");
 	}
 
 	public boolean commandJob()
@@ -111,16 +111,16 @@ public class FC_RpgPermissions extends PermissionManager
 		return getCanUseCommand("FC_Rpg.command.job");
 	}
 	
-	public boolean commandList()
+	public boolean commandPlayers()
 	{
-		return getCanUseCommand("FC_Rpg.command.list");
+		return getCanUseCommand("FC_Rpg.command.players");
 	}
 	
 	public boolean commandGuild()
 	{
 		return getCanUseCommand("FC_Rpg.command.guild");
 	}
-
+	
 	public boolean commandPvp()
 	{
 		return getCanUseCommand("FC_Rpg.command.pvp");

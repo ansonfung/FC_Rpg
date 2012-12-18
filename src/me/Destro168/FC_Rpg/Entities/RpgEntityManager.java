@@ -265,7 +265,7 @@ public class RpgEntityManager
     	int intClass = -1;
     	
 		//Tell the server that the class/job have been picked.
-    	FC_Rpg.bLib.rpgBroadcast(player.getName() + " has picked " + classSelection + "!");
+    	FC_Rpg.rpgBroadcast.rpgBroadcast(player.getName() + " has picked " + classSelection + "!");
 		
     	//Convert stringClass to real class number.
     	for (int i = 0; i < FC_Rpg.classConfig.getRpgClasses().length; i++)

@@ -22,7 +22,7 @@ public class PlayerConfig extends ConfigGod
 	private int levelCap;
 	protected RpgClass rpgClass;
     protected String name;
-    protected boolean hasAlchemy;
+    public boolean hasAlchemy;
     
 	public String getName() { return name; }
 	public RpgClass getRpgClass() { return rpgClass; }
@@ -194,12 +194,22 @@ public class PlayerConfig extends ConfigGod
 		//Handle updates.
 		handleUpdates();
 		
-		for (Spell s : rpgClass.getSpellBook())
+		//Update whether or not the player has alchemy or not.
+		Spell s;
+		
+		for (int j = 0; j < rpgClass.getSpellBook().size(); j++)
 		{
+			s = rpgClass.getSpellBook().get(j);
+			
 			if (s.getEffectID() == EffectIDs.ALCHEMY)
 			{
-				hasAlchemy = true;
-				break;
+				if (getSpellLevels().get(j) > 0)
+				{
+					hasAlchemy = true;
+					break;
+				}
+				else
+					break;
 			}
 		}
 	}
@@ -449,7 +459,7 @@ public class PlayerConfig extends ConfigGod
 				setStats(getStats() + FC_Rpg.balanceConfig.getPlayerStatsPerLevel());
 			
 			if (displayLevelUpMessage == true)
-				FC_Rpg.bLib.rpgBroadcast(name + " is now level [" + String.valueOf(getClassLevel()) + "]");	//Broadcast that he leveled up
+				FC_Rpg.rpgBroadcast.rpgBroadcast(name + " is now level [" + String.valueOf(getClassLevel()) + "]");	//Broadcast that he leveled up
 		}
 		
 		//we now set player class experience to passed in experience.

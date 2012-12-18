@@ -88,6 +88,7 @@ import com.earth2me.essentials.User;
 
 public class FC_Rpg extends JavaPlugin
 {
+	
 	final static double MAX_HP = 999999;
 	public final static DateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	public static final DecimalFormat df = new DecimalFormat("#.#");
@@ -110,7 +111,7 @@ public class FC_Rpg extends JavaPlugin
 	
 	public static ColorLib cl = new ColorLib();
 	public static PvpEvent pvp;
-	public static RpgBroadcast bLib;
+	public static RpgBroadcast rpgBroadcast;
 	public static WorldConfig worldConfig;
 	public static Economy economy = null;
 	public static DungeonEvent[] dungeonEventArray;
@@ -136,7 +137,6 @@ public class FC_Rpg extends JavaPlugin
 	
 	private CommandGod commandCE;
 	private MobSpawnManager msm;
-	
 	
 	@Override
 	public void onDisable()
@@ -197,7 +197,7 @@ public class FC_Rpg extends JavaPlugin
 		GroupConfig gm = new GroupConfig();
 		
 		worldConfig = new WorldConfig();
-		bLib = new RpgBroadcast();
+		rpgBroadcast = new RpgBroadcast();
 		guildManager = new GuildConfig();
 		pvp = new PvpEvent();
 		spellConfig = new SpellConfig();
@@ -247,7 +247,6 @@ public class FC_Rpg extends JavaPlugin
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordH()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordGH()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordHG()).setExecutor(commandCE);
-		getCommand(FC_Rpg.generalConfig.getCommandKeyWordHat()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordJob()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordGuild()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordPvp()).setExecutor(commandCE);
@@ -259,7 +258,8 @@ public class FC_Rpg extends JavaPlugin
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordW()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordBuff()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordWorld()).setExecutor(commandCE);
-		getCommand(FC_Rpg.generalConfig.getCommandKeyWordList()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordHead()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordPlayers()).setExecutor(commandCE);
 		
 		// Handle tasks that happen every 30 minutes. Delay'd by 5 seconds.
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable()

@@ -3,6 +3,7 @@ package me.Destro168.FC_Rpg.Util;
 import java.util.List;
 
 import me.Destro168.FC_Rpg.FC_Rpg;
+import me.Destro168.FC_Suite_Shared.ColorLib;
 import me.Destro168.FC_Suite_Shared.Messaging.BroadcastLib;
 
 import org.bukkit.World;
@@ -15,6 +16,7 @@ public class RpgBroadcast extends BroadcastLib
 	public boolean rpgBroadcast(String msg)
 	{
 		List<World> rpgWorlds = FC_Rpg.worldConfig.getRpgWorlds();
+		ColorLib colorLib = new ColorLib();
 		
 		if (rpgWorlds == null || rpgWorlds.size() <= 0)
 			return true;
@@ -23,7 +25,7 @@ public class RpgBroadcast extends BroadcastLib
 		{
 			for (Player p : rpgWorld.getPlayers())
 			{
-				p.sendMessage(cLib.parseCustom(cm.primaryColor, cm.broadcastTag + msg));
+				p.sendMessage(colorLib.parseCustom(cm.primaryColor, cm.broadcastTag + msg));
 			}
 		}
 		

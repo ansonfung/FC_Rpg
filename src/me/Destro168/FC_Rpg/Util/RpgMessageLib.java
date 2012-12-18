@@ -124,8 +124,8 @@ public class RpgMessageLib extends MessageLib
 		if (perms.commandPvp())
 			standardMessage("/pvp","Help for pvp events.");
 		
-		if (perms.commandList())
-			standardMessage("/list","See who is online.");
+		if (perms.commandPlayers())
+			standardMessage("/players","See who is online.");
 		
 		if (perms.commandBuff())
 			standardMessage("/buff","Help with buffs.");
@@ -326,8 +326,8 @@ public class RpgMessageLib extends MessageLib
 		
 		standardHeader("Donator Commands");
 		
-		if (FC_Rpg.generalConfig.getDonatorsCanHat() || perms.commandHat())
-			standardMessage("/hat", "Wear a block as a hat!");
+		if (FC_Rpg.generalConfig.getDonatorsCanHat() || perms.commandHead())
+			standardMessage("/head", "Wear a block on your head!");
 		
 		standardMessage("/donator respecialize", "Redistribute stat points on the fly!");
 		standardMessage("- Have a suggestion? Ask Destro168!");
@@ -445,6 +445,9 @@ public class RpgMessageLib extends MessageLib
 		standardMessage("/rpg expMult [x]","Change current global exp multiplier. Currently: " + FC_Rpg.balanceConfig.getGlobalExpMultiplier());
 		standardMessage("/rpg wall","Creates wall with all classes/jobs/start sign.");
 		standardMessage("/rpg sudo [name]","Make somebody say anything/use any command.");
+		standardMessage("/rpg taskwipe","Stops all tasks of FC_Rpg.");
+		standardMessage("/rpg stop","Disables the plugin FC_Rpg.");
+		standardMessage("/rpg reload","Reloads FC_Rpg.");
 		
 		return true;
 	}

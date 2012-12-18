@@ -277,6 +277,9 @@ public class RpgPlayer extends RpgEntity
 			if (playerConfig.getStats() > 0)
 				msgLib.standardMessage("Remember to assign stat points. Use /class for help!");
 		}
+		
+		if (playerConfig.getSpellPoints() > 0)
+			msgLib.standardMessage("Remember to choose and upgrade spells. Use /spell for help!");
 	}
 	
 	public void updateDonatorStats()
@@ -1132,7 +1135,7 @@ public class RpgPlayer extends RpgEntity
 			return;
 		
 		//Broadcast Promotion.
-		FC_Rpg.bLib.rpgBroadcast(name + " Has Been Promoted To " + ChatColor.GREEN + newGroup);
+		FC_Rpg.rpgBroadcast.rpgBroadcast(name + " Has Been Promoted To " + ChatColor.GREEN + newGroup);
 		
 		//Add the player to the new group.
 		perms.setPlayerGroup(newGroup);

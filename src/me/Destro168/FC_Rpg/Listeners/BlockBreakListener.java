@@ -121,7 +121,7 @@ public class BlockBreakListener implements Listener
 				//Variable Declarations
 				Random rand = new Random();
 				ItemStack wheat = new ItemStack(Material.WHEAT, rand.nextInt(2) + 1);
-				ItemStack seed = new ItemStack(Material.SEEDS, rand.nextInt(2));
+				ItemStack seed = new ItemStack(Material.SEEDS, rand.nextInt(1));
 				
 				//If wheat is fully grown.
 				if (block.getData() == 7)
@@ -137,8 +137,29 @@ public class BlockBreakListener implements Listener
 					block.setData((byte) 0);
 				}
 				
-				if (!perms.isAdmin())
-					event.setCancelled(true);
+				event.setCancelled(true);
+			}
+		}
+		
+		if (FC_Rpg.generalConfig.getPerfectWarts() == true)
+		{
+			if (block.getType().equals(Material.NETHER_WARTS))
+			{
+				//Variable Declarations
+				Random rand = new Random();
+				ItemStack warts = new ItemStack(Material.NETHER_STALK, rand.nextInt(3) + 1);
+				
+				//If wheat is fully grown.
+				if (block.getData() == 3)
+				{
+					//Drop the wheat and seeds.
+					block.getWorld().dropItemNaturally(block.getLocation(), warts);
+					
+					//Set the data back to 0.
+					block.setData((byte) 0);
+				}
+				
+				event.setCancelled(true);
 			}
 		}
 		

@@ -535,7 +535,7 @@ public class EntityDamageManager
 			rpgLooter.attemptMonsterOutOfRangeNotification();
 			return;
 		}
-
+		
 		// Give a bonus percent based on level difference, 1 level = x% more.
 		if (levelDifference == 0)
 			bonusPercent = 1;

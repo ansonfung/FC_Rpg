@@ -65,19 +65,16 @@ public class CommandGod implements CommandExecutor
 			msgLib.standardError("Command failed to initialize.");
 			return true;
 		}
-		
 		if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordFaq()))
 		{
 			FaqCE cmd = new FaqCE();
 			return cmd.execute();
 		}
-		
-		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordList()))
+		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordPlayers()))
 		{
 			ListCE cmd = new ListCE();
 			return cmd.execute();
 		}
-		
 		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordReset()))
 		{
 			ResetCE cmd = new ResetCE();
@@ -88,7 +85,13 @@ public class CommandGod implements CommandExecutor
 			RpgCE cmd = new RpgCE();
 			return cmd.execute();
 		}
+		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordHead()))
+		{
+			HatCE cmd = new HatCE();
+			return cmd.execute();
+		}
 		
+		//Check if the player is active for future commands.
 		if (isActive == false)
 			return msgLib.errorCreateCharacter();
 		
@@ -114,11 +117,6 @@ public class CommandGod implements CommandExecutor
 		{
 			QuickCE cmd = new QuickCE();
 			return cmd.execute(command.getName());
-		}
-		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordHat()))
-		{
-			HatCE cmd = new HatCE();
-			return cmd.execute();
 		}
 		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordJob()))
 		{
@@ -1068,11 +1066,14 @@ public class CommandGod implements CommandExecutor
 			
 			//If donators can hat, then check if the player is donator.
 			if (FC_Rpg.generalConfig.getDonatorsCanHat())
-				canHat = rpgPlayer.getPlayerConfig().isDonator();
+			{
+				if (rpgPlayer != null)
+					canHat = rpgPlayer.getPlayerConfig().isDonator();
+			}
 			
 			//If they can't hat or aren't a donator, then check if they have perm.
 			if (canHat == false)
-				canHat = perms.commandHat();
+				canHat = perms.commandHead();
 			
 			if (canHat)
 			{
@@ -1184,7 +1185,7 @@ public class CommandGod implements CommandExecutor
 						rpgPlayer.getPlayerConfig().setJobRank(rpgPlayer.getPlayerConfig().getJobRank() + 1);
 						
 						//Announce the promotion
-						FC_Rpg.bLib.rpgBroadcast(player.getName() + " is now Job Rank [" + rpgPlayer.getPlayerConfig().getJobRank() + "]");
+						FC_Rpg.rpgBroadcast.rpgBroadcast(player.getName() + " is now Job Rank [" + rpgPlayer.getPlayerConfig().getJobRank() + "]");
 					}
 					else
 					{
@@ -1207,7 +1208,7 @@ public class CommandGod implements CommandExecutor
 		
 		public boolean execute()
 	    {
-			if (!perms.commandList())
+			if (!perms.commandPlayers())
 				return msgLib.errorNoPermission();
 			
 			//Variable Declarations
@@ -1525,7 +1526,7 @@ public class CommandGod implements CommandExecutor
 				
 				//Add the player
 				if (FC_Rpg.pvp.addPvper(player) == true)
-					FC_Rpg.bLib.rpgBroadcast(player.getName() + " Has Joined The " + ChatColor.RED + "Arena");
+					FC_Rpg.rpgBroadcast.rpgBroadcast(player.getName() + " Has Joined The " + ChatColor.RED + "Arena");
 				
 				return true;
 			}
@@ -1588,7 +1589,7 @@ public class CommandGod implements CommandExecutor
 		private void endPvpEvent()
 		{
 			FC_Rpg.pvp.end(true);
-			FC_Rpg.bLib.rpgBroadcast("Pvp Events Ended By Admin.");
+			FC_Rpg.rpgBroadcast.rpgBroadcast("Pvp Events Ended By Admin.");
 		}
 	}
 	
@@ -1649,8 +1650,6 @@ public class CommandGod implements CommandExecutor
 			//Stop the targets tasks.
 			if (target != null)
 				FC_Rpg.rpgEntityManager.unregisterRpgPlayer(target);
-			
-			FC_Rpg.plugin.getLogger().info("A: " + rpgPlayerFile.getName() + " player: " + player.getName());
 			
 			return true;
 		}
@@ -1751,7 +1750,7 @@ public class CommandGod implements CommandExecutor
 				else if (modifable.equalsIgnoreCase("donator") || modifable.equalsIgnoreCase("d"))
 				{
 					playerFile.offlineSetDonator(intArg2);
-					FC_Rpg.bLib.standardBroadcast("Thank you for donating " + args[0] + "!!!");
+					FC_Rpg.rpgBroadcast.standardBroadcast("Thank you for donating " + args[0] + "!!!");
 				}
 				else if (modifable.equalsIgnoreCase("ticket") || modifable.equalsIgnoreCase("tickets"))
 					playerFile.setClassChangeTickets(intArg2);
@@ -1812,7 +1811,7 @@ public class CommandGod implements CommandExecutor
 					FC_Rpg.eventExpMultiplier = 2;
 					
 					//Announce the start of the event.
-					FC_Rpg.bLib.rpgBroadcast("Double Experience Event For One Hour Started!");
+					FC_Rpg.rpgBroadcast.rpgBroadcast("Double Experience Event For One Hour Started!");
 					
 					FC_Rpg.tid3 = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable() 
 					{
@@ -1820,7 +1819,7 @@ public class CommandGod implements CommandExecutor
 						public void run()
 						{
 							FC_Rpg.eventExpMultiplier = 1;
-							FC_Rpg.bLib.rpgBroadcast("Double Experience Event Has Ended!");
+							FC_Rpg.rpgBroadcast.rpgBroadcast("Double Experience Event Has Ended!");
 						}
 					} , eventLength * 20);
 				}
@@ -1828,14 +1827,14 @@ public class CommandGod implements CommandExecutor
 				{
 					FC_Rpg.eventCashMultiplier = 2;
 					
-					FC_Rpg.bLib.rpgBroadcast("Double Money Event For One Hour Started!");
+					FC_Rpg.rpgBroadcast.rpgBroadcast("Double Money Event For One Hour Started!");
 					
 					FC_Rpg.tid4 = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable() 
 					{
 						public void run()
 						{
 							FC_Rpg.eventCashMultiplier = 1;
-							FC_Rpg.bLib.rpgBroadcast("Double Money Event Has Ended!");
+							FC_Rpg.rpgBroadcast.rpgBroadcast("Double Money Event Has Ended!");
 						}
 					} , eventLength * 20);
 				}
@@ -1847,7 +1846,7 @@ public class CommandGod implements CommandExecutor
 					FC_Rpg.eventExpMultiplier = 1;
 					FC_Rpg.eventCashMultiplier = 1;
 					
-					FC_Rpg.bLib.rpgBroadcast("All Bonus Events Have Been Stopped By An Admin!");
+					FC_Rpg.rpgBroadcast.rpgBroadcast("All Bonus Events Have Been Stopped By An Admin!");
 				}
 			}
 			
@@ -1942,6 +1941,20 @@ public class CommandGod implements CommandExecutor
 			else if (args[0].equalsIgnoreCase("taskwipe"))
 			{
 				Bukkit.getScheduler().cancelTasks(FC_Rpg.plugin);
+				return msgLib.successCommand();
+			}
+			
+			else if (args[0].equalsIgnoreCase("stop"))
+			{
+				Bukkit.getScheduler().cancelTasks(FC_Rpg.plugin);
+				Bukkit.getPluginManager().disablePlugin(FC_Rpg.plugin);
+				return msgLib.successCommand();
+			}
+			
+			else if (args[0].equalsIgnoreCase("reload"))
+			{
+				Bukkit.getPluginManager().disablePlugin(FC_Rpg.plugin);
+				Bukkit.getPluginManager().enablePlugin(FC_Rpg.plugin);
 				return msgLib.successCommand();
 			}
 			
@@ -2202,38 +2215,40 @@ public class CommandGod implements CommandExecutor
 		{
 			msgLib.standardHeader("Spells List");
 			
-			msgLib.standardMessage("Current Spell Points",String.valueOf(rpgPlayer.getPlayerConfig().getSpellPoints()));
-			
-			String[] msg = new String[9];
+			int spellPoints = rpgPlayer.getPlayerConfig().getSpellPoints();
+			List<Integer> spellLevels = rpgPlayer.getPlayerConfig().getSpellLevels();
+			RpgClass rpgClass = rpgPlayer.getPlayerConfig().getRpgClass();
 			int spellLevel;
+			Spell spell = null;
+			
+			msgLib.standardMessage("Current Spell Points",spellPoints + "");
+			
+			if (spellPoints > 0 && rpgPlayer.getPlayerConfig().getClassLevel() < 10)
+				msgLib.standardError("Upgrade spells with /spell upgrade [name]");
 			
 			for (int i = 0; i < rpgPlayer.getPlayerConfig().getRpgClass().getSpellBook().size(); i++)
 			{
-				spellLevel = rpgPlayer.getPlayerConfig().getSpellLevels().get(i);
+				spellLevel = spellLevels.get(i);
+				spell = rpgClass.getSpell(i);
 				
-				msg[0] = "#" + String.valueOf(i+1) + ": ";
-				
-				msg[1] = rpgPlayer.getPlayerConfig().getRpgClass().getSpell(i).getName() + "(";
-				msg[2] = String.valueOf(spellLevel);
-				
-				msg[3] = ")";
-				
-				
-				if (rpgPlayer.getPlayerConfig().getSpellLevels().get(i) > 0)
+				if (spellLevel == 0)
 				{
-					msg[5] = " [MC]: ";
-					msg[6] = String.valueOf(rpgPlayer.getPlayerConfig().getRpgClass().getSpell(i).getManaCost().get(spellLevel-1));
+					msgLib.standardError("#" + String.valueOf(i+1) + ": " + spell.getName() + "(" +
+							String.valueOf(spellLevel) + "): " + spell.getDescription() + " This spell is unleveled.");
 				}
-				else
+				else if (spellLevel > 0)
 				{
-					msg[5] = " [MC]: ";
-					msg[6] = "0";
+					try {
+						msgLib.infiniteMessage("#" + String.valueOf(i+1) + ": ", spell.getName() + "(",
+							String.valueOf(spellLevel),"): ",spell.getDescription() + " This spell costs ",
+							ChatColor.DARK_AQUA + String.valueOf(spell.getManaCost().get(spellLevel - 1)), " Mana." + " Next level costs ",
+							ChatColor.DARK_AQUA + String.valueOf(spell.getManaCost().get(spellLevel)), " Mana.");
+					} catch (IndexOutOfBoundsException e) {
+						msgLib.infiniteMessage("#" + String.valueOf(i+1) + ": ", spell.getName() + "(",
+							String.valueOf(spellLevel),"): ",spell.getDescription() + " This spell costs ",
+							ChatColor.DARK_AQUA + String.valueOf(spell.getManaCost().get(spellLevel - 1)), " Mana." + " This spell is max level.");
+					}
 				}
-				
-				msg[7] = " [D]: ";
-				msg[8] = rpgPlayer.getPlayerConfig().getRpgClass().getSpell(i).getDescription();
-				
-				msgLib.standardMessage(msg);
 			}
 			
 			return true;
@@ -2263,6 +2278,10 @@ public class CommandGod implements CommandExecutor
 			
 			//Increaese the spell level.
 			rpgPlayer.getPlayerConfig().updateSpellLevel(intArg1, rpgPlayer.getPlayerConfig().getSpellLevels().get(intArg1) + 1);
+			
+			//If alchemy set alchemy to true.
+			if (rpgPlayer.getPlayerConfig().getRpgClass().getSpellBook().get(intArg1).getEffectID() == EffectIDs.ALCHEMY)
+				rpgPlayer.getPlayerConfig().hasAlchemy = true;
 			
 			//Decrease player spell points.
 			rpgPlayer.getPlayerConfig().setSpellPoints(rpgPlayer.getPlayerConfig().getSpellPoints() - 1);
@@ -2861,7 +2880,7 @@ public class CommandGod implements CommandExecutor
 			for (Player p : Bukkit.getServer().getOnlinePlayers())
 				p.addPotionEffect(getRandomPotionEffect());
 			
-			FC_Rpg.bLib.standardBroadcast("Everybody has been given a random (de)buff!");
+			FC_Rpg.rpgBroadcast.standardBroadcast("Everybody has been given a random (de)buff!");
 			
 			return true;
 		}

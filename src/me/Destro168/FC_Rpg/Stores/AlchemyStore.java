@@ -28,38 +28,41 @@ public class AlchemyStore
 		store.add(new Purchasable(Material.WOOD,.1,true));
 		store.add(new Purchasable(Material.MOSSY_COBBLESTONE,.2,true));
 		store.add(new Purchasable(Material.STONE,.2,true));
-		store.add(new Purchasable(Material.SMOOTH_BRICK,.4,true));
 		store.add(new Purchasable(Material.BRICK,.4,true));
 		store.add(new Purchasable(Material.NETHERRACK,.4,true));
 		store.add(new Purchasable(Material.NETHER_BRICK,.6,true));
 		store.add(new Purchasable(Material.OBSIDIAN,3,true));
 		store.add(new Purchasable(Material.BONE,1,true));
 		store.add(new Purchasable(Material.BOOK,1,true));
-		store.add(new Purchasable(Material.COAL,3,true));
+		store.add(new Purchasable(Material.COAL,2,true));
+		store.add(new Purchasable(Material.REDSTONE,.75,true));
 		store.add(new Purchasable(Material.COOKIE,4,true));
 		store.add(new Purchasable(Material.EGG,5,true));
 		store.add(new Purchasable(Material.ARROW,1,true));
 		store.add(new Purchasable(Material.REDSTONE,2,true));
 		store.add(new Purchasable(Material.SUGAR,4,true));
 		store.add(new Purchasable(Material.MELON,4,true));
-		store.add(new Purchasable(Material.COOKED_FISH,10,true));
-		store.add(new Purchasable(Material.COOKED_CHICKEN,12,true));
-		store.add(new Purchasable(Material.RAW_BEEF,15,true));
+		store.add(new Purchasable(Material.COOKED_FISH,3,true));
+		store.add(new Purchasable(Material.COOKED_CHICKEN,3,true));
+		store.add(new Purchasable(Material.RAW_BEEF,4,true));
 		store.add(new Purchasable(Material.SULPHUR,4,true));
 		store.add(new Purchasable(Material.BOOKSHELF,20,true));
 		store.add(new Purchasable(Material.GLOWSTONE_DUST,3,true));
-		store.add(new Purchasable(Material.NETHER_WARTS,5,true));
-		store.add(new Purchasable(Material.BLAZE_ROD,3,true));
-		store.add(new Purchasable(Material.GLASS,6,true));
+		store.add(new Purchasable(Material.SOUL_SAND,5,true));
+		store.add(new Purchasable(Material.NETHER_STALK,1,true));
+		store.add(new Purchasable(Material.BLAZE_ROD,2,true));
+		store.add(new Purchasable(Material.GLASS,3.1,true));
 		store.add(new Purchasable(Material.ICE,6,true));
 		store.add(new Purchasable(Material.COBBLESTONE,1,true));
 		store.add(new Purchasable(Material.IRON_INGOT,3,true));
 		store.add(new Purchasable(Material.DIAMOND,5,true));
 		store.add(new Purchasable(Material.GOLD_INGOT,10,true));
+		store.add(new Purchasable(Material.BEACON,1000,true));
 		
 		//Store a count of all buyable items.
 		buyableCount = store.size();
-		
+
+		store.add(new Purchasable(Material.BOW,.5,true));
 		store.add(new Purchasable(Material.GOLD_AXE,30,false));
 		store.add(new Purchasable(Material.GOLD_HOE,20,false));
 		store.add(new Purchasable(Material.GOLD_PICKAXE,30,false));

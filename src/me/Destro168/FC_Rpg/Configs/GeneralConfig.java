@@ -44,6 +44,7 @@ public class GeneralConfig extends ConfigGod
 	private void setInactivePlayerFileDeleteTime(long x) { fcw.set(prefix + "inactivePlayerFileDeleteTime", x); }
 	private void setBuffCommandCost(double x) { fcw.set(prefix + "buffCommandCost", x); }
 	private void setBonusMobSpawns(boolean x) { fcw.set(prefix + "bonusMobSpawns", x); }
+	private void setPerfectWarts(boolean x) { fcw.set(prefix + "perfectWarts", x); }
 	
 	private void setCommandKeyWordClass(String x) { fcw.set(prefix + "commandKeyWord.class", x); }
 	private void setCommandKeyWordDonator(String x) { fcw.set(prefix + "commandKeyWord.donator", x); }
@@ -53,7 +54,7 @@ public class GeneralConfig extends ConfigGod
 	private void setCommandKeyWordH(String x) { fcw.set(prefix + "commandKeyWord.h", x); }
 	private void setCommandKeyWordGH(String x) { fcw.set(prefix + "commandKeyWord.gh", x); }
 	private void setCommandKeyWordHG(String x) { fcw.set(prefix + "commandKeyWord.hg", x); }
-	private void setCommandKeyWordHat(String x) { fcw.set(prefix + "commandKeyWord.hat", x); }
+	private void setCommandKeyWordHead(String x) { fcw.set(prefix + "commandKeyWord.head", x); }
 	private void setCommandKeyWordJob(String x) { fcw.set(prefix + "commandKeyWord.job", x); }
 	private void setCommandKeyWordGuild(String x) { fcw.set(prefix + "commandKeyWord.guild", x); }
 	private void setCommandKeyWordPvp(String x) { fcw.set(prefix + "commandKeyWord.pvp", x); }
@@ -65,7 +66,7 @@ public class GeneralConfig extends ConfigGod
 	private void setCommandKeyWordW(String x) { fcw.set(prefix + "commandKeyWord.w", x); }
 	private void setCommandKeyWordBuff(String x) { fcw.set(prefix + "commandKeyWord.buff", x); }
 	private void setCommandKeyWordWorld(String x) { fcw.set(prefix + "commandKeyWord.world", x); }
-	private void setCommandKeyWordList(String x) { fcw.set(prefix + "commandKeyWord.list", x); }
+	private void setCommandKeyWordPlayers(String x) { fcw.set(prefix + "commandKeyWord.players", x); }
 	
 	public String getDefaultPrefix() { return fcw.getStringS(prefix + "defaultPrefix"); }
 	public boolean getPerfectBirch() { return fcw.getBooleanS(prefix + "perfectBirch"); }
@@ -93,6 +94,7 @@ public class GeneralConfig extends ConfigGod
 	public long getInactivePlayerFileDeleteTime() { return fcw.getLongS(prefix + "inactivePlayerFileDeleteTime"); }
 	public double getBuffCommandCost() { return fcw.getDoubleS(prefix + "buffCommandCost"); }
 	public boolean getBonusMobSpawns() { return fcw.getBooleanS(prefix + "bonusMobSpawns"); }
+	public boolean getPerfectWarts() { return fcw.getBooleanS(prefix + "perfectWarts"); }
 	
 	public String getCommandKeyWordClass() { return fcw.getStringS(prefix + "commandKeyWord.class"); }
 	public String getCommandKeyWordDonator() { return fcw.getStringS(prefix + "commandKeyWord.donator"); }
@@ -102,21 +104,19 @@ public class GeneralConfig extends ConfigGod
 	public String getCommandKeyWordH() { return fcw.getStringS(prefix + "commandKeyWord.h"); }
 	public String getCommandKeyWordGH() { return fcw.getStringS(prefix + "commandKeyWord.gh"); }
 	public String getCommandKeyWordHG() { return fcw.getStringS(prefix + "commandKeyWord.hg"); }
-	public String getCommandKeyWordHat() { return fcw.getStringS(prefix + "commandKeyWord.hat"); }
+	public String getCommandKeyWordHead() { return fcw.getStringS(prefix + "commandKeyWord.head"); }
 	public String getCommandKeyWordJob() { return fcw.getStringS(prefix + "commandKeyWord.job"); }
 	public String getCommandKeyWordGuild() { return fcw.getStringS(prefix + "commandKeyWord.guild"); }
 	public String getCommandKeyWordPvp() { return fcw.getStringS(prefix + "commandKeyWord.pvp"); }
 	public String getCommandKeyWordReset() { return fcw.getStringS(prefix + "commandKeyWord.reset"); }
 	public String getCommandKeyWordRpg() { return fcw.getStringS(prefix + "commandKeyWord.rpg"); }
 	public String getCommandKeyWordSpell() { return fcw.getStringS(prefix + "commandKeyWord.spell"); }
-	
 	public String getCommandKeyWordAlchemy() { return fcw.getStringS(prefix + "commandKeyWord.alchemy"); }
-	
 	public String getCommandKeyWordModify() { return fcw.getStringS(prefix + "commandKeyWord.modify"); }
 	public String getCommandKeyWordW() { return fcw.getStringS(prefix + "commandKeyWord.w"); }
 	public String getCommandKeyWordBuff() { return fcw.getStringS(prefix + "commandKeyWord.buff"); }
 	public String getCommandKeyWordWorld() { return fcw.getStringS(prefix + "commandKeyWord.world"); }
-	public String getCommandKeyWordList() { return fcw.getStringS(prefix + "commandKeyWord.list"); }
+	public String getCommandKeyWordPlayers() { return fcw.getStringS(prefix + "commandKeyWord.players"); }
 	
 	public GeneralConfig()
 	{
@@ -176,24 +176,28 @@ public class GeneralConfig extends ConfigGod
 			setCommandKeyWordH("h");
 			setCommandKeyWordGH("gh");
 			setCommandKeyWordHG("hg");
-			setCommandKeyWordHat("hat");
+			setCommandKeyWordHead("hat");
 			setCommandKeyWordJob("job");
 			setCommandKeyWordGuild("guild");
 			setCommandKeyWordPvp("pvp");
 			setCommandKeyWordReset("reset");
 			setCommandKeyWordRpg("rpg");
 			setCommandKeyWordSpell("spell");
-			setCommandKeyWordAlchemy("alchemy");
 			setCommandKeyWordModify("modify");
 			setCommandKeyWordW("w");
 			setCommandKeyWordBuff("buff");
 			setCommandKeyWordWorld("world");
-			setCommandKeyWordList("list");
+			setCommandKeyWordPlayers("list");
 		}
 		
-		if (getVersion() < 1.1)
+		if (getVersion() < 1.14)
 		{
-			setVersion(1.1);
+			setVersion(1.14);
+			
+			setCommandKeyWordAlchemy("alchemy");
+			setCommandKeyWordPlayers("players");
+			setCommandKeyWordHead("head");
+			setPerfectWarts(true);
 		}
 		
 		//Load up timed items.

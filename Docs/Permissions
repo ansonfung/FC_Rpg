@@ -16,4 +16,3 @@ FC_Rpg.command.reset -> Permission to use /reset.
 FC_Rpg.command.buff -> Permission to use /buff.
 FC_Rpg.command.guild -> Permission to use /guild.
 FC_Rpg.command.spell -> Permission to use /spell.
-

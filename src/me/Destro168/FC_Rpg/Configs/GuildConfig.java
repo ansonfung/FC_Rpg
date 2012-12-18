@@ -212,7 +212,7 @@ public class GuildConfig extends ConfigGod
 		
 		guildListAdd(guildName);
 		
-		FC_Rpg.bLib.rpgBroadcast(newLeader + " has created the guild " + guildName + ".");
+		FC_Rpg.rpgBroadcast.rpgBroadcast(newLeader + " has created the guild " + guildName + ".");
 		
 		return true;
     }
