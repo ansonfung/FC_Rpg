@@ -1,6 +1,8 @@
 package me.Destro168.FC_Rpg.Entities;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 import me.Destro168.FC_Rpg.FC_Rpg;
@@ -8,6 +10,7 @@ import me.Destro168.FC_Rpg.Configs.BalanceConfig;
 import me.Destro168.FC_Rpg.LoadedObjects.RpgClass;
 import me.Destro168.FC_Rpg.Spells.EffectIDs;
 import me.Destro168.FC_Rpg.Util.HealthConverter;
+import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 
 import org.bukkit.EntityEffect;
 import org.bukkit.Material;
@@ -22,10 +25,8 @@ import org.bukkit.inventory.ItemStack;
 
 public class EntityDamageManager
 {
-	private final int DROP_FAIL_VALUE = 999999;
-
 	public EntityDamageManager() { }
-
+	
 	//Player combat.
 	public void attackPlayerDefender(RpgPlayer rpgDefender, RpgPlayer rpgAttacker, RpgMonster rpgMobAttacker, double damage, int damageType)
 	{
@@ -186,7 +187,7 @@ public class EntityDamageManager
 		else
 		{
 			rpgDefender.attemptDefenseNotification(damage);
-
+			
 			if (rpgAttacker != null)
 				handle_Defense_Passives(damage, rpgDefender, rpgAttacker.getPlayer());
 			else if (rpgMobAttacker != null)
@@ -454,13 +455,18 @@ public class EntityDamageManager
 		}
 		
 		// Attempt to send an attack notification.
-		rpgAttacker.attemptAttackNotification(rpgMobDefender.getEntity().getType(), rpgMobDefender.getLevel(), rpgMobDefender.getCurHealth(),rpgMobDefender.getMaxHealth(),damage);
+		rpgAttacker.attemptAttackNotification(rpgMobDefender.getEntity().getType(), rpgMobDefender.getLevel(), rpgMobDefender.getCurHealth(), rpgMobDefender.getMaxHealth(), damage);
 		
 		// Handle berserker class spells
 		handle_Postoffense_Buffs(rpgAttacker, entityDefender, damage);
 		
 		if (playerAttacker != null)
 			applyKnockback(playerAttacker, entityDefender, damageType);
+		
+		//Put entity damage by entity event on both attacker and defender.
+		EntityDamageByEntityEvent edbe = new EntityDamageByEntityEvent(rpgAttacker.getPlayer(), entityDefender, DamageCause.ENTITY_ATTACK, 0);
+		rpgAttacker.getPlayer().setLastDamageCause(edbe);
+		entityDefender.setLastDamageCause(edbe);
 		
 		// If the mob has 0 health handle it's death processes AND drop loot.
 		if (rpgMobDefender.getCurHealth() <= 0)
@@ -474,25 +480,22 @@ public class EntityDamageManager
 			{
 				// Give the attacker a mob kill
 				rpgAttacker.getPlayerConfig().setLifetimeMobKills(rpgAttacker.getPlayerConfig().getLifetimeMobKills() + 1);
-
+				
 				// If the player is in a party, then...
 				if (guild != null)
 				{
 					// Add a mob kill for that party.
 					FC_Rpg.guildManager.addMobKill(guild);
-
-					for (Player p : FC_Rpg.guildManager.getOnlineGuildPlayerList(guild))
-					{
-						if (p != null)
-							attemptGiveBattleWinnings(guild, p, rpgMobDefender);
-					}
+					
+					//Give battle winnings
+					attemptGiveBattleWinnings(guild, rpgAttacker.getPlayer(), rpgMobDefender);
 				}
 				else
 					attemptGiveBattleWinnings(guild, playerAttacker, rpgMobDefender); // Else if not in a party, give loot to the single player.
 				
 				// Don't drop loot if the monster level is too high/low.
-				if (!(getLevelDifference(playerAttacker, rpgMobDefender) == DROP_FAIL_VALUE))
-					rpgMobDefender.handleHostileMobDrops(entityDefender.getLocation()); // Drop items for hostile mobs.
+				if ((rpgMobDefender.getLevel() - rpgAttacker.getPlayerConfig().getClassLevel()) > FC_Rpg.balanceConfig.getPowerLevelPrevention() * -1)
+					rpgMobDefender.handleHostileMobDrops(entityDefender.getLocation()); // Drop rpg items for hostile mobs.
 			}
 			else
 			{
@@ -501,90 +504,120 @@ public class EntityDamageManager
 					rpgMobDefender.handlePassiveMobDrops(entityDefender.getLocation());
 			}
 			
+			//Drop experience
+			rpgMobDefender.dropExperience();
+			
 			// Remove the mob
 			removeMob(entityDefender);
 		}
 	}
-
-	private int getLevelDifference(Player playerLooter, RpgMonster rpgMobDefender)
-	{
-		RpgPlayer rpgLooter = FC_Rpg.rpgEntityManager.getRpgPlayer(playerLooter);
-		int levelDifference = rpgMobDefender.getLevel() - rpgLooter.getPlayerConfig().getClassLevel();
-		int powerLevelPrevention = FC_Rpg.balanceConfig.getPowerLevelPrevention();
-
-		if (powerLevelPrevention > -1 && !rpgMobDefender.getIsBoss())
-		{
-			if (levelDifference > powerLevelPrevention || levelDifference < powerLevelPrevention * -1)
-				return DROP_FAIL_VALUE;
-		}
-
-		return levelDifference;
-	}
-
+	
 	private void attemptGiveBattleWinnings(String guild, Player playerLooter, RpgMonster rpgMobDefender)
 	{
-		RpgPlayer rpgLooter = FC_Rpg.rpgEntityManager.getRpgPlayer(playerLooter);
+		List<Player> recipients = new ArrayList<Player>();
+		RpgPlayer rpgLooter;
 		double bonusPercentCap = FC_Rpg.balanceConfig.getBonusPercentCap();
 		double bonusPercent = 1;
 		double cash;
 		double exp;
-		int levelDifference = getLevelDifference(playerLooter, rpgMobDefender);
-
-		if (levelDifference == DROP_FAIL_VALUE)
-		{
-			rpgLooter.attemptMonsterOutOfRangeNotification();
-			return;
-		}
+		double guildBonus = 1;
+		int powerLevelPrevention = FC_Rpg.balanceConfig.getPowerLevelPrevention();
+		int levelDifference;
+		boolean checkPowerLeveling = (powerLevelPrevention > -1 && !rpgMobDefender.getIsBoss());
 		
-		// Give a bonus percent based on level difference, 1 level = x% more.
-		if (levelDifference == 0)
-			bonusPercent = 1;
-		else if (levelDifference < 0)
-			bonusPercent = 1 + levelDifference * FC_Rpg.balanceConfig.getMobLootPercentWeaker();
+		if (guild != null)
+		{
+			recipients = FC_Rpg.guildManager.getOnlineGuildPlayerList(guild);
+			guildBonus = FC_Rpg.guildManager.getGuildBonus(guild);
+		}
 		else
-			bonusPercent = 1 + levelDifference * FC_Rpg.balanceConfig.getMobLootPercentStronger();
-
-		if (bonusPercent > bonusPercentCap)
-			bonusPercent = bonusPercentCap;
+			recipients.add(playerLooter);
 		
-		// Set up loot amounts.
-		cash = rpgMobDefender.getLevel() * bonusPercent * FC_Rpg.balanceConfig.getMobCashMultiplier();
-		exp = rpgMobDefender.getLevel() * bonusPercent * FC_Rpg.balanceConfig.getMobExpMultiplier();
-
-		// Add global modifiers
-		cash = cash * FC_Rpg.eventCashMultiplier;
-		exp = exp * FC_Rpg.eventExpMultiplier;
-
-		// Calculate how much loot and experience to aquire by donator
-		if (rpgLooter.getPlayerConfig().isDonator())
+		for (Player p : recipients)
 		{
-			cash = cash * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
-			exp = exp * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
-		}
-
-		// For slimes we reduce the gold and exp based on size.
-		if (rpgMobDefender.getEntity() instanceof Slime)
-		{
-			Slime slime = (Slime) rpgMobDefender.getEntity();
-			int slimeSize = slime.getSize();
-
-			if (slimeSize == 2)
+			//Get new rpgLooter.
+			rpgLooter = FC_Rpg.rpgEntityManager.getRpgPlayer(p);
+			
+			//Mob level - player level : Positive = Mob stronger, negative = mob weaker.
+			levelDifference = rpgMobDefender.getLevel() - rpgLooter.getPlayerConfig().getClassLevel();
+			
+			if (checkPowerLeveling && levelDifference < powerLevelPrevention * -1)
 			{
-				exp = exp / 4;
-				cash = cash / 4;
+				MessageLib msgLib = new MessageLib(p);
+				msgLib.standardError("You annhilated the monster so brutally most loot was destroyed.");
 			}
-			else if (slimeSize == 1)
+			else if (checkPowerLeveling && levelDifference > powerLevelPrevention)
 			{
-				exp = exp / 8;
-				cash = cash / 8;
+				//Allow solo players to still recieve loot from stronger level monsters.
+				if (recipients.size() == 1)
+					levelDifference = (int) (FC_Rpg.balanceConfig.getPowerLevelPrevention());
+				else
+				{
+					rpgLooter.attemptMonsterOutOfRangeNotification();
+					return;
+				}
+			}
+			else
+			{
+				// Give a bonus percent based on level difference, 1 level = x% more.
+				if (levelDifference == 0)
+					bonusPercent = 1;
+				else if (levelDifference < 0)
+					bonusPercent = 1 + levelDifference * FC_Rpg.balanceConfig.getMobLootPercentWeaker();
+				else
+					bonusPercent = 1 + levelDifference * FC_Rpg.balanceConfig.getMobLootPercentStronger();
+				
+				if (bonusPercent > bonusPercentCap)
+					bonusPercent = bonusPercentCap;
+				else
+				{
+					// Set up loot amounts.
+					cash = rpgMobDefender.getLevel() * bonusPercent * FC_Rpg.balanceConfig.getMobCashMultiplier();
+					exp = rpgMobDefender.getLevel() * bonusPercent * FC_Rpg.balanceConfig.getMobExpMultiplier();
+					
+					// Add global modifiers
+					cash = cash * FC_Rpg.eventCashMultiplier;
+					exp = exp * FC_Rpg.eventExpMultiplier;
+					
+					// Calculate how much loot and experience to aquire by donator
+					if (rpgLooter.getPlayerConfig().isDonator())
+					{
+						cash = cash * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
+						exp = exp * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
+					}
+
+					// For slimes we reduce the gold and exp based on size.
+					if (rpgMobDefender.getEntity() instanceof Slime)
+					{
+						Slime slime = (Slime) rpgMobDefender.getEntity();
+						int slimeSize = slime.getSize();
+
+						if (slimeSize == 2)
+						{
+							exp = exp / 4;
+							cash = cash / 4;
+						}
+						else if (slimeSize == 1)
+						{
+							exp = exp / 8;
+							cash = cash / 8;
+						}
+					}
+					
+					if (guildBonus > 1)
+					{
+						cash = cash * guildBonus;
+						exp = exp * guildBonus;
+					}
+					
+					FC_Rpg.economy.depositPlayer(p.getName(),cash);
+					FC_Rpg.rpgEntityManager.getRpgPlayer(p).addClassExperience(exp, true);
+					
+					// Send a message to the player showing experience and loot gains.
+					rpgLooter.attemptMonsterDeathNotification(rpgMobDefender.getLevel(), exp, cash);
+				}
 			}
 		}
-
-		FC_Rpg.economy.depositPlayer(playerLooter.getName(), FC_Rpg.guildManager.getGuildBonus(guild, cash));
-		FC_Rpg.rpgEntityManager.getRpgPlayer(playerLooter).addClassExperience(FC_Rpg.guildManager.getGuildBonus(guild, exp), true);
-		
-		// Send a message to the player showing experience and loot gains.
-		rpgLooter.attemptMonsterDeathNotification(rpgMobDefender.getLevel(), exp, cash);
 	}
 	
 	// Handle player defense skills
@@ -629,7 +662,7 @@ public class EntityDamageManager
 			double healAmount = damage * caster.getPlayerConfig().getStatusMagnitude(EffectIDs.LIFESTEAL);
 			
 			caster.attemptHealSelfNotification(healAmount);
-			caster.restoreHealth(healAmount);
+			caster.healHealth(healAmount);
 		}
 		
 		if (caster.getStatusActiveRpgPlayer(EffectIDs.TELEPORT_STRIKE))

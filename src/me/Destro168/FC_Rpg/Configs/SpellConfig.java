@@ -35,7 +35,9 @@ public class SpellConfig extends ConfigGod
 	public void setRadius(int i, int a, int b, int c, int d, int e) { fcw.set(prefix + i + ".radius", a + "," + b + "," + c + "," + d + "," + e); }
 	
 	public void setTargetParty(int i, boolean x) { fcw.set(prefix + i + ".targetParty", x); }
-	public void setRestricted(int i, boolean x) { fcw.set(prefix + i + ".restricted", x); }
+	public void setIsClassRestricted(int i, boolean x) { fcw.set(prefix + i + ".isClassRestricted", x); }
+	public void setRequiresTarget(int i, boolean x) { fcw.set(prefix + i + ".requiresTarget", x); }
+	public void setUncastable(int i, boolean x) { fcw.set(prefix + i + ".uncastable", x); }
 	
 	//Gets
 	public int getEffectID(int i) { return fcw.getInt(prefix + i + ".effectID"); }
@@ -52,7 +54,9 @@ public class SpellConfig extends ConfigGod
 	public List<Integer> getRadius(int i) { try { return converter.getIntegerListFromString(fcw.getString(prefix + i + ".radius")); } catch (NullPointerException e) { return null; } }
 	
 	public boolean getTargetParty(int i) { return fcw.getBoolean(prefix + i + ".targetParty"); }
-	public boolean getRestricted(int i) { return fcw.getBoolean(prefix + i + ".restricted"); }
+	public boolean getIsClassRestricted(int i) { return fcw.getBoolean(prefix + i + ".isClassRestricted"); }
+	public boolean getRequiresTarget(int i) { return fcw.getBoolean(prefix + i + ".requiresTarget"); }
+	public boolean getUncastable(int i) { return fcw.getBoolean(prefix + i + ".uncastable"); }
 	
 	public SpellConfig()
 	{
@@ -89,7 +93,8 @@ public class SpellConfig extends ConfigGod
 				if (!getName(i).equals(""))
 				{
 					spells.put(i, new Spell(getEffectID(i), getName(i), getDescription(i), getDuration(i), getManaCost(i), getConstantMagnitude(i), getAttackMagnitude(i), getMagicMagnitude(i),
-							getIntelligenceMagnitude(i), getConstitutionMagnitude(i), getRadius(i), getTargetParty(i), getRestricted(i)));
+							getIntelligenceMagnitude(i), getConstitutionMagnitude(i), getRadius(i), getTargetParty(i),
+							getIsClassRestricted(i), getRequiresTarget(i), getUncastable(i)));
 				}
 			}
 		}
@@ -97,15 +102,17 @@ public class SpellConfig extends ConfigGod
 	
 	private void setBuffStats(int i)
 	{
-		setDuration(i, 10000, 10000, 10000, 10000, 10000);
-		setManaCost(i, 10, 15, 20, 25, 30);
-		setRestricted(i, false);
+		setDuration(i, 10000, 12500, 15000, 17500, 20000);
+		setManaCost(i, 10, 20, 30, 40, 50);
+		setIsClassRestricted(i, false);
+		setRequiresTarget(i, false);
 	}
 	
 	private void setD1Stats(int i)
 	{
 		setManaCost(i, 2, 4, 6, 8, 10);
-		setRestricted(i, true);
+		setIsClassRestricted(i, true);
+		setRequiresTarget(i, true);
 	}
 	
 	private void setDefaultSpells()
@@ -116,13 +123,13 @@ public class SpellConfig extends ConfigGod
 		
 		setEffectID(0, EffectIDs.DODGE);
 		setName(0, "Nimble");
-		setDescription(0, "Grants you (x)% passive dodge chance for 10 seconds.");
+		setDescription(0, "Grants you (x)% passive dodge chance.");
 		setBuffStats(0);
 		setConstantMagnitude(0, 4, 8, 12, 16, 20);
 		
 		setEffectID(1, EffectIDs.ATTACK);
 		setName(1, "Morale");
-		setDescription(1, "Apply a (x)% damage boost to your entire party for 10 seconds.");
+		setDescription(1, "Apply a (x)% damage boost to your entire party.");
 		setBuffStats(1);
 		setConstantMagnitude(1, 1.04, 1.08, 1.12, 1.16, 1.20);
 		
@@ -150,11 +157,12 @@ public class SpellConfig extends ConfigGod
 		
 		setEffectID(5, EffectIDs.SPEED);
 		setName(5, "Adreneline");
-		setDescription(5, "Applies (x) speed buff on character for 10 seconds.");
-		setDuration(5, 10, 10, 10, 10, 10);
-		setManaCost(5, 10, 15, 20, 25, 30);
-		setRestricted(5, false);
-		setConstantMagnitude(5, .3, .4, .5, .6, .7);
+		setDescription(5, "Applies an (x)% speed buff on your character.");
+		setDuration(5, 10, 12, 15, 17, 20);
+		setManaCost(5, 10, 20, 30, 40, 50);
+		setIsClassRestricted(5, false);
+		setRequiresTarget(5, false);
+		setConstantMagnitude(5, .28, .36, .42, .50, .58);
 		
 		setEffectID(6, EffectIDs.FIRE_ARROW);
 		setName(6, "Flame");
@@ -174,14 +182,17 @@ public class SpellConfig extends ConfigGod
 		setDescription(8, "Your next arrow applies a 5 second long, 1 tick a second poison that does (x) damage.");
 		setManaCost(8, 3, 6, 9, 12, 15);
 		setConstantMagnitude(8, .24, .48, .72, .96, 1.2);
-		setRestricted(8, true);
+		setIsClassRestricted(8, true);
+		setRequiresTarget(8, true);
 		
-		setEffectID(9, EffectIDs.BACKSTAB);
-		setName(9, "Assassinate");
-		setDescription(9, "Multiplies the damage of your next attack by (x) if it hits a target from behind.");
-		setManaCost(9, 5, 10, 15, 20, 25);
-		setConstantMagnitude(9, 1.6, 3.2, 4.8, 6.2, 8.0);
-		setRestricted(9, true);
+		setEffectID(9, EffectIDs.FROST_ARROW);
+		setName(9, "Frost");
+		setDescription(9, "Hit a target with an arrow to freeze everything within (x) radius for (x) seconds.");
+		setDuration(9,40,55,70,85,100);
+		setManaCost(9,5,10,15,20,25);
+		setConstantMagnitude(9,2,4,6,8,10);
+		setIsClassRestricted(9, true);
+		setRequiresTarget(9, true);
 		
 		/*******************************************
 		 * Defender
@@ -189,13 +200,13 @@ public class SpellConfig extends ConfigGod
 		
 		setEffectID(10, EffectIDs.TAUNT);
 		setName(10, "Taunt");
-		setDescription(10, "Teleport and set aggro of all monsters in 12 block radius to you. Increases party defense by (x)% for 10 seconds.");
+		setDescription(10, "Teleport and set aggro of all monsters in 12 block radius to you. Increases party defense by (x)%.");
 		setBuffStats(10);
 		setConstantMagnitude(10, .96, .92, .88, .84, .80);
 		
 		setEffectID(11, EffectIDs.THORNS);
 		setName(11, "Thorns");
-		setDescription(11, "All attacks against you return (x)% of damage. Lasts for 10 seconds.");
+		setDescription(11, "All attacks against you return (x)% of damage.");
 		setBuffStats(11);
 		setConstantMagnitude(11, .04, .08, .12, .16, .20);
 		
@@ -203,22 +214,24 @@ public class SpellConfig extends ConfigGod
 		setName(12, "Undefeated");
 		setDescription(12, "Heal (x)% of your max health.");
 		setBuffStats(12);
-		setManaCost(12, 15, 30, 45, 60, 75);
-		setConstantMagnitude(12, .1, .2, .3, .4, .5);
+		setManaCost(12, 10,20,30,40,50);
+		setConstantMagnitude(12, .2, .28, .36, .42, .5);
 		
 		setEffectID(13, EffectIDs.WEAKEN);
 		setName(13, "Weaken");
 		setDescription(13, "Permanently lower all mob stats by (x)%.");
 		setManaCost(13, 3, 6, 9, 12, 15);
 		setConstantMagnitude(13, .03, .06, .09, .12, .15);
-		setRestricted(13, true);
+		setIsClassRestricted(13, true);
+		setRequiresTarget(13, true);
 		
 		setEffectID(14, EffectIDs.DISABLED);
 		setName(14, "Bash");
 		setDescription(14, "Disables your targets ability to attack for (x) seconds.");
 		setManaCost(14, 3, 6, 9, 12, 15);
 		setConstantMagnitude(14, 500, 1000, 1500, 2000, 2500);
-		setRestricted(14, true);
+		setIsClassRestricted(14, true);
+		setRequiresTarget(14, true);
 		
 		/*******************************************
 		 * Wizard
@@ -227,42 +240,47 @@ public class SpellConfig extends ConfigGod
 		setEffectID(15, EffectIDs.FIREBALL);
 		setName(15, "Fireball");
 		setDescription(15, "Release a fireball exploding an area for (x) damage.");
-		setManaCost(15,2,3,4,5,6);
+		setManaCost(15,3,6,9,12,15);
 		setConstantMagnitude(15, 1, 1, 1, 1, 1);
-		setMagicMagnitude(15,1,1.25,1.5,1.75,2);
+		setMagicMagnitude(15,.75,1.0,1.25,1.5,1.75);
 		setRadius(15, 12, 12, 12, 12, 12);
-		setRestricted(15, false);
+		setIsClassRestricted(15, true);
+		setRequiresTarget(15, false);
 		
 		setEffectID(16, EffectIDs.ALCHEMY);
 		setName(16, "Alchemy");
 		setDescription(16, "Destroy items for items. Grants /alchemy.");
 		setManaCost(16,0,0,0,0,0);
-		setConstantMagnitude(16,.1,.2,.3,.4,.5);
-		setRestricted(16, false);
+		setConstantMagnitude(16,0,.125,.25,.375,.5);
+		setIsClassRestricted(16, false);
+		setRequiresTarget(16, false);
+		setUncastable(16, true);
 		
 		setEffectID(17, EffectIDs.LIGHTNING);
 		setName(17, "Lightning");
 		setDescription(17, "Strike a target with lightning for (x) damage.");
-		setManaCost(17, 1,1.5,2,2.5,3);
+		setManaCost(17,1,3,5,7,9);
 		setConstantMagnitude(17, 1, 1, 1, 1, 1);
-		setMagicMagnitude(17,2,2.5,3,3.5,4);
-		setRestricted(17, true);
+		setMagicMagnitude(17,1.25,1.75,2.25,2.75,3.25);
+		setIsClassRestricted(17, true);
+		setRequiresTarget(17, true);
 		
-		setEffectID(18, EffectIDs.HEAL_OTHER);
+		setEffectID(18, EffectIDs.HEAL_SELF_OR_OTHER);
 		setName(18, "Remedy");
-		setDescription(18, "Heal an ally for (x) health.");
-		setManaCost(18, 4, 8, 12, 16, 20);
+		setDescription(18, "Heal yourself or an ally for (x) health.");
+		setManaCost(18,6,12,18,24,30);
 		setConstantMagnitude(18,1,1,1,1,1);
 		setMagicMagnitude(18,1,1.25,1.5,1.75,2);
-		setRestricted(18, true);
+		setIsClassRestricted(18, false);
+		setRequiresTarget(18, false);
 		
 		setEffectID(19, EffectIDs.BOOST_STATS);
 		setName(19, "Invigorate");
-		setDescription(19, "Buff an allies stats by (x) for 10 seconds.");
+		setDescription(19, "Buff you or an allies stats by (x)% for 20 seconds.");
 		setManaCost(19, 6, 12, 18, 24, 30);
 		setConstantMagnitude(19, .03, .06, .09, .12, .15);
-		setMagicMagnitude(19, 1, 1.25, 1.5, 1.75, 2);
-		setRestricted(19, false);
+		setIsClassRestricted(19, false);
+		setRequiresTarget(19, false);
 		
 		/*******************************************
 		 * Bloodthirster
@@ -270,7 +288,7 @@ public class SpellConfig extends ConfigGod
 		
 		setEffectID(20, EffectIDs.LIFESTEAL);
 		setName(20, "Bloodthirst");
-		setDescription(20, "Steal (x)% life from all damage for 10 seconds.");
+		setDescription(20, "Steal (x)% life from all damage.");
 		setBuffStats(20);
 		setConstantMagnitude(20, .04, .08, .12, .16, .20);
 		
@@ -278,7 +296,7 @@ public class SpellConfig extends ConfigGod
 		setName(21, "Undying");
 		setDescription(21, "Become immune to death for (x) seconds.");
 		setBuffStats(21);
-		setConstantMagnitude(21, 1, 1, 1, 1, 1);
+		setConstantMagnitude(21,3,3.5,4,4.5,5);
 		
 		setEffectID(22, EffectIDs.TELEPORT_STRIKE);
 		setName(22, "Ferocity");

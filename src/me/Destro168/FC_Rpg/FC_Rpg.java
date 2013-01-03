@@ -17,11 +17,11 @@ import me.Destro168.FC_Rpg.Configs.FaqConfig;
 import me.Destro168.FC_Rpg.Configs.GeneralConfig;
 import me.Destro168.FC_Rpg.Configs.GroupConfig;
 import me.Destro168.FC_Rpg.Configs.GuildConfig;
+import me.Destro168.FC_Rpg.Configs.ItemConfig;
 import me.Destro168.FC_Rpg.Configs.SpellConfig;
 import me.Destro168.FC_Rpg.Configs.TreasureConfig;
 import me.Destro168.FC_Rpg.Configs.WarpConfig;
 import me.Destro168.FC_Rpg.Configs.WorldConfig;
-import me.Destro168.FC_Rpg.Entities.MobEquipment;
 import me.Destro168.FC_Rpg.Entities.RpgEntityManager;
 import me.Destro168.FC_Rpg.Entities.RpgMonster;
 import me.Destro168.FC_Rpg.Entities.RpgPlayer;
@@ -30,7 +30,7 @@ import me.Destro168.FC_Rpg.Events.PvpEvent;
 import me.Destro168.FC_Rpg.Listeners.BlockBreakListener;
 import me.Destro168.FC_Rpg.Listeners.DamageListener;
 import me.Destro168.FC_Rpg.Listeners.PlayerInteractionListener;
-import me.Destro168.FC_Rpg.Stores.AlchemyStore;
+import me.Destro168.FC_Rpg.LoadedObjects.RpgItem;
 import me.Destro168.FC_Rpg.Util.BattleCalculations;
 import me.Destro168.FC_Rpg.Util.DistanceModifierLib;
 import me.Destro168.FC_Rpg.Util.FC_RpgPermissions;
@@ -77,6 +77,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.event.world.StructureGrowEvent;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -88,17 +89,14 @@ import com.earth2me.essentials.User;
 
 public class FC_Rpg extends JavaPlugin
 {
-	
-	final static double MAX_HP = 999999;
-	public final static DateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+	//Public global variables.
+	public static final DateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	public static final DecimalFormat df = new DecimalFormat("#.#");
 	public static final DecimalFormat df2 = new DecimalFormat("#.##");
+	public static final DecimalFormat df3 = new DecimalFormat("#.###");
 	
-	public final static boolean debugModeEnabled = false;
-	
+	//Uncommon class globals.
 	public static FC_Rpg plugin;
-	public static String dataFolderAbsolutePath;
-	
 	public static RpgEntityManager rpgEntityManager;
 	public static GuildConfig guildManager;
 	public static SpellConfig spellConfig;
@@ -108,8 +106,7 @@ public class FC_Rpg extends JavaPlugin
 	public static WarpConfig warpConfig;
 	public static BalanceConfig balanceConfig;
 	public static DungeonConfig dungeonConfig;
-	
-	public static ColorLib cl = new ColorLib();
+	public static ItemConfig itemConfig;
 	public static PvpEvent pvp;
 	public static RpgBroadcast rpgBroadcast;
 	public static WorldConfig worldConfig;
@@ -117,26 +114,31 @@ public class FC_Rpg extends JavaPlugin
 	public static DungeonEvent[] dungeonEventArray;
 	public static SelectionVector sv;
 	public static MaterialLib mLib;
-	public static AlchemyStore as;
 	public static BattleCalculations battleCalculations;
+	public static MobSpawnManager msm;
+	public static ColorLib cl = new ColorLib();
 	
+	//Common class globals.
+	public static Map<Player, String> classSelection = new HashMap<Player, String>();
+	public static Map<Integer, Integer> trueDungeonNumbers;
+	public static Map<Player, Boolean> aoeLock = new HashMap<Player, Boolean>();
+	public static Map<Player, Integer> playerBuffTimerTIDs = new HashMap<Player, Integer>();
+	public static Map<Player, Integer> playerSlowTimerTIDs = new HashMap<Player, Integer>();
+	public static Map<Material, Double> recordExpBonuses;
+	public static Map<Player, Boolean> playerChatModeMap = new HashMap<Player, Boolean>();
+	public static List<String> vanishedPlayers = new ArrayList<String>();
+	public static List<RpgItem> rpgItemList;
+	public static List<RpgItem> buyList;
+	public static String dataFolderAbsolutePath;
 	public static int eventExpMultiplier = 1;
 	public static int eventCashMultiplier = 1;
 	public static int tid3;
 	public static int tid4;
 	public static int dungeonCount;
 	
-	public int tid;
-	public int tid2;
-	
-	public static Map<Player, String> classSelection = new HashMap<Player, String>();
-	public static Map<Integer, Integer> trueDungeonNumbers;
-	public static Map<Player, Boolean> aoeLock = new HashMap<Player, Boolean>();
-	
-	public static List<String> vanishedPlayers = new ArrayList<String>();
-	
+	//Private variables.
+	private final double MAX_HP = 999999;
 	private CommandGod commandCE;
-	private MobSpawnManager msm;
 	
 	@Override
 	public void onDisable()
@@ -149,6 +151,7 @@ public class FC_Rpg extends JavaPlugin
 		{
 			rpgEntityManager.unregisterRpgPlayer(player);
 			msm.endMobSpawns(player);
+			player.setWalkSpeed(0.2F);
 		}
 		
 		for (int i = 0; i < dungeonCount; i++)
@@ -178,16 +181,9 @@ public class FC_Rpg extends JavaPlugin
 		// World manager = new world manager;
 		mLib = new MaterialLib();
 		sv = new SelectionVector();
-		as = new AlchemyStore();
 		
 		battleCalculations = new BattleCalculations();
 		generalConfig = new GeneralConfig();
-		
-		try {
-			new AutoUpdate(this);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 		
 		//Initialize a few things to let them attempt to generate configurations.
 		@SuppressWarnings("unused")
@@ -206,10 +202,11 @@ public class FC_Rpg extends JavaPlugin
 		warpConfig = new WarpConfig();
 		balanceConfig = new BalanceConfig();
 		dungeonConfig = new DungeonConfig();
+		itemConfig = new ItemConfig();
 		
 		// Set up the economy.
 		setupEconomy();
-
+		
 		// Initialize dungeons.
 		initializeDungeons();
 
@@ -234,7 +231,8 @@ public class FC_Rpg extends JavaPlugin
 		getServer().getPluginManager().registerEvents(new CreatureSpawnListener(), plugin);
 		getServer().getPluginManager().registerEvents(new ExperienceChangeListener(), plugin);
 		getServer().getPluginManager().registerEvents(new ArrowFireListener(), plugin);
-		getServer().getPluginManager().registerEvents(new teleportListener(), plugin);
+		getServer().getPluginManager().registerEvents(new TeleportListener(), plugin);
+		getServer().getPluginManager().registerEvents(new PlayerTeleportListener(), plugin);
 		
 		// Register Commands
 		commandCE = new CommandGod();
@@ -242,6 +240,7 @@ public class FC_Rpg extends JavaPlugin
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordClass()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordDonator()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordDungeon()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordDE()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordFaq()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordG()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordH()).setExecutor(commandCE);
@@ -251,7 +250,8 @@ public class FC_Rpg extends JavaPlugin
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordGuild()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordPvp()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordReset()).setExecutor(commandCE);
-		getCommand(FC_Rpg.generalConfig.getCommandKeyWordRpg()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordRpgHelp()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordRAdmin()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordSpell()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordAlchemy()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordModify()).setExecutor(commandCE);
@@ -279,38 +279,34 @@ public class FC_Rpg extends JavaPlugin
 		
 		msm = new MobSpawnManager();
 		
+		handleRpgItemList();
+		
+		if (FC_Rpg.generalConfig.getRecordExpRewards())
+			handleRecordExpMap();
+		
+		// Handle autoupdate.
+		try {
+			new AutoUpdate(this);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		// We want to perform promotion checks.
 		this.getLogger().info("Enabled");
 	}
-
-	private void initializeDungeons()
+	
+	private void handleRecordExpMap()
 	{
-		// Variable Declarations/Initializations
-		String ref = "";
-		int count = 0;
-		trueDungeonNumbers = new HashMap<Integer, Integer>();
+		recordExpBonuses = new HashMap<Material, Double>();
 		
-		// Attempt to store all dungeon names.
-		for (int i = 0; i < 1000; i++)
-		{
-			ref = FC_Rpg.dungeonConfig.getName(i);
-			
-			if (ref != null)
-			{
-				trueDungeonNumbers.put(i, count);
-				count++;
-			}
-		}
-
-		// Store number of dungeons.
-		dungeonCount = trueDungeonNumbers.size();
-
-		// Create dungeonEvents based on size of dungeons.
-		dungeonEventArray = new DungeonEvent[dungeonCount];
-
-		// Initate the dungeons.
-		for (int i = 0; i < dungeonCount; i++)
-			dungeonEventArray[i] = new DungeonEvent(i);
+		recordExpBonuses.put(Material.RECORD_4, .01D);
+		recordExpBonuses.put(Material.RECORD_5, .05D);
+		recordExpBonuses.put(Material.RECORD_6, .1D);
+		recordExpBonuses.put(Material.RECORD_7, .15D);
+		recordExpBonuses.put(Material.RECORD_8, .20D);
+		recordExpBonuses.put(Material.RECORD_9, .25D);
+		recordExpBonuses.put(Material.GREEN_RECORD, .5D);
+		recordExpBonuses.put(Material.GOLD_RECORD, 1D);
 	}
 	
 	// Listen for block growth
@@ -478,7 +474,7 @@ public class FC_Rpg extends JavaPlugin
 		{
 			// Store entity
 			Entity entity = event.getEntity();
-
+			
 			// Do dungeon checking for mob deaths to see if dungeons are cleared.
 			for (int i = 0; i < dungeonCount; i++)
 				dungeonEventArray[i].checkMobDeath(entity);
@@ -609,6 +605,8 @@ public class FC_Rpg extends JavaPlugin
 			FC_Rpg.rpgEntityManager.checkPlayerRegistration(player, true);
 			
 			msm.beginMobSpawns(player);
+			
+			player.setWalkSpeed(0.2F);
 		}
 	}
 
@@ -702,19 +700,19 @@ public class FC_Rpg extends JavaPlugin
 				// Heal the player different amounts for different things.
 				if (event.getRegainReason() == RegainReason.EATING)
 				{
-					magnitudeModifier = magnitudeModifier * FC_Rpg.balanceConfig.getHealPercentEating(); // 5%
+					magnitudeModifier *= FC_Rpg.balanceConfig.getHealPercentEating(); // 5%
 				}
 				else if (event.getRegainReason() == RegainReason.MAGIC)
 				{
-					magnitudeModifier = magnitudeModifier * FC_Rpg.balanceConfig.getHealPercentMagic(); // 25%
+					magnitudeModifier *= FC_Rpg.balanceConfig.getHealPercentMagic(); // 25%
 				}
 				else if (event.getRegainReason() == RegainReason.MAGIC_REGEN)
 				{
-					magnitudeModifier = magnitudeModifier * FC_Rpg.balanceConfig.getHealPercentMagicRegen(); // 5%
+					magnitudeModifier *= FC_Rpg.balanceConfig.getHealPercentMagicRegen(); // 5%
 				}
 				else if (event.getRegainReason() == RegainReason.SATIATED)
 				{
-					magnitudeModifier = magnitudeModifier * FC_Rpg.balanceConfig.getHealPercentSatiated(); // 2%
+					magnitudeModifier *= FC_Rpg.balanceConfig.getHealPercentSatiated(); // 2%
 				}
 				
 				// Make sure to heal at least one
@@ -722,7 +720,7 @@ public class FC_Rpg extends JavaPlugin
 					magnitudeModifier = 1;
 				
 				// Restore health/mana to the player
-				rpgEntityManager.getRpgPlayer(player).restoreHealth(magnitudeModifier);
+				rpgEntityManager.getRpgPlayer(player).healHealth(magnitudeModifier);
 				
 				// Update health
 				hc = new HealthConverter(rpgEntityManager.getRpgPlayer(player).getMaxHealth(), rpgEntityManager.getRpgPlayer(player).getCurHealth());
@@ -785,8 +783,14 @@ public class FC_Rpg extends JavaPlugin
 			if (!FC_Rpg.worldConfig.getIsRpgWorld(event.getPlayer().getWorld().getName()))
 				return;
 			
+			for (String s : FC_Rpg.generalConfig.getCustomChatExclusions())
+			{
+				if (event.getFormat().contains(s))
+					return;
+			}
+			
 			RpgPlayer rpgPlayer = FC_Rpg.rpgEntityManager.getRpgPlayer(event.getPlayer());
-
+			
 			if (rpgPlayer == null)
 				return;
 			
@@ -825,7 +829,7 @@ public class FC_Rpg extends JavaPlugin
 			event.setFormat(FC_Rpg.cl.parse(chatFormat));
 		}
 	}
-
+	
 	public class CreatureSpawnListener implements Listener
 	{
 		RpgMonster m;
@@ -845,8 +849,8 @@ public class FC_Rpg extends JavaPlugin
 				return;
 			
 			//If not a mob world, cancel.
-			if (!FC_Rpg.worldConfig.getIsMobWorld(worldName))
-				return;
+			if (FC_Rpg.worldConfig.getIsMobWorld(worldName))
+				event.setCancelled(true);
 			
 			// Prevent dungeon mob spawns.
 			for (int i = 0; i < dungeonCount; i++)
@@ -867,6 +871,9 @@ public class FC_Rpg extends JavaPlugin
 				}
 			}
 			
+			//Uncancel the event if it's a dungeon monster.
+			event.setCancelled(false);
+			
 			//Initialize variables
 			livingEntity = event.getEntity();
 			m = FC_Rpg.rpgEntityManager.getRpgMonster(livingEntity);
@@ -885,21 +892,23 @@ public class FC_Rpg extends JavaPlugin
 			else if (event.getEntity().getType() == EntityType.SKELETON)
 			{
 				setArmor();
-				MobEquipment.setWeapon(livingEntity, getBow());
+				livingEntity.getEquipment().setItemInHand(getBow());
 			}
 		}
 		
 		private void setArmor()
 		{
-			MobEquipment.setHelmet(livingEntity, getItem(6));
-			MobEquipment.setBoots(livingEntity,  getItem(5));
-			MobEquipment.setChestplate(livingEntity, getItem(8));
-			MobEquipment.setPants(livingEntity, getItem(7));
+			EntityEquipment equip = livingEntity.getEquipment();
+			
+			equip.setHelmet(getItem(6));
+			equip.setBoots( getItem(5));
+			equip.setChestplate(getItem(8));
+			equip.setLeggings(getItem(7));
 		}
 		
 		private void setWeapon()
 		{
-			MobEquipment.setWeapon(livingEntity, getItem(4));
+			livingEntity.getEquipment().setItemInHand(getItem(4));
 		}
 		
 		private ItemStack getItem(int refNumber)
@@ -979,8 +988,18 @@ public class FC_Rpg extends JavaPlugin
 		@EventHandler
 		public void PlayerExpChangeEvent(PlayerExpChangeEvent event)
 		{
-			// If experience isn't canceled, then we just alter by global exp multiplier.
-			event.setAmount(event.getAmount() * FC_Rpg.balanceConfig.getGlobalExpMultiplier());
+			int expAmount = event.getAmount();
+			int million = 1000000;
+			
+			if (expAmount > million)
+			{
+				event.setAmount(expAmount - million);
+			}
+			else
+			{
+				// If experience isn't canceled, then we just alter by global exp multiplier.
+				event.setAmount(expAmount * FC_Rpg.balanceConfig.getGlobalExpMultiplier());
+			}
 		}
 	}
 	
@@ -1032,14 +1051,14 @@ public class FC_Rpg extends JavaPlugin
 		}
 	}
 
-	public class teleportListener implements Listener
+	public class TeleportListener implements Listener
 	{
 		@EventHandler
 		public void onPearlThrow(PlayerTeleportEvent event)
 		{
 			if (FC_Rpg.generalConfig.getDisableEnderPearls() == false)
 				return;
-
+			
 			if (event.getCause() == TeleportCause.ENDER_PEARL)
 			{
 				FC_Rpg.plugin.getLogger().info("Ender pearl teleportation by " + event.getPlayer().getName() + " prevented.");
@@ -1047,6 +1066,90 @@ public class FC_Rpg extends JavaPlugin
 				event.setCancelled(true);
 			}
 		}
+	}
+	
+	public class PlayerTeleportListener implements Listener
+	{
+		@EventHandler
+		public void onPlayerTeleport(PlayerTeleportEvent event)
+		{
+			if (event.isCancelled() == true)
+				return;
+			
+			World from = event.getFrom().getWorld();
+			World to = event.getTo().getWorld();
+			
+			if (from == to)
+				return;
+			
+			Player p = event.getPlayer();
+			
+			if (!FC_Rpg.worldConfig.getIsRpgWorld(to.getName()))
+				FC_Rpg.msm.endMobSpawns(p);
+			else
+				FC_Rpg.msm.beginMobSpawns(p);
+		}
+	}
+	
+	public void handleRpgItemList()
+	{
+		//Variable Declarations
+		RpgItem temp;
+		
+		rpgItemList = itemConfig.getLoadedRpgItemList();
+		buyList = new ArrayList<RpgItem>();
+		
+		for (RpgItem item : rpgItemList)
+			buyList.add(item);
+		
+		for (RpgItem item : rpgItemList)
+		{
+			if (item.priceBuy == -1)
+				buyList.remove(item);
+		}
+		
+		for (int i = 0; i < buyList.size(); i++)
+		{
+			for (int j = i; j < buyList.size(); j++)
+			{
+				if (buyList.get(i).priceBuy > buyList.get(j).priceBuy)
+				{
+					temp = buyList.get(j);
+					buyList.set(j, buyList.get(i));
+					buyList.set(i, temp);
+				}
+			}
+		}
+	}
+	
+	private void initializeDungeons()
+	{
+		// Variable Declarations/Initializations
+		String ref = "";
+		int count = 0;
+		trueDungeonNumbers = new HashMap<Integer, Integer>();
+		
+		// Attempt to store all dungeon names.
+		for (int i = 0; i < 1000; i++)
+		{
+			ref = FC_Rpg.dungeonConfig.getName(i);
+			
+			if (ref != null)
+			{
+				trueDungeonNumbers.put(i, count);
+				count++;
+			}
+		}
+
+		// Store number of dungeons.
+		dungeonCount = trueDungeonNumbers.size();
+
+		// Create dungeonEvents based on size of dungeons.
+		dungeonEventArray = new DungeonEvent[dungeonCount];
+
+		// Initate the dungeons.
+		for (int i = 0; i < dungeonCount; i++)
+			dungeonEventArray[i] = new DungeonEvent(i);
 	}
 	
 	private Boolean setupEconomy()

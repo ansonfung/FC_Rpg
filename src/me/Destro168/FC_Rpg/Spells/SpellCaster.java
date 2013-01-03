@@ -1,10 +1,10 @@
 package me.Destro168.FC_Rpg.Spells;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.Entities.EntityDamageManager;
-import me.Destro168.FC_Rpg.Entities.EntityLocationLib;
 import me.Destro168.FC_Rpg.Entities.RpgMonster;
 import me.Destro168.FC_Rpg.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.LoadedObjects.RpgClass;
@@ -12,17 +12,17 @@ import me.Destro168.FC_Rpg.LoadedObjects.Spell;
 import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 public class SpellCaster
 {
-	private EntityLocationLib ell;
 	private EffectIDs e;
 	
 	private LivingEntity target;
@@ -57,7 +57,6 @@ public class SpellCaster
 	
 	private void setDefaults()
 	{
-		ell = new EntityLocationLib();
 		e = new EffectIDs();
 		target = null;
 		rpgCaster = null;
@@ -127,16 +126,21 @@ public class SpellCaster
 		if (spell == null)
 			return false;
 		
+		try { if (spell.getUncastable()) { msgLib.standardError("This spell cannot be cast normally conditions."); return false; } } catch (NullPointerException e) { }
+		
 		//Assign Variables.
 		spellTier = rpgCaster.getPlayerConfig().getSpellLevels().get(spellNumber) - 1;
 		
 		//If the spell is restricted, then...
-		if (spell.getRestricted())
+		if (spell.getRequiresTarget())
 		{
 			//If there is no target return failure.
 			if (rpgMobDefender == null && rpgDefender == null)
 				return false;
-			
+		}
+		
+		if (spell.getIsClassRestricted())
+		{
 			//Restricted spells also require a target.
 			for (RpgClass rpgClass : FC_Rpg.classConfig.getRpgClasses())
 			{
@@ -145,12 +149,12 @@ public class SpellCaster
 					//If the damage is an arrow, and has the restriction id 0, and if restricted spell, then return false.
 					if (rpgClass.getRestrictionID() == 1 && damageType != 1)
 					{
-						msgLib.standardMessage("Please shoot arrows from a bow to cast spells.");
+						msgLib.standardError("Please shoot arrows from a bow to cast this spell.");
 						return false;
 					}
-					else if (rpgClass.getRestrictionID() == 2 && !(playerCaster.getItemInHand().getType() == Material.STICK))
+					else if (rpgClass.getRestrictionID() == 2 && !(playerCaster.getItemInHand().getType() == Material.STICK || playerCaster.getItemInHand().getType() == Material.BLAZE_ROD))
 					{
-						msgLib.standardMessage("Please use a wand (stick) to cast spells.");
+						msgLib.standardError("Please use a wand (stick) to cast this spell.");
 						return false;
 					}
 				}
@@ -218,8 +222,8 @@ public class SpellCaster
 		else if (x == EffectIDs.AOE)
 			effect_AoE();
 		
-		else if (x == EffectIDs.BACKSTAB)
-			effect_Backstab();
+		else if (x == EffectIDs.FROST_ARROW)
+			effect_Frost_Arrow();
 		
 		else if (x == EffectIDs.HEAL_SELF)
 			effect_Heal_Self();
@@ -239,8 +243,8 @@ public class SpellCaster
 		else if (x == EffectIDs.LIGHTNING)
 			effect_Lightning();
 		
-		else if (x == EffectIDs.HEAL_OTHER)
-			effect_Heal_Other();
+		else if (x == EffectIDs.HEAL_SELF_OR_OTHER)
+			effect_Heal_Self_Or_Other();
 		
 		else if (x == EffectIDs.BOOST_STATS)
 			effect_Boost_Stats();
@@ -261,10 +265,13 @@ public class SpellCaster
 			effect_Sacrifice_Health_For_Damage();
 		
 		else if (x == EffectIDs.SPEED)
-			effect_Potion_Speed();
+			effect_Speed();
 		
 		else if (x == EffectIDs.POISON)
 			effect_Poison();
+		
+		else if (x == EffectIDs.HEAL_OTHER)
+			effect_Heal_Other();
 		
 		return true;
 	}
@@ -304,25 +311,45 @@ public class SpellCaster
 	//	If the spell has the requirements to target an ally, give the buff to allies. Else solely give to caster.
 	private void applyBuff(int effectID)
 	{
+		List<RpgPlayer> playerConfigs = new ArrayList<RpgPlayer>();
+		
 		//We can give dodge to allies only.
 		if (radius > 0 && targetParty == true)
 		{
 			//For all friendly party members
 			for (RpgPlayer partyMember : FC_Rpg.rpgEntityManager.getNearbyPartiedRpgPlayers(playerCaster, radius))
-			{
-				partyMember.getPlayerConfig().setStatusDuration(effectID, duration);
-				partyMember.getPlayerConfig().setStatusMagnitude(effectID, finalSpellMagnitude);
-			}
+				playerConfigs.add(partyMember);
 		}
 		else
+			playerConfigs.add(rpgCaster);
+		
+		//Return if there are no configs.
+		if (playerConfigs.size() == 0)
+			return;
+		
+		//For each player we set the buff duration and magnitude.
+		for (final RpgPlayer p : playerConfigs)
 		{
 			//Give buff to only caster.
-			rpgCaster.getPlayerConfig().setStatusDuration(effectID, duration);
-			rpgCaster.getPlayerConfig().setStatusMagnitude(effectID, finalSpellMagnitude);
+			p.getPlayerConfig().setStatusDuration(effectID, duration);
+			p.getPlayerConfig().setStatusMagnitude(effectID, finalSpellMagnitude);
+			
+			if (FC_Rpg.playerBuffTimerTIDs.containsKey(p.getPlayer()))
+				Bukkit.getScheduler().cancelTask(FC_Rpg.playerBuffTimerTIDs.get(p.getPlayer()));
+			
+			FC_Rpg.playerBuffTimerTIDs.put(p.getPlayer(), Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					MessageLib msgLib = new MessageLib(p.getPlayer());
+					msgLib.standardMessage("A Buff Has Expired And Been Removed.");
+				}
+			}, (int) (duration * .02)));
 		}
 	}
 	
-	private void effect_Potion_Speed()
+	private void effect_Speed()
 	{
 		//Adjust player move speed.
 		playerCaster.setWalkSpeed((float) finalSpellMagnitude);
@@ -384,6 +411,8 @@ public class SpellCaster
 		
 		//Don't create fire.
 		fireball.setIsIncendiary(false);
+		
+		fireball.setYield(2F);
 		
 		//Create and add the fireball to the players ownership
 		rpgCaster.summon_Add(fireball, 40);
@@ -461,7 +490,7 @@ public class SpellCaster
 		{
 			final RpgMonster finalMobDefender = rpgMobDefender;
 			
-			for (int i = 0; i < finalSpellMagnitude; i++)
+			for (int i = 0; i < 5; i++)
 			{
 				Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
 				{
@@ -472,14 +501,14 @@ public class SpellCaster
 							edm.attackMobDefender(finalMobDefender, rpgCaster, finalDamage, damageType);
 						}
 					}
-				}, i * 20 + 40);
+				}, i * 20 + 20);
 			}
 		}
 		else if (target instanceof Player)
 		{
 			final RpgPlayer finalPlayerDefender = FC_Rpg.rpgEntityManager.getRpgPlayer((Player) target);
 			
-			for (int i = 0; i < finalSpellMagnitude; i++)
+			for (int i = 0; i < 5; i++)
 			{
 				Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
 				{
@@ -490,37 +519,48 @@ public class SpellCaster
 							edm.attackPlayerDefender(rpgCaster, finalPlayerDefender, null, finalDamage, 3);
 						}
 					}
-				}, i * 20 + 40);
+				}, i * 20 + 20);
 			}
 		}
 	}
 	
-	private void effect_Backstab()
+	private void effect_Frost_Arrow()
 	{
-		Location behindLoc = ell.getLocationBehindEntity(target.getLocation());
-		double x = playerCaster.getLocation().getX();
-		double z = playerCaster.getLocation().getZ();
-		boolean behindX = false;
-		boolean behindZ = false;
+		PotionEffect pe = new PotionEffect(PotionEffectType.SLOW, duration, 5);
 		
-		//Make sure it's in range
-		if (x > behindLoc.getX() - 1 && x < behindLoc.getX() + 1)
-			behindX = true;
-		
-		if (z > behindLoc.getZ() - 1 && z < behindLoc.getZ() + 1)
-			behindZ = true;
-		
-		//FC_Rpg.plugin.getLogger().info("player:" + x + "," + z + "  behind: " + behindLoc.getX() + "," + behindLoc.getZ());
-		
-		if (behindX == true && behindZ == true)
-			damage = damage * finalSpellMagnitude;
+		for (Entity entity : rpgCaster.getPlayer().getNearbyEntities(finalSpellMagnitude, finalSpellMagnitude, finalSpellMagnitude))
+		{
+			if (entity instanceof Player)
+			{
+				Player player = (Player) entity;
+				
+				if (FC_Rpg.playerSlowTimerTIDs.containsKey(player))
+					Bukkit.getScheduler().cancelTask(FC_Rpg.playerSlowTimerTIDs.get(player));
+				
+				playerDefender.setWalkSpeed(0.0F);
+				
+				FC_Rpg.playerSlowTimerTIDs.put(player, Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						playerDefender.setWalkSpeed(0.2F);
+					}
+				}, duration));
+			}
+			else if (entity instanceof LivingEntity)
+			{
+				((LivingEntity) entity).removePotionEffect(PotionEffectType.SLOW);
+				((LivingEntity) entity).addPotionEffect(pe);
+			}
+		}
 	}
 	
 	private void effect_Heal_Self()
 	{
-		double healAmount = rpgCaster.getMaxHealth() * finalSpellMagnitude;
+		double healAmount = finalSpellMagnitude;
 		
-		rpgCaster.heal(healAmount);
+		rpgCaster.healHealth(healAmount);
 		rpgCaster.attemptHealSelfNotification(healAmount);
 	}
 	
@@ -575,11 +615,25 @@ public class SpellCaster
 		damage = rpgCaster.getTotalAttack() * finalSpellMagnitude;
 	}
 	
+	private void effect_Heal_Self_Or_Other()
+	{
+		if (playerDefender != null)
+		{
+			rpgDefender.healHealth(rpgDefender.getMaxHealth() * finalSpellMagnitude);
+			rpgCaster.attemptHealOtherNotification(rpgDefender);
+		}
+		else
+		{
+			rpgCaster.healHealth(rpgCaster.getMaxHealth() * finalSpellMagnitude);
+			rpgCaster.attemptHealSelfNotification(rpgCaster.getMaxHealth() * finalSpellMagnitude);
+		}
+	}
+	
 	private void effect_Heal_Other()
 	{
 		if (playerDefender != null)
 		{
-			rpgDefender.heal(rpgDefender.getMaxHealth() * finalSpellMagnitude);
+			rpgDefender.healHealth(rpgDefender.getMaxHealth() * finalSpellMagnitude);
 			rpgCaster.attemptHealOtherNotification(rpgDefender);
 		}
 	}

@@ -1,0 +1,21 @@
+~ FC_Rpg, Developer Personal Notes ~
+
+^Todo List^
+
+Dungeons:
+- Finish treasure commands in /de.
+- Add the automatic dungeon creation command by checking blocks in nearby area. "/de scan"
+- Thoroughly test by making some more dungeons.
+
+General:
+- Everything under level 6 gets access to all spells. ~ Configurable
+- Redo Treasure config. Numbers should scale down like 0: with fields.
+- Loot subdirectory with loot files that can be read.
+- Dungeons have "static level" field and "lootconfig" field.
+- Make sure all lists start at 1 and work properly.
+- Class requirement / Job Rank minimum / Minimum level requirement for warps.
+- Make passive mobs not count in dungeon finishing check.
+
+^Potential CraftBukkit Bugs^
+- Can't attack with weakness.
+- Skeletons don't change yaw when rotating.

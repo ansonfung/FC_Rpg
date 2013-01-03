@@ -5,8 +5,8 @@ import java.util.List;
 
 import me.Destro168.FC_Suite_Shared.ConfigManagers.ConfigGod;
 import me.Destro168.FC_Suite_Shared.ConfigManagers.FileConfigurationWrapper;
+import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 import me.Destro168.FC_Rpg.FC_Rpg;
-import me.Destro168.FC_Rpg.Util.RpgMessageLib;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -337,7 +337,7 @@ public class GuildConfig extends ConfigGod
 		return false;
 	}
 	
-	public boolean viewGuildInfoByGuildName(String guildName, RpgMessageLib msgLib)
+	public boolean viewGuildInfoByGuildName(String guildName, MessageLib msgLib)
 	{
 		if (!exists(guildName))
 			return false;
@@ -345,7 +345,7 @@ public class GuildConfig extends ConfigGod
 		return viewGuildInfo(guildName, msgLib);
 	}
 	
-	public boolean viewGuildInfo(String guildName, RpgMessageLib msgLib)
+	public boolean viewGuildInfo(String guildName, MessageLib msgLib)
 	{
 		updateGfcw(guildName);
 		
@@ -431,25 +431,40 @@ public class GuildConfig extends ConfigGod
 		if (!exists(guildName))
 			return null;
 		
+		// Update the gfcw.
+		this.updateGfcw(guildName);
+		
 		List<Player> playerList = new ArrayList<Player>();
+		Player p;
 		
 		for (String pName : getMembers())
 		{
-			if (Bukkit.getServer().getPlayer(pName) != null)
-				playerList.add(Bukkit.getServer().getPlayer(pName));
+			p = Bukkit.getServer().getPlayer(pName);
+			
+			if (p != null)
+				playerList.add(p);
 		}
 		
 		return playerList;
 	}
 
-	public double getGuildBonus(String guildName, double loot) 
+	public double getGuildBonus(String guildName) 
 	{
 		List<Player> guildPlayers = getOnlineGuildPlayerList(guildName);
+		double totalBonus;
 		int size = 1;
+		
+		// Update the gfcw.
+		this.updateGfcw(guildName);
 		
 		if (!(guildPlayers == null))
 			size = guildPlayers.size();
 		
-		return loot * (1.0D + size * 0.0025D);
+		totalBonus = 1.0D + size * 0.0040D;
+		
+		if (totalBonus > 1.2)
+			totalBonus = 1.2;
+		
+		return totalBonus;
 	}
 }

@@ -1,32 +1,21 @@
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                    ___           ___                         ___     
-      ___          /  /\         /  /\          ___          /  /\    
-     /  /\        /  /::\       /  /::\        /  /\        /  /::\   
-    /  /::\      /  /:/\:\     /  /:/\:\      /  /::\      /  /:/\:\  
-   /  /:/\:\    /  /:/  \:\   /  /::\ \:\    /  /:/\:\    /  /:/  \:\
-  /  /::\ \:\  /__/:/ \  \:\ /__/:/\:\_\:\  /  /::\ \:\  /__/:/_\_ \:\
- /__/:/\:\ \:\ \  \:\  \__\/ \__\/~|::\/:/ /__/:/\:\_\:\ \  \:\__/\_\/
- \__\/  \:\_\/  \  \:\          |  |:|::/  \__\/  \:\/:/  \  \:\ \:\  
-      \  \:\     \  \:\         |  |:|\/        \  \::/    \  \:\/:/  
-       \__\/      \  \:\        |__|:|~          \__\/      \  \::/   
-                   \__\/         \__\|                       \__\/    
-      ___           ___                         ___                   
-     /  /\         /  /\          ___          /  /\          ___     
-    /  /::\       /  /::\        /__/\        /  /:/         /  /\    
-   /__/:/\:\     /  /:/\:\       \  \:\      /  /:/         /  /::\   
-  _\_ \:\ \:\   /  /::\ \:\       \__\:\    /  /:/         /  /:/\:\  
- /__/\ \:\ \:\ /__/:/\:\ \:\      /  /::\  /__/:/     /\  /  /::\ \:\ 
- \  \:\ \:\_\/ \  \:\ \:\_\/     /  /:/\:\ \  \:\    /:/ /__/:/\:\_\:\
-  \  \:\_\:\    \  \:\ \:\      /  /:/__\/  \  \:\  /:/  \__\/  \:\/:/
-   \  \:\/:/     \  \:\_\/     /__/:/        \  \:\/:/        \  \::/ 
-    \  \::/       \  \:\       \__\/          \  \::/          \__\/  
-     \__\/         \__\/                       \__\/                  
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      ___           ___                    ___           ___                         ___           ___   
+     /\__\         /\__\                  /\__\         /\__\                       /\  \         /\  \  
+    /:/ _/_       /:/  /                 /:/ _/_       /:/ _/_         ___          \:\  \       /::\  \ 
+   /:/ /\__\     /:/  /                 /:/ /\  \     /:/ /\__\       /\__\          \:\  \     /:/\:\__\
+  /:/ /:/  /    /:/  /  ___            /:/ /::\  \   /:/ /:/ _/_     /:/  /      ___  \:\  \   /:/ /:/  /
+ /:/_/:/  /    /:/__/  /\__\          /:/_/:/\:\__\ /:/_/:/ /\__\   /:/__/      /\  \  \:\__\ /:/_/:/  / 
+ \:\/:/  /     \:\  \ /:/  /          \:\/:/ /:/  / \:\/:/ /:/  /  /::\  \      \:\  \ /:/  / \:\/:/  /  
+  \::/__/       \:\  /:/  /            \::/ /:/  /   \::/_/:/  /  /:/\:\  \      \:\  /:/  /   \::/__/   
+   \:\  \        \:\/:/  /              \/_/:/  /     \:\/:/  /   \/__\:\  \      \:\/:/  /     \:\  \   
+    \:\__\        \::/  /                 /:/  /       \::/  /         \:\__\      \::/  /       \:\__\  
+     \/__/         \/__/                  \/__/         \/__/           \/__/       \/__/         \/__/  
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Table of Contents:
 I: Introduction
-    a: Command Usage:
+    a: Command Usage
     b: Configuration General
 II: Getting Started
     a: Configuring Groups.yml
@@ -42,6 +31,7 @@ III: Intermediate Steps
     f. Configuring Pvp.yml
     g. Configuring Balance.yml
     h. Configuring Guilds.yml
+IV: FAQs and Bonus Information
 
 I: Introduction:
 
@@ -49,7 +39,7 @@ I: Introduction:
     
 a: Command Usage:
 
-    To being using FC_Rpg you need to immediately familiarize yourself with the help command, /rpg. /rpg is the most important command as it shows the help for all commands. I intentionally tried to name commands such that they do not override some other major plugins. For example, warp is /w, rather than /warp to prevent conflicts with Essentials warp command. Conversely, the /world command for FC_Rpg conflicts with the /world command for Essentials. So immediately it is in your best interest to disable the world command Essentials by following their instructions. If disabling a command for Essentials is too difficult for you, then, once again I can only stress the amount of difficulty you will probably soon be experiencing!
+    To begin using FC_Rpg you need to immediately familiarize yourself with the help command, /rpg. /rpg is the most important command as it shows the help for all commands. I intentionally tried to name commands such that they do not override some other major plugins. For example, warp is /w, rather than /warp to prevent conflicts with Essentials warp command. Conversely, the /world command for FC_Rpg conflicts with the /world command for Essentials. So immediately it is in your best interest to disable the world command Essentials by following their instructions. If disabling a command for Essentials is too difficult for you, then, once again I can only stress the amount of difficulty you will probably soon be experiencing!
     
     All of the permissions for the plugin are inside of the doc folder inside of FC_Rpg.jar Just unzip FC_Rpg to gain access to the docs folder. Most permissions are related to commands but there are a few non-command related permissions.
 	
@@ -131,6 +121,8 @@ b: Configuring General.yml
 - buffCommandCost - This is the cost to use the /buff random command.
 - bonusMobSpawns - Enabling this setting will spawn additional mobs around players in rpg worlds. The mobs will only spawn at night or whenever there is a storm "default minecraft rules". They also don't spawn in liquids.
 - commandKeyWord - Changing these settings allow you to change any command inside of FC_Rpg. Simply change it's command name in plugin.yml for the command rename to take effect.
+- recordExpRewards - Trade in records for experience! Gold = 100% (garunteed levelup), Green = 50%, Record_4 = 1%, 5 = 5%, 6 = 10%, 7 = 15%, 8 = 20%, 9 = 25%.
+- customChatExclusion - Allows you to disable custom rpg chat when specified phrases appear in the chat format of player messages. Don't change if you don't understand chat formats. Disables custom chat for towny private chat channels by default.
 
 c: Configuring World.yml
 
@@ -140,6 +132,7 @@ c: Configuring World.yml
 - isRpg - Sets whether FC_RPG should actively work in this world or not.
 - isPvp - Sets whether this world contains the pvp arena or not. If your pvp settings are configured, will be described later, then you required at least one world with this setting enabled.
 - isSpawn - Sets whether this world is the primary spawn point for new players or not. You need to have at least one spawn world.
+- isMobWorld - Will prevent the spawn of all monsters that aren't from dungeons.
 - isAoEWorld - Set whether people should AoE break everything in a 3x3x3 radius when using pickaxes of a tier higher than wooden.
 - spawn - The spawn location for the world.
 - levelOne: This is the point where mobs will spawn at level one. Mobs will become stronger as they move away from this location.
@@ -431,3 +424,7 @@ Configuration settings:
 h. Configuring Guilds.yml
 
 No need to configure anything in this file currently. It's best if you don't ever alter this file currently.
+
+IV: FAQs and Bonus Information
+
+I have created this section to give a little bit of advice about random tidbits that will hopefully HELP you use my plugin even futher. These are 

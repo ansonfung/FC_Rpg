@@ -19,7 +19,7 @@ public class EffectIDs
 	public static final int POISON = 1005;
 	public static final int BLEED = 1006;
 	public static final int AOE = 1007;
-	public static final int BACKSTAB = 1008;
+	public static final int FROST_ARROW = 1008;
 	public static final int HEAL_SELF = 1009;
 	public static final int HEAL_OTHER = 1010;
 	public static final int WEAKEN = 1011;
@@ -30,6 +30,7 @@ public class EffectIDs
 	public static final int DAMAGE_SCALED_BY_HEALTH = 1016;
 	public static final int DAMAGE_BY_MISSING_HEALTH = 1017;
 	public static final int SACRIFICE_HEALTH_FOR_DAMAGE = 1018;
+	public static final int HEAL_SELF_OR_OTHER = 1019;
 	
 	public static final int DAMAGE_BOOST = 2000;
 	

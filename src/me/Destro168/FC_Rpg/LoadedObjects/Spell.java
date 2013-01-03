@@ -16,7 +16,9 @@ public class Spell
 	private List<Double> constitutionMagnitude;
 	private List<Integer> radius;
 	private boolean targetParty;
-	private boolean restricted;
+	private boolean getIsClassRestricted;
+	private boolean getRequiresTarget;
+	private boolean uncastable;
 	
 	//Gets
 	public int getEffectID() { return effectID; }
@@ -31,12 +33,14 @@ public class Spell
 	public List<Double> getConstitutionMagnitude() { return constitutionMagnitude; }
 	public List<Integer> getRadius() { return radius; }
 	public boolean getTargetParty() { return targetParty; }
-	public boolean getRestricted() { return restricted; }
+	public boolean getIsClassRestricted() { return getIsClassRestricted; }
+	public boolean getRequiresTarget() { return getRequiresTarget; }
+	public boolean getUncastable() { return uncastable; }
 	
 	//Constructor
 	public Spell(int effectID_, String name_, String description_, List<Integer> duration_, List<Double> manaCost_, List<Double> constantMagnitude_,
 			List<Double> attackMagnitude_, List<Double> magicMagnitude_, List<Double> intelligenceMagnitude_, List<Double> constitutionMagnitude_,
-			List<Integer> radius_, boolean targetParty_, boolean restricted_)
+			List<Integer> radius_, boolean targetParty_, boolean getIsClassRestricted_, boolean getRequiresTarget_, boolean uncastable_)
 	{
 		effectID = effectID_;
 		name = name_;
@@ -50,6 +54,10 @@ public class Spell
 		constitutionMagnitude = constitutionMagnitude_;
 		radius = radius_;
 		targetParty = targetParty_;
-		restricted = restricted_;
+		getIsClassRestricted = getIsClassRestricted_;
+		getRequiresTarget = getRequiresTarget_;
+		uncastable = uncastable_;
 	}
 }
+
+

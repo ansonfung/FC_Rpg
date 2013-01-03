@@ -15,14 +15,11 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.inventory.ItemStack;
 
 import me.Destro168.FC_Rpg.FC_Rpg;
-import me.Destro168.FC_Rpg.FC_Rpg.CreatureSpawnListener;
-import me.Destro168.FC_Rpg.Util.RpgMessageLib;
 import me.Destro168.FC_Suite_Shared.SuiteConfig;
+import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 import me.Destro168.FC_Suite_Shared.TimeUtils.DateManager;
 
 public class DungeonEvent extends GeneralEvent
@@ -65,7 +62,7 @@ public class DungeonEvent extends GeneralEvent
 	public boolean addDungeoneer(Player player, int dungeonNumber)
 	{
 		//Variable declarations.
-		RpgMessageLib msgLib = new RpgMessageLib(player);
+		MessageLib msgLib = new MessageLib(player);
 		int level = FC_Rpg.rpgEntityManager.getRpgPlayer(player).getPlayerConfig().getClassLevel();
 		
 		//Update the dungeonNumber
@@ -74,7 +71,7 @@ public class DungeonEvent extends GeneralEvent
 		//Check to make sure they are in the correct level range.
 		if (level < FC_Rpg.dungeonConfig.getPlayerLevelRequirementMinimum(dungeonNumber) || level > FC_Rpg.dungeonConfig.getPlayerLevelRequirementMaximum(dungeonNumber))
 		{
-			msgLib.errorLevelOutOfRange();
+			msgLib.standardError("Your level is out of range.");
 			return false;
 		}
 		
@@ -215,19 +212,20 @@ public class DungeonEvent extends GeneralEvent
 		//Add loot to chests.
 		addChestLoot(true);
 		
-		//Begin tasks to notify end of dungeon.
+		//Customize boss monster.
 		if (FC_Rpg.worldConfig.getIsRpgWorld(dungeonStart.getWorld().getName()))
 		{
 			//Register the custom monster.
 			FC_Rpg.rpgEntityManager.registerCustomLevelEntity(spawnedMobs[mobCountMinusOne], 5, true);
 			
-			CreatureSpawnListener l = FC_Rpg.plugin.new CreatureSpawnListener();
-			CreatureSpawnEvent event = new CreatureSpawnEvent(spawnedMobs[mobCountMinusOne], SpawnReason.CUSTOM);
-			l.onCreaturespawn(event);
+			//CreatureSpawnListener l = FC_Rpg.plugin.new CreatureSpawnListener();
+			//CreatureSpawnEvent event = new CreatureSpawnEvent(spawnedMobs[mobCountMinusOne], SpawnReason.CUSTOM);
+			//l.onCreaturespawn(event);
 			
-			FC_Rpg.rpgEntityManager.getRpgMonster(spawnedMobs[mobCountMinusOne]).checkEquipment();
+			//FC_Rpg.rpgEntityManager.getRpgMonster(spawnedMobs[mobCountMinusOne]).checkEquipment();
 		}
 		
+		//Begin tasks to notify end of dungeon.
 		int endTime = FC_Rpg.dungeonConfig.getTimerEnd(dungeonNumber);
 		int endDelay = 0;
 		int endIncrement = 120;
@@ -495,25 +493,35 @@ public class DungeonEvent extends GeneralEvent
 	private void addLoot(Location chestLocation)
 	{
 		//Variable Declarations
-		List<ItemStack> drops = null;
 		Random rand = new Random();
+		List<ItemStack> drops = FC_Rpg.treasureConfig.getRandomTreasure(lowestLevel, rand.nextInt(5) + 1); // Get the list of random treasure.
 		Block chestBlock;
 		Chest chest;
+		int x = (int) chestLocation.getX();
+		int y = (int) chestLocation.getY();
+		int z = (int) chestLocation.getZ();
 		
 		// Create the chest.
-		chestBlock = Bukkit.getServer().getWorld(chestLocation.getWorld().getName()).getBlockAt((int) chestLocation.getX(), (int) chestLocation.getY(), (int) chestLocation.getZ());
-		chestBlock.setType(Material.CHEST);
-		chest = (Chest) chestBlock.getState();
+		chestBlock = Bukkit.getServer().getWorld(chestLocation.getWorld().getName()).getBlockAt(x,y,z);
 		
-		// Clear the chest inventory.
-		chest.getInventory().clear();
-		
-		// Get the list of random treasure.
-		drops = FC_Rpg.treasureConfig.getRandomTreasure(lowestLevel, rand.nextInt(5) + 1);
-		
-		// Add items to the chest inventory.
-		for (ItemStack drop : drops)
-			chest.getInventory().addItem(drop);
+		//Attempt to cast the chest and drop or else drop on the ground.
+		try
+		{
+			chest = (Chest) chestBlock.getState();
+			
+			// Clear the chest inventory.
+			chest.getInventory().clear();
+			
+			// Add items to the chest inventory.
+			for (ItemStack drop : drops)
+				chest.getInventory().addItem(drop);
+		}
+		catch (ClassCastException e)
+		{
+			// Add items to the ground.
+			for (ItemStack drop : drops)
+				chestBlock.getWorld().dropItemNaturally(chestBlock.getLocation(), drop);
+		}
 	}
 	
 	private EntityType returnRandomLivingEntity()

@@ -68,7 +68,12 @@ public class MobSpawnManager
 					loc.add(0,3,0);
 					
 					DistanceModifierLib dml = new DistanceModifierLib();
-					final LivingEntity e = (LivingEntity) loc.getWorld().spawnEntity(loc,getRandomMobType(dml.getWorldDML(loc)));
+					EntityType type = getRandomMobType(dml.getWorldDML(loc));
+					
+					if (type == EntityType.WITHER || type == EntityType.GHAST)
+						loc.add(0,40,0);
+					
+					final LivingEntity e = (LivingEntity) loc.getWorld().spawnEntity(loc,type);
 					
 					Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
 					{
@@ -113,38 +118,38 @@ public class MobSpawnManager
 				
 				if (modifier < 50)
 				{
-					int spawnChance = rand.nextInt(5);
+					int spawnChance = rand.nextInt(97);
 					
-					if (spawnChance == 0)
+					if (spawnChance < 25)
 						return EntityType.ZOMBIE;
-					else if (spawnChance == 1)
-						return EntityType.ENDERMAN;
-					else if (spawnChance == 2)
+					else if (spawnChance < 50)
 						return EntityType.CREEPER;
-					else if (spawnChance == 3)
+					else if (spawnChance < 75)
 						return EntityType.SKELETON;
-					else if (spawnChance == 4)
+					else if (spawnChance  < 95)
 						return EntityType.PIG_ZOMBIE;
+					else if (spawnChance == 96)
+						return EntityType.ENDERMAN;
 				}
 				else
 				{
-					int spawnChance = rand.nextInt(91002);
+					int spawnChance = rand.nextInt(87100);
 					
 					if (spawnChance <= 16000)
 						return EntityType.ZOMBIE;
 					else if (spawnChance <= 32000)
 						return EntityType.ENDERMAN;
-					else if (spawnChance <= 48000)
+					else if (spawnChance <= 33000)
 						return EntityType.CREEPER;
-					else if (spawnChance <= 60000)
+					else if (spawnChance <= 49000)
 						return EntityType.SKELETON;
-					else if (spawnChance <= 80000)
+					else if (spawnChance <= 65000)
 						return EntityType.PIG_ZOMBIE;
-					else if (spawnChance <= 85000)
+					else if (spawnChance <= 81000)
 						return EntityType.BLAZE;
-					else if (spawnChance <= 90000)
+					else if (spawnChance <= 86000)
 						return EntityType.SILVERFISH;
-					else if (spawnChance <= 91000)
+					else if (spawnChance <= 87000)
 						return EntityType.GHAST;
 					else
 						return EntityType.WITHER;
@@ -153,7 +158,7 @@ public class MobSpawnManager
 				return EntityType.ZOMBIE;
 			}
 			
-		},20,80));
+		},20,60));
 	}
 	
 	public void nukeMob(LivingEntity entity)

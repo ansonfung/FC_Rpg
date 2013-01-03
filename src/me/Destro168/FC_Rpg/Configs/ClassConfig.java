@@ -79,15 +79,15 @@ public class ClassConfig extends ConfigGod
 			setPassiveID(4, BalanceConfig.passive_BattleLust);
 			
 			//Set restrictions for certain classes.
-			setRestrictionID(1,0); //Only can use bows for magic.
-			setRestrictionID(3,1); //Only can use sticks for magic.
+			setRestrictionID(1,1); //Only can use bows for magic.
+			setRestrictionID(3,2); //Only can use sticks for magic.
 			
 			//Set stat growths for all the classes.
-			setStatGrowth(0,3,3,2,2);
-			setStatGrowth(1,5,1,2,2);
-			setStatGrowth(2,1,5,2,2);
+			setStatGrowth(0,5,4,0,1);
+			setStatGrowth(1,6,2,0,2);
+			setStatGrowth(2,4,5,0,1);
 			setStatGrowth(3,0,2,4,4);
-			setStatGrowth(4,3,5,0,2);;
+			setStatGrowth(4,8,1,0,1);
 			setStatGrowth(5,999,999,999,999);
 		}
 	}

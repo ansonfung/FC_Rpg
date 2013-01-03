@@ -8,12 +8,15 @@ import java.util.Map;
 
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.Configs.PlayerConfig;
+import me.Destro168.FC_Rpg.FC_Rpg.CreatureSpawnListener;
 import me.Destro168.FC_Suite_Shared.Messaging.BroadcastLib;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 public class RpgEntityManager 
 {
@@ -135,31 +138,57 @@ public class RpgEntityManager
     	
     	return onlinePlayers;
     }
-    
-	public List<RpgPlayer> getNearbyPartiedRpgPlayers(Player sourcePlayer, int distance)
+	
+	public List<RpgPlayer> getNearbyPartiedRpgPlayers(Player player, int distance)
 	{
-		String guild = FC_Rpg.guildManager.getGuildByMember(sourcePlayer.getName());
+		// Variable Declarations
+		List<RpgPlayer> playerList = new ArrayList<RpgPlayer>();
+		EntityLocationLib ell = new EntityLocationLib();
+		String guild = FC_Rpg.guildManager.getGuildByMember(player.getName());
 		
-		//If no party return the source player in list form.
+		// If no party return the source player in list form.
 		if (guild == null)
 		{
-			List<RpgPlayer> rpgPartyList = new ArrayList<RpgPlayer>();
-			rpgPartyList.add(getRpgPlayer(sourcePlayer));
-			return rpgPartyList;
+			playerList.add(getRpgPlayer(player));
+			return playerList;
 		}
 		
-		EntityLocationLib ell = new EntityLocationLib();
-		List<RpgPlayer> rpgPlayerList = new ArrayList<RpgPlayer>();
-		
-		for (Player player : FC_Rpg.guildManager.getOnlineGuildPlayerList(guild))
+		//If the guild isn't null, then we get online guild members and add them.
+		for (Player guildMember : FC_Rpg.guildManager.getOnlineGuildPlayerList(guild))
 		{
-			if (ell.isNearby(sourcePlayer, player, distance))
+			if (ell.isNearby(player, guildMember, distance))
 			{
-				rpgPlayerList.add(getRpgPlayer(player));
+				playerList.add(getRpgPlayer(player));
 			}
 		}
 		
-		return rpgPlayerList;
+		return playerList;
+	}
+	
+	public List<Player> getNearbyPartiedPlayers(Player player, int distance)
+	{
+		// Variable Declarations
+		List<Player> playerList = new ArrayList<Player>();
+		EntityLocationLib ell = new EntityLocationLib();
+		String guild = FC_Rpg.guildManager.getGuildByMember(player.getName());
+		
+		// If no party return the source player in list form.
+		if (guild == null)
+		{
+			playerList.add(player);
+			return playerList;
+		}
+		
+		//If the guild isn't null, then we get online guild members and add them.
+		for (Player guildMember : FC_Rpg.guildManager.getOnlineGuildPlayerList(guild))
+		{
+			if (ell.isNearby(player, guildMember, distance))
+			{
+				playerList.add(player);
+			}
+		}
+		
+		return playerList;
 	}
 	
     //Functions
@@ -223,6 +252,15 @@ public class RpgEntityManager
     	RpgMonster mob = new RpgMonster(entity, levelBonus, isBoss);
     	
 		miMap.put(entity, mob);
+		
+		//Perform false event to register the monster
+		CreatureSpawnListener l = FC_Rpg.plugin.new CreatureSpawnListener();
+		CreatureSpawnEvent event = new CreatureSpawnEvent(entity, SpawnReason.CUSTOM);
+		l.onCreaturespawn(event);
+		
+		//Check the monsters equipment.
+		FC_Rpg.rpgEntityManager.getRpgMonster(entity).checkEquipment();
+		
 		return miMap.get(entity);
     }
     

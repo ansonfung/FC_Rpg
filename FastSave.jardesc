@@ -12,10 +12,10 @@
     </manifest>
     <selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
         <file path="/FC_Rpg/FastSave.jardesc"/>
-        <file path="/FC_Rpg/plugin.yml"/>
         <file path="/FC_Rpg/.classpath"/>
-        <javaElement handleIdentifier="=FC_Rpg/src"/>
+        <file path="/FC_Rpg/plugin.yml"/>
         <folder path="/FC_Rpg/Docs"/>
+        <javaElement handleIdentifier="=FC_Rpg/src"/>
         <file path="/FC_Rpg/.project"/>
     </selectedElements>
 </jardesc>

@@ -5,7 +5,7 @@ import me.Destro168.FC_Rpg.Configs.FaqConfig;
 import me.Destro168.FC_Rpg.Entities.RpgPlayer;
 import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 
-import org.bukkit.craftbukkit.command.ColouredConsoleSender;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class RpgMessageLib extends MessageLib 
@@ -14,9 +14,9 @@ public class RpgMessageLib extends MessageLib
 	RpgPlayer rpgPlayer;
 	FC_RpgPermissions perms;
 	
-	public RpgMessageLib(Player player_)
+	public RpgMessageLib(CommandSender sender, Player player_)
 	{
-		super(player_);
+		super(sender);
 		
 		//Store player
 		player = player_;
@@ -27,7 +27,7 @@ public class RpgMessageLib extends MessageLib
 		rpgPlayer = FC_Rpg.rpgEntityManager.getRpgPlayer(player);
 	}
 	
-	public RpgMessageLib(ColouredConsoleSender sender)
+	public RpgMessageLib(CommandSender sender)
 	{
 		super(sender);
 		
@@ -90,7 +90,7 @@ public class RpgMessageLib extends MessageLib
 		return true;
 	}
 	
-	public boolean helpRpg()
+	public boolean helpRpgHelp()
 	{
 		standardHeader("FC_Rpg Command Help!");
 		
@@ -134,9 +134,10 @@ public class RpgMessageLib extends MessageLib
 		{
 			standardMessage("[A] /w", "Help with warps.");
 			standardMessage("[A] /dungeon","Help for dungeons.");
+			standardMessage("[A] /de","Help for dungeon setup.");
 			standardMessage("[A] /modify","Help for modify command.");
 			standardMessage("[A] /world","Help for world command.");
-			standardMessage("[A] /rpg admin","Admin Commands.");
+			standardMessage("[A] /radmin","Admin Commands.");
 		}
 		
 		return true;
@@ -307,7 +308,7 @@ public class RpgMessageLib extends MessageLib
 		
 		if (perms.isAdmin())
 		{
-			standardMessage("[A] /buff random [name] [length] [level]","Apply a specific buff with specified characteristics to yourself.");
+			standardMessage("[A] /buff random [name] [effect] [length] [level]","Apply a specific buff with specified characteristics to yourself.");
 			standardMessage("[A] /buff all","Buff everybody online.");
 			standardMessage("[A] /buff clear [name]","Clear target of buffs.");
 			standardMessage("[A] /buff max [name]","Put all buffs on target.");
@@ -361,7 +362,6 @@ public class RpgMessageLib extends MessageLib
 		standardHeader("Dungeon Help");
 		standardMessage("/dungeon list","List dungeons.");
 		standardMessage("/dungeon print","Prints out information for dungeon setup.");
-		standardMessage("/dungeon info [num]","See information regarding a specific dungeon.");
 		standardMessage("/dungeon start [num]","Start a dungeon.");
 		standardMessage("/dungeon stop [num]","Stop a dungeon.");
 		standardMessage("/dungeon check [num]","Check if any mobs are left to update loot chest.");
@@ -370,29 +370,29 @@ public class RpgMessageLib extends MessageLib
 		return true;
 	}
 	
-	public boolean helpDungeonDefinition()
+	public boolean helpDungeonDE()
 	{
 		if (!perms.isAdmin())
 			return errorNoPermission();
 		
 		standardHeader("Dungeon Definition Commands.");
-		standardHeader("BE CAREFUL ~ READ PLUGIN HELP!");
-		standardMessage("/dungeon new [name]", "Creates empty dungeon in dungeon config.");
-		standardMessage("/dungeon name [num]");
-		standardMessage("/dungeon spawnBox [num]");
-		standardMessage("/dungeon lobby [num]");
-		standardMessage("/dungeon playerStart [num]", "NOT 'START'! Careful!");
-		standardMessage("/dungeon playerExit [num]", "NOT 'END'! Careful!");
-		standardMessage("/dungeon bossSpawn [num]");
-		standardMessage("/dungeon timerJoin [num] [value]");
-		standardMessage("/dungeon timerEnd [num] [value]");
-		standardMessage("/dungeon treasureStart [num] [index]");
-		standardMessage("/dungeon treasureEnd [num]  [index]");
-		standardMessage("/dungeon fee [num] [value]");
-		standardMessage("/dungeon lmin [num] [value]");
-		standardMessage("/dungeon lmax [num] [value]");
-		standardMessage("/dungeon spawnCount [num] [index]");
-		standardMessage("/dungeon spawnchance [num] [index] [value]");
+		standardMessage("/de info [num] <spawnbox>");
+		standardMessage("/de new [name]", "Creates empty dungeon in dungeon config.");
+		standardMessage("/de name [num]");
+		standardMessage("/de spawnbox [num] [add, remove [num], swap [num1] [num2], spawnChance [num], mobList [List<String>]]");
+		standardMessage("/de lobby [num]");
+		standardMessage("/de playerStart [num]", "NOT 'START'! Careful!");
+		standardMessage("/de playerExit [num]", "NOT 'END'! Careful!");
+		standardMessage("/de bossSpawn [num]");
+		standardMessage("/de timerJoin [num] [value]");
+		standardMessage("/de timerEnd [num] [value]");
+		standardMessage("/de treasureStart [num] [index]");
+		standardMessage("/de treasureEnd [num]  [index]");
+		standardMessage("/de fee [num] [value]");
+		standardMessage("/de lmin [num] [value]");
+		standardMessage("/de lmax [num] [value]");
+		standardMessage("/de spawnCount [num] [index]");
+		standardMessage("/de spawnchance [num] [index] [value]");
 
 		return true;
 	}
@@ -415,7 +415,6 @@ public class RpgMessageLib extends MessageLib
 		return true;
 	}
 	
-	
 	public boolean helpWorld()
 	{
 		if (!perms.isAdmin())
@@ -432,22 +431,23 @@ public class RpgMessageLib extends MessageLib
 		return true;
 	}
 	
-	public boolean helpAdmin()
+	public boolean helpRAdmin()
 	{
 		if (!perms.isAdmin())
 			return true;
 		
 		standardHeader("Admin Commands");
-		standardMessage("/rpg event [type]","loot,exp,off");
+		standardMessage("/rAdmin event [type]","loot,exp,off");
+		standardMessage("/rAdmin go [u [amount],d [amount],(coords)]","Teleport anywhere.");
+		standardMessage("/rAdmin tp [name] <name>","Teleport to anybody. Teleport somebody to somebody.");
+		standardMessage("/rAdmin spawn [entity] [level]","Spawn a mob.");
+		standardMessage("/rAdmin expMult [x]","Change current global exp multiplier. Currently: " + FC_Rpg.balanceConfig.getGlobalExpMultiplier());
+		standardMessage("/rAdmin wall","Creates wall with all classes/jobs/start sign.");
+		standardMessage("/rAdmin sudo [name]","Make somebody say anything/use any command.");
+		standardMessage("/rAdmin taskwipe","Stops all tasks of FC_Rpg.");
+		standardMessage("/rAdmin stop","Disables the plugin FC_Rpg.");
+		standardMessage("/rAdmin reload","Reloads FC_Rpg.");
 		standardMessage("/h,/g,/hg,/gh [name]","Heal/Gamemode single/hybrid commands.");
-		standardMessage("/rpg go [u [amount],d [amount],(coords)]","Teleport anywhere.");
-		standardMessage("/rpg tp","Teleport to anybody. Fully bypasses everything.");
-		standardMessage("/rpg expMult [x]","Change current global exp multiplier. Currently: " + FC_Rpg.balanceConfig.getGlobalExpMultiplier());
-		standardMessage("/rpg wall","Creates wall with all classes/jobs/start sign.");
-		standardMessage("/rpg sudo [name]","Make somebody say anything/use any command.");
-		standardMessage("/rpg taskwipe","Stops all tasks of FC_Rpg.");
-		standardMessage("/rpg stop","Disables the plugin FC_Rpg.");
-		standardMessage("/rpg reload","Reloads FC_Rpg.");
 		
 		return true;
 	}

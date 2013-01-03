@@ -10,10 +10,12 @@ import org.bukkit.Bukkit;
 import me.Destro168.FC_Suite_Shared.ConfigManagers.ConfigGod;
 import me.Destro168.FC_Suite_Shared.ConfigManagers.FileConfigurationWrapper;
 import me.Destro168.FC_Rpg.FC_Rpg;
+import me.Destro168.FC_Rpg.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.LoadedObjects.RpgClass;
 import me.Destro168.FC_Rpg.LoadedObjects.Spell;
 import me.Destro168.FC_Rpg.Spells.EffectIDs;
 import me.Destro168.FC_Suite_Shared.NameMatcher;
+import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 import me.Destro168.FC_Suite_Shared.TimeUtils.DateManager;
 
 // Handles storing of player data in files.
@@ -405,12 +407,12 @@ public class PlayerConfig extends ConfigGod
 		int targetLevel = getClassLevel() + level;
 		
 		//Add enough to levelup onece
-		addOfflineClassExperience(getLevelUpAmount() - getClassExperience(), false);
+		addOfflineClassExperience(getLevelUpAmount() - getClassExperience(), false, null);
 		
 		//Keep adding experience to levelup until the player is the new level.
 		while (getClassLevel() < targetLevel)
 		{
-			addOfflineClassExperience(getLevelUpAmount() - getClassExperience(), false);
+			addOfflineClassExperience(getLevelUpAmount() - getClassExperience(), false, null);
 			
 			if (getClassLevel() == levelCap)
 				return;
@@ -420,23 +422,23 @@ public class PlayerConfig extends ConfigGod
 		setClassExperience(0);
 	}
     
-    public void addOfflineClassExperience(double x, boolean displayLevelUpMessage)
+    public boolean addOfflineClassExperience(double x, boolean displayLevelUpMessage, RpgPlayer rpgPlayer)
 	{
 		//Variable declarations
-		double classExperience = getClassExperience() + x;
+		double newExperience = getClassExperience() + x;
 		
 		//Account for level cap.
 		if (getClassLevel() == levelCap)
 		{
 			setClassExperience(0);
-			return;
+			return false;
 		}
 		
 		//While the player has enough experience to levelup, level up.
-		while (classExperience >= getLevelUpAmount())
+		while (newExperience >= getLevelUpAmount())
 		{
 			//Add the experience to the player.
-			classExperience = classExperience - getLevelUpAmount();
+			newExperience = newExperience - getLevelUpAmount();
 			
 			//Increase the players level.
 			setClassLevel(getClassLevel() + 1);
@@ -449,21 +451,34 @@ public class PlayerConfig extends ConfigGod
 			if (getClassLevel() == levelCap)
 			{
 				setClassExperience(0);
-				return;
+				return false;
 			}
 			
 			//Manage Stat Points
 			if (getManualAllocation() == true)
-				assignClassStatPoints(); 
+				assignClassStatPoints();
 			else
 				setStats(getStats() + FC_Rpg.balanceConfig.getPlayerStatsPerLevel());
 			
 			if (displayLevelUpMessage == true)
-				FC_Rpg.rpgBroadcast.rpgBroadcast(name + " is now level [" + String.valueOf(getClassLevel()) + "]");	//Broadcast that he leveled up
+			{
+				if (getClassLevel() >= 50)
+					FC_Rpg.rpgBroadcast.rpgBroadcast(name + " is now level [" + String.valueOf(getClassLevel()) + "]!");	//Broadcast that he leveled up
+				else
+				{
+					if (rpgPlayer != null)
+					{
+						MessageLib msgLib = new MessageLib(rpgPlayer.getPlayer());
+						msgLib.infiniteMessage("You have just reached level [",getClassLevel() + "","]!");
+					}
+				}
+			}
 		}
 		
 		//we now set player class experience to passed in experience.
-		setClassExperience(classExperience);
+		setClassExperience(newExperience);
+		
+		return true;
 	}
     
     public void assignClassStatPoints()

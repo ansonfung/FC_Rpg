@@ -45,10 +45,10 @@ public class GeneralConfig extends ConfigGod
 	private void setBuffCommandCost(double x) { fcw.set(prefix + "buffCommandCost", x); }
 	private void setBonusMobSpawns(boolean x) { fcw.set(prefix + "bonusMobSpawns", x); }
 	private void setPerfectWarts(boolean x) { fcw.set(prefix + "perfectWarts", x); }
-	
 	private void setCommandKeyWordClass(String x) { fcw.set(prefix + "commandKeyWord.class", x); }
 	private void setCommandKeyWordDonator(String x) { fcw.set(prefix + "commandKeyWord.donator", x); }
 	private void setCommandKeyWordDungeon(String x) { fcw.set(prefix + "commandKeyWord.dungeon", x); }
+	private void setCommandKeyWordDE(String x) { fcw.set(prefix + "commandKeyWord.DE", x); }
 	private void setCommandKeyWordFaq(String x) { fcw.set(prefix + "commandKeyWord.faq", x); }
 	private void setCommandKeyWordG(String x) { fcw.set(prefix + "commandKeyWord.g", x); }
 	private void setCommandKeyWordH(String x) { fcw.set(prefix + "commandKeyWord.h", x); }
@@ -59,7 +59,8 @@ public class GeneralConfig extends ConfigGod
 	private void setCommandKeyWordGuild(String x) { fcw.set(prefix + "commandKeyWord.guild", x); }
 	private void setCommandKeyWordPvp(String x) { fcw.set(prefix + "commandKeyWord.pvp", x); }
 	private void setCommandKeyWordReset(String x) { fcw.set(prefix + "commandKeyWord.reset", x); }
-	private void setCommandKeyWordRpg(String x) { fcw.set(prefix + "commandKeyWord.rpg", x); }
+	private void setCommandKeyWordRpgHelp(String x) { fcw.set(prefix + "commandKeyWord.rpgHelp", x); }
+	private void setCommandKeyWordRpgRAdmin(String x) { fcw.set(prefix + "commandKeyWord.rAdmin", x); }
 	private void setCommandKeyWordSpell(String x) { fcw.set(prefix + "commandKeyWord.spell", x); }
 	private void setCommandKeyWordAlchemy(String x) { fcw.set(prefix + "commandKeyWord.alchemy", x); }
 	private void setCommandKeyWordModify(String x) { fcw.set(prefix + "commandKeyWord.modify", x); }
@@ -67,6 +68,8 @@ public class GeneralConfig extends ConfigGod
 	private void setCommandKeyWordBuff(String x) { fcw.set(prefix + "commandKeyWord.buff", x); }
 	private void setCommandKeyWordWorld(String x) { fcw.set(prefix + "commandKeyWord.world", x); }
 	private void setCommandKeyWordPlayers(String x) { fcw.set(prefix + "commandKeyWord.players", x); }
+	private void setRecordExpRewards(boolean x) { fcw.set(prefix + "recordExpRewards", x); }
+	private void setCustomChatExclusions(String x) { fcw.set(prefix + "customChatExclusions", x); }
 	
 	public String getDefaultPrefix() { return fcw.getStringS(prefix + "defaultPrefix"); }
 	public boolean getPerfectBirch() { return fcw.getBooleanS(prefix + "perfectBirch"); }
@@ -95,10 +98,10 @@ public class GeneralConfig extends ConfigGod
 	public double getBuffCommandCost() { return fcw.getDoubleS(prefix + "buffCommandCost"); }
 	public boolean getBonusMobSpawns() { return fcw.getBooleanS(prefix + "bonusMobSpawns"); }
 	public boolean getPerfectWarts() { return fcw.getBooleanS(prefix + "perfectWarts"); }
-	
 	public String getCommandKeyWordClass() { return fcw.getStringS(prefix + "commandKeyWord.class"); }
 	public String getCommandKeyWordDonator() { return fcw.getStringS(prefix + "commandKeyWord.donator"); }
 	public String getCommandKeyWordDungeon() { return fcw.getStringS(prefix + "commandKeyWord.dungeon"); }
+	public String getCommandKeyWordDE() { return fcw.getStringS(prefix + "commandKeyWord.DE"); }
 	public String getCommandKeyWordFaq() { return fcw.getStringS(prefix + "commandKeyWord.faq"); }
 	public String getCommandKeyWordG() { return fcw.getStringS(prefix + "commandKeyWord.g"); }
 	public String getCommandKeyWordH() { return fcw.getStringS(prefix + "commandKeyWord.h"); }
@@ -109,7 +112,8 @@ public class GeneralConfig extends ConfigGod
 	public String getCommandKeyWordGuild() { return fcw.getStringS(prefix + "commandKeyWord.guild"); }
 	public String getCommandKeyWordPvp() { return fcw.getStringS(prefix + "commandKeyWord.pvp"); }
 	public String getCommandKeyWordReset() { return fcw.getStringS(prefix + "commandKeyWord.reset"); }
-	public String getCommandKeyWordRpg() { return fcw.getStringS(prefix + "commandKeyWord.rpg"); }
+	public String getCommandKeyWordRpgHelp() { return fcw.getStringS(prefix + "commandKeyWord.rpgHelp"); }
+	public String getCommandKeyWordRAdmin() { return fcw.getStringS(prefix + "commandKeyWord.rAdmin"); }
 	public String getCommandKeyWordSpell() { return fcw.getStringS(prefix + "commandKeyWord.spell"); }
 	public String getCommandKeyWordAlchemy() { return fcw.getStringS(prefix + "commandKeyWord.alchemy"); }
 	public String getCommandKeyWordModify() { return fcw.getStringS(prefix + "commandKeyWord.modify"); }
@@ -117,6 +121,8 @@ public class GeneralConfig extends ConfigGod
 	public String getCommandKeyWordBuff() { return fcw.getStringS(prefix + "commandKeyWord.buff"); }
 	public String getCommandKeyWordWorld() { return fcw.getStringS(prefix + "commandKeyWord.world"); }
 	public String getCommandKeyWordPlayers() { return fcw.getStringS(prefix + "commandKeyWord.players"); }
+	public boolean getRecordExpRewards() { return fcw.getBooleanS(prefix + "recordExpRewards"); }
+	public List<String> getCustomChatExclusions() { return converter.getStringListFromString(fcw.getStringS(prefix + "customChatExclusions")); }
 	
 	public GeneralConfig()
 	{
@@ -127,11 +133,8 @@ public class GeneralConfig extends ConfigGod
 	public void handleUpdates()
 	{
 		//If no config was previously created, then...
-		if (getVersion() < 1.0)
+		if (getVersion() < 1.16)
 		{
-			//Update the version.
-			setVersion(1.0);
-			
 			//Set defaults
 			setDefaultPrefix("&f[&7Guest&f] ");
 			setPerfectBirch(false);
@@ -161,12 +164,6 @@ public class GeneralConfig extends ConfigGod
 			setChatFormatAdmin("&e%time% [&6%level%&e] %prefix%&e%name%: %chat%");
 			setInactivePlayerFileDeleteTime(1209600000);
 			setBuffCommandCost(10);
-		}
-		
-		if (getVersion() < 1.061)
-		{
-			setVersion(1.061);
-			
 			setBonusMobSpawns(true);
 			setCommandKeyWordClass("class");
 			setCommandKeyWordDonator("donator");
@@ -181,23 +178,41 @@ public class GeneralConfig extends ConfigGod
 			setCommandKeyWordGuild("guild");
 			setCommandKeyWordPvp("pvp");
 			setCommandKeyWordReset("reset");
-			setCommandKeyWordRpg("rpg");
 			setCommandKeyWordSpell("spell");
 			setCommandKeyWordModify("modify");
 			setCommandKeyWordW("w");
 			setCommandKeyWordBuff("buff");
 			setCommandKeyWordWorld("world");
 			setCommandKeyWordPlayers("list");
-		}
-		
-		if (getVersion() < 1.14)
-		{
-			setVersion(1.14);
-			
 			setCommandKeyWordAlchemy("alchemy");
 			setCommandKeyWordPlayers("players");
 			setCommandKeyWordHead("head");
 			setPerfectWarts(true);
+		}
+		
+		if (getVersion() < 1.18)
+		{
+			setVersion(1.18);
+			
+			fcw.set(prefix + "commandKeyWord.rp", null); 
+			fcw.set(prefix + "commandKeyWord.rpg", null); 
+			setCommandKeyWordRpgHelp("rpgHelp");
+			setCommandKeyWordRpgRAdmin("rAdmin");
+		}
+		
+		if (getVersion() < 1.19)
+		{
+			setVersion(1.19);
+			
+			setCommandKeyWordDE("de");
+		}
+		
+		if (getVersion() < 1.21)
+		{
+			setVersion(1.21);
+			
+			setRecordExpRewards(true);
+			setCustomChatExclusions("TC,NC,ADMIN,MOD");
 		}
 		
 		//Load up timed items.

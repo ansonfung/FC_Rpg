@@ -6,7 +6,6 @@ import java.util.Random;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.Configs.WorldConfig;
 import me.Destro168.FC_Rpg.Entities.EntityDamageManager;
-import me.Destro168.FC_Rpg.Entities.MobEquipment;
 import me.Destro168.FC_Rpg.Entities.RpgMonster;
 import me.Destro168.FC_Rpg.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.LoadedObjects.Spell;
@@ -16,19 +15,18 @@ import me.Destro168.FC_Rpg.Util.DistanceModifierLib;
 import me.Destro168.FC_Rpg.Util.MobAggressionCheck;
 
 import org.bukkit.GameMode;
-import org.bukkit.craftbukkit.entity.CraftArrow;
-import org.bukkit.craftbukkit.entity.CraftExperienceOrb;
-import org.bukkit.craftbukkit.entity.CraftItem;
-import org.bukkit.craftbukkit.entity.CraftLargeFireball;
-import org.bukkit.craftbukkit.entity.CraftLightningStrike;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Egg;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Fish;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.LargeFireball;
+import org.bukkit.entity.LightningStrike;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowball;
@@ -82,10 +80,10 @@ public class DamageListener implements Listener
 		
 		// Block damage in creative world.
 		WorldConfig wm = new WorldConfig();
-
+		
 		if (!wm.getIsRpgWorld(event_.getEntity().getWorld().getName()))
 			return;
-
+		
 		// Store event.
 		event = event_;
 
@@ -157,7 +155,7 @@ public class DamageListener implements Listener
 	{
 		// Cancel the event.
 		event.setCancelled(true);
-
+		
 		playerDefender = null;
 		playerAttacker = null;
 		party = null;
@@ -201,18 +199,18 @@ public class DamageListener implements Listener
 		LivingEntity entity;
 		Entity eEntity = ed.getEntity();
 		
-		if (eEntity instanceof CraftArrow)
+		if (eEntity instanceof Arrow)
 		{
-			CraftArrow ca = (CraftArrow) eEntity;
+			Arrow ca = (Arrow) eEntity;
 			entity = ca.getShooter();
 		}
-		else if (eEntity instanceof CraftLargeFireball)
+		else if (eEntity instanceof LargeFireball)
 		{
-			CraftLargeFireball cf = (CraftLargeFireball) eEntity;
+			LargeFireball cf = (LargeFireball) eEntity;
 			entity = cf.getShooter();
 		}
-		else if (eEntity instanceof CraftExperienceOrb) {return;}
-		else if (eEntity instanceof CraftItem) {return;}
+		else if (eEntity instanceof ExperienceOrb) {return;}
+		else if (eEntity instanceof Item) {return;}
 		else
 		{
 			// Set entity equal to the entity that got hit.
@@ -383,6 +381,20 @@ public class DamageListener implements Listener
 		{
 			boolean success = false;
 			
+			Fireball fb = (Fireball) (e.getDamager());
+
+			if (fb.getShooter() == e.getEntity())
+			{
+				cancelRpgDamage = true;
+				return 0;
+			}
+			
+			if (e.getEntity() instanceof Fireball || e.getEntity() instanceof LargeFireball)
+			{
+				cancelRpgDamage = true;
+				return 0;
+			}
+			
 			for (RpgPlayer rpgPlayer : FC_Rpg.rpgEntityManager.getOnlineRpgPlayers())
 			{
 				if (rpgPlayer.summon_Owns(e.getDamager()))
@@ -450,15 +462,15 @@ public class DamageListener implements Listener
 			// Remove all arrows.
 			arrow.remove();
 		}
-
-		else if (e.getDamager() instanceof CraftLightningStrike)
+		
+		else if (e.getDamager() instanceof LightningStrike)
 		{
 			// Initialize rpgMobAttacker;
 			rpgMobAttacker = new RpgMonster();
 
 			damage = rpgMobAttacker.getAttack() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeAttack();
 		}
-
+		
 		// Melee player attacks
 		else if (e.getDamager() instanceof Player)
 		{
@@ -489,7 +501,7 @@ public class DamageListener implements Listener
 			damage = rpgMobAttacker.getAttack() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeAttack();
 			
 			// Account for mob weapon type for damage.
-			ItemStack mobWeapon = MobEquipment.getWeapon(creatureAttacker);
+			ItemStack mobWeapon = creatureAttacker.getEquipment().getItemInHand();
 			
 			if (mobWeapon != null)
 				damage = damage * FC_Rpg.battleCalculations.getWeaponModifier(mobWeapon.getType(),999999);

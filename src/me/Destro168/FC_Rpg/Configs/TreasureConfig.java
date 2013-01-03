@@ -8,6 +8,7 @@ import java.util.Random;
 
 import me.Destro168.FC_Suite_Shared.ConfigManagers.ConfigGod;
 import me.Destro168.FC_Rpg.FC_Rpg;
+import me.Destro168.FC_Rpg.LoadedObjects.RpgItem;
 import me.Destro168.FC_Rpg.Util.MaterialLib;
 
 import org.bukkit.Material;
@@ -29,12 +30,6 @@ public class TreasureConfig extends ConfigGod
 	private void setEnchantLevelFourChance(int a, int b, int c) { fcw.set(prefix + "enchantLevelFourChance", a + "," + b + "," + c); }
 	private void setEnchantLevelThreeChance(int a, int b) { fcw.set(prefix + "enchantLevelThreeChance", a + "," + b); }
 	private void setEnchantLevelTwoChance(int a) { fcw.set(prefix + "enchantLevelTwoChance", a); }
-	private void setTreasureListIDs(List<Integer> a) { fcw.setCustomList(prefix + "treasureList.ids", a); }
-	private void setTreasureListEnchantable(List<Integer> a) { fcw.setCustomList(prefix + "treasureList.enchantable", a); }
-	private void setTreasureListMobLevelRangeMin(List<Integer> a) { fcw.setCustomList(prefix + "treasureList.mobLevelRangeMin", a); }
-	private void setTreasureListMobLevelRangeMax(List<Integer> a) { fcw.setCustomList(prefix + "treasureList.mobLevelRangeMax", a); }
-	private void setTreasureListAmountFlat(List<Integer> a) { fcw.setCustomList(prefix + "treasureList.amountFlat", a); }
-	private void setTreasureListAmountRandom(List<Integer> a) { fcw.setCustomList(prefix + "treasureList.amountRandom", a); }
 	
 	private List<Integer> getDropChances() { return converter.getIntegerListFromString(fcw.getString(prefix + "dropChances")); }
 	private List<Integer> getEnchantChances() { return converter.getIntegerListFromString(fcw.getString(prefix + "enchantChances")); }
@@ -42,34 +37,6 @@ public class TreasureConfig extends ConfigGod
 	private List<Integer> getEnchantLevelFourChance() { return converter.getIntegerListFromString(fcw.getString(prefix + "enchantLevelFourChance")); }
 	private List<Integer> getEnchantLevelThreeChance() { return converter.getIntegerListFromString(fcw.getString(prefix + "enchantLevelThreeChance")); }
 	private int getEnchantLevelTwoChance() { return fcw.getInt(prefix + "enchantLevelTwoChance"); }
-	private List<Integer> getTreasureListIDs() { return converter.getIntegerListFromString(fcw.getString(prefix + "treasureList.ids")); }
-	private List<Integer> getTreasureListEnchantable() { return converter.getIntegerListFromString(fcw.getString(prefix + "treasureList.enchantable")); }
-	private List<Integer> getTreasureListMobLevelRangeMin() { return converter.getIntegerListFromString(fcw.getString(prefix + "treasureList.mobLevelRangeMin")); }
-	private List<Integer> getTreasureListMobLevelRangeMax() { return converter.getIntegerListFromString(fcw.getString(prefix + "treasureList.mobLevelRangeMax")); }
-	private List<Integer> getTreasureListAmountFlat() { return converter.getIntegerListFromString(fcw.getString(prefix + "treasureList.amountFlat")); }
-	private List<Integer> getTreasureListAmountRandom() { return converter.getIntegerListFromString(fcw.getString(prefix + "treasureList.amountRandom")); }
-	
-	List<Treasure> treasureList = new ArrayList<Treasure>();
-	
-	public class Treasure
-	{
-		int id;
-		int enchantable;
-		int rangeMin;
-		int rangeMax;
-		int amountFlat;
-		int amountRandom;
-		
-		public Treasure(int id_, int enchantable_, int rangeMin_, int rangeMax_, int amountFlat_, int amountRandom_)
-		{
-			id = id_;
-			enchantable = enchantable_;
-			rangeMin = rangeMin_;
-			rangeMax = rangeMax_;
-			amountFlat = amountFlat_;
-			amountRandom = amountRandom_;
-		}
-	}
 	
 	public TreasureConfig()
 	{
@@ -94,89 +61,12 @@ public class TreasureConfig extends ConfigGod
 			
 			//Reset settings.
 			setDropChances(3500,2000,1000,300,100);
-			setEnchantChances(5000,2500,1200,700,300);
-			setEnchantLevelFiveChance(5000, 8000, 9500, 9900);
-			setEnchantLevelFourChance(5540, 8870, 9890);
-			setEnchantLevelThreeChance(8000, 9600);
-			setEnchantLevelTwoChance(9000);
+			setEnchantChances(8000,6000,4000,4000,4000);
+			setEnchantLevelFiveChance(8000,7000,6000,5000);
+			setEnchantLevelFourChance(8000,7000,600);
+			setEnchantLevelThreeChance(8000,7000);
+			setEnchantLevelTwoChance(8000);
 		}
-		
-		if (getVersion() < 0.2)
-		{
-			setVersion(0.2);
-			
-			MaterialLib mLib = FC_Rpg.mLib;
-			int total_mats = MaterialLib.TIER_TOTAL_ITEMS;
-			
-			List<Integer> a = new ArrayList<Integer>();
-			List<Integer> b = new ArrayList<Integer>();
-			List<Integer> c = new ArrayList<Integer>();
-			List<Integer> d = new ArrayList<Integer>();
-			List<Integer> e = new ArrayList<Integer>();
-			List<Integer> f = new ArrayList<Integer>();
-			
-			for (int i = 0; i < 5; i++)
-			{
-				for (int j = 0; j < total_mats; j++)
-				{
-					a.add(mLib.tierList.get(i).get(j).getId());
-					b.add(1);
-					c.add(i * 20);
-					
-					if (i == 4)
-						d.add(999999);
-					else
-						d.add(i * 20 + 20);
-					
-					e.add(1);
-					f.add(0);
-				}
-			}
-			
-			a.add(Material.BOW.getId());
-			b.add(1);
-			c.add(0);
-			d.add(999999);
-			e.add(1);
-			f.add(0);
-			
-			a.add(Material.BREAD.getId());
-			b.add(1);
-			c.add(0);
-			d.add(999999);
-			e.add(1);
-			f.add(1);
-			
-			a.add(Material.COOKED_BEEF.getId());
-			b.add(1);
-			c.add(0);
-			d.add(999999);
-			e.add(1);
-			f.add(1);
-			
-			setTreasureListIDs(a);
-			setTreasureListEnchantable(b);
-			setTreasureListMobLevelRangeMin(c);
-			setTreasureListMobLevelRangeMax(d);
-			setTreasureListAmountFlat(e);
-			setTreasureListAmountRandom(f);
-		}
-		
-		//Load up treasure.
-		loadTreasure();
-	}
-	
-	public void loadTreasure()
-	{
-		List<Integer> a = getTreasureListIDs();
-		List<Integer> b = getTreasureListEnchantable();
-		List<Integer> c = getTreasureListMobLevelRangeMin();
-		List<Integer> d = getTreasureListMobLevelRangeMax();
-		List<Integer> e = getTreasureListAmountFlat();
-		List<Integer> f = getTreasureListAmountRandom();
-		
-		for (int i = 0; i < a.size(); i++)
-			treasureList.add(new Treasure(a.get(i), b.get(i), c.get(i), d.get(i), e.get(i), f.get(i)));
 	}
 	
 	public List<ItemStack> getRandomDrops(int entityLevel)
@@ -246,40 +136,57 @@ public class TreasureConfig extends ConfigGod
 	{
 		//Assign variables
 		Random rand = new Random();
-		Treasure t = treasureList.get(rand.nextInt(treasureList.size()));
+		List<RpgItem> itemList = new ArrayList<RpgItem>();
 		int breakLimit = 0;
 		
-		//Only check if the mobs levle is above 0.
-		if (mobLevel > 0)
+		//We want to remove all items that don't have a range above -1.
+		for (RpgItem ri : FC_Rpg.rpgItemList)
 		{
-			//Get a random item in the treasures mob level range.
-			while (mobLevel < t.rangeMin || mobLevel > t.rangeMax)
+			if (ri.dropLevelMin != -1)
+				itemList.add(ri);
+		}
+		
+		//Return if mob level is less than or equal to 0.
+		if (mobLevel <= 0)
+			return null;
+		
+		//Pick a random rpg item.
+		RpgItem rpgItem = itemList.get(rand.nextInt(itemList.size()));
+		
+		//Get a random item in the treasures mob level range.
+		while (mobLevel < rpgItem.dropLevelMin || mobLevel > rpgItem.dropLevelMax)
+		{
+			rpgItem = itemList.get(rand.nextInt(itemList.size()));
+			
+			breakLimit++;
+			
+			if (breakLimit > 50)
 			{
-				t = treasureList.get(rand.nextInt(treasureList.size()));
-				
-				breakLimit++;
-				
-				if (breakLimit > 50)
-				{
-					//Don't attempt to drop items when dungeons are started with no players (ie, while debugging).
-					if (mobLevel == 999999)
-						return null;
-					
-					FC_Rpg.plugin.getLogger().info("Failed to find item in proper range.");
+				//Don't attempt to drop items when dungeons are started with no players (ie, while debugging).
+				if (mobLevel == 999999)
 					return null;
-				}
+				
+				return null;
 			}
 		}
 		
 		//Create the itemstack
-		drop = new ItemStack(t.id);
+		drop = new ItemStack(rpgItem.getMaterial(), rpgItem.dropAmountFlat);
 		
-		if (t.amountRandom > 0)
-			drop.setAmount(drop.getAmount() + rand.nextInt(t.amountRandom));	//Set it's amount.
+		if (rpgItem.dropAmountRandom > 0)
+			drop.setAmount(drop.getAmount() + rand.nextInt(rpgItem.dropAmountRandom));	//Set it's amount.
 		
 		//If it is enchantable, then we enchant.
-		if (t.enchantable == 1)
+		if (rpgItem.enchantable == true)
+		{
 			drop.addEnchantments(getEnchantment());
+			
+			MaterialLib ml = FC_Rpg.mLib;
+			Material dropType = drop.getType();
+			
+		    if (ml.chestplates.contains(dropType) || ml.leggings.contains(dropType) || ml.helmets.contains(dropType) || ml.boots.contains(dropType))
+				drop.addUnsafeEnchantment(Enchantment.DURABILITY, 5);
+		}
 		
 		return drop;
 	}
@@ -324,19 +231,19 @@ public class TreasureConfig extends ConfigGod
 			
 			//Add that enchantment.
 			if (enchantmentType == 0)
-				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.DAMAGE_ALL);
+				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.DAMAGE_ALL, -1);
 			
 			else if (enchantmentType == 1)
-				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.DAMAGE_UNDEAD);
+				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.DAMAGE_UNDEAD, -1);
 			
 			else if (enchantmentType == 2)
-				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.DAMAGE_ARTHROPODS);
+				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.DAMAGE_ARTHROPODS, -1);
 			
 			else if (enchantmentType == 3)
-				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.KNOCKBACK);
+				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.KNOCKBACK, -1);
 			
 			else if (enchantmentType == 4)
-				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.LOOT_BONUS_MOBS);
+				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.LOOT_BONUS_MOBS, -1);
 		}
 		
 		//Chest - Legging
@@ -346,7 +253,7 @@ public class TreasureConfig extends ConfigGod
 			enchantmentType = rand.nextInt(4);
 			
 			//Add that enchantment.
-			success = addEnchantToEnchantmentMap(enchantmentMap, getProtectionEnchant(enchantmentType));
+			success = addEnchantToEnchantmentMap(enchantmentMap, getProtectionEnchant(enchantmentType), -1);
 		}
 		
 		//Helmet
@@ -357,13 +264,13 @@ public class TreasureConfig extends ConfigGod
 			
 			//Add that enchantment.
 			if (enchantmentType < 4)
-				success = addEnchantToEnchantmentMap(enchantmentMap, getProtectionEnchant(enchantmentType));
+				success = addEnchantToEnchantmentMap(enchantmentMap, getProtectionEnchant(enchantmentType), -1);
 			
 			else if (enchantmentType == 4)
-				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.OXYGEN);
+				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.OXYGEN, -1);
 			
 			else if (enchantmentType == 5)
-				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.WATER_WORKER);
+				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.WATER_WORKER, -1);
 		}
 		
 		//Boots
@@ -374,9 +281,9 @@ public class TreasureConfig extends ConfigGod
 			
 			//Add that enchantment.
 			if (enchantmentType < 4)
-				success = addEnchantToEnchantmentMap(enchantmentMap, getProtectionEnchant(enchantmentType));
+				success = addEnchantToEnchantmentMap(enchantmentMap, getProtectionEnchant(enchantmentType), -1);
 			else if (enchantmentType == 4)
-				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.PROTECTION_FALL);
+				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.PROTECTION_FALL, -1);
 		}
 		
 		//Bows
@@ -387,13 +294,13 @@ public class TreasureConfig extends ConfigGod
 			
 			//Add that enchantment.
 			if (enchantmentType == 0)
-				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.ARROW_DAMAGE);
+				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.ARROW_DAMAGE, -1);
 			
 			else if (enchantmentType == 1)
-				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.ARROW_INFINITE);
+				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.ARROW_INFINITE, -1);
 			
 			else if (enchantmentType == 2)
-				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.ARROW_KNOCKBACK);
+				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.ARROW_KNOCKBACK, -1);
 		}
 		
 		//Pickaxe
@@ -402,9 +309,9 @@ public class TreasureConfig extends ConfigGod
 			enchantmentType = rand.nextInt(4);
 			
 			if (enchantmentType < 3)
-				success = addEnchantToEnchantmentMap(enchantmentMap, getToolEnchantment(enchantmentType));
+				success = addEnchantToEnchantmentMap(enchantmentMap, getToolEnchantment(enchantmentType), -1);
 			else if (enchantmentType == 3)
-				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.SILK_TOUCH);
+				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.SILK_TOUCH, -1);
 		}
 		
 		//Axe - Shovel
@@ -412,7 +319,7 @@ public class TreasureConfig extends ConfigGod
 		{
 			enchantmentType = rand.nextInt(3);
 			
-			success = addEnchantToEnchantmentMap(enchantmentMap, getToolEnchantment(enchantmentType));
+			success = addEnchantToEnchantmentMap(enchantmentMap, getToolEnchantment(enchantmentType), -1);
 		}
 		
 		return success;
@@ -444,12 +351,15 @@ public class TreasureConfig extends ConfigGod
 			return Enchantment.PROTECTION_PROJECTILE;
 	}
 	
-	private boolean addEnchantToEnchantmentMap(Map<Enchantment, Integer> enchantmentMap, Enchantment enchant)
+	private boolean addEnchantToEnchantmentMap(Map<Enchantment, Integer> enchantmentMap, Enchantment enchant, int enchantStrength)
 	{
 		if (enchantmentMap.containsKey(enchant))
 			return false;
 		
-		enchantmentMap.put(enchant, getEnchantStrength(enchant.getMaxLevel()));
+		if (enchantStrength > 0)
+			enchantmentMap.put(enchant, enchantStrength);
+		else
+			enchantmentMap.put(enchant, getEnchantStrength(enchant.getMaxLevel()));
 		
 		return true;
 	}
@@ -475,8 +385,9 @@ public class TreasureConfig extends ConfigGod
 	private int getEnchantStrength(int maxEnchantmentLevels)
 	{
 		//Variable Declarations
-		int strength = rand.nextInt(randomConstant);
+		int strength;
 		List<Integer> strengthChance = new ArrayList<Integer>();
+		int finalEnchantStrength = 1;
 		
 		//Return a chance to add an enchantment
 		if (maxEnchantmentLevels == 5)
@@ -493,12 +404,14 @@ public class TreasureConfig extends ConfigGod
 		
 		for (int i = 0; i < strengthChance.size(); i++)
 		{
-			if (strength < strengthChance.get(i))
-				return i + 1;
+			strength = rand.nextInt(randomConstant);
+			
+			if (strengthChance.get(i) < strength)
+				finalEnchantStrength += 1;
 		}
 		
 		//Always return 1 by default if no enchant was found.
-		return 1;
+		return finalEnchantStrength;
 	}
 }
 

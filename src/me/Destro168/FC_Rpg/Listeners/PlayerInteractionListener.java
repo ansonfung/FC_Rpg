@@ -6,7 +6,6 @@ import me.Destro168.FC_Rpg.Configs.WorldConfig;
 import me.Destro168.FC_Rpg.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.Events.DungeonEvent;
 import me.Destro168.FC_Rpg.Util.FC_RpgPermissions;
-import me.Destro168.FC_Rpg.Util.RpgMessageLib;
 import me.Destro168.FC_Suite_Shared.ColorLib;
 import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 
@@ -19,27 +18,40 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 
 public class PlayerInteractionListener implements Listener
 {
+	PlayerInteractEvent event;
 	Player player;
 	MessageLib msgLib;
 	WorldConfig wm;
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onClick(PlayerInteractEvent event)
+	public void teleportHandler(PlayerInteractEvent event_)
 	{
 		//Check world.
+		event = event_;
 		player = event.getPlayer();
 		
 		if (!FC_Rpg.worldConfig.getIsRpgWorld(player.getWorld().getName()))
 			return;
 		
+		teleportHandler();
+		
+		if (FC_Rpg.generalConfig.getCreativeControl() && wm.isCreativeWorld(player.getWorld()))
+			creativeControlHander();
+		
+		spellHandler();
+		selectionHandler();
+		spendRecord();
+	}
+	
+	public void teleportHandler()
+	{
 		//Variable Declerations
 		Sign sign;
 		Block block;
-		FC_RpgPermissions perms = new FC_RpgPermissions(player);
-		Boolean allowUse = true;
 		wm = new WorldConfig();
 		
 		//Initialize variables
@@ -58,9 +70,14 @@ public class PlayerInteractionListener implements Listener
 			parseSignClick(sign);
 			return;
 		}
-		
+	}
+	
+	public void creativeControlHander()
+	{
 		//Initialize msgLib.
-		msgLib = new RpgMessageLib(player);
+		MessageLib msgLib = new MessageLib(player);
+		FC_RpgPermissions perms = new FC_RpgPermissions(player);
+		Boolean allowUse = true;
 		
 		//Blacklist items that can't be used.
 		if (player.getItemInHand().getType() == Material.MONSTER_EGG || player.getItemInHand().getType() == Material.MONSTER_EGGS)
@@ -78,9 +95,6 @@ public class PlayerInteractionListener implements Listener
 		
 		if (allowUse == false)
 		{
-			if (!wm.isCreativeWorld(player.getWorld()))
-				return;
-			
 			//Inform the player they can't use eggs, cancel the event, and return if they aren't admin.
 			if (!perms.isAdmin())
 			{
@@ -95,32 +109,43 @@ public class PlayerInteractionListener implements Listener
 		}
 	}
 	
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onClick2(PlayerInteractEvent event)
+	public void spellHandler()
 	{
 		//Check world.
 		player = event.getPlayer();
 		
-		if (!FC_Rpg.worldConfig.getIsRpgWorld(player.getWorld().getName()))
-			return;
-		
 		//Variable declarations.
 		RpgPlayer rp = FC_Rpg.rpgEntityManager.getRpgPlayer(player);
+		boolean autocast = rp.getPlayerConfig().getAutoCast();
 		boolean leftClick = false;
+		boolean hasBow = false;
 		
 		//Act on left and right clicks only.
-		if ((event.getAction() == Action.LEFT_CLICK_AIR) && (!(event.getAction() == Action.LEFT_CLICK_BLOCK)))
+		if ((event.getAction() == Action.LEFT_CLICK_AIR) || (event.getAction() == Action.LEFT_CLICK_BLOCK))
 			leftClick = true;
-		else if ((event.getAction() == Action.RIGHT_CLICK_AIR) && (!(event.getAction() == Action.RIGHT_CLICK_BLOCK)))
+		else if ((event.getAction() == Action.RIGHT_CLICK_AIR) || (event.getAction() == Action.RIGHT_CLICK_BLOCK))
 			leftClick = false;
 		else
 			return;
 		
+		if (player.getItemInHand() != null)
+		{
+			if (player.getItemInHand().getType() == Material.BOW)
+				hasBow = true;
+		}
+		
 		//If they left-clicked, attempt to cast spells.
 		if (leftClick == true)
 		{
+			//If the player has a bow, handle that.
+			if (hasBow == true && !autocast)
+			{
+				rp.prepareSpell(true); //Prepare spell
+				return;
+			}
+			
 			//If auto-cast is enabled, we cast the spell.
-			if (rp.getPlayerConfig().getAutoCast() == true)
+			if (autocast == true)
 			{
 				//Then set active spell.
 				rp.prepareSpell(false);
@@ -141,20 +166,22 @@ public class PlayerInteractionListener implements Listener
 				}
 			}
 		}
-		else
+		else if (leftClick == false && hasBow == false)
 		{
-			//Make sure they use the approriate action before continuing.
-			if (!(event.getAction() == Action.RIGHT_CLICK_AIR) && (!(event.getAction() == Action.RIGHT_CLICK_BLOCK)))
-				return;
-			
 			//If autocast is disabled, then you can prepare.
-			if (rp.getPlayerConfig().getAutoCast() == false)
+			if (autocast == false)
 				rp.prepareSpell(true); //Prepare spell
+			
+			if (hasBow == true)
+			{
+				// If autocast is disabled, then you can prepare.
+				if (autocast)
+					rp.castSpell(null, 0, 0);	//Then cast the spell.
+			}
 		}
 	}
 	
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onClick3(PlayerInteractEvent event)
+	public void selectionHandler()
 	{
 		//Check world.
 		player = event.getPlayer();
@@ -260,7 +287,33 @@ public class PlayerInteractionListener implements Listener
 				teleportPlayer(FC_Rpg.rpgEntityManager.getRpgPlayer(player), sign.getLine(1));
 		}
 	}
-
+	
+	private void spendRecord()
+	{
+		//If record bonuses are disabled or the player has no item in their hand, then return.
+		if (!FC_Rpg.generalConfig.getRecordExpRewards() || player.getItemInHand() == null)
+			return;
+		
+		Material mat = player.getItemInHand().getType();
+		
+		if (FC_Rpg.recordExpBonuses.containsKey(mat))
+		{
+			//Perform calculations
+			RpgPlayer rPlayer = FC_Rpg.rpgEntityManager.getRpgPlayer(player);
+			int expAmount = (int) (rPlayer.getPlayerConfig().getLevelUpAmount() * FC_Rpg.recordExpBonuses.get(mat));
+			
+			//Add experience
+			rPlayer.addClassExperience(expAmount, true);
+			
+			//Message player.
+			MessageLib msgLib = new MessageLib(player);
+			msgLib.infiniteMessage("You have just consumed a record for ",expAmount + ""," experience.");
+			
+			//Consume the record.
+			player.setItemInHand(new ItemStack(Material.AIR));
+		}
+	}
+	
 	//Teleports players based on sign text.
 	private void teleportPlayer(RpgPlayer rpgPlayer, String text)
 	{

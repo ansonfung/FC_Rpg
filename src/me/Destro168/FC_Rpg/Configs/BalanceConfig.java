@@ -248,15 +248,15 @@ public class BalanceConfig extends ConfigGod
 			//Set version
 			setVersion(1.0);
 			
-			setDifficultyScalor(500);	//500 = roughly 20% increase from 0-100.
+			setDifficultyScalor(100);	//500 = roughly 20% increase from 0-100.
 			setRandomMobLevelDeviation(2);
 			setPowerLevelPrevention(5);
 			setGlobalExpMultiplier(1);
-			setWitherLevelBonus(100);
-			setEnderDragonLevelBonus(50);
+			setWitherLevelBonus(10);
+			setEnderDragonLevelBonus(100);
 			setDefaultItemDrops(true);
 			setArrowKnockback(false);
-			setBonusPercentCap(3);
+			setBonusPercentCap(2);
 			setEnchantmentMultiplierSharpness(0.02);
 			setEnchantmentMultiplierBane(0.02);
 			setEnchantmentMultiplierSmite(0.02);
@@ -276,18 +276,16 @@ public class BalanceConfig extends ConfigGod
 			setPlayerStatsPerLevel(10);
 			setPlayerExpScaleRate(3);
 			setPlayerExpScaleBase(11);
-			//Use magicmultiplier for spells to set damage.
 			
-			setMobAttackHardMultiplier(2);
+			setMobAttackHardMultiplier(5);
 			setMobConstitutionMultiplier(100);
-			setMobLootPercentStronger(0.2D);
-			setMobLootPercentWeaker(0.166667D);
-			
-			setMobSpawnWithItemChance(20);
-			setMobSpawnWithEnchantsChance(40);
+			setMobLootPercentStronger(0.1D);
+			setMobLootPercentWeaker(0.1D);
+			setMobSpawnWithItemChance(50);
+			setMobSpawnWithEnchantsChance(50);
 			setMobCashMultiplier(.8);
 			setMobExpMultiplier(1);
-		
+			
 			setSwordMultiplierWood(1.25);
 			setSwordMultiplierStone(1.5);
 			setSwordMultiplierIron(1.75);
@@ -310,19 +308,19 @@ public class BalanceConfig extends ConfigGod
 			setArmorMultiplierLH(.01);
 			setArmorMultiplierLL(.015);
 			setArmorMultiplierLC(.02);
-
+			
 			//CHAIN - 10% total, 1%, 2%, 3%, 4%
 			setArmorMultiplierCB(.01);
 			setArmorMultiplierCH(.02);
 			setArmorMultiplierCL(.03);
 			setArmorMultiplierCC(.04);
-
+			
 			//IRON - 15% total, 1.5, 3, 4.5, 6
 			setArmorMultiplierIB(.015);
 			setArmorMultiplierIH(.03);
 			setArmorMultiplierIL(.045);
 			setArmorMultiplierIC(.06);
-
+			
 			//DIAMOND - 20% total, 2,4,6,8
 			setArmorMultiplierDB(.02);
 			setArmorMultiplierDH(.04);

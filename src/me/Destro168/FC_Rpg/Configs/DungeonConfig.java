@@ -28,7 +28,18 @@ public class DungeonConfig extends ConfigGod
 	public void setTreasureStart(int dNum, int index, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"treasure.start." + index,world,x,y,z,a,b); }
 	public void setTreasureEnd(int dNum, int index, String world, double x, double y, double z, float a, float b) { setLocation(dNum,"treasure.end." + index,world,x,y,z,a,b); }
 	
-	public int setSpawnBox1(int dNum, String world, double x, double y, double z, float a, float b)
+	public void setSpawnBoxesNull(int dNum, int index)
+	{
+		fcw.set(getDP(dNum) + "spawnBox.selection1." + index, null);
+		fcw.set(getDP(dNum) + "spawnBox.selection2." + index, null);
+	}
+	
+	public void setSpawnBox1(int dNum, int index, String world, double x, double y, double z, float a, float b)
+	{
+		setLocation(dNum,"spawnBox.selection1." + index,world,x,y,z,a,b);
+	}
+	
+	public int setSpawnBox1Empty(int dNum, String world, double x, double y, double z, float a, float b)
 	{
 		//Variable Declarations
 		int emptyIndex = 0;
@@ -172,7 +183,7 @@ public class DungeonConfig extends ConfigGod
 				setBossSpawn(i,worldName,0,0,0,0,0);
 				setTreasureStart(i,0,worldName,0,0,0,0,0);
 				setTreasureEnd(i,0,worldName,0,0,0,0,0);
-				int maxIndex = setSpawnBox1(i,worldName,0,0,0,0,0);
+				int maxIndex = setSpawnBox1Empty(i,worldName,0,0,0,0,0);
 				setSpawnBox2(i,maxIndex,worldName,0,0,0,0,0);
 				setSpawnChance(i,maxIndex,100);
 				

@@ -190,7 +190,7 @@ public class RpgPlayer extends RpgEntity
 			msgLib.standardMessage("Your stat points are automatically distributed!");
 		
 		//Send the player some usefull information.
-		msgLib.standardMessage("Type /rpg if you need help!");
+		msgLib.standardMessage("Type /rpghelp to see all help!");
 		
 		//Fully heal the player.
 		healFull();
@@ -266,7 +266,8 @@ public class RpgPlayer extends RpgEntity
 	public void addClassExperience(double x, boolean displayLevelUpMessage)
 	{
 		//Add the class experience
-		playerConfig.addOfflineClassExperience(x, displayLevelUpMessage);
+		if (playerConfig.addOfflineClassExperience(x, displayLevelUpMessage, this) == false)
+			return;
 		
 		//Update Donator Stats
 		updateDonatorStats();
@@ -392,10 +393,10 @@ public class RpgPlayer extends RpgEntity
 		base[3] = tempIntelligence;
 		
 		//Update them.
-		tempAttack = (int) (getTotalAttack() * buffStrength);
-		tempMagic = (int) (getTotalMagic() * buffStrength);
-		tempConstitution = (int) (getTotalConstitution() * buffStrength);
-		tempIntelligence = (int) (getTotalIntelligence() * buffStrength);
+		tempAttack += (int) (getTotalAttack() * buffStrength);
+		tempMagic += (int) (getTotalMagic() * buffStrength);
+		tempConstitution += (int) (getTotalConstitution() * buffStrength);
+		tempIntelligence += (int) (getTotalIntelligence() * buffStrength);
 		
 		//Message lib.
 		msgLib.standardMessage("The support spell has been applied to you!");
@@ -440,12 +441,12 @@ public class RpgPlayer extends RpgEntity
 			curMana = maxMana;
 	}
 	
-	public void heal(double d)
+	public void healHealthAndMana(double d)
 	{
 		//Update health and mana.
 		calculateHealthAndMana();
 		
-		restoreHealth(d);
+		healHealth(d);
 		restoreMana(d);
 	}
 	
@@ -493,7 +494,7 @@ public class RpgPlayer extends RpgEntity
 			curMana = maxMana;
 	}
 	
-	public void restoreHealth(double amount) 
+	public void healHealth(double amount) 
 	{
 		//Update health and mana.
 		calculateHealthAndMana();
@@ -643,11 +644,15 @@ public class RpgPlayer extends RpgEntity
 	
 	public void attemptHealOtherNotification(RpgPlayer healTarget)
 	{
-		String[] d = getRemainingX(curMana,maxMana,1);
+		if (getCanNotify(lastHealNotification) == false)
+			return;
+		
+		lastHealNotification = new Date();
+		
+		//String[] d = getRemainingX(curMana,maxMana,1);
 		String[] p = getRemainingX(healTarget.getCurHealth(),healTarget.getMaxHealth(),0);
 		
-		msgLib.infiniteMessage("[","-Healed Other-","] MP: ",String.valueOf(curMana),
-				d[0],d[1],d[2],d[3],d[4],d[5], " / Target HP: (",
+		msgLib.infiniteMessage("[","-Healed Other-","]  / Target HP: (",
 				p[0],p[1],p[2],p[3],p[4],p[5]);
 	}
 	
@@ -745,13 +750,6 @@ public class RpgPlayer extends RpgEntity
 		Date now = new Date();
 		WorldConfig wm = new WorldConfig();
 		List<ItemStack> timedItems = FC_Rpg.generalConfig.getTimedItems();
-		String itemText = "item";
-		
-		//If there are no hourly items, then return.
-		if (timedItems.size() == 0)
-			return;
-		if (timedItems.size() > 1)
-			itemText += "s";
 		
 		//Only give steak in rpg world.
 		if (!wm.getIsRpgWorld(player.getWorld().getName()))
@@ -763,7 +761,7 @@ public class RpgPlayer extends RpgEntity
 			for (ItemStack hourlyItem : timedItems)
 				addItemToInventory(hourlyItem);
 			
-			msgLib.standardMessage("Timed item(s), " + itemText + ", given to you!");
+			msgLib.standardMessage("Timed item(s) given to you!");
 			
 			//Update last ate time.
 			playerConfig.setLastRecievedHourlyItems(now.getTime());

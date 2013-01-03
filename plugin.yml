@@ -1,6 +1,6 @@
 name: FC_Rpg
 main: me.Destro168.FC_Rpg.FC_Rpg
-version: 1.14
+version: 1.21
 description: Handles RPG aspects of the server.
 commands:
    class:
@@ -9,6 +9,8 @@ commands:
       description: This command accesses donator commands.
    dungeon:
       description: This command accesses dungeon commands.
+   de:
+      description: This command accesses dungeon extra commands.
    players:
       description: This command displays online players.
    faq:
@@ -31,7 +33,9 @@ commands:
       description: This command accesses pvp commands.
    reset:
       description: This command resets an RPG players class.
-   rpg:
+   rpgHelp:
+      description: This command shows all commands available.
+   rAdmin:
       description: This command handles all admin commands.
    spell:
       description: This command accesses spell commands.

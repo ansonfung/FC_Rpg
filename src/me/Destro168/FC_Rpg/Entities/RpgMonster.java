@@ -17,6 +17,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 
 public class RpgMonster extends RpgEntity
@@ -98,7 +99,7 @@ public class RpgMonster extends RpgEntity
 		// Variable Assignment
 		entity = entity_;
 		mac = new MobAggressionCheck(entity.getType());
-
+		
 		// Variable Declarations
 		Random levelDeviation = new Random();
 		boolean calculateModifierByArea = true;
@@ -120,7 +121,7 @@ public class RpgMonster extends RpgEntity
 				}
 			}
 		}
-
+		
 		if (calculateModifierByArea == true)
 		{
 			// Set the modifier by mob location.
@@ -173,16 +174,17 @@ public class RpgMonster extends RpgEntity
 	public void checkEquipment()
 	{
 		//Variable declarations.
+		EntityEquipment equip = entity.getEquipment();
 		double constitutionModifier = 1;
 		
 		//Update attack by weapon.
-		checkWeapon(MobEquipment.getWeapon(entity));
+		checkWeapon(equip.getItemInHand());
 		
 		//Update constitution and attack based on equipment.
-		constitutionModifier += checkItem(MobEquipment.getBoots(entity));
-		constitutionModifier += checkItem(MobEquipment.getChestplate(entity));
-		constitutionModifier += checkItem(MobEquipment.getHelmet(entity));
-		constitutionModifier += checkItem(MobEquipment.getPants(entity));
+		constitutionModifier += checkItem(equip.getBoots());
+		constitutionModifier += checkItem(equip.getChestplate());
+		constitutionModifier += checkItem(equip.getHelmet());
+		constitutionModifier += checkItem(equip.getLeggings());
 		
 		//Update constitution.
 		constitution = (int) (constitution * constitutionModifier);
@@ -234,7 +236,7 @@ public class RpgMonster extends RpgEntity
 	{
 		DistanceModifierLib dml = new DistanceModifierLib();
 		WorldConfig wm = new WorldConfig();
-
+		
 		if (!wm.getIsRpgWorld(entity.getWorld().getName()))
 			return;
 
@@ -253,8 +255,6 @@ public class RpgMonster extends RpgEntity
 		
 		for (ItemStack drop : drops)
 			dropSpot.getWorld().dropItem(dropSpot, drop); // Drop the item.
-		
-		dropExperience();
 	}
 	
 	public void handlePassiveMobDrops(Location dropSpot)
@@ -302,8 +302,6 @@ public class RpgMonster extends RpgEntity
 		{
 			dropPassiveItem(Material.BONE, dropSpot);
 		}
-		
-		dropExperience();
 	}
 	
 	public void dropExperience()

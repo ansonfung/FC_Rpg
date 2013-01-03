@@ -1,7 +1,6 @@
 package me.Destro168.FC_Rpg.Util;
 
 import me.Destro168.FC_Rpg.FC_Rpg;
-import me.Destro168.FC_Rpg.Entities.MobEquipment;
 import me.Destro168.FC_Rpg.Entities.RpgMonster;
 import me.Destro168.FC_Rpg.Entities.RpgPlayer;
 
@@ -9,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
@@ -61,20 +61,20 @@ public class BattleCalculations
 		armorBonus -= getArmorPieceBonus(player.getInventory().getLeggings(), constitution);
 		armorBonus -= getArmorPieceBonus(player.getInventory().getChestplate(), constitution);
 		armorBonus -= getArmorPieceBonus(player.getInventory().getBoots(), constitution);
-
+		
 		return armorBonus;
 	}
 
 	public double getArmorBonus(RpgMonster rpgMonster)
 	{
-		LivingEntity entity = rpgMonster.getEntity();
+		EntityEquipment entityEquipment = rpgMonster.getEntity().getEquipment();
 		double armorBonus = 1;
 		int constitution = rpgMonster.getConstitution();
-
-		armorBonus -= getArmorPieceBonus(MobEquipment.getHelmet(entity), constitution);
-		armorBonus -= getArmorPieceBonus(MobEquipment.getPants(entity), constitution);
-		armorBonus -= getArmorPieceBonus(MobEquipment.getChestplate(entity), constitution);
-		armorBonus -= getArmorPieceBonus(MobEquipment.getBoots(entity), constitution);
+		
+		armorBonus -= getArmorPieceBonus(entityEquipment.getHelmet(), constitution);
+		armorBonus -= getArmorPieceBonus(entityEquipment.getLeggings(), constitution);
+		armorBonus -= getArmorPieceBonus(entityEquipment.getChestplate(), constitution);
+		armorBonus -= getArmorPieceBonus(entityEquipment.getBoots(), constitution);
 		
 		return armorBonus;
 	}
@@ -91,7 +91,7 @@ public class BattleCalculations
 	{
 		if (armor.equals(Material.LEATHER_BOOTS))
 			return FC_Rpg.balanceConfig.getArmorMultiplierLB();
-
+		
 		else if (armor.equals(Material.LEATHER_HELMET))
 			return FC_Rpg.balanceConfig.getArmorMultiplierLH();
 
@@ -101,7 +101,7 @@ public class BattleCalculations
 		else if (armor.equals(Material.LEATHER_CHESTPLATE))
 			return FC_Rpg.balanceConfig.getArmorMultiplierLC();
 
-		if (constitution > 124)
+		if (constitution >= FC_Rpg.balanceConfig.getArmorWearRequirementChain())
 		{
 			if (armor.equals(Material.CHAINMAIL_BOOTS))
 				return FC_Rpg.balanceConfig.getArmorMultiplierCB();
@@ -116,7 +116,7 @@ public class BattleCalculations
 				return FC_Rpg.balanceConfig.getArmorMultiplierCC();
 		}
 
-		if (constitution > 249)
+		if (constitution >= FC_Rpg.balanceConfig.getArmorWearRequirementIron())
 		{
 			if (armor.equals(Material.IRON_BOOTS))
 				return FC_Rpg.balanceConfig.getArmorMultiplierIB();
@@ -130,8 +130,8 @@ public class BattleCalculations
 			else if (armor.equals(Material.IRON_CHESTPLATE))
 				return FC_Rpg.balanceConfig.getArmorMultiplierIC();
 		}
-
-		if (constitution > 374)
+		
+		if (constitution >= FC_Rpg.balanceConfig.getArmorWearRequirementDiamond())
 		{
 			if (armor.equals(Material.DIAMOND_BOOTS))
 				return FC_Rpg.balanceConfig.getArmorMultiplierDB();
@@ -145,8 +145,8 @@ public class BattleCalculations
 			else if (armor.equals(Material.DIAMOND_CHESTPLATE))
 				return FC_Rpg.balanceConfig.getArmorMultiplierDC();
 		}
-
-		if (constitution > 499)
+		
+		if (constitution >= FC_Rpg.balanceConfig.getArmorWearRequirementGold())
 		{
 			if (armor.equals(Material.GOLD_BOOTS))
 				return FC_Rpg.balanceConfig.getArmorMultiplierGB();
@@ -180,12 +180,13 @@ public class BattleCalculations
 
 	public double getArmorEnchantmentBonus(LivingEntity entity, Enchantment enchant)
 	{
+		EntityEquipment entityEquipment = entity.getEquipment();
 		double bonus = 1;
 		
-		bonus -= getEnchantValue(MobEquipment.getHelmet(entity), enchant);
-		bonus -= getEnchantValue(MobEquipment.getChestplate(entity), enchant);
-		bonus -= getEnchantValue(MobEquipment.getPants(entity), enchant);
-		bonus -= getEnchantValue(MobEquipment.getBoots(entity), enchant);
+		bonus -= getEnchantValue(entityEquipment.getHelmet(), enchant);
+		bonus -= getEnchantValue(entityEquipment.getChestplate(), enchant);
+		bonus -= getEnchantValue(entityEquipment.getLeggings(), enchant);
+		bonus -= getEnchantValue(entityEquipment.getBoots(), enchant);
 		
 		return bonus;
 	}
@@ -255,7 +256,7 @@ public class BattleCalculations
 	
 	public double getEntityEnchantmentBonus(LivingEntity entity, Enchantment enchant)
 	{
-		ItemStack checkItem = MobEquipment.getWeapon(entity);
+		ItemStack checkItem = entity.getEquipment().getItemInHand();
 		
 		if (checkItem == null)
 			return 1;
