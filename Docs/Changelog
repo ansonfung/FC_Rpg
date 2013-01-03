@@ -2,6 +2,7 @@
 
 Version 1.2-1.21:
 
+- Updated to CB Beta 1.4.6-R0.3
 - Player levelups will no longer be broadcast when lower than level 50. They get personal messages.
 - Records can be used to give experience if new balanceconfig setting is enabled (enabled by default).
 - Test -> Add protection enchantment to armor.
