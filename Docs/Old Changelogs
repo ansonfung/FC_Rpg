@@ -1,5 +1,67 @@
 ~ FC_Rpg Old Changelogs ~
 
+Version 1.2-1.21:
+
+- Updated to CB Beta 1.4.6-R0.3
+- Player levelups will no longer be broadcast when lower than level 50. They get personal messages.
+- Records can be used to give experience if new balanceconfig setting is enabled (enabled by default).
+- Test -> Add protection enchantment to armor.
+- Heal spells no longer super overpowered.
+- Refixed power level prevention setting for mobs being too weak so they don't give rpg items or gold or exp.
+- Updated mobWorld setting for worlds. Updated use in help.
+- New custom chat format exclusion list that can be used to bypass chat for plugins. Don't change if you don't understand chat formats.
+
+Version 1.17-1.19:
+
+- Few commands renamed, /rpg to rpgHelp and rAdmin. Dungeon extra put into /de.
+- Many bug fixes.
+
+Version 1.16:
+
+General:
+- Mob spawns will start and stop on world change for players by FC_Rpg.
+
+Spells:
+- Assassinate replaced with Frost, a powerful aoe freezing skill. Should fit the archer role well.
+
+Version 1.15:
+
+Going to start keeping track of configs that need updated per version.
+Configs edited: ClassConfig, SpellConfig, BalanceConfig
+
+- Heavily decreased chance for endermen to spawn with bonus mob spawn setting. They were annoying, end of story :/
+- Chance mobs spawn with items increased to 50% by default.
+- Chance for mobs to spawn with enchants increased to 50% by default.
+- Fixed timed item message string.
+- Fixed and updated spells invigorate and remedy. Invigorate was bugged and gave major stats. Fresh spell configs will have the changes.
+- Fixed heal other message that was buggy.
+- The effect id for heal_other is now retired. It is 1010 for those interested in using the spell still on maybe a healer type class? There are now three heals if you want to create a dedicated healer class. Hoping to add more effect ids at a later time.
+- Alchemy prices updated further. More balanced, less exploitable. Suggestions always welcome in this area.
+- Alchemy buy list is sorted now before
+- Experimental spell balance changes. Majority of buff spells durations rebalanced and mana costs rebalanced.
+- Speed from assassin spell scaled a bit.
+- Updated default generated restriction ids in class config.
+- Added new setting that prevents spells from being cast if set to true. Alchemy has this setting by default "uncastable".
+- Added notifications when buffs end.
+- Removed obsolete debug variable.
+- Fixed poison spell. Was broken, now works as description says.
+- Using the donator respecialize command will reset arcanium down to 0. This is to prevent respecing into max alchemy when convenient.
+- Mob spawns are now varied for all distances from spawn. Makes things more exciting overall with bonus mob spawn setting enabled.
+- Rebalanced bonus amount of money given from mobs stronger than you. 50% is the top now if you are killing mobs 5 levels higher rather than the old 100%.
+- Updated interact event to be more efficient.
+- Can now click on blocks to prepare a spell. Before you had to click air.
+- Assassins now have reverse autocast and spell prepare procedures when holding a bow. This is to help with the casting of offensive spells with a bow.
+- Mage fireballs now have a radius of 2.
+- Mage remedy and invigorate spells don't need a stick anymore.
+
+Experience/Gold from mob drops:
+- Heavy changes to default experience and gold values given in balance config.
+- Mob experience and loot are now divided on the individual level. This means that power level prevention will only apply to players.
+- Players by themselves no longer have to worry about power level prevention when killing mobs. Players in guilds have to worry about it. The idea behind power level prevention was to stop a level 100 from killing level 100s to raise the level of a level 1 really fast.
+- Bosses still bypass power level prevention up to the bonus amount cap.
+- Drops for guilds are no longer global once more. You have to be within 40 range of the guild leader to get the split drops.
+- Mob difficulty and scaling made to be quite a bit harder to really help prevent players from killing monsters several levels above them very easily. Mobs hit harder at all levels, and scale to hit harder.
+
 Version 1.11 - 1.14:
 
 - Renamed /list to /players. Renamed /hat to /head. These are to prevent plugin conflicts and because for some reason /list was buggy on larger servers, no idea why. Everything updated, including permissions and settings to match.

@@ -98,7 +98,7 @@ public class FC_Rpg extends JavaPlugin
 	//Uncommon class globals.
 	public static FC_Rpg plugin;
 	public static RpgEntityManager rpgEntityManager;
-	public static GuildConfig guildManager;
+	public static GuildConfig guildConfig;
 	public static SpellConfig spellConfig;
 	public static ClassConfig classConfig;
 	public static GeneralConfig generalConfig;
@@ -194,7 +194,7 @@ public class FC_Rpg extends JavaPlugin
 		
 		worldConfig = new WorldConfig();
 		rpgBroadcast = new RpgBroadcast();
-		guildManager = new GuildConfig();
+		guildConfig = new GuildConfig();
 		pvp = new PvpEvent();
 		spellConfig = new SpellConfig();
 		classConfig = new ClassConfig();
@@ -208,8 +208,8 @@ public class FC_Rpg extends JavaPlugin
 		setupEconomy();
 		
 		// Initialize dungeons.
-		initializeDungeons();
-
+		dungeonConfig.initializeDungeons();
+		
 		// Register Listeners
 		getServer().getPluginManager().registerEvents(new FishingListener(), plugin);
 		getServer().getPluginManager().registerEvents(new HealthRegenListener(), plugin);
@@ -250,7 +250,7 @@ public class FC_Rpg extends JavaPlugin
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordGuild()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordPvp()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordReset()).setExecutor(commandCE);
-		getCommand(FC_Rpg.generalConfig.getCommandKeyWordRpgHelp()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordRpg()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordRAdmin()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordSpell()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordAlchemy()).setExecutor(commandCE);
@@ -760,7 +760,7 @@ public class FC_Rpg extends JavaPlugin
 				else if (event.getRegainReason() == RegainReason.WITHER_SPAWN)
 				{
 					if (rpgEntityManager.getRpgMonster((LivingEntity) entity) == null)
-						rpgEntityManager.registerCustomLevelEntity((LivingEntity) entity, 50, true);
+						rpgEntityManager.registerCustomLevelEntity((LivingEntity) entity, 0, 50, true);
 					
 					rpgEntityManager.getRpgMonster((LivingEntity) entity).restoreHealth(999999999);
 					((LivingEntity) entity).setHealth(300);
@@ -1120,36 +1120,6 @@ public class FC_Rpg extends JavaPlugin
 				}
 			}
 		}
-	}
-	
-	private void initializeDungeons()
-	{
-		// Variable Declarations/Initializations
-		String ref = "";
-		int count = 0;
-		trueDungeonNumbers = new HashMap<Integer, Integer>();
-		
-		// Attempt to store all dungeon names.
-		for (int i = 0; i < 1000; i++)
-		{
-			ref = FC_Rpg.dungeonConfig.getName(i);
-			
-			if (ref != null)
-			{
-				trueDungeonNumbers.put(i, count);
-				count++;
-			}
-		}
-
-		// Store number of dungeons.
-		dungeonCount = trueDungeonNumbers.size();
-
-		// Create dungeonEvents based on size of dungeons.
-		dungeonEventArray = new DungeonEvent[dungeonCount];
-
-		// Initate the dungeons.
-		for (int i = 0; i < dungeonCount; i++)
-			dungeonEventArray[i] = new DungeonEvent(i);
 	}
 	
 	private Boolean setupEconomy()

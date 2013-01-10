@@ -273,6 +273,9 @@ public class SpellCaster
 		else if (x == EffectIDs.HEAL_OTHER)
 			effect_Heal_Other();
 		
+		else if (x == EffectIDs.HEAL_SELF_PERCENT)
+			effect_Heal_Self_Percent();
+		
 		return true;
 	}
 	
@@ -456,7 +459,7 @@ public class SpellCaster
 					{
 						if (rpgMobDefender != null)
 						{
-							edm.attackPlayerDefender(rpgCaster, finalPlayerDefender, null, finalDamage, 3);
+							edm.attackPlayerDefender(rpgCaster, finalPlayerDefender, null, finalDamage, 3, finalPlayerDefender.getPlayer().getName());
 						}
 					}
 				}, i * 20);
@@ -516,7 +519,7 @@ public class SpellCaster
 					{
 						if (rpgMobDefender != null)
 						{
-							edm.attackPlayerDefender(rpgCaster, finalPlayerDefender, null, finalDamage, 3);
+							edm.attackPlayerDefender(rpgCaster, finalPlayerDefender, null, finalDamage, 3, finalPlayerDefender.getPlayer().getName());
 						}
 					}
 				}, i * 20 + 20);
@@ -636,6 +639,14 @@ public class SpellCaster
 			rpgDefender.healHealth(rpgDefender.getMaxHealth() * finalSpellMagnitude);
 			rpgCaster.attemptHealOtherNotification(rpgDefender);
 		}
+	}
+	
+	private void effect_Heal_Self_Percent()
+	{
+		double healAmount = rpgCaster.getMaxHealth() * finalSpellMagnitude;
+		
+		rpgCaster.healHealth(healAmount);
+		rpgCaster.attemptHealSelfNotification(healAmount);
 	}
 	
 	private void effect_Boost_Stats()

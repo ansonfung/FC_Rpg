@@ -43,7 +43,7 @@ a: Command Usage:
     
     All of the permissions for the plugin are inside of the doc folder inside of FC_Rpg.jar Just unzip FC_Rpg to gain access to the docs folder. Most permissions are related to commands but there are a few non-command related permissions.
 	
-	The first command you will need to run is /rpg wall. Find yourself a nice clear area that won't be griefed and type /rpg wall. This command is more like a board... if you fly like 5 blocks into the air and type it you will be more than fine. I would just try not to use it DIRECTLY next to something as it creates an unremovable board.
+	The first command you will need to run is /radmin wall. Find yourself a nice clear area that won't be griefed and type /radmin wall. This command is more like a board... if you fly like 5 blocks into the air and type it you will be more than fine. I would just try not to use it DIRECTLY next to something as it creates an unremovable board. You will need to select your class off of the new board that you generated. Class selection is done through signs.
 	
 	The next command you will likely need to use is /world levelone. Go find a spot where you want level 1 monsters to spawn and type in /world levelone.
 	
@@ -137,7 +137,7 @@ c: Configuring World.yml
 - spawn - The spawn location for the world.
 - levelOne: This is the point where mobs will spawn at level one. Mobs will become stronger as they move away from this location.
 
-Please note that there are commands in-game in the /rpg admin section and /rpg owner section that will help you greatly in setting the spawn and levelOne settings.
+Please note that there are commands in-game in the /radmin section section that will help you greatly in setting the spawn and levelOne settings.
 
 III: Intermediate Steps
 
@@ -270,7 +270,7 @@ g. Configuring Warps.yml
 
 The Warp section allows you to list out warps you want on your server. The following is the format for a warp sign: http://dev.bukkit.org/thumbman/images/47/305/600x434/2012-09-23_01.33.22.png.-m1.png. Note that the brackets around the warp name are optional.
 
-By default your configuration file will create warps to all of your worlds. This means you can access world spawns with the /rpg tpworld [world] command and through signs. Worlds are listed numerically from 0 to 1000. Simply add a new world by following the previous structure of world nodes and then change the settings to what you would like.
+By default your configuration file will create warps to all of your worlds. This means you can access world spawns with the /radmin tpworld [world] command and through signs. Worlds are listed numerically from 0 to 1000. Simply add a new world by following the previous structure of world nodes and then change the settings to what you would like.
 
 - name - Set the name of the warp
 - description - Give the warp a description. There is no limit to how many lines you add to the description. Don't add the [&id + some numbers] part to additional descriptions.

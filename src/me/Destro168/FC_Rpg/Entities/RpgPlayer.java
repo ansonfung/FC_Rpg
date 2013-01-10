@@ -1,5 +1,6 @@
 package me.Destro168.FC_Rpg.Entities;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -21,13 +22,13 @@ import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class RpgPlayer extends RpgEntity
 {
+	private List<String> queuedHealMessage;
 	private MessageLib msgLib;
 	private ItemStack air;
 	private Player player;
@@ -190,7 +191,7 @@ public class RpgPlayer extends RpgEntity
 			msgLib.standardMessage("Your stat points are automatically distributed!");
 		
 		//Send the player some usefull information.
-		msgLib.standardMessage("Type /rpghelp to see all help!");
+		msgLib.standardMessage("Type /" + FC_Rpg.generalConfig.getCommandKeyWordRpg() + " to see all help!");
 		
 		//Fully heal the player.
 		healFull();
@@ -608,28 +609,32 @@ public class RpgPlayer extends RpgEntity
 		return true;
 	}
 	
-	public void attemptAttackNotification(EntityType type, int level, double minHp, double maxHp, double damage)
+	public void attemptAttackNotification(String type, int level, double minHp, double maxHp, double damage)
 	{
 		if (getCanNotify(lastAttackNotification) == false)
 			return;
 		
-		String[] p = getRemainingX(minHp,maxHp,0);
+		String[] p = playerConfig.getRemainingX(minHp,maxHp,0);
 		lastAttackNotification = new Date();
 		
-		msgLib.infiniteMessage("Damage: ",ChatColor.GREEN + FC_Rpg.df.format(damage)," / HP: (",
-				p[0],p[1],p[2],p[3],p[4],p[5] + " / ",type.toString(),"(",ChatColor.GREEN + String.valueOf(level),")");
+		msgLib.infiniteMessage("DMG: ",ChatColor.GREEN + FC_Rpg.df.format(damage)," // HP: (",
+				p[0],p[1],p[2],p[3],p[4],p[5] + " // ",type.toString(),"(",ChatColor.GREEN + String.valueOf(level),")");
 	}
 	
-	public void attemptDefenseNotification(double damage)
+	public void attemptDefenseNotification(double damage, String type, int level)
 	{
 		if (getCanNotify(lastDefenseNotification) == false)
 			return;
 		
-		String[] p = getRemainingX(curHealth,maxHealth,2);
+		String[] p = playerConfig.getRemainingX(curHealth,maxHealth,2);
 		lastDefenseNotification = new Date();
 		
-		msgLib.infiniteMessage("Damage: ",ChatColor.RED + String.valueOf(FC_Rpg.df.format(damage))," / HP: (",
-				p[0],p[1],p[2],p[3],p[4],p[5]);
+		if (level > -1)
+			msgLib.infiniteMessage("DMG: ",ChatColor.RED + String.valueOf(FC_Rpg.df.format(damage))," // HP: (",
+					p[0],p[1],p[2],p[3],p[4],p[5] + " // ",type,"(",level+"",")");
+		else
+			msgLib.infiniteMessage("DMG: ",ChatColor.RED + String.valueOf(FC_Rpg.df.format(damage))," // HP: (",
+					p[0],p[1],p[2],p[3],p[4],p[5] + " // ",type);
 	}
 	
 	public void attemptCastNotification(String spellName)
@@ -637,9 +642,11 @@ public class RpgPlayer extends RpgEntity
 		if (getCanNotify(lastCastNotification) == false)
 			return;
 		
-		String[] p = getRemainingX(curMana,maxMana,1);
-		msgLib.infiniteMessage("[","*Spell Cast*","] ",spellName," / MP: (",
+		String[] p = playerConfig.getRemainingX(curMana,maxMana,1);
+		msgLib.infiniteMessage("[","*Spell Cast*","] ",spellName," // MP: (",
 				p[0],p[1],p[2],p[3],p[4],p[5]);
+		
+		dequeHealMessage();
 	}
 	
 	public void attemptHealOtherNotification(RpgPlayer healTarget)
@@ -650,24 +657,31 @@ public class RpgPlayer extends RpgEntity
 		lastHealNotification = new Date();
 		
 		//String[] d = getRemainingX(curMana,maxMana,1);
-		String[] p = getRemainingX(healTarget.getCurHealth(),healTarget.getMaxHealth(),0);
+		String[] p = playerConfig.getRemainingX(healTarget.getCurHealth(),healTarget.getMaxHealth(),0);
 		
-		msgLib.infiniteMessage("[","-Healed Other-","]  / Target HP: (",
-				p[0],p[1],p[2],p[3],p[4],p[5]);
+		queuedHealMessage = Arrays.asList("[","-Healed Other-","] Target HP: (",p[0],p[1],p[2],p[3],p[4],p[5]);
 	}
+	
 	
 	public void attemptHealSelfNotification(double healAmount)
 	{
 		if (getCanNotify(lastHealNotification) == false)
 			return;
 		
-		String[] p = getRemainingX(curHealth,maxHealth,0);
+		String[] p = playerConfig.getRemainingX(curHealth,maxHealth,0);
 		lastHealNotification = new Date();
         
-		msgLib.infiniteMessage("[","-Heal-","] HP: (",
-				p[0],p[1],p[2],p[3],p[4],p[5]);
+		queuedHealMessage = Arrays.asList("[","-Heal-","] Amount: ",healAmount + ""," // HP: (",p[0],p[1],p[2],p[3],p[4],p[5]);
 	}
-	 
+	
+	public void dequeHealMessage()
+	{
+		if (queuedHealMessage != null)
+			msgLib.standardMessage(queuedHealMessage);
+		
+		queuedHealMessage = null;
+	}
+	
 	public void attemptMonsterDeathNotification(int level, double exp, double loot)
 	{
 		if (!getCanNotify(lastMonsterDeathNotification, 100))
@@ -675,8 +689,8 @@ public class RpgPlayer extends RpgEntity
 		
 		lastMonsterDeathNotification = new Date();
 		
-		msgLib.infiniteMessage("[_","Mob Slain","_] Level: ",String.valueOf(level)," / Experience: ",FC_Rpg.df.format(exp)," (",
-				FC_Rpg.df.format(playerConfig.getRequiredExpPercent()) + "%)"," / Money: ",FC_Rpg.df.format(loot));
+		msgLib.infiniteMessage("[_","Mob Slain","_] Level: ",String.valueOf(level)," // Experience: ",FC_Rpg.df.format(exp)," (",
+				FC_Rpg.df.format(playerConfig.getRequiredExpPercent()) + "%",") // Money: ",FC_Rpg.df.format(loot));
 	}
 	
 	public void attemptMonsterOutOfRangeNotification()
@@ -710,7 +724,7 @@ public class RpgPlayer extends RpgEntity
 		
     	lastThornsNotification = new Date();
     	
-		msgLib.infiniteMessage("[","Thorns","] Damage: ",FC_Rpg.df.format(damage));
+		msgLib.infiniteMessage("[","Thorns","] DMG: ",FC_Rpg.df.format(damage));
 	}
 	
 	public void attemptNoManaNotification(int spellNumber, int spellLevel)
@@ -718,44 +732,30 @@ public class RpgPlayer extends RpgEntity
 		if (getCanNotify(lastNoManaNotification) == false)
 			return;
 
-		String[] p = getRemainingX(curMana,maxMana,1);
+		String[] p = playerConfig.getRemainingX(curMana,maxMana,1);
 		lastNoManaNotification = new Date();
 		
 		msgLib.infiniteMessage("[","*Spell Fail*","] Out Of Mana! (",
 				p[0],p[1],p[2],p[3],p[4],p[5]);
 	}
 	
-	private String[] getRemainingX(double min, double max, int colorID)
-	{
-		String[] parts = new String[6];
-		ChatColor color = ChatColor.GREEN;
-		
-		if (colorID == 1)
-			color = ChatColor.DARK_AQUA;
-		else if (colorID == 2)
-			color = ChatColor.RED;
-		
-		parts[0] = color + FC_Rpg.df.format(min);
-		parts[1] = "/";
-		parts[2] = color + FC_Rpg.df.format(max);
-		parts[3] = ") (";
-		parts[4] = color + FC_Rpg.df.format(min * 100 / max)+"%";
-		parts[5] = ")";
-		
-		return parts;
-	}
-	
 	public void attemptGiveTimedItems()
 	{
+		List<ItemStack> timedItems = FC_Rpg.generalConfig.getTimedItems();
+		
+		//If timed items are null return.
+		if (timedItems == null || timedItems.size() == 0)
+			return;
+		
+		//Variable Declarations
 		Date now = new Date();
 		WorldConfig wm = new WorldConfig();
-		List<ItemStack> timedItems = FC_Rpg.generalConfig.getTimedItems();
 		
 		//Only give steak in rpg world.
 		if (!wm.getIsRpgWorld(player.getWorld().getName()))
 			return;
 		
-		//Wait an hour before giving steak again.
+		//Wait an amount of time before giving items.
 		if (now.getTime() - playerConfig.getLastRecievedHourlyItems() > FC_Rpg.generalConfig.getTimedItemsInterval())
 		{
 			for (ItemStack hourlyItem : timedItems)
@@ -768,13 +768,36 @@ public class RpgPlayer extends RpgEntity
 		}
 	}
 	
-	public void addItemToInventory(ItemStack itemSTack)
+	public boolean canEnterDungeon()
+	{
+		//Always allow admins to enter.
+		FC_RpgPermissions perms = new FC_RpgPermissions(player);
+		
+		if (perms.isAdmin())
+			return true;
+		
+		//Check time for non-admins to see if they are allowed to enter again.
+		Date now = new Date();
+		
+		if (now.getTime() >= playerConfig.getLastDungeonCompletion() + FC_Rpg.generalConfig.getDungeonEnterWaitPeriod())
+			return true;
+		
+		return false;
+	}
+	
+	public int getDungeonWaitTime()
+	{
+		Date now = new Date();
+		return (int) (((playerConfig.getLastDungeonCompletion() + FC_Rpg.generalConfig.getDungeonEnterWaitPeriod() - now.getTime())) * .001);
+	}
+	
+	public void addItemToInventory(ItemStack itemStack)
 	{
 		//Tell the player about their steak and drop/add it.
-		if (hasEmptyInventorySlot(itemSTack.getType(), itemSTack.getAmount()))
-			player.getInventory().addItem(itemSTack);
+		if (hasEmptyInventorySlot(itemStack.getType(), itemStack.getAmount()))
+			player.getInventory().addItem(itemStack);
 		else
-			Bukkit.getServer().getWorld(player.getWorld().getName()).dropItemNaturally(player.getLocation(), itemSTack);
+			Bukkit.getServer().getWorld(player.getWorld().getName()).dropItemNaturally(player.getLocation(), itemStack);
 	}
 	
 	private boolean hasEmptyInventorySlot(Material itemType, int itemCount)

@@ -9,6 +9,7 @@ import java.util.Map;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.Configs.PlayerConfig;
 import me.Destro168.FC_Rpg.FC_Rpg.CreatureSpawnListener;
+import me.Destro168.FC_Suite_Shared.ColorLib;
 import me.Destro168.FC_Suite_Shared.Messaging.BroadcastLib;
 
 import org.bukkit.Bukkit;
@@ -144,7 +145,7 @@ public class RpgEntityManager
 		// Variable Declarations
 		List<RpgPlayer> playerList = new ArrayList<RpgPlayer>();
 		EntityLocationLib ell = new EntityLocationLib();
-		String guild = FC_Rpg.guildManager.getGuildByMember(player.getName());
+		String guild = FC_Rpg.guildConfig.getGuildByMember(player.getName());
 		
 		// If no party return the source player in list form.
 		if (guild == null)
@@ -154,7 +155,7 @@ public class RpgEntityManager
 		}
 		
 		//If the guild isn't null, then we get online guild members and add them.
-		for (Player guildMember : FC_Rpg.guildManager.getOnlineGuildPlayerList(guild))
+		for (Player guildMember : FC_Rpg.guildConfig.getOnlineGuildPlayerList(guild))
 		{
 			if (ell.isNearby(player, guildMember, distance))
 			{
@@ -170,7 +171,7 @@ public class RpgEntityManager
 		// Variable Declarations
 		List<Player> playerList = new ArrayList<Player>();
 		EntityLocationLib ell = new EntityLocationLib();
-		String guild = FC_Rpg.guildManager.getGuildByMember(player.getName());
+		String guild = FC_Rpg.guildConfig.getGuildByMember(player.getName());
 		
 		// If no party return the source player in list form.
 		if (guild == null)
@@ -180,7 +181,7 @@ public class RpgEntityManager
 		}
 		
 		//If the guild isn't null, then we get online guild members and add them.
-		for (Player guildMember : FC_Rpg.guildManager.getOnlineGuildPlayerList(guild))
+		for (Player guildMember : FC_Rpg.guildConfig.getOnlineGuildPlayerList(guild))
 		{
 			if (ell.isNearby(player, guildMember, distance))
 			{
@@ -237,19 +238,19 @@ public class RpgEntityManager
     	//If the player information isn't stored, then store.
     	if (!(miMap.containsKey(entity)))
     	{
-    		RpgMonster mob = new RpgMonster(entity, 0, false);
+    		RpgMonster mob = new RpgMonster(entity, 0, 0, false);
     		miMap.put(entity, mob);
     	}
     }
     
-    public RpgMonster registerCustomLevelEntity(LivingEntity entity, int levelBonus, boolean isBoss)
+    public RpgMonster registerCustomLevelEntity(LivingEntity entity, int fixedLevel, int levelBonus, boolean isBoss)
     {
     	//If the entity is already in miMap, then we remote it.
     	if (miMap.containsKey(entity))
     		miMap.remove(entity);
     	
     	//Register the new entity and return it.
-    	RpgMonster mob = new RpgMonster(entity, levelBonus, isBoss);
+    	RpgMonster mob = new RpgMonster(entity, fixedLevel, levelBonus, isBoss);
     	
 		miMap.put(entity, mob);
 		
@@ -305,10 +306,12 @@ public class RpgEntityManager
 		//Tell the server that the class/job have been picked.
     	FC_Rpg.rpgBroadcast.rpgBroadcast(player.getName() + " has picked " + classSelection + "!");
 		
+    	ColorLib cl = new ColorLib();
+    	
     	//Convert stringClass to real class number.
     	for (int i = 0; i < FC_Rpg.classConfig.getRpgClasses().length; i++)
     	{
-    		if (classSelection.equals(FC_Rpg.classConfig.getRpgClass(i).getName()))
+    		if (classSelection.equals(cl.removeColorCodes(FC_Rpg.classConfig.getRpgClass(i).getName())))
     		{
     			intClass = i;
     			break;

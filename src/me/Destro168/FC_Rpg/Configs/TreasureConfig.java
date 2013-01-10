@@ -184,8 +184,27 @@ public class TreasureConfig extends ConfigGod
 			MaterialLib ml = FC_Rpg.mLib;
 			Material dropType = drop.getType();
 			
+			// Add unbreaking to all armor.
 		    if (ml.chestplates.contains(dropType) || ml.leggings.contains(dropType) || ml.helmets.contains(dropType) || ml.boots.contains(dropType))
 				drop.addUnsafeEnchantment(Enchantment.DURABILITY, 5);
+		    
+		    else if (dropType.equals(Material.BOW))
+				drop.addUnsafeEnchantment(Enchantment.DURABILITY, 30);
+		    
+		    else if (dropType.equals(Material.WOOD_SWORD))
+				drop.addUnsafeEnchantment(Enchantment.DURABILITY, 73);
+		    
+		    else if (dropType.equals(Material.STONE_SWORD))
+				drop.addUnsafeEnchantment(Enchantment.DURABILITY, 36);
+			
+		    else if (dropType.equals(Material.IRON_SWORD))
+				drop.addUnsafeEnchantment(Enchantment.DURABILITY, 20);
+		    
+		    else if (dropType.equals(Material.DIAMOND_SWORD))
+				drop.addUnsafeEnchantment(Enchantment.DURABILITY, 3);
+		    
+		    else if (dropType.equals(Material.GOLD_SWORD))
+				drop.addUnsafeEnchantment(Enchantment.DURABILITY, 150);
 		}
 		
 		return drop;
@@ -287,7 +306,7 @@ public class TreasureConfig extends ConfigGod
 		}
 		
 		//Bows
-		else if (dropType == Material.BOW)
+		else if (dropType.equals(Material.BOW))
 		{
 			//Roll a type of enchantment to put on.
 			enchantmentType = rand.nextInt(3);

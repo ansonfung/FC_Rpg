@@ -62,8 +62,6 @@ public class BalanceConfig extends ConfigGod
 	private void setArmorMultiplierGL(double x) { fcw.set(prefix + "armor.multiplier.gold.leggings", x); }
 	private void setArmorMultiplierGC(double x) { fcw.set(prefix + "armor.multiplier.gold.chestplate", x); }
 	
-	private void setMobLootPercentStronger(double x) { fcw.set(prefix + "mob.lootPercent.stronger", x); }
-	private void setMobLootPercentWeaker(double x) { fcw.set(prefix + "mob.lootPercent.weaker", x); }
 	private void setMobCashMultiplier(double x) { fcw.set(prefix + "mob.cashMultiplier", x); }
 	private void setMobExpMultiplier(double x) { fcw.set(prefix + "mob.expMultiplier", x); }
 	private void setMobSpawnWithItemChance(int x) { fcw.set(prefix + "mob.spawnWithItemChance", x); }
@@ -173,8 +171,6 @@ public class BalanceConfig extends ConfigGod
 	public double getArmorMultiplierGL() { return fcw.getDoubleS(prefix + "armor.multiplier.gold.leggings"); }
 	public double getArmorMultiplierGC() { return fcw.getDoubleS(prefix + "armor.multiplier.gold.chestplate"); }
 	
-	public double getMobLootPercentStronger() { return fcw.getDoubleS(prefix + "mob.lootPercent.stronger"); }
-	public double getMobLootPercentWeaker() { return fcw.getDoubleS(prefix + "mob.lootPercent.weaker"); }
 	public double getMobCashMultiplier() { return fcw.getDoubleS(prefix + "mob.cashMultiplier"); }
 	public double getMobExpMultiplier() { return fcw.getDoubleS(prefix + "mob.expMultiplier"); }
 	public int getMobSpawnWithItemChance() { return fcw.getIntS(prefix + "mob.spawnWithItemChance"); }
@@ -279,12 +275,10 @@ public class BalanceConfig extends ConfigGod
 			
 			setMobAttackHardMultiplier(5);
 			setMobConstitutionMultiplier(100);
-			setMobLootPercentStronger(0.1D);
-			setMobLootPercentWeaker(0.1D);
 			setMobSpawnWithItemChance(50);
 			setMobSpawnWithEnchantsChance(50);
 			setMobCashMultiplier(.8);
-			setMobExpMultiplier(1);
+			setMobExpMultiplier(.1);
 			
 			setSwordMultiplierWood(1.25);
 			setSwordMultiplierStone(1.5);

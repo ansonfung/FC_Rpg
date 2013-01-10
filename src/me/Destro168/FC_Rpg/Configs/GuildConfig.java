@@ -17,6 +17,12 @@ public class GuildConfig extends ConfigGod
 	final static int MAX_GUILDS = 1000;
 	public FileConfigurationWrapper gfcw;
 	
+	//Global guild settings
+	public void setCreationCost(double x) { fcw.set(prefix + "creationCost", x); }
+	
+	public double getCreationCost() { return fcw.getDouble(prefix + "creationCost"); }
+	
+	//Individual specific guild settings
 	public void setGuildList(List<String> x) { fcw.setCustomList(prefix + "guildList", x); }
 	public void setLeader(String x) { gfcw.set(prefix + "leader", x); }
 	public void setMembers(List<String> x) { gfcw.setCustomList(prefix + "members", x); }
@@ -47,7 +53,7 @@ public class GuildConfig extends ConfigGod
 		setMembers(members);
 	}
 	
-	public void removeMember(String x)
+	public void removeMember(String x, String gName)
 	{
 		List<String> members = getMembers();
 		
@@ -57,13 +63,18 @@ public class GuildConfig extends ConfigGod
 			return;
 		
 		if (members.size() == 0)
-			setGuildList(null);
+			guildListRemove(gName);
 		else
 			setMembers(members);
 	}
     
-	public void guildListAdd(String x)
+	public boolean guildListAdd(String x)
 	{
+		if (!exists(x))
+			return false;
+		
+		updateGfcw(x);
+		
 		List<String> gList = getGuildList();
 		
 		if (!(gList == null))
@@ -75,32 +86,28 @@ public class GuildConfig extends ConfigGod
 		}
 		
 		setGuildList(gList);
+		
+		return true;
 	}
 	
-	public void guildListRemove(String x)
+	public boolean guildListRemove(String x)
 	{
+		if (!exists(x))
+			return false;
+		
+		updateGfcw(x);
+		
 		List<String> gList = getGuildList();
 		
 		if (!(gList == null))
+		{
 			gList.remove(x);
+			gfcw.clearFileData();
+		}
 		else
-			return;
-		
-		if (gList.size() == 0)
-			setGuildList(null);
-		else
-			setGuildList(gList);
-	}
-	
-	public boolean setGuildNull(String guildName) 
-	{
-		if (!exists(guildName))
 			return false;
 		
-		updateGfcw(guildName);
-		
-		gfcw.set("Guilds", null);
-		guildListRemove(guildName);
+		setGuildList(gList);
 		
 		return true;
 	}
@@ -146,45 +153,59 @@ public class GuildConfig extends ConfigGod
 			
 			guildListAdd("Default");
 		}
+		
+		if (getVersion() < 0.3)
+		{
+			setVersion(0.3);
+			
+			setCreationCost(10);
+		}
 	}
 	
     public String listGuilds()
     {
-    	boolean guildGreen = true;
-    	String list = "Listing guilds: ";
-    	int guildCount = 0;
+    	List<String> guildList = getGuildList();
     	String noGuildMessage = ChatColor.RED + "There are currently no created guilds.";
-    	
-    	if (getGuildList() == null)
+
+    	if (guildList == null)
     		return noGuildMessage;
     	
-    	for (String g : getGuildList())
-    	{
+    	String list = "Listing guilds: ";
+    	int guildCount = 0;
+    	boolean alternate = false;
+    	int guildListSize = guildList.size();
+    	ChatColor color = ChatColor.WHITE;
+    	
+    	for (int i = 0; i < guildListSize; i++)
+		{
     		guildCount++;
 			
-			if (guildGreen == true)
-			{
-				list = list + ChatColor.WHITE + g + " ";
-				guildGreen = false;
-			}
-			else
-			{
-				list = list + ChatColor.YELLOW + g + " ";
-				guildGreen = true;
-			}
-    	}
+    		if (alternate)
+    			color = ChatColor.YELLOW;
+			else if (!alternate)
+    			color = ChatColor.WHITE;
+			
+    		list += color + guildList.get(i);
+    		
+    		if (i != guildListSize - 1)
+    			list += ", ";
+    		
+    		alternate = !alternate;
+		}
     	
     	if (guildCount > 0)
-    		return list;
+    		return list; //Return char array without strings.
     	else
     		return noGuildMessage;
     }
     
-    public boolean createGuild(String guildName, String newLeader)
+    public boolean createGuild(String guildName, Player newLeader, MessageLib msgLib)
     {
+    	String newLeaderName = newLeader.getName();
+    	
     	//Check to see if the person already is in a guild.
-    	if (getGuildByMember(newLeader) != null)
-    		return false;
+    	if (getGuildByMember(newLeaderName) != null)
+    		return msgLib.standardError("Command failed because you're already in a guild.");
     	
     	//Check to see if any guilds exist with that name;
     	if (getGuildList() != null)
@@ -192,19 +213,31 @@ public class GuildConfig extends ConfigGod
     		for (String gName : getGuildList())
         	{
         		if (gName.equalsIgnoreCase(guildName))
-        			return false;
+        			return msgLib.standardError("Command failed because Guild already exists.");
         	}
     	}
+    	
+    	//Prevent crazy guild names.
+    	if (guildName.length() < 3 || guildName.length() > 10)
+    		return msgLib.standardError("Command failed. Guild names must be within 3 and 10 characters.");
+    	
+    	double creationCost = FC_Rpg.guildConfig.getCreationCost();
+    	
+    	if (FC_Rpg.economy.getBalance(newLeaderName) < creationCost)
+    		return msgLib.standardError("Command failed because you need " + creationCost + " to create a guild.");
+    	
+    	// Remove money from player.
+    	FC_Rpg.economy.withdrawPlayer(newLeaderName, creationCost);
     	
     	updateGfcw(guildName);
     	
     	List<String> members = new ArrayList<String>();
 		List<String> perks = new ArrayList<String>();
 		
-		members.add(newLeader);
+		members.add(newLeaderName);
 		perks.add("none");
 		
-		setLeader(newLeader);
+		setLeader(newLeaderName);
 		setMembers(members);
 		setPerks(perks);
 		setPrivate(true);
@@ -212,7 +245,7 @@ public class GuildConfig extends ConfigGod
 		
 		guildListAdd(guildName);
 		
-		FC_Rpg.rpgBroadcast.rpgBroadcast(newLeader + " has created the guild " + guildName + ".");
+		FC_Rpg.rpgBroadcast.rpgBroadcast(newLeaderName + " has created the guild " + guildName + "!");
 		
 		return true;
     }
@@ -231,29 +264,19 @@ public class GuildConfig extends ConfigGod
 		return false;
     }
     
-	public boolean removeMemberFromAllGuilds(String playerName)
+	public boolean removeMemberFromGuild(String playerName)
 	{
 		for (String gName : getGuildList())
 		{
 			updateGfcw(gName);
-			
+
 			if (getMembers().contains(playerName))
 			{
-				removeMember(playerName);
-				
-				List<String> members = getMembers();
-				
-				if (members.size() > 0)
-				{
-					//Replace leader if needed
-					if (getLeader().equalsIgnoreCase(playerName))
-						setLeader(playerName);
-				}
-				else
-					setGuildNull(gName);
+				//Remove the player.
+				removeMember(playerName, gName);
 				
 				//Tell guild members that the player left.
-				messageGuildMembers(ChatColor.GRAY + playerName + " has left the guild!");
+				messageGuildMembers(ChatColor.GRAY + playerName + " has left " + gName + "!");
 				
 				return true;
 			}
@@ -298,7 +321,7 @@ public class GuildConfig extends ConfigGod
 	
 	public boolean attemptAddGuildMember(String playerName, String guildName, boolean forceAdmin)
 	{
-		removeMemberFromAllGuilds(playerName);
+		removeMemberFromGuild(playerName);
     	
     	if (!exists(guildName))
     		return false;
@@ -330,7 +353,7 @@ public class GuildConfig extends ConfigGod
 		
 		if (getLeader().equalsIgnoreCase(requester) || forceAdmin)
 		{
-			removeMemberFromAllGuilds(targetPlayer);
+			removeMemberFromGuild(targetPlayer);
 			return true;
 		}
 		

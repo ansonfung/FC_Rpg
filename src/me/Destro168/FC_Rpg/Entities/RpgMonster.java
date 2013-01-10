@@ -42,7 +42,7 @@ public class RpgMonster extends RpgEntity
 	public double getCurHealth() { return curHealth; }
 	public int getMobId() { return mobId; }
 	public int getLevel() { return level; }
-	public MobAggressionCheck getMobAggressionCheck() { return mac; }
+	public boolean getMobAggressionCheck() { return mac.getIsHostile(entity.getType()); }
 	public boolean getIsBoss() { return isBoss; }
 	public boolean getIsWeak() { return isWeak; }
 	public long getStatusDisabled() { return statusDisabled; }
@@ -71,16 +71,16 @@ public class RpgMonster extends RpgEntity
 		setDefaults();
 	}
 	
-	public RpgMonster(LivingEntity entity_, int levelBonus, boolean isBoss_)
+	public RpgMonster(LivingEntity entity_, int fixedLevel, int levelBonus, boolean isBoss_)
 	{
 		setDefaults();
 		isBoss = isBoss_;
-		create(entity_, levelBonus);
+		create(entity_, fixedLevel, levelBonus);
 	}
 	
 	public void setDefaults()
 	{
-		mac = null;
+		mac = new MobAggressionCheck();
 		entity = null;
 		mobId = -1;
 		level = -1;
@@ -94,11 +94,10 @@ public class RpgMonster extends RpgEntity
 		statusDisabled = 0;
 	}
 
-	public void create(LivingEntity entity_, int levelBonus)
+	public void create(LivingEntity entity_, int fixedLevel, int levelBonus)
 	{
 		// Variable Assignment
 		entity = entity_;
-		mac = new MobAggressionCheck(entity.getType());
 		
 		// Variable Declarations
 		Random levelDeviation = new Random();
@@ -115,7 +114,11 @@ public class RpgMonster extends RpgEntity
 			{
 				if (FC_Rpg.dungeonEventArray[trueDungeonNumber].isInsideDungeon(entity.getLocation()))
 				{
-					modifier = FC_Rpg.dungeonEventArray[trueDungeonNumber].getLowestLevel() + levelBonus;
+					if (fixedLevel > 0)
+						modifier = fixedLevel;
+					else
+						modifier = FC_Rpg.dungeonEventArray[trueDungeonNumber].getLowestLevel() + levelBonus;
+					
 					calculateModifierByArea = false;
 					break;
 				}
@@ -129,19 +132,19 @@ public class RpgMonster extends RpgEntity
 			
 			if (entity.getType() == EntityType.WITHER)
 			{
-				levelBonus = levelBonus + FC_Rpg.balanceConfig.getWitherLevelBonus();
+				levelBonus += FC_Rpg.balanceConfig.getWitherLevelBonus();
 				isBoss = true;
 			}
 			else if (entity.getType() == EntityType.ENDER_DRAGON)
 			{
-				levelBonus = levelBonus + FC_Rpg.balanceConfig.getEnderDragonLevelBonus();
+				levelBonus += FC_Rpg.balanceConfig.getEnderDragonLevelBonus();
 				isBoss = true;
 			}
 			
 			// Increase modifier by level bonus.
-			modifier = modifier + levelBonus;
+			modifier += levelBonus;
 		}
-
+		
 		// Set all variables
 		mobId = entity.getEntityId();
 		level = modifier + (levelDeviation.nextInt(levelDev) - levelDeviation.nextInt(levelDev));
@@ -157,7 +160,7 @@ public class RpgMonster extends RpgEntity
 		attack = (int) FC_Rpg.balanceConfig.getMobAttackMultiplier() * modifier * difficultyCoefficient;
 		
 		// Only set constitution for hostile mobs.
-		if (mac.isHostile() == true)
+		if (getMobAggressionCheck())
 			constitution = (int) (FC_Rpg.balanceConfig.getMobConstitutionMultiplier() * modifier * difficultyCoefficient);
 		else
 			constitution = 1;
@@ -241,9 +244,9 @@ public class RpgMonster extends RpgEntity
 			return;
 
 		// Make all non-hostile mobs level 1.
-		if (mac.isHostile() == false)
+		if (getMobAggressionCheck() == false)
 			return;
-
+		
 		dml.getWorldDML(entity.getLocation());
 
 		modifier = dml.getDistanceModifier();

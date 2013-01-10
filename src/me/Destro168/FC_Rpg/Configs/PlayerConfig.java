@@ -4,8 +4,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Random;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
+import org.bukkit.FireworkEffect.Type;
+import org.bukkit.Location;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
+import org.bukkit.inventory.meta.FireworkMeta;
 
 import me.Destro168.FC_Suite_Shared.ConfigManagers.ConfigGod;
 import me.Destro168.FC_Suite_Shared.ConfigManagers.FileConfigurationWrapper;
@@ -69,6 +78,7 @@ public class PlayerConfig extends ConfigGod
 	public boolean getAutoCast() { return fcw.getBoolean(prefix + "autoCast"); }
 	public double getArcanium() { return fcw.getDouble(prefix + "arcanium"); }
 	
+	public long getLastDungeonCompletion() { return fcw.getLong(prefix + "lastDungeonCompletion"); }
 	public long getLastRecievedHourlyItems() { return fcw.getLong(prefix + "lastRecievedHourlyItems"); }
 	
 	//Sets
@@ -103,7 +113,8 @@ public class PlayerConfig extends ConfigGod
 	public void setShowDamageGiven(boolean x) { fcw.set(prefix + "showDamageGiven",x); }
 	public void setAutoCast(boolean x) { fcw.set(prefix + "autoCast",x); }
 	public void setArcanium(double x) { fcw.set(prefix + "arcanium",x); }
-	
+
+	public void setLastDungeonCompletion(long x) { fcw.set(prefix + "lastDungeonCompletion", x); }
 	public void setLastRecievedHourlyItems(long x) { fcw.set(prefix + "lastRecievedHourlyItems", x); }
 	
 	//Spell Status Set/Gets
@@ -296,6 +307,12 @@ public class PlayerConfig extends ConfigGod
 			setVersion(0.3);
 			setArcanium(0);
 		}
+		
+		if (getVersion() < 0.4)
+		{
+			setVersion(0.4);
+			setLastDungeonCompletion(0);
+		}
 	}
 	
 	public void setDefaults()
@@ -358,6 +375,8 @@ public class PlayerConfig extends ConfigGod
 		
 		setSpellPoints(1);
 		setAutoCast(false);
+		
+		setLastDungeonCompletion(0);
 	}
 	
 	public void setPlayerDefaults(int pickedClass, boolean manualDistribution)
@@ -472,6 +491,28 @@ public class PlayerConfig extends ConfigGod
 						msgLib.infiniteMessage("You have just reached level [",getClassLevel() + "","]!");
 					}
 				}
+				
+				for (int i = 0; i < 3; i++)
+				{
+					Location pLoc = rpgPlayer.getPlayer().getLocation();
+					
+					Firework fw = (Firework) pLoc.getWorld().spawnEntity(pLoc, EntityType.FIREWORK);
+					FireworkMeta fwMeta = fw.getFireworkMeta();
+					
+					fwMeta.setPower(i);
+					
+					fwMeta.addEffect(FireworkEffect.builder()
+							.flicker(true)
+							.trail(true)
+							.with(Type.BALL_LARGE)
+							.withColor(getRandomColor(), getRandomColor(), getRandomColor())
+							.withFade(getRandomColor(), getRandomColor(), getRandomColor())
+							.withFlicker()
+							.withTrail()
+							.build());
+					
+					fw.setFireworkMeta(fwMeta);
+				}
 			}
 		}
 		
@@ -480,6 +521,18 @@ public class PlayerConfig extends ConfigGod
 		
 		return true;
 	}
+    
+    private Color getRandomColor()
+    {
+		Random rand = new Random();
+		int c1 = rand.nextInt(256);
+		rand = new Random();
+		int c2 = rand.nextInt(256);
+		rand = new Random();
+		int c3 = rand.nextInt(256);
+		
+		return Color.fromRGB(c1, c2, c3);
+    }
     
     public void assignClassStatPoints()
 	{
@@ -525,6 +578,26 @@ public class PlayerConfig extends ConfigGod
     public double getPromotionCost()
 	{
 		return FC_Rpg.generalConfig.getJobRankCosts().get(getJobRank() - 1);
+	}
+    
+    public String[] getRemainingX(double min, double max, int colorID)
+	{
+		String[] parts = new String[6];
+		ChatColor color = ChatColor.GREEN;
+		
+		if (colorID == 1)
+			color = ChatColor.DARK_AQUA;
+		else if (colorID == 2)
+			color = ChatColor.RED;
+		
+		parts[0] = color + FC_Rpg.df.format(min);
+		parts[1] = "/";
+		parts[2] = color + FC_Rpg.df.format(max);
+		parts[3] = ") (";
+		parts[4] = color + FC_Rpg.df.format(min * 100 / max)+"%";
+		parts[5] = ")";
+		
+		return parts;
 	}
 }
 

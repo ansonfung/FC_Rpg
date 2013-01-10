@@ -210,7 +210,7 @@ public class SpellConfig extends ConfigGod
 		setBuffStats(11);
 		setConstantMagnitude(11, .04, .08, .12, .16, .20);
 		
-		setEffectID(12, EffectIDs.HEAL_SELF);
+		setEffectID(12, EffectIDs.HEAL_SELF_PERCENT);
 		setName(12, "Undefeated");
 		setDescription(12, "Heal (x)% of your max health.");
 		setBuffStats(12);

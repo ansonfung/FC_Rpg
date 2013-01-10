@@ -1,5 +1,6 @@
 package me.Destro168.FC_Rpg.Events;
 
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -18,6 +19,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import me.Destro168.FC_Rpg.FC_Rpg;
+import me.Destro168.FC_Rpg.Util.MobAggressionCheck;
 import me.Destro168.FC_Suite_Shared.SuiteConfig;
 import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 import me.Destro168.FC_Suite_Shared.TimeUtils.DateManager;
@@ -157,6 +159,9 @@ public class DungeonEvent extends GeneralEvent
 		if (isHappening() == false)
 			return;
 		
+		Date now = new Date();
+		FC_Rpg.rpgEntityManager.getRpgPlayer(playerToRemove).getPlayerConfig().setLastDungeonCompletion(now.getTime());
+		
 		if (participantList.size() == 0)
 			end(false);
 	}
@@ -204,10 +209,14 @@ public class DungeonEvent extends GeneralEvent
 		
 		//Check boss location, somehow makes the boss location work. Don't question the magic!
 		if (isSafe(bossLocation) == false)
+		{
 			FC_Rpg.plugin.getLogger().info("[ERROR] Boss Spawn Location Is NOT Safe!");
-		
-		//Spawn a boss monster.
-		spawnedMobs[mobCountMinusOne] = (LivingEntity) dungeonWorld.spawnEntity(bossLocation, returnRandomLivingEntity());
+		}
+		else
+		{
+			//Spawn a boss monster.
+			spawnedMobs[mobCountMinusOne] = (LivingEntity) dungeonWorld.spawnEntity(bossLocation, returnRandomLivingEntity());
+		}
 		
 		//Add loot to chests.
 		addChestLoot(true);
@@ -216,13 +225,7 @@ public class DungeonEvent extends GeneralEvent
 		if (FC_Rpg.worldConfig.getIsRpgWorld(dungeonStart.getWorld().getName()))
 		{
 			//Register the custom monster.
-			FC_Rpg.rpgEntityManager.registerCustomLevelEntity(spawnedMobs[mobCountMinusOne], 5, true);
-			
-			//CreatureSpawnListener l = FC_Rpg.plugin.new CreatureSpawnListener();
-			//CreatureSpawnEvent event = new CreatureSpawnEvent(spawnedMobs[mobCountMinusOne], SpawnReason.CUSTOM);
-			//l.onCreaturespawn(event);
-			
-			//FC_Rpg.rpgEntityManager.getRpgMonster(spawnedMobs[mobCountMinusOne]).checkEquipment();
+			FC_Rpg.rpgEntityManager.registerCustomLevelEntity(spawnedMobs[mobCountMinusOne], 0, (int) (lowestLevel * .2), true);
 		}
 		
 		//Begin tasks to notify end of dungeon.
@@ -533,14 +536,17 @@ public class DungeonEvent extends GeneralEvent
 	
 	public void checkMobDeath(Entity entity)
 	{
-		//Perform boss checks only in rpg worlds.
-		if (FC_Rpg.worldConfig.getIsRpgWorld(entity.getWorld().getName()))
+		if (entity != null)
 		{
-			//Check if the boss mob was slain.
-			if (spawnedMobs != null)
+			//Perform boss checks only in rpg worlds.
+			if (FC_Rpg.worldConfig.getIsRpgWorld(entity.getWorld().getName()))
 			{
-				if (spawnedMobs[spawnedMobs.length - 1] == entity)
-					rbLib.rpgBroadcast("The Dungeon " + dungeonName + " Boss Monster Has Been Slain!");
+				//Check if the boss mob was slain.
+				if (spawnedMobs != null)
+				{
+					if (spawnedMobs[spawnedMobs.length - 1] == entity)
+						rbLib.rpgBroadcast("The Dungeon " + dungeonName + " Boss Monster Has Been Slain!");
+				}
 			}
 		}
 		
@@ -554,29 +560,30 @@ public class DungeonEvent extends GeneralEvent
 						end(true);
 				} catch (NullPointerException e) { } //Allows you to pass in nulls.
 			}
-		}, 20));
+		}, 60));
 	}
 	
 	public boolean checkEmpty()
 	{
 		//Variable Declarations
 		List<LivingEntity> entities = dungeonWorld.getLivingEntities();
+		MobAggressionCheck mac = new MobAggressionCheck();
 		
 		//Return if not the proper phase.
 		if (phase != 2)
 			return true;
-
+		
 		//Return if no entities.
 		if (entities == null)
 			return true;
-
 		
 		//Check all wordly entities and compare coords.
 		for (LivingEntity entity : entities)
 		{
 			if (!(entity instanceof Player))
 			{
-				if (isInsideDungeon(entity.getLocation()))
+				//If the mob is hostile and inside the dungeon, then return that it's not empty.
+				if (mac.getIsHostile(entity.getType()) && isInsideDungeon(entity.getLocation()))
 					return false;
 			}
 		}
@@ -672,7 +679,7 @@ public class DungeonEvent extends GeneralEvent
 			phase = 3;
 			
 			//Message the participants they will be tp'd out.
-			super.messageAllParticipants("Dungeon Complete! All participants will be tp'd out in [60] seconds.");
+			super.messageAllParticipants("Dungeon Complete! All participants will be tp'd out in [",60 + "","] seconds.");
 			
 			//Add loot to the chest.
 			addChestLoot(false);
@@ -689,6 +696,13 @@ public class DungeonEvent extends GeneralEvent
 					//Teleport all players out
 					teleportAllParticipants(FC_Rpg.dungeonConfig.getExit(dungeonNumber));
 					
+					//For all the participants in the dungeon set they just completed a dungeon.
+					for (Player player: participantList)
+					{
+						Date now = new Date();
+						FC_Rpg.rpgEntityManager.getRpgPlayer(player).getPlayerConfig().setLastDungeonCompletion(now.getTime());
+					}
+					
 					//Reset everything.
 					setDungeonDefaults(-1);
 				}
@@ -701,6 +715,13 @@ public class DungeonEvent extends GeneralEvent
 			
 			//Teleport all players out
 			teleportAllParticipants(FC_Rpg.dungeonConfig.getExit(dungeonNumber));
+			
+			//For all the participants in the dungeon set they just completed a dungeon.
+			for (Player player: participantList)
+			{
+				Date now = new Date();
+				FC_Rpg.rpgEntityManager.getRpgPlayer(player).getPlayerConfig().setLastDungeonCompletion(now.getTime());
+			}
 			
 			//Reset everything.
 			setDungeonDefaults(dungeonNumber);

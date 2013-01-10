@@ -139,7 +139,7 @@ public class ItemConfig extends ConfigGod
 			rpgItem.add(new RpgItem(Material.BEACON.toString(), 0, false, 5000, -1, -1, -1, -1, -1));
 			rpgItem.add(new RpgItem(Material.MOB_SPAWNER.toString(), 0, false, 99999, -1, -1, -1, -1, -1));
 			
-			rpgItem.add(new RpgItem(Material.BOW.toString(), 0, false, 3, -1, 1, 100, 1, 0));
+			rpgItem.add(new RpgItem(Material.BOW.toString(), 0, true, 3, -1, 1, 999999, 1, 0));
 			rpgItem.add(new RpgItem(Material.WOOD_AXE.toString(), 0, true, -1, .3, 1, 20, 1, 0));
 			rpgItem.add(new RpgItem(Material.WOOD_HOE.toString(), 0, true, -1, .2, 1, 20, 1, 0));
 			rpgItem.add(new RpgItem(Material.WOOD_PICKAXE.toString(), 0, true, -1, .1, 1, 20, 1, 0));
@@ -176,15 +176,15 @@ public class ItemConfig extends ConfigGod
 			rpgItem.add(new RpgItem(Material.DIAMOND_HELMET.toString(), 0, true, -1, 3.0, 61, 80, 1, 0));
 			rpgItem.add(new RpgItem(Material.DIAMOND_LEGGINGS.toString(), 0, true, -1, 4.2, 61, 80, 1, 0));
 			rpgItem.add(new RpgItem(Material.DIAMOND_CHESTPLATE.toString(), 0, true, -1, 4.8, 61, 80, 1, 0));
-			rpgItem.add(new RpgItem(Material.GOLD_AXE.toString(), 0, true, -1, 2.4, 81, 100, 1, 0));
-			rpgItem.add(new RpgItem(Material.GOLD_HOE.toString(), 0, true, -1, 1.6, 81, 100, 1, 0));
-			rpgItem.add(new RpgItem(Material.GOLD_PICKAXE.toString(), 0, true, -1, 2.4, 81, 100, 1, 0));
-			rpgItem.add(new RpgItem(Material.GOLD_SPADE.toString(), 0, true, -1, 1.6, 81, 100, 1, 0));
-			rpgItem.add(new RpgItem(Material.GOLD_SWORD.toString(), 0, true, -1, 1.6, 81, 100, 1, 0));
-			rpgItem.add(new RpgItem(Material.GOLD_BOOTS.toString(), 0, true, -1, 3.2, 81, 100, 1, 0));
-			rpgItem.add(new RpgItem(Material.GOLD_HELMET.toString(), 0, true, -1, 4.0, 81, 100, 1, 0));
-			rpgItem.add(new RpgItem(Material.GOLD_LEGGINGS.toString(), 0, true, -1, 5.6, 81, 100, 1, 0));
-			rpgItem.add(new RpgItem(Material.GOLD_CHESTPLATE.toString(), 0, true, -1, 6.4, 81, 100, 1, 0));
+			rpgItem.add(new RpgItem(Material.GOLD_AXE.toString(), 0, true, -1, 2.4, 81, 999999, 1, 0));
+			rpgItem.add(new RpgItem(Material.GOLD_HOE.toString(), 0, true, -1, 1.6, 81, 999999, 1, 0));
+			rpgItem.add(new RpgItem(Material.GOLD_PICKAXE.toString(), 0, true, -1, 2.4, 81, 999999, 1, 0));
+			rpgItem.add(new RpgItem(Material.GOLD_SPADE.toString(), 0, true, -1, 1.6, 81, 999999, 1, 0));
+			rpgItem.add(new RpgItem(Material.GOLD_SWORD.toString(), 0, true, -1, 1.6, 81, 999999, 1, 0));
+			rpgItem.add(new RpgItem(Material.GOLD_BOOTS.toString(), 0, true, -1, 3.2, 81, 999999, 1, 0));
+			rpgItem.add(new RpgItem(Material.GOLD_HELMET.toString(), 0, true, -1, 4.0, 81, 999999, 1, 0));
+			rpgItem.add(new RpgItem(Material.GOLD_LEGGINGS.toString(), 0, true, -1, 5.6, 81, 999999, 1, 0));
+			rpgItem.add(new RpgItem(Material.GOLD_CHESTPLATE.toString(), 0, true, -1, 6.4, 81, 999999, 1, 0));
 			
 			int count = 0;
 			

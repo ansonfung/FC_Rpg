@@ -59,7 +59,7 @@ public class GeneralConfig extends ConfigGod
 	private void setCommandKeyWordGuild(String x) { fcw.set(prefix + "commandKeyWord.guild", x); }
 	private void setCommandKeyWordPvp(String x) { fcw.set(prefix + "commandKeyWord.pvp", x); }
 	private void setCommandKeyWordReset(String x) { fcw.set(prefix + "commandKeyWord.reset", x); }
-	private void setCommandKeyWordRpgHelp(String x) { fcw.set(prefix + "commandKeyWord.rpgHelp", x); }
+	private void setCommandKeyWordRpg(String x) { fcw.set(prefix + "commandKeyWord.rpg", x); }
 	private void setCommandKeyWordRpgRAdmin(String x) { fcw.set(prefix + "commandKeyWord.rAdmin", x); }
 	private void setCommandKeyWordSpell(String x) { fcw.set(prefix + "commandKeyWord.spell", x); }
 	private void setCommandKeyWordAlchemy(String x) { fcw.set(prefix + "commandKeyWord.alchemy", x); }
@@ -70,6 +70,7 @@ public class GeneralConfig extends ConfigGod
 	private void setCommandKeyWordPlayers(String x) { fcw.set(prefix + "commandKeyWord.players", x); }
 	private void setRecordExpRewards(boolean x) { fcw.set(prefix + "recordExpRewards", x); }
 	private void setCustomChatExclusions(String x) { fcw.set(prefix + "customChatExclusions", x); }
+	private void setDungeonEnterWaitPeriod(long x) { fcw.set(prefix + "dungeonEnterWaitPeriod", x); }
 	
 	public String getDefaultPrefix() { return fcw.getStringS(prefix + "defaultPrefix"); }
 	public boolean getPerfectBirch() { return fcw.getBooleanS(prefix + "perfectBirch"); }
@@ -112,7 +113,7 @@ public class GeneralConfig extends ConfigGod
 	public String getCommandKeyWordGuild() { return fcw.getStringS(prefix + "commandKeyWord.guild"); }
 	public String getCommandKeyWordPvp() { return fcw.getStringS(prefix + "commandKeyWord.pvp"); }
 	public String getCommandKeyWordReset() { return fcw.getStringS(prefix + "commandKeyWord.reset"); }
-	public String getCommandKeyWordRpgHelp() { return fcw.getStringS(prefix + "commandKeyWord.rpgHelp"); }
+	public String getCommandKeyWordRpg() { return fcw.getStringS(prefix + "commandKeyWord.rpg"); }
 	public String getCommandKeyWordRAdmin() { return fcw.getStringS(prefix + "commandKeyWord.rAdmin"); }
 	public String getCommandKeyWordSpell() { return fcw.getStringS(prefix + "commandKeyWord.spell"); }
 	public String getCommandKeyWordAlchemy() { return fcw.getStringS(prefix + "commandKeyWord.alchemy"); }
@@ -123,6 +124,7 @@ public class GeneralConfig extends ConfigGod
 	public String getCommandKeyWordPlayers() { return fcw.getStringS(prefix + "commandKeyWord.players"); }
 	public boolean getRecordExpRewards() { return fcw.getBooleanS(prefix + "recordExpRewards"); }
 	public List<String> getCustomChatExclusions() { return converter.getStringListFromString(fcw.getStringS(prefix + "customChatExclusions")); }
+	public long getDungeonEnterWaitPeriod() { return fcw.getLong(prefix + "dungeonEnterWaitPeriod"); }
 	
 	public GeneralConfig()
 	{
@@ -195,8 +197,6 @@ public class GeneralConfig extends ConfigGod
 			setVersion(1.18);
 			
 			fcw.set(prefix + "commandKeyWord.rp", null); 
-			fcw.set(prefix + "commandKeyWord.rpg", null); 
-			setCommandKeyWordRpgHelp("rpgHelp");
 			setCommandKeyWordRpgRAdmin("rAdmin");
 		}
 		
@@ -215,13 +215,27 @@ public class GeneralConfig extends ConfigGod
 			setCustomChatExclusions("TC,NC,ADMIN,MOD");
 		}
 		
+		if (getVersion() < 1.23)
+		{
+			setVersion(1.23);
+			
+			fcw.set(prefix + "commandKeyWord.rpgHelp", null); 
+			setCommandKeyWordRpg("rpg");
+			setDungeonEnterWaitPeriod(300000);
+		}
+		
 		//Load up timed items.
 		loadTimedItems();
 	}
 	
 	private void loadTimedItems() 
 	{
-		List<Integer> itemIDs = converter.getIntegerListFromString(fcw.getStringS(prefix + "timedItems.ids"));
+		String ids = fcw.getStringS(prefix + "timedItems.ids");
+		
+		if (ids == null || ids.equalsIgnoreCase(""))
+			return;
+		
+		List<Integer> itemIDs = converter.getIntegerListFromString(ids);
 		List<Integer> itemCounts = converter.getIntegerListFromString(fcw.getStringS(prefix + ".timedItems.counts"));
 		List<Byte> itemDataValues = converter.getByteListFromString(fcw.getStringS(prefix + "timedItems.dataValues"));
 		ItemStack newItem;

@@ -33,7 +33,7 @@ commands:
       description: This command accesses pvp commands.
    reset:
       description: This command resets an RPG players class.
-   rpgHelp:
+   rpg:
       description: This command shows all commands available.
    rAdmin:
       description: This command handles all admin commands.

@@ -1,63 +1,55 @@
 ~ FC_Rpg Changelog ~
 
-Version 1.2-1.21:
-
-- Updated to CB Beta 1.4.6-R0.3
-- Player levelups will no longer be broadcast when lower than level 50. They get personal messages.
-- Records can be used to give experience if new balanceconfig setting is enabled (enabled by default).
-- Test -> Add protection enchantment to armor.
-- Heal spells no longer super overpowered.
-- Refixed power level prevention setting for mobs being too weak so they don't give rpg items or gold or exp.
-- Updated mobWorld setting for worlds. Updated use in help.
-- New custom chat format exclusion list that can be used to bypass chat for plugins. Don't change if you don't understand chat formats.
-
-Version 1.17-1.19:
-
-- Few commands renamed, /rpg to rpgHelp and rAdmin. Dungeon extra put into /de.
-- Many bug fixes.
-
-Version 1.16:
+Version 1.23:
 
 General:
-- Mob spawns will start and stop on world change for players by FC_Rpg.
+- A few string upgrades.
+- Added new customizable timer for amount of milliseconds a person has to wait before they can re-enter a dungeon. 5 minutes by default.
+- Updated class view command display a lot.
 
-Spells:
-- Assassinate replaced with Frost, a powerful aoe freezing skill. Should fit the archer role well.
+Commands:
+- /rpgHelp made back to /rpg by default. /radmin is still /radmin.
+- Help command messaged to players when they pick a class will now with the /rpg setting being changed.
 
-Version 1.15:
+Combat:
+- Leveling up now shoots out fireworks. :)
+- Bows can have enchantments.
 
-Going to start keeping track of configs that need updated per version.
-Configs edited: ClassConfig, SpellConfig, BalanceConfig
+Version 1.22:
 
-- Heavily decreased chance for endermen to spawn with bonus mob spawn setting. They were annoying, end of story :/
-- Chance mobs spawn with items increased to 50% by default.
-- Chance for mobs to spawn with enchants increased to 50% by default.
-- Fixed timed item message string.
-- Fixed and updated spells invigorate and remedy. Invigorate was bugged and gave major stats. Fresh spell configs will have the changes.
-- Fixed heal other message that was buggy.
-- The effect id for heal_other is now retired. It is 1010 for those interested in using the spell still on maybe a healer type class? There are now three heals if you want to create a dedicated healer class. Hoping to add more effect ids at a later time.
-- Alchemy prices updated further. More balanced, less exploitable. Suggestions always welcome in this area.
-- Alchemy buy list is sorted now before
-- Experimental spell balance changes. Majority of buff spells durations rebalanced and mana costs rebalanced.
-- Speed from assassin spell scaled a bit.
-- Updated default generated restriction ids in class config.
-- Added new setting that prevents spells from being cast if set to true. Alchemy has this setting by default "uncastable".
-- Added notifications when buffs end.
-- Removed obsolete debug variable.
-- Fixed poison spell. Was broken, now works as description says.
-- Using the donator respecialize command will reset arcanium down to 0. This is to prevent respecing into max alchemy when convenient.
-- Mob spawns are now varied for all distances from spawn. Makes things more exciting overall with bonus mob spawn setting enabled.
-- Rebalanced bonus amount of money given from mobs stronger than you. 50% is the top now if you are killing mobs 5 levels higher rather than the old 100%.
-- Updated interact event to be more efficient.
-- Can now click on blocks to prepare a spell. Before you had to click air.
-- Assassins now have reverse autocast and spell prepare procedures when holding a bow. This is to help with the casting of offensive spells with a bow.
-- Mage fireballs now have a radius of 2.
-- Mage remedy and invigorate spells don't need a stick anymore.
+General:
+- Made timed items capable of being set to empty. Delete the field, set to unreal numbers, doesn't matter! Go nuts.
+- /radmin spawn command now automatically puts input for entity in caps.
+- Made class colors completely compatible with signs now. Put color codes on classes, do whatever you want with them. ^^. Also makes sign colors non-important, but can be set to anything.
+- Bats added to non-hostile mobs list going forward. No overpowered bats anymore :(.
 
-Experience/Gold from mob drops:
-- Heavy changes to default experience and gold values given in balance config.
-- Mob experience and loot are now divided on the individual level. This means that power level prevention will only apply to players.
-- Players by themselves no longer have to worry about power level prevention when killing mobs. Players in guilds have to worry about it. The idea behind power level prevention was to stop a level 100 from killing level 100s to raise the level of a level 1 really fast.
-- Bosses still bypass power level prevention up to the bonus amount cap.
-- Drops for guilds are no longer global once more. You have to be within 40 range of the guild leader to get the split drops.
-- Mob difficulty and scaling made to be quite a bit harder to really help prevent players from killing monsters several levels above them very easily. Mobs hit harder at all levels, and scale to hit harder.
+ItemConfig:
+- Item config golden item drops set back to 999,999 by default so that you can fight monsters above level 100 without fatal crashes.
+- Bows now set to enchantable again. Woops.
+
+Combat:
+- Battle display upgraded once more. Whatever deals damage to you will now be displayed. Slashes are now double slashes.
+- Default exp scaling of mobs cut by 1/10th.
+- Fully removed all bonus percents from mobs. This means that killing mobs stronger or weaker has no penalties. Balance config settings removed for this.
+- Bosses for dungeons are now 20% stronger than the lowest level person in the dungeon, rather than being a flat 5 levels above.
+- Enchanted swords now break.
+- Enchanted swords are given unbreaking to not break as fast. Each level of unbreaking will grant an additional 1% chance to not break. Thus, unbreaking 100 = never break.
+
+Guilds:
+- Non-Guild players, or solo players will no longer get negative gold/exp from mobs.
+- Guild names now must be within 3-10 characters.
+- Optional guild creation cost.
+- Leaders leaving guilds will now properly give leadership to the person that joined the guild after them.
+- Guild deletions will no longer clear the guild list field, sigh. lol.
+
+Dungeons:
+- Added treasure management commands to /de. 
+- None of the commands are based on player position in /de. They work on your first and, if needed, second selections using your selection tool (default bedrock).
+- Heavy upgrade to the way that spawnbox selection regions are implemented as well as treasure regions.
+- Tested dungeon creation via commands, was able to make a dungeon in 2 minutes. :)
+- Non-hostile mobs no longer checked in dungeon completion check. Spawn bats or whatever you want now. ^^.
+- Dungeon completion delayed by 3 seconds rather than 1 second after you kill the final mob. This gives plugins and Bukkit a chance to process mob deaths better.
+
+SpellConfig:
+- New "Heal Self Percent" effect id: 1020 now used for defender heal. Update accordingly if needed.
+- Also, heal notifications are now placed AFTER the spell cast notification. This orders chat better.

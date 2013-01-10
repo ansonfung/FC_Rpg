@@ -2,20 +2,67 @@
 
 ^Todo List^
 
-Dungeons:
-- Finish treasure commands in /de.
-- Add the automatic dungeon creation command by checking blocks in nearby area. "/de scan"
-- Thoroughly test by making some more dungeons.
-
 General:
-- Everything under level 6 gets access to all spells. ~ Configurable
-- Redo Treasure config. Numbers should scale down like 0: with fields.
-- Loot subdirectory with loot files that can be read.
+
 - Dungeons have "static level" field and "lootconfig" field.
-- Make sure all lists start at 1 and work properly.
 - Class requirement / Job Rank minimum / Minimum level requirement for warps.
-- Make passive mobs not count in dungeon finishing check.
+- X,Y,Z scaling per world.
+
+Guilds:
+- Guild mods
+- Guild chat
+- Guild tax
+
+- Guild perks:
+	Stat Boosts:
+		- 100000 = 1%
+		- 500000 = 2%
+		- 1000000 = 3%
+		- 2500000 = 4%
+		- 10000000 = 5%
+
+	Specials:
+		- 250000 = 2% more exp/gold.
+		- 5000000 = 5% more exp/gold
+
+		- 2000000 = Ability to randomly buff your party every 2 hours.
+		- 20000000 = Ability to randomly buff your party every 1 hour.
+
+		- 50000000 = 5% spell vamp / life steal
+		- 100000000 = 5% bonus defense
+		
+		- 200000000 = 1% mana regen for guild members.
+
+- Experience between guild members is split between nearby party members. Not exclusive to leader.
+
+Long Term Todo (Maybe):
+- Axes as increment for damage, 30, 60, 90, 120 attack req.
 
 ^Potential CraftBukkit Bugs^
 - Can't attack with weakness.
 - Skeletons don't change yaw when rotating.
+
+Data Upgrade Plan:
+
+A new way to handle data retrieval, schema.
+
+* Data Storage.
+
+Data can be either static or dynamic.
+
+- Static Data.
+
+Data we expect to be static, we will load into hashmaps. All fields for a program will be added to List<String> fieldList = new ArrayList<Field>();
+
+HashMap examples: Map<String, Object> staticObjectMap = new HashMapMap<String, Object>();
+HashMap examples: Map<String, Object> staticLocationMap = new HashMapMap<String, Object>();
+
+- Dynamic Data
+
+Data that will be dynamic, we will load directly into memory. Any time changes are made to the data, the information will be changed in memory. Every interval of time, the data will be auto-saved back into the files.
+
+For MySQL, we can still perform the same logic.
+
+* Data Retreival
+
+We want to always make sure that the variable exists first. For static data, if the value doesn't exist, then we will create a default for it. For dynamic data, if there are no entries, we want to return null.

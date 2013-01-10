@@ -116,6 +116,10 @@ public class PlayerInteractionListener implements Listener
 		
 		//Variable declarations.
 		RpgPlayer rp = FC_Rpg.rpgEntityManager.getRpgPlayer(player);
+		
+		if (rp == null)
+			return;
+		
 		boolean autocast = rp.getPlayerConfig().getAutoCast();
 		boolean leftClick = false;
 		boolean hasBow = false;
@@ -221,12 +225,12 @@ public class PlayerInteractionListener implements Listener
 		if (sign.getLine(0).contains("Pick Class:"))
 		{
 			//Strip colors
-			pickedClass = cl.removeColors(sign.getLine(1));
+			pickedClass = cl.removeColors(cl.removeColorCodes(sign.getLine(1)));
 			
 			//If the sign was proper, then 
 			for (int i = 0; i < FC_Rpg.classConfig.getRpgClasses().length; i++)
 			{
-				if (pickedClass.equalsIgnoreCase(FC_Rpg.classConfig.getRpgClass(i).getName()))
+				if (pickedClass.equalsIgnoreCase(cl.removeColorCodes(FC_Rpg.classConfig.getRpgClass(i).getName())))
 				{
 					//Prevent players from picking a job/class again without respecing.
 					if (FC_Rpg.rpgEntityManager.getRpgPlayer(player) != null)
@@ -236,7 +240,7 @@ public class PlayerInteractionListener implements Listener
 					}
 					
 					//Send the player a confirmation message.
-					msgLib.standardMessage("You have selected the " + pickedClass + " class. Now hit the finish sign to choose how you want your stats allocated.");
+					msgLib.infiniteMessage("You have selected the ",sign.getLine(1)," class. Next, hit a finish sign!");
 					
 					//Store their class selection in a hashmap
 					if (FC_Rpg.classSelection.containsKey(player))
@@ -400,8 +404,6 @@ public class PlayerInteractionListener implements Listener
 	
 	private void dungeonTeleport(String text, int dNumber)
 	{
-		//Dungeon lobby
-		
 		//If we have a dungeon exit symbol, then,
 		if (text.contains("-"))
 		{
@@ -416,6 +418,17 @@ public class PlayerInteractionListener implements Listener
 		//If no dungeon was found, return
 		if (dNumber == -1)
 			return;
+		
+		RpgPlayer rPlayer = FC_Rpg.rpgEntityManager.getRpgPlayer(player);
+		
+		if (rPlayer != null)
+		{
+			if (!rPlayer.canEnterDungeon())
+			{
+				msgLib.infiniteError("You need to wait [",rPlayer.getDungeonWaitTime() + "","] more seconds.");
+				return;
+			}
+		}
 		
 		//Store dungeon for faster access.
 		DungeonEvent dungeon = FC_Rpg.dungeonEventArray[dNumber];

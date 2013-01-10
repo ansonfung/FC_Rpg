@@ -28,7 +28,7 @@ public class EntityDamageManager
 	public EntityDamageManager() { }
 	
 	//Player combat.
-	public void attackPlayerDefender(RpgPlayer rpgDefender, RpgPlayer rpgAttacker, RpgMonster rpgMobAttacker, double damage, int damageType)
+	public void attackPlayerDefender(RpgPlayer rpgDefender, RpgPlayer rpgAttacker, RpgMonster rpgMobAttacker, double damage, int damageType, String typeString)
 	{
 		Player playerDefender = rpgDefender.getPlayer();
 		String party = "";
@@ -36,10 +36,10 @@ public class EntityDamageManager
 		int memberCount = 0;
 		
 		// Get party and member count.
-		if (FC_Rpg.guildManager.getGuildByMember(playerDefender.getName()) != null)
+		if (FC_Rpg.guildConfig.getGuildByMember(playerDefender.getName()) != null)
 		{
-			party = FC_Rpg.guildManager.getGuildByMember(playerDefender.getName());
-			memberCount = FC_Rpg.guildManager.getOnlineGuildPlayerList(party).size();
+			party = FC_Rpg.guildConfig.getGuildByMember(playerDefender.getName());
+			memberCount = FC_Rpg.guildConfig.getOnlineGuildPlayerList(party).size();
 		}
 		else
 			memberCount = 1;
@@ -163,7 +163,7 @@ public class EntityDamageManager
 		if (rpgAttacker != null)
 		{
 			handle_Postoffense_Buffs(rpgAttacker, playerDefender, damage);
-			rpgAttacker.attemptAttackNotification(rpgDefender.getPlayer().getType(), rpgDefender.getPlayerConfig().getClassLevel(), rpgDefender.getCurHealth(), rpgDefender.getMaxHealth(), damage);
+			rpgAttacker.attemptAttackNotification(rpgDefender.getPlayer().getName(), rpgDefender.getPlayerConfig().getClassLevel(), rpgDefender.getCurHealth(), rpgDefender.getMaxHealth(), damage);
 			applyKnockback(rpgAttacker.getPlayer(), playerDefender, damageType);
 		}
 		
@@ -186,12 +186,20 @@ public class EntityDamageManager
 		}
 		else
 		{
-			rpgDefender.attemptDefenseNotification(damage);
-			
 			if (rpgAttacker != null)
+			{
+				rpgDefender.attemptDefenseNotification(damage, rpgAttacker.getPlayer().getName(), rpgAttacker.getPlayerConfig().getClassLevel());
 				handle_Defense_Passives(damage, rpgDefender, rpgAttacker.getPlayer());
+			}
 			else if (rpgMobAttacker != null)
+			{
+				rpgDefender.attemptDefenseNotification(damage, rpgMobAttacker.getEntity().getType().toString(), rpgMobAttacker.getLevel());
 				handle_Defense_Passives(damage, rpgDefender, rpgMobAttacker.getEntity());
+			}
+			else
+			{
+				rpgDefender.attemptDefenseNotification(damage, typeString, -1);
+			}
 		}
 	}
 	
@@ -199,19 +207,31 @@ public class EntityDamageManager
 	{
 		//Variable Declaration
 		ItemStack handItem = p.getItemInHand();
-		ItemStack newItem = handItem;
 		int handItemDurability = handItem.getDurability();
+		int maxDurability = handItem.getType().getMaxDurability();
+		int unbreakingLevel = handItem.getEnchantmentLevel(Enchantment.DURABILITY);
+		Random rand = new Random();
 		
 		//Adjust durability of sword.
-		if (FC_Rpg.mLib.swords.contains(handItem.getType()))
+		if (FC_Rpg.mLib.swords.contains(handItem.getType()) || handItem.getType().equals(Material.BOW))
 		{
+			//If the item has unbreaking, then we have to give the item a chance to not break based on it.
+			if (handItem.getEnchantments().size() == 0)
+				return;
+			
+			//Handle sword unbreaking level.
+			if (unbreakingLevel > 0)
+			{
+				if ((rand.nextInt(unbreakingLevel)) == 0)
+					return;
+			}
+			
+			// Increase durability.
 			handItem.setDurability((short) (handItemDurability + 1));
 			
-			if (handItemDurability >= handItem.getType().getMaxDurability()-1)
-			{
-				newItem.setDurability((short) 0);
-				p.setItemInHand(newItem);
-			}
+			// Set the hand item 
+			if (handItemDurability >= maxDurability)
+				p.setItemInHand(new ItemStack(Material.AIR));
 		}
 	}
 	
@@ -367,10 +387,10 @@ public class EntityDamageManager
 		int partyMemberCount = 1;
 		
 		// Make sure that the mob wasn't attacked too recently.
-		if (FC_Rpg.guildManager.getGuildByMember(playerAttacker.getName()) != null)
+		if (FC_Rpg.guildConfig.getGuildByMember(playerAttacker.getName()) != null)
 		{
-			guild = FC_Rpg.guildManager.getGuildByMember(playerAttacker.getName());
-			partyMemberCount = FC_Rpg.guildManager.getOnlineGuildPlayerList(guild).size();
+			guild = FC_Rpg.guildConfig.getGuildByMember(playerAttacker.getName());
+			partyMemberCount = FC_Rpg.guildConfig.getOnlineGuildPlayerList(guild).size();
 			
 			if (canAttack(rpgMobDefender.getLastDamagedLong(), partyMemberCount) == false)
 				return;
@@ -455,7 +475,7 @@ public class EntityDamageManager
 		}
 		
 		// Attempt to send an attack notification.
-		rpgAttacker.attemptAttackNotification(rpgMobDefender.getEntity().getType(), rpgMobDefender.getLevel(), rpgMobDefender.getCurHealth(), rpgMobDefender.getMaxHealth(), damage);
+		rpgAttacker.attemptAttackNotification(rpgMobDefender.getEntity().getType().toString(), rpgMobDefender.getLevel(), rpgMobDefender.getCurHealth(), rpgMobDefender.getMaxHealth(), damage);
 		
 		// Handle berserker class spells
 		handle_Postoffense_Buffs(rpgAttacker, entityDefender, damage);
@@ -476,7 +496,7 @@ public class EntityDamageManager
 
 			rpgMobDefender.setIsAlive(false);
 			
-			if (rpgMobDefender.getMobAggressionCheck().isHostile() == true)
+			if (rpgMobDefender.getMobAggressionCheck())
 			{
 				// Give the attacker a mob kill
 				rpgAttacker.getPlayerConfig().setLifetimeMobKills(rpgAttacker.getPlayerConfig().getLifetimeMobKills() + 1);
@@ -485,7 +505,7 @@ public class EntityDamageManager
 				if (guild != null)
 				{
 					// Add a mob kill for that party.
-					FC_Rpg.guildManager.addMobKill(guild);
+					FC_Rpg.guildConfig.addMobKill(guild);
 					
 					//Give battle winnings
 					attemptGiveBattleWinnings(guild, rpgAttacker.getPlayer(), rpgMobDefender);
@@ -516,19 +536,20 @@ public class EntityDamageManager
 	{
 		List<Player> recipients = new ArrayList<Player>();
 		RpgPlayer rpgLooter;
-		double bonusPercentCap = FC_Rpg.balanceConfig.getBonusPercentCap();
-		double bonusPercent = 1;
 		double cash;
 		double exp;
 		double guildBonus = 1;
 		int powerLevelPrevention = FC_Rpg.balanceConfig.getPowerLevelPrevention();
 		int levelDifference;
-		boolean checkPowerLeveling = (powerLevelPrevention > -1 && !rpgMobDefender.getIsBoss());
+		boolean checkPowerLeveling = (powerLevelPrevention > -1);
+		
+		if (checkPowerLeveling && rpgMobDefender.getIsBoss())
+			checkPowerLeveling = false;
 		
 		if (guild != null)
 		{
-			recipients = FC_Rpg.guildManager.getOnlineGuildPlayerList(guild);
-			guildBonus = FC_Rpg.guildManager.getGuildBonus(guild);
+			recipients = FC_Rpg.guildConfig.getOnlineGuildPlayerList(guild);
+			guildBonus = FC_Rpg.guildConfig.getGuildBonus(guild);
 		}
 		else
 			recipients.add(playerLooter);
@@ -550,7 +571,7 @@ public class EntityDamageManager
 			{
 				//Allow solo players to still recieve loot from stronger level monsters.
 				if (recipients.size() == 1)
-					levelDifference = (int) (FC_Rpg.balanceConfig.getPowerLevelPrevention());
+					levelDifference = powerLevelPrevention;
 				else
 				{
 					rpgLooter.attemptMonsterOutOfRangeNotification();
@@ -559,63 +580,46 @@ public class EntityDamageManager
 			}
 			else
 			{
-				// Give a bonus percent based on level difference, 1 level = x% more.
-				if (levelDifference == 0)
-					bonusPercent = 1;
-				else if (levelDifference < 0)
-					bonusPercent = 1 + levelDifference * FC_Rpg.balanceConfig.getMobLootPercentWeaker();
-				else
-					bonusPercent = 1 + levelDifference * FC_Rpg.balanceConfig.getMobLootPercentStronger();
+				// Set up loot amounts.
+				cash = rpgMobDefender.getLevel() * FC_Rpg.balanceConfig.getMobCashMultiplier() * FC_Rpg.eventCashMultiplier;;
+				exp = rpgMobDefender.getLevel() * FC_Rpg.balanceConfig.getMobExpMultiplier() * FC_Rpg.eventExpMultiplier;
 				
-				if (bonusPercent > bonusPercentCap)
-					bonusPercent = bonusPercentCap;
-				else
+				// Calculate how much loot and experience to aquire by donator
+				if (rpgLooter.getPlayerConfig().isDonator())
 				{
-					// Set up loot amounts.
-					cash = rpgMobDefender.getLevel() * bonusPercent * FC_Rpg.balanceConfig.getMobCashMultiplier();
-					exp = rpgMobDefender.getLevel() * bonusPercent * FC_Rpg.balanceConfig.getMobExpMultiplier();
-					
-					// Add global modifiers
-					cash = cash * FC_Rpg.eventCashMultiplier;
-					exp = exp * FC_Rpg.eventExpMultiplier;
-					
-					// Calculate how much loot and experience to aquire by donator
-					if (rpgLooter.getPlayerConfig().isDonator())
-					{
-						cash = cash * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
-						exp = exp * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
-					}
-
-					// For slimes we reduce the gold and exp based on size.
-					if (rpgMobDefender.getEntity() instanceof Slime)
-					{
-						Slime slime = (Slime) rpgMobDefender.getEntity();
-						int slimeSize = slime.getSize();
-
-						if (slimeSize == 2)
-						{
-							exp = exp / 4;
-							cash = cash / 4;
-						}
-						else if (slimeSize == 1)
-						{
-							exp = exp / 8;
-							cash = cash / 8;
-						}
-					}
-					
-					if (guildBonus > 1)
-					{
-						cash = cash * guildBonus;
-						exp = exp * guildBonus;
-					}
-					
-					FC_Rpg.economy.depositPlayer(p.getName(),cash);
-					FC_Rpg.rpgEntityManager.getRpgPlayer(p).addClassExperience(exp, true);
-					
-					// Send a message to the player showing experience and loot gains.
-					rpgLooter.attemptMonsterDeathNotification(rpgMobDefender.getLevel(), exp, cash);
+					cash = cash * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
+					exp = exp * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
 				}
+				
+				// For slimes we reduce the gold and exp based on size.
+				if (rpgMobDefender.getEntity() instanceof Slime)
+				{
+					Slime slime = (Slime) rpgMobDefender.getEntity();
+					int slimeSize = slime.getSize();
+					
+					if (slimeSize == 2)
+					{
+						exp = exp * .25;
+						cash = cash * .25;
+					}
+					else if (slimeSize == 1)
+					{
+						exp = exp * .125;
+						cash = cash * .125;
+					}
+				}
+				
+				if (guildBonus > 1)
+				{
+					cash = cash * guildBonus;
+					exp = exp * guildBonus;
+				}
+				
+				FC_Rpg.economy.depositPlayer(p.getName(),cash);
+				FC_Rpg.rpgEntityManager.getRpgPlayer(p).addClassExperience(exp, true);
+				
+				// Send a message to the player showing experience and loot gains.
+				rpgLooter.attemptMonsterDeathNotification(rpgMobDefender.getLevel(), exp, cash);
 			}
 		}
 	}

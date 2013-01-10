@@ -31,6 +31,7 @@ public class EffectIDs
 	public static final int DAMAGE_BY_MISSING_HEALTH = 1017;
 	public static final int SACRIFICE_HEALTH_FOR_DAMAGE = 1018;
 	public static final int HEAL_SELF_OR_OTHER = 1019;
+	public static final int HEAL_SELF_PERCENT = 1020;
 	
 	public static final int DAMAGE_BOOST = 2000;
 	

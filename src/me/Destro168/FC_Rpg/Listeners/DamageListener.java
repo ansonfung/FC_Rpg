@@ -138,7 +138,7 @@ public class DamageListener implements Listener
 					return;
 				
 				// Attack the player with enviromental damage.
-				edm.attackPlayerDefender(rpgDefender, null, null, damage, damageType);
+				edm.attackPlayerDefender(rpgDefender, null, null, damage, damageType, event.getCause().toString());
 			}
 			else
 			{
@@ -303,9 +303,9 @@ public class DamageListener implements Listener
 		{
 			// Attack the player Defender.
 			if (rpgAttacker != null)
-				edm.attackPlayerDefender(rpgDefender, rpgAttacker, null, damage, damageType);
+				edm.attackPlayerDefender(rpgDefender, rpgAttacker, null, damage, damageType, rpgAttacker.getPlayer().getName());
 			else if (rpgMobAttacker != null)
-				edm.attackPlayerDefender(rpgDefender, null, rpgMobAttacker, damage, damageType);
+				edm.attackPlayerDefender(rpgDefender, null, rpgMobAttacker, damage, damageType, rpgMobAttacker.getEntity().getType().toString());
 		}
 	}
 

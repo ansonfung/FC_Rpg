@@ -100,12 +100,12 @@ public class GeneralEvent
 		return false;
 	}
 	
-	protected void messageAllParticipants(String message)
+	protected void messageAllParticipants(String ... message)
 	{
 		for (Player player : participantList)
 		{
 			MessageLib msgLib = new MessageLib(player);
-			msgLib.standardMessage(message);
+			msgLib.infiniteMessage(message);
 		}
 	}
 	
