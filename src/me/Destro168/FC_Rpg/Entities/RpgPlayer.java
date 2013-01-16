@@ -28,11 +28,12 @@ import org.bukkit.inventory.ItemStack;
 
 public class RpgPlayer extends RpgEntity
 {
+	public PlayerConfig playerConfig;
+	
 	private List<String> queuedHealMessage;
 	private MessageLib msgLib;
 	private ItemStack air;
 	private Player player;
-	private PlayerConfig playerConfig;
 	private String prefix = "";
 	private String name = "";
 	private boolean isSupportBuffed;
@@ -48,23 +49,12 @@ public class RpgPlayer extends RpgEntity
 	private Date lastNoManaNotification;
 	private Date lastMonsterDeathNotification;
 	private Date lastCastNotification;
-	private double curHealth;
-	private double maxHealth;
-	private double curMana;
-	private double maxMana;
 	
 	public void switchIsCasting() { isCasting = !isCasting; }
 	public boolean getIsCasting() { return isCasting; }
 	
 	//Gets
 	public Player getPlayer() { return player; }
-	public PlayerConfig getPlayerConfig() { return playerConfig; }
-	
-	//Only call twice, one when player is loaded, once when player deloads.
-	public double getCurHealth() { return curHealth; }
-	public double getMaxHealth() { return maxHealth; }
-	public double getCurMana() { return curMana; }
-	public double getMaxMana() { return maxMana; }
 	
 	//Functions that rely on file get/sets
 	public int getTotalAttack() { return playerConfig.getAttack() + tempAttack; }
@@ -104,10 +94,7 @@ public class RpgPlayer extends RpgEntity
 		logonDate = new Date();
 		lastMonsterDeathNotification = new Date();
 		lastCastNotification = new Date();
-		curHealth = 0;
-		maxHealth = 0;
-		curMana = 0;
-		maxMana = 0;
+		playerConfig = null;
 	}
     
 	public void setPlayer(Player player_)
@@ -124,6 +111,11 @@ public class RpgPlayer extends RpgEntity
 		//Create the player config
 		playerConfig = new PlayerConfig(player.getName());
 		
+		playerConfig.curHealth = 0;
+		playerConfig.maxHealth = 0;
+		playerConfig.curMana = 0;
+		playerConfig.maxMana = 0;
+		
 		//Check for infinite donator.
 		FC_RpgPermissions perms = new FC_RpgPermissions(player);
     	
@@ -133,13 +125,13 @@ public class RpgPlayer extends RpgEntity
         		setDonator(1);
     	}
     	
-    	//Update player health hud.
-		loadCriticalInformation();
+    	//Update player name.
+    	name = playerConfig.getName();
 		
 		//Update the prefix.
 		updatePrefix();
 		
-    	HealthConverter hc = new HealthConverter(maxHealth, curHealth);
+    	HealthConverter hc = new HealthConverter(playerConfig.maxHealth, playerConfig.curHealth);
     	
     	WorldConfig wm = new WorldConfig();
     	
@@ -148,23 +140,6 @@ public class RpgPlayer extends RpgEntity
 		
 		//Check and apply donator bonuses
 		updateDonatorStats();
-	}
-	
-	public void loadCriticalInformation()
-	{
-		curMana = playerConfig.getCurManaFile();
-		maxMana = playerConfig.getMaxManaFile();
-		curHealth = playerConfig.getCurHealthFile();
-		maxHealth = playerConfig.getMaxHealthFile();
-		name = playerConfig.getName();
-	}
-	
-	public void dumpCriticalInformation()
-	{
-		playerConfig.setCurManaFile(curMana);
-		playerConfig.setMaxManaFile(maxMana);
-		playerConfig.setCurHealthFile(curHealth);
-		playerConfig.setMaxHealthFile(maxHealth);
 	}
 	
 	public void createPlayerRecord(Player player_, int pickedClass, boolean manualDistribution)
@@ -358,7 +333,7 @@ public class RpgPlayer extends RpgEntity
 		}
 		
 		//Make sure the new class is different from current class.
-		if (getPlayerConfig().getCombatClass() == cNumber)
+		if (playerConfig.getCombatClass() == cNumber)
 			return msgLib.standardError("You Can't Switch To The Class You Are Currently.");
 		
 		//Make sure that the user is only picking from proper classes.
@@ -366,7 +341,7 @@ public class RpgPlayer extends RpgEntity
 			return msgLib.errorInvalidCommand();
 		
 		//Chance the combat class.
-		playerConfig.setCombatClass(cNumber);
+		playerConfig.adjustNewCombatclass(cNumber);
 		
 		//If not an admin we decrease class change tickets.
 		if (hasInfiniteTickets == false)
@@ -431,15 +406,15 @@ public class RpgPlayer extends RpgEntity
 	//Remember when changing this to change the RPGPLAYERFILE version! -> calculateHealthAndManaOffline()
 	public void calculateHealthAndMana()
 	{
-		maxHealth = FC_Rpg.balanceConfig.getPlayerBaseHealth() + getTotalConstitution() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeConstitution();
-		maxMana = FC_Rpg.balanceConfig.getPlayerBaseMana() + getTotalIntelligence() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeIntelligence();
+		playerConfig.maxHealth = FC_Rpg.balanceConfig.getPlayerBaseHealth() + getTotalConstitution() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeConstitution();
+		playerConfig.maxMana = FC_Rpg.balanceConfig.getPlayerBaseMana() + getTotalIntelligence() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeIntelligence();
 		
 		//Prevent overflow of health/mana.
-		if (curHealth > maxHealth)
-			curHealth = maxHealth;
+		if (playerConfig.curHealth > playerConfig.maxHealth)
+			playerConfig.curHealth = playerConfig.maxHealth;
 		
-		if (curMana > maxMana)
-			curMana = maxMana;
+		if (playerConfig.curMana > playerConfig.maxMana)
+			playerConfig.curMana = playerConfig.maxMana;
 	}
 	
 	public void healHealthAndMana(double d)
@@ -456,8 +431,8 @@ public class RpgPlayer extends RpgEntity
 		//Update health and mana.
 		calculateHealthAndMana();
 		
-		curHealth = maxHealth;
-		curMana = maxMana;
+		playerConfig.curHealth = playerConfig.maxHealth;
+		playerConfig.curMana = playerConfig.maxMana;
 	}
 	
 	public double dealDamage(double damage)
@@ -465,11 +440,11 @@ public class RpgPlayer extends RpgEntity
 		//Update health and mana.
 		calculateHealthAndMana();
 		
-		curHealth -= damage;
+		playerConfig.curHealth -= damage;
 		
 		lastDamaged = new Date();
 		
-		return curHealth;
+		return playerConfig.curHealth;
 	}
 	
 	public void drainMana(double d)
@@ -477,7 +452,7 @@ public class RpgPlayer extends RpgEntity
 		//Update health and mana.
 		calculateHealthAndMana();
 		
-		curMana -= d;
+		playerConfig.curMana -= d;
 	}
 	
 	public void restoreManaTick()
@@ -486,13 +461,13 @@ public class RpgPlayer extends RpgEntity
 		calculateHealthAndMana();
 		
 		if (playerConfig.getRpgClass().getPassiveID() == BalanceConfig.passive_InnerFire)
-			restoreMana(maxMana * .2); //20% mana regeneration per 5 seconds (4% per sec)
+			restoreMana(playerConfig.maxMana * .2); //20% mana regeneration per 5 seconds (4% per sec)
 		else
-			restoreMana(maxMana * .05); //5% mana regeneration per 5 seconds (1% per sec)
+			restoreMana(playerConfig.maxMana * .05); //5% mana regeneration per 5 seconds (1% per sec)
 		
 		//Attempt to restore mana.
-		if (curMana > maxMana)
-			curMana = maxMana;
+		if (playerConfig.curMana > playerConfig.maxMana)
+			playerConfig.curMana = playerConfig.maxMana;
 	}
 	
 	public void healHealth(double amount) 
@@ -501,11 +476,11 @@ public class RpgPlayer extends RpgEntity
 		calculateHealthAndMana();
 		
 		//Actually add in new amount.
-		curHealth = curHealth + amount;
+		playerConfig.curHealth = playerConfig.curHealth + amount;
 		
 		//If new health is equal to 
-		if (curHealth > maxHealth)
-			curHealth = maxHealth;
+		if (playerConfig.curHealth > playerConfig.maxHealth)
+			playerConfig.curHealth = playerConfig.maxHealth;
 	}
 	
 	public void restoreMana(double amount) 
@@ -514,11 +489,11 @@ public class RpgPlayer extends RpgEntity
 		calculateHealthAndMana();
 		
 		//Actually add in new amount.
-		curMana = curMana + amount;
+		playerConfig.curMana = playerConfig.curMana + amount;
 		
 		//If new health is equal to 
-		if (curMana > maxMana)
-			curMana = maxMana;
+		if (playerConfig.curMana > playerConfig.maxMana)
+			playerConfig.curMana = playerConfig.maxMana;
 	}
 	
 	//Return stat points to a player.
@@ -542,7 +517,7 @@ public class RpgPlayer extends RpgEntity
 		playerConfig.setConstitution(0);
 		playerConfig.setMagic(0);
 		playerConfig.setIntelligence(0);
-		
+
 		playerConfig.setStats(stats);
 	}
 	
@@ -626,7 +601,7 @@ public class RpgPlayer extends RpgEntity
 		if (getCanNotify(lastDefenseNotification) == false)
 			return;
 		
-		String[] p = playerConfig.getRemainingX(curHealth,maxHealth,2);
+		String[] p = playerConfig.getRemainingX(playerConfig.curHealth,playerConfig.maxHealth,2);
 		lastDefenseNotification = new Date();
 		
 		if (level > -1)
@@ -642,7 +617,7 @@ public class RpgPlayer extends RpgEntity
 		if (getCanNotify(lastCastNotification) == false)
 			return;
 		
-		String[] p = playerConfig.getRemainingX(curMana,maxMana,1);
+		String[] p = playerConfig.getRemainingX(playerConfig.curMana,playerConfig.maxMana,1);
 		msgLib.infiniteMessage("[","*Spell Cast*","] ",spellName," // MP: (",
 				p[0],p[1],p[2],p[3],p[4],p[5]);
 		
@@ -657,7 +632,7 @@ public class RpgPlayer extends RpgEntity
 		lastHealNotification = new Date();
 		
 		//String[] d = getRemainingX(curMana,maxMana,1);
-		String[] p = playerConfig.getRemainingX(healTarget.getCurHealth(),healTarget.getMaxHealth(),0);
+		String[] p = playerConfig.getRemainingX(healTarget.playerConfig.curHealth,healTarget.playerConfig.maxHealth,0);
 		
 		queuedHealMessage = Arrays.asList("[","-Healed Other-","] Target HP: (",p[0],p[1],p[2],p[3],p[4],p[5]);
 	}
@@ -668,7 +643,7 @@ public class RpgPlayer extends RpgEntity
 		if (getCanNotify(lastHealNotification) == false)
 			return;
 		
-		String[] p = playerConfig.getRemainingX(curHealth,maxHealth,0);
+		String[] p = playerConfig.getRemainingX(playerConfig.curHealth,playerConfig.maxHealth,0);
 		lastHealNotification = new Date();
         
 		queuedHealMessage = Arrays.asList("[","-Heal-","] Amount: ",healAmount + ""," // HP: (",p[0],p[1],p[2],p[3],p[4],p[5]);
@@ -732,7 +707,7 @@ public class RpgPlayer extends RpgEntity
 		if (getCanNotify(lastNoManaNotification) == false)
 			return;
 
-		String[] p = playerConfig.getRemainingX(curMana,maxMana,1);
+		String[] p = playerConfig.getRemainingX(playerConfig.curMana,playerConfig.maxMana,1);
 		lastNoManaNotification = new Date();
 		
 		msgLib.infiniteMessage("[","*Spell Fail*","] Out Of Mana! (",
@@ -741,7 +716,7 @@ public class RpgPlayer extends RpgEntity
 	
 	public void attemptGiveTimedItems()
 	{
-		List<ItemStack> timedItems = FC_Rpg.generalConfig.getTimedItems();
+		List<ItemStack> timedItems = FC_Rpg.generalConfig.timedItems;
 		
 		//If timed items are null return.
 		if (timedItems == null || timedItems.size() == 0)
@@ -1212,7 +1187,7 @@ public class RpgPlayer extends RpgEntity
 	
 	public boolean hasEnoughMana(int spellNumber, int spellLevel)
 	{
-		if (curMana > playerConfig.getRpgClass().getSpell(spellNumber).getManaCost().get(spellLevel))
+		if (playerConfig.curMana > playerConfig.getRpgClass().getSpell(spellNumber).getManaCost().get(spellLevel))
 			return true;
 		
 		return false;
@@ -1223,7 +1198,7 @@ public class RpgPlayer extends RpgEntity
 		//Update health and mana.
 		calculateHealthAndMana();
 		
-		double percent = curHealth * 100 / maxHealth;
+		double percent = playerConfig.curHealth * 100 / playerConfig.maxHealth;
 		
 		//We have to inverse percent for lower hp = more damage.
 		percent = (percent - 100) * -1;

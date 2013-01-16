@@ -1,13 +1,11 @@
 package me.Destro168.FC_Rpg.Configs;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import me.Destro168.FC_Suite_Shared.ConfigManagers.ConfigGod;
 import me.Destro168.FC_Suite_Shared.ConfigManagers.ListGetter;
 import me.Destro168.FC_Rpg.FC_Rpg;
-import me.Destro168.FC_Rpg.Events.DungeonEvent;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -32,6 +30,18 @@ public class DungeonConfig extends ConfigGod
 			
 			//Add a default dungeon
 			addNewDungeon("Grasslands");
+		}
+		
+		// Update
+		if (getVersion() < 1.1)
+		{
+			setVersion(1.1);
+			
+			for (int i : getDungeonList())
+			{
+				setStaticLevel(i, -1);
+				setLootList(i, "default");
+			}
 		}
 	}
 	
@@ -75,50 +85,20 @@ public class DungeonConfig extends ConfigGod
 				break;
 			}
 		}
-		
-		initializeDungeons();
 	}
 	
 	/****************************************************************
-	 ^ Configuration Accessing Methods 
+	 ^ Configuration Accessing Methods
+	 - All Dynamically Accessed
 	 * Helper functions
 	****************************************************************/
-
+	
+	public List<Integer> getDungeonList() { ListGetter lg = new ListGetter(fcw, prefix); return lg.getFieldIntegerList(); }
 	public Location getLocation(int dungeonNumber, String field) { return fcw.getLocation(getDungeonPrefix(dungeonNumber) + field); }
-	public void removeDungeon(int dungeonNumber) { fcw.setNull(prefix + dungeonNumber); initializeDungeons(); } // Set null then refresh dungeons.
+	public void removeDungeon(int dungeonNumber) { fcw.setNull(prefix + dungeonNumber); FC_Rpg.reloadDungeons(); } // Set null then refresh dungeons.
+	public boolean getNameIsSet(int dungeonNumber) { return fcw.isSet(getDungeonPrefix(dungeonNumber) + "name"); }
 	
 	private String getDungeonPrefix(int dungeonNumber) { return prefix + dungeonNumber + "."; }
-	
-	//Do NOT call in constructor or you will get an error.
-	public void initializeDungeons()
-	{
-		// Variable Declarations/Initializations
-		String ref = "";
-		int count = 0;
-		FC_Rpg.trueDungeonNumbers = new HashMap<Integer, Integer>();
-		
-		// Attempt to store all dungeon names.
-		for (int i = 0; i < 1000; i++)
-		{
-			ref = FC_Rpg.dungeonConfig.getName(i);
-			
-			if (ref != null)
-			{
-				FC_Rpg.trueDungeonNumbers.put(i, count);
-				count++;
-			}
-		}
-
-		// Store number of dungeons.
-		FC_Rpg.dungeonCount = FC_Rpg.trueDungeonNumbers.size();
-
-		// Create dungeonEvents based on size of dungeons.
-		FC_Rpg.dungeonEventArray = new DungeonEvent[FC_Rpg.dungeonCount];
-
-		// Initate the dungeons.
-		for (int i = 0; i < FC_Rpg.dungeonCount; i++)
-			FC_Rpg.dungeonEventArray[i] = new DungeonEvent(i);
-	}
 	
 	/********************************
 	 * Sets section
@@ -135,6 +115,8 @@ public class DungeonConfig extends ConfigGod
 	public void setStart(int dungeonNumber, Location loc) { fcw.setLocation(getDungeonPrefix(dungeonNumber) + "start", loc);  }
 	public void setExit(int dungeonNumber, Location loc) { fcw.setLocation(getDungeonPrefix(dungeonNumber) + "exit", loc);  }
 	public void setBossSpawn(int dungeonNumber, Location loc) { fcw.setLocation(getDungeonPrefix(dungeonNumber) + "bossSpawn", loc); }
+	public void setStaticLevel(int dungeonNumber, int x) { fcw.set(getDungeonPrefix(dungeonNumber) + "staticLevel", x); }
+	public void setLootList(int dungeonNumber, String x) { fcw.set(getDungeonPrefix(dungeonNumber) + "lootList", x); }
 	
 	/********************************
 	 - Treasure Based Sets
@@ -223,6 +205,8 @@ public class DungeonConfig extends ConfigGod
 	public Location getStart(int dungeonNumber) { return getLocation(dungeonNumber,"start"); }
 	public Location getExit(int dungeonNumber) { return getLocation(dungeonNumber,"exit"); }
 	public Location getBossSpawn(int dungeonNumber) { return getLocation(dungeonNumber,"bossSpawn"); }
+	public int getStaticLevel(int dungeonNumber) { return fcw.getInt(getDungeonPrefix(dungeonNumber) + "staticLevel"); }
+	public String getLootList(int dungeonNumber) { return fcw.getString(getDungeonPrefix(dungeonNumber) + "lootList"); }
 	
 	public List<Location> getTreasureStart(int dungeonNumber) { ListGetter lg = new ListGetter(fcw, getDungeonPrefix(dungeonNumber) + "treasure.start"); return lg.getLocationList(); }
 	public List<Location> getTreasureEnd(int dungeonNumber) { ListGetter lg = new ListGetter(fcw, getDungeonPrefix(dungeonNumber) + "treasure.end"); return lg.getLocationList(); }
@@ -233,7 +217,7 @@ public class DungeonConfig extends ConfigGod
 	
 	public List<EntityType> getMobList(int dungeonNumber, int index) 
 	{
-		List<String> entityTypeStringList = converter.getStringListFromString(fcw.getStringS(getDungeonPrefix(dungeonNumber) + "spawnBox.mobList." + index));
+		List<String> entityTypeStringList = fcw.getCustomStringList(getDungeonPrefix(dungeonNumber) + "spawnBox.mobList." + index);
 		List<EntityType> entityTypeList = new ArrayList<EntityType>();
 		
 		for (String s : entityTypeStringList)

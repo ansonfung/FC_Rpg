@@ -30,30 +30,35 @@ import me.Destro168.FC_Suite_Shared.TimeUtils.DateManager;
 // Handles storing of player data in files.
 public class PlayerConfig extends ConfigGod
 {
-	private int levelCap;
+	//Variable Declarations
 	protected RpgClass rpgClass;
     protected String name;
     public boolean hasAlchemy;
     
 	public String getName() { return name; }
 	public RpgClass getRpgClass() { return rpgClass; }
-	
 	public boolean getHasAlchemy() { return hasAlchemy; }
 	
-	//Gets
-	public boolean getIsActive()  //Very important get so it gets to take up space.
-	{
-		try	{
-			return fcw.getBoolean(prefix + "isActive");
-		} catch (NullPointerException e) {
-			return false;
-		}
-	}
+	// Loaded dynamic variables.
+	public double curMana;
+	public double maxMana;
+	public double curHealth;
+	public double maxHealth;
 	
+	// Gets
+	public List<Integer> getSpellLevels() { return fcw.getIntegerList(prefix + "spell.levels"); }
+	public List<Integer> getSpellBinds() { return fcw.getIntegerList(prefix + "spell.binds"); }
 	public String getCustomPrefix() { return fcw.getString(prefix + "customPrefix"); }
 	public String getActiveSpell() { return fcw.getString(prefix + "activeSpell"); }
     public long getDonatorTime() { return fcw.getLong(prefix + "donatorTime"); }
-	public long getHunterLastPay() { return fcw.getLong(prefix + "hunterLastPay"); }
+	public long getLastDungeonCompletion() { return fcw.getLong(prefix + "lastDungeonCompletion"); }
+	public long getLastRecievedHourlyItems() { return fcw.getLong(prefix + "lastRecievedHourlyItems"); }
+	public double getClassExperience() { return fcw.getDouble(prefix + "classExperience"); }
+	public double getArcanium() { return fcw.getDouble(prefix + "arcanium"); }
+	public double getCurManaFile() { return fcw.getDouble(prefix + "curMana"); }
+	public double getMaxManaFile() { return fcw.getDouble(prefix + "maxMana"); }
+	public double getCurHealthFile() { return fcw.getDouble(prefix + "curHealth"); }
+	public double getMaxHealthFile() { return fcw.getDouble(prefix + "maxHealth"); }
 	public int getCombatClass() { return fcw.getInt(prefix + "combatClass"); }
 	public int getIntelligence() { return fcw.getInt(prefix + "intelligence"); }
 	public int getClassLevel() { return fcw.getInt(prefix + "classLevel"); }
@@ -66,58 +71,43 @@ public class PlayerConfig extends ConfigGod
 	public int getClassChangeTickets() { return fcw.getInt(prefix + "classChangeTickets"); }
 	public int getSecondsPlayed() { return fcw.getInt(prefix + "secondsPlayed"); }
 	public int getSpellPoints() { return fcw.getInt(prefix + "spellPoints"); }
-	
-	public List<Integer> getSpellLevels() { return converter.getIntegerListFromString(fcw.getString(prefix + "spell.levels")); }
-	public List<Integer> getSpellBinds() { return converter.getIntegerListFromString(fcw.getString(prefix + "spell.binds")); }
-	
-	public double getClassExperience() { return fcw.getDouble(prefix + "classExperience"); }
+	public boolean getIsActive() { if (fcw.isSet(prefix + "isActive")) return fcw.getBoolean(prefix + "isActive"); else return false; }
 	public boolean getManualAllocation() { return fcw.getBoolean(prefix + "manualAllocation"); }
-	public boolean getShowDamageTaken() { return fcw.getBoolean(prefix + "showDamageTaken"); }
-	public boolean getShowDamageGiven() { return fcw.getBoolean(prefix + "showDamageGiven"); }
-	public boolean getHunterCanKit() { return fcw.getBoolean(prefix + "hunterCanKit"); }
 	public boolean getAutoCast() { return fcw.getBoolean(prefix + "autoCast"); }
-	public double getArcanium() { return fcw.getDouble(prefix + "arcanium"); }
 	
-	public long getLastDungeonCompletion() { return fcw.getLong(prefix + "lastDungeonCompletion"); }
-	public long getLastRecievedHourlyItems() { return fcw.getLong(prefix + "lastRecievedHourlyItems"); }
-	
-	//Sets
-	public void setCustomPrefix(String x) { fcw.set(prefix + "customPrefix", x); }
-	public void setActiveSpell(String x) { fcw.set(prefix + "activeSpell", x); }
-	public void setCombatClass(int x) { 
-		fcw.set(prefix + "combatClass", x);
-		refreshClass();
-	}
-	public void setClassLevel(int x) { fcw.set(prefix + "classLevel", x); }
-	public void setJobRank(int x) { fcw.set(prefix + "jobRank", x); }
-	public void setAttack(int x) { fcw.set(prefix + "attack", x); }
-	public void setConstitution(int x) { fcw.set(prefix + "constitution", x); }
-	public void setMagic(int x) { fcw.set(prefix + "magic", x); }
-	public void setStats(int x) { fcw.set(prefix + "stats", x); }
-	public void setIntelligence(int x) { fcw.set(prefix + "intelligence", x); }
-	public void setLifetimeMobKills(int x) { fcw.set(prefix + "lifetimeMobKills", x); }
-	public void setClassChangeTickets(int x) { fcw.set(prefix + "classChangeTickets", x); }
-	public void setSecondsPlayed(int x) { fcw.set(prefix + "secondsPlayed", x); }
-	public void setSpellPoints(int x) { fcw.set(prefix + "spellPoints", x); }
-	
+	// Sets
 	public void setSpellLevels(int x) { fcw.set(prefix + "spell.levels", x); }
 	public void setSpellBinds(int x) { fcw.set(prefix + "spell.binds", x); }
 	public void setSpellLevels(List<Integer> x) { fcw.setCustomList(prefix + "spell.levels", x); }
 	public void setSpellBinds(List<Integer> x) { fcw.setCustomList(prefix + "spell.binds", x); }
-	
-	public void setDonatorTime(Long x) { fcw.set(prefix + "donatorTime", x); }
-	public void setClassExperience(double x) { fcw.set(prefix + "classExperience", x); }
-	public void setIsActive(boolean x) { fcw.set(prefix + "isActive",x); }
-	public void setAutomaticAllocation(boolean x) { fcw.set(prefix + "manualAllocation",x); }
-	public void setShowDamageTaken(boolean x) { fcw.set(prefix + "showDamageTaken",x); }
-	public void setShowDamageGiven(boolean x) { fcw.set(prefix + "showDamageGiven",x); }
-	public void setAutoCast(boolean x) { fcw.set(prefix + "autoCast",x); }
-	public void setArcanium(double x) { fcw.set(prefix + "arcanium",x); }
-
+	public void setCustomPrefix(String x) { fcw.set(prefix + "customPrefix", x); }
+	public void setActiveSpell(String x) { fcw.set(prefix + "activeSpell", x); }
+	public void setDonatorTime(long x) { fcw.set(prefix + "donatorTime", x); }
 	public void setLastDungeonCompletion(long x) { fcw.set(prefix + "lastDungeonCompletion", x); }
 	public void setLastRecievedHourlyItems(long x) { fcw.set(prefix + "lastRecievedHourlyItems", x); }
+	public void setClassExperience(double x) { fcw.set(prefix + "classExperience", x); }
+	public void setArcanium(double x) { fcw.set(prefix + "arcanium",x); }
+	public void setCurManaFile(double x) { fcw.set(prefix + "curMana", x); }
+	public void setMaxManaFile(double x) { fcw.set(prefix + "maxMana", x); }
+	public void setCurHealthFile(double x) { fcw.set(prefix + "curHealth", x); }
+	public void setMaxHealthFile(double x) { fcw.set(prefix + "maxHealth", x); }
+	public void setCombatClass(int x) { fcw.set(prefix + "combatClass", x); refreshClass(); }
+	public void setIntelligence(int x) { fcw.set(prefix + "intelligence", x); }
+	public void setClassLevel(int x) { fcw.set(prefix + "classLevel", x); }
+	public void setJobRank(int x) { fcw.set(prefix + "jobRank", x); }
+	public void setStats(int x) { fcw.set(prefix + "stats", x); }
+	public void setAttack(int x) { fcw.set(prefix + "attack", x); }
+	public void setConstitution(int x) { fcw.set(prefix + "constitution", x); }
+	public void setMagic(int x) { fcw.set(prefix + "magic", x); }
+	public void setLifetimeMobKills(int x) { fcw.set(prefix + "lifetimeMobKills", x); }
+	public void setClassChangeTickets(int x) { fcw.set(prefix + "classChangeTickets", x); }
+	public void setSecondsPlayed(int x) { fcw.set(prefix + "secondsPlayed", x); }
+	public void setSpellPoints(int x) { fcw.set(prefix + "spellPoints", x); }
+	public void setIsActive(boolean x) { fcw.set(prefix + "isActive",x); }
+	public void setAutomaticAllocation(boolean x) { fcw.set(prefix + "manualAllocation",x); }
+	public void setAutoCast(boolean x) { fcw.set(prefix + "autoCast",x); }
 	
-	//Spell Status Set/Gets
+	// Old school get/sets
 	public void setStatusDuration(int effectID, int x) { //Sets the duration of a status in seconds.
 		DateManager dm = new DateManager();
 		fcw.set(prefix + "status." + effectID + ".duration", dm.getFutureDate_Milliseconds(x)); }
@@ -127,17 +117,6 @@ public class PlayerConfig extends ConfigGod
 	public long getStatusDuration(int effectID) { return fcw.getLong(prefix + "status." + effectID + ".duration"); }
 	public double getStatusMagnitude(int effectID) { return fcw.getDouble(prefix + "status." + effectID + ".magnitude"); }
 	public int getStatusUses(int effectID) { return fcw.getInt(prefix + "status." + effectID + ".uses"); }
-	
-	//Mana/Hp sets and gets.
-	public void setCurManaFile(double x) { fcw.set(prefix + "curMana", x); }
-	public void setMaxManaFile(double x) { fcw.set(prefix + "maxMana", x); }
-	public void setCurHealthFile(double x) { fcw.set(prefix + "curHealth", x); }
-	public void setMaxHealthFile(double x) { fcw.set(prefix + "maxHealth", x); }
-	
-	public double getCurManaFile() { return fcw.getDouble(prefix + "curMana"); }
-	public double getMaxManaFile() { return fcw.getDouble(prefix + "maxMana"); }
-	public double getCurHealthFile() { return fcw.getDouble(prefix + "curHealth"); }
-	public double getMaxHealthFile() { return fcw.getDouble(prefix + "maxHealth"); }
 	
 	//Misc functions
 	public synchronized void clearAllData() { 
@@ -149,6 +128,7 @@ public class PlayerConfig extends ConfigGod
 	public void resetActiveSpell() { fcw.set(prefix + "activeSpell", "none"); }
 	public void subtractArcanium(double x) { setArcanium(getArcanium() - x); }
 	public void addArcanium(double x) { setArcanium(getArcanium() + x); }
+	public void adjustNewCombatclass(int x) { setCombatClass(x); refreshClass(); }
 	
 	public void updateSpellLevel(int spellID, int newVal)
 	{
@@ -167,7 +147,6 @@ public class PlayerConfig extends ConfigGod
 	public PlayerConfig()
 	{
 		super(FC_Rpg.dataFolderAbsolutePath, "Rpg");
-		updateLevelCap();
 		
 		handleUpdates();
 		name = "";
@@ -176,15 +155,9 @@ public class PlayerConfig extends ConfigGod
 	public PlayerConfig(String playerName)
 	{
 		super(FC_Rpg.dataFolderAbsolutePath, "Rpg");
-		updateLevelCap();
 		
 		handleUpdates();
 		setPlayerName(playerName);
-	}
-	
-	private void updateLevelCap()
-	{
-		levelCap = FC_Rpg.generalConfig.getLevelCap();
 	}
 	
 	public void setPlayerName(String playerName)
@@ -239,21 +212,18 @@ public class PlayerConfig extends ConfigGod
 		//Check if the player needs more default level slots for spells.
 		if (playerStoredSpellLevels < rpgClass.getSpellBook().size())
 		{
-			List<Integer> levels = new ArrayList<Integer>();
-			List<Integer> binds = new ArrayList<Integer>();
-			
-			levels = getSpellLevels();
-			binds = getSpellBinds();
+			//Update spell levels and binds with new lists
+			List<Integer> spellLevels = new ArrayList<Integer>();
+			List<Integer> spellBinds = new ArrayList<Integer>();
 			
 			for (int i = playerStoredSpellLevels; i < rpgClass.getSpellBook().size(); i++)
 			{
-				levels.add(0);
-				binds.add(999);
+				spellLevels.add(0);
+				spellBinds.add(999);
 			}
 			
-			//Update spell levels and binds with new lists
-			setSpellLevels(levels);
-			setSpellBinds(binds);
+			setSpellLevels(spellLevels);
+			setSpellBinds(spellBinds);
 		}
 	}
 	
@@ -263,71 +233,31 @@ public class PlayerConfig extends ConfigGod
 		if (getIsActive() == false)
 			return;
 		
-		if (getVersion() < 0.1)
-		{
-			//Update the version.
-			setVersion(0.1);
-			
-			//Remove outdated variables.
-			fcw.set(prefix + "lastAte", null);
-			fcw.set(prefix + "rankFreeze", null);
-		}
-		
-		if (getVersion() < 0.2)
-		{
-			setVersion(0.2);
-			
-			List<Integer> levels = new ArrayList<Integer>();
-			List<Integer> binds = new ArrayList<Integer>();
-			
-			//Load up old spell levels and spell binds.
-			for (int i = 0; i < 5; i++)
-			{
-				levels.add(fcw.getInt(prefix + "spellLevel." + i));
-				binds.add(fcw.getInt(prefix + "spellBind." + i));
-			}
-			
-			//Remove them.
-			fcw.set(prefix + "spellLevel", null);
-			fcw.set(prefix + "spellBind", null);
-			
-			//Add in defaults for the class.
-			for (int i = levels.size(); i < rpgClass.getSpellBook().size(); i++)
-			{
-				levels.add(0);
-				binds.add(999);
-			}
-			
-			setSpellLevels(levels);
-			setSpellBinds(binds);
-		}
-		
-		if (getVersion() < 0.3)
-		{
-			setVersion(0.3);
-			setArcanium(0);
-		}
-		
-		if (getVersion() < 0.4)
-		{
-			setVersion(0.4);
+		if (getVersion() < 1.0)
 			setLastDungeonCompletion(0);
-		}
+	}
+	
+	public void save()
+	{
+		setCurManaFile(curMana);
+		setMaxManaFile(maxMana);
+		setCurHealthFile(curHealth);
+		setMaxHealthFile(maxHealth);
 	}
 	
 	public void setDefaults()
 	{
 		//Variable Declarations
 		Date now = new Date();
-		
+
 		//Set variables to the new style
 		setCustomPrefix(FC_Rpg.generalConfig.getDefaultPrefix());
 		setIsActive(false);
-		
+
 		//Don't wipe out donator time for players that donated.
 		if (getDonatorTime() == 0)
 			setDonatorTime((long) 0);
-		
+
 		setActiveSpell("none");
 		setCombatClass(0);
 		setClassLevel(0);
@@ -337,7 +267,7 @@ public class PlayerConfig extends ConfigGod
 		setConstitution(0);
 		setMagic(0);
 		setIntelligence(0);
-		
+
 		setStats(0);
 		setAttack(0);
 		setConstitution(0);
@@ -347,10 +277,9 @@ public class PlayerConfig extends ConfigGod
 		setMaxManaFile(0);
 		setCurHealthFile(0);
 		setMaxHealthFile(0);
-		
+
 		setLifetimeMobKills(0);
 		setAutomaticAllocation(true);
-		setShowDamageTaken(true);
 		setLastRecievedHourlyItems(now.getTime());
 		setClassChangeTickets(0);
 		
@@ -359,11 +288,11 @@ public class PlayerConfig extends ConfigGod
 		
 		//Use a temporary rpgClass.
 		RpgClass tempClass = FC_Rpg.classConfig.getClassByID(getCombatClass());
-		
+
 		//Set the spell level and binds for spells.
 		List<Integer> levels = new ArrayList<Integer>();
 		List<Integer> binds = new ArrayList<Integer>();
-		
+
 		for (int i = 0; i < tempClass.getSpellBook().size(); i++)
 		{
 			levels.add(0);
@@ -372,24 +301,26 @@ public class PlayerConfig extends ConfigGod
 
 		setSpellLevels(levels);
 		setSpellBinds(binds);
-		
+
 		setSpellPoints(1);
 		setAutoCast(false);
-		
+
 		setLastDungeonCompletion(0);
+		
+		save();
 	}
 	
-	public void setPlayerDefaults(int pickedClass, boolean manualDistribution)
+	public void setPlayerDefaults(int pickedClass, boolean manualAllocation_)
 	{
 		setDefaults();
-		
+
 		setIsActive(true);
 		setCombatClass(pickedClass);
 		setClassLevel(1);
 		setJobRank(1);
-		
+
 		//Give the player stats based on their choice.
-		if (manualDistribution == true)
+		if (manualAllocation_ == true)
 		{
 			setStats(10);
 			setAutomaticAllocation(false);
@@ -399,6 +330,8 @@ public class PlayerConfig extends ConfigGod
 			assignClassStatPoints();
 			setAutomaticAllocation(true);
 		}
+		
+		save();
 	}
 	
     public boolean isDonator() 
@@ -415,7 +348,7 @@ public class PlayerConfig extends ConfigGod
 		{
 			//If there is any time on the donator time, then clear it.
 			if (time > 0)
-				setDonatorTime((long) 0);
+				setDonatorTime(0);
 			
 			return false; 
 		}
@@ -433,7 +366,7 @@ public class PlayerConfig extends ConfigGod
 		{
 			addOfflineClassExperience(getLevelUpAmount() - getClassExperience(), false, null);
 			
-			if (getClassLevel() == levelCap)
+			if (getClassLevel() == FC_Rpg.generalConfig.getLevelCap())
 				return;
 		}
 		
@@ -445,6 +378,7 @@ public class PlayerConfig extends ConfigGod
 	{
 		//Variable declarations
 		double newExperience = getClassExperience() + x;
+		int levelCap = FC_Rpg.generalConfig.getLevelCap();
 		
 		//Account for level cap.
 		if (getClassLevel() == levelCap)
@@ -464,7 +398,7 @@ public class PlayerConfig extends ConfigGod
 			
 			//Spell points.
 			if (getClassLevel() % FC_Rpg.balanceConfig.getPlayerLevelsPerSkillPoint() == 0)
-				setSpellPoints(getSpellPoints() + 1);
+				setStats(getStats() + 1);
 			
 			//Acount for level cap.
 			if (getClassLevel() == levelCap)
@@ -543,10 +477,10 @@ public class PlayerConfig extends ConfigGod
     	{
     		if (rpgClass.getID() == getCombatClass())
     		{
-    			setAttack(getAttack() + statGrowth.get(0));
-    			setConstitution(getConstitution() + statGrowth.get(1));
-    			setMagic(getMagic() + statGrowth.get(2));
-    			setIntelligence(getIntelligence() + statGrowth.get(3));
+				setAttack(getAttack() + statGrowth.get(0));
+				setConstitution(getConstitution() + statGrowth.get(1));
+				setMagic(getMagic() + statGrowth.get(2));
+				setIntelligence(getIntelligence() + statGrowth.get(3));
     		}
     	}
     	
@@ -556,8 +490,8 @@ public class PlayerConfig extends ConfigGod
     
     public void calculateHealthAndManaOffline()
 	{
-		setMaxHealthFile(FC_Rpg.balanceConfig.getPlayerBaseHealth() + getConstitution() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeConstitution());
-		setMaxManaFile(FC_Rpg.balanceConfig.getPlayerBaseMana() + getIntelligence() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeIntelligence());
+    	maxHealth = FC_Rpg.balanceConfig.getPlayerBaseHealth() + getConstitution() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeConstitution();
+    	maxMana = FC_Rpg.balanceConfig.getPlayerBaseMana() + getIntelligence() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeIntelligence();
 	}
     
     public void offlineSetDonator(int periods)

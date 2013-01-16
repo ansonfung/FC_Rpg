@@ -16,20 +16,6 @@ public class ClassConfig extends ConfigGod
 	public RpgClass[] getRpgClasses() { return rpgClass; }
 	public RpgClass getRpgClass(int i) { return rpgClass[i]; }
 	
-	private void setName(int i, String x) { fcw.set(prefix + i + ".name", x); }
-	private void setDescription(int i, String x) { fcw.set(prefix + i + ".description", x); }
-	private void setPassiveID(int i, int x) { fcw.set(prefix + i + ".passiveID", x); }
-	private void setRestrictionID(int i, int x) { fcw.set(prefix + i + ".restrictionID", x); }
-	private void setStatGrowth(int i, int a, int b, int c, int d) { fcw.set(prefix + i + ".statGrowth", a + "," + b + "," + c + "," + d); }
-	private void setSpells(int i, int a, int b, int c, int d, int e) { fcw.set(prefix + i + ".spellIDs", a + "," + b + "," + c + "," + d + "," + e); }
-	
-	private String getName(int i) { return fcw.getString(prefix + i + ".name"); }
-	private String getDescription(int i) { return fcw.getString(prefix + i + ".description"); }
-	private int getPassiveID(int i) { return fcw.getInt(prefix + i + ".passiveID"); }
-	private int setRestrictionID(int i) { return fcw.getInt(prefix + i + ".restrictionID"); }
-	private List<Integer> getStatGrowth(int i) { return converter.getIntegerListFromString(fcw.getString(prefix + i + ".statGrowth")); }
-	private List<Integer> getSpells(int i) { return converter.getIntegerListFromString(fcw.getString(prefix + i + ".spellIDs")); }
-	
 	public ClassConfig()
 	{
 		super(FC_Rpg.dataFolderAbsolutePath, "Classes");
@@ -152,6 +138,25 @@ public class ClassConfig extends ConfigGod
 		
 		return null;
 	}
+	
+	/****************************************************************
+	 ^ Configuration Accessing Methods 
+	 - All Dynamically Accessed
+	****************************************************************/
+	
+	private void setName(int i, String x) { fcw.set(prefix + i + ".name", x); }
+	private void setDescription(int i, String x) { fcw.set(prefix + i + ".description", x); }
+	private void setPassiveID(int i, int x) { fcw.set(prefix + i + ".passiveID", x); }
+	private void setRestrictionID(int i, int x) { fcw.set(prefix + i + ".restrictionID", x); }
+	private void setStatGrowth(int i, int a, int b, int c, int d) { fcw.set(prefix + i + ".statGrowth", a + "," + b + "," + c + "," + d); }
+	private void setSpells(int i, int a, int b, int c, int d, int e) { fcw.set(prefix + i + ".spellIDs", a + "," + b + "," + c + "," + d + "," + e); }
+	
+	private String getName(int i) { return fcw.getString(prefix + i + ".name");  }
+	private String getDescription(int i) { return fcw.getString(prefix + i + ".description"); }
+	private int getPassiveID(int i) { return fcw.getInt(prefix + i + ".passiveID"); }
+	private int setRestrictionID(int i) { return fcw.getInt(prefix + i + ".restrictionID"); }
+	private List<Integer> getStatGrowth(int i) { return fcw.getCustomIntegerList(prefix + i + ".statGrowth"); }
+	private List<Integer> getSpells(int i) { return fcw.getCustomIntegerList(prefix + i + ".spellIDs"); }
 }
 
 

@@ -100,21 +100,27 @@ public class RpgMonster extends RpgEntity
 		entity = entity_;
 		
 		// Variable Declarations
-		Random levelDeviation = new Random();
+		Random rand = new Random();
 		boolean calculateModifierByArea = true;
 		int difficultyCoefficient;
 		int trueDungeonNumber;
-		int levelDev = FC_Rpg.balanceConfig.getRandomMobLevelDeviation();
+		int randomLevelDeviation = FC_Rpg.balanceConfig.getRandomMobLevelDeviation();
+		int levelCap = FC_Rpg.worldConfig.getLevelCap(entity.getWorld().getName());
+		int staticLevel;
 		
 		for (int i = 0; i < FC_Rpg.dungeonCount; i++)
 		{
 			trueDungeonNumber = FC_Rpg.trueDungeonNumbers.get(i);
-
+			
+			staticLevel = FC_Rpg.dungeonConfig.getStaticLevel(trueDungeonNumber);
+			
 			if (FC_Rpg.dungeonEventArray[trueDungeonNumber].getPhase() == 2)
 			{
 				if (FC_Rpg.dungeonEventArray[trueDungeonNumber].isInsideDungeon(entity.getLocation()))
 				{
-					if (fixedLevel > 0)
+					if (staticLevel > 0)
+						modifier = staticLevel;
+					else if (fixedLevel > 0)
 						modifier = fixedLevel;
 					else
 						modifier = FC_Rpg.dungeonEventArray[trueDungeonNumber].getLowestLevel() + levelBonus;
@@ -127,18 +133,23 @@ public class RpgMonster extends RpgEntity
 		
 		if (calculateModifierByArea == true)
 		{
-			// Set the modifier by mob location.
-			setModifierByArea();
-			
-			if (entity.getType() == EntityType.WITHER)
+			if (fixedLevel > 0)
+				modifier = fixedLevel;
+			else
 			{
-				levelBonus += FC_Rpg.balanceConfig.getWitherLevelBonus();
-				isBoss = true;
-			}
-			else if (entity.getType() == EntityType.ENDER_DRAGON)
-			{
-				levelBonus += FC_Rpg.balanceConfig.getEnderDragonLevelBonus();
-				isBoss = true;
+				// Set the modifier by mob location.
+				setModifierByArea();
+				
+				if (entity.getType() == EntityType.WITHER)
+				{
+					levelBonus += FC_Rpg.balanceConfig.getWitherLevelBonus();
+					isBoss = true;
+				}
+				else if (entity.getType() == EntityType.ENDER_DRAGON)
+				{
+					levelBonus += FC_Rpg.balanceConfig.getEnderDragonLevelBonus();
+					isBoss = true;
+				}
 			}
 			
 			// Increase modifier by level bonus.
@@ -147,11 +158,15 @@ public class RpgMonster extends RpgEntity
 		
 		// Set all variables
 		mobId = entity.getEntityId();
-		level = modifier + (levelDeviation.nextInt(levelDev) - levelDeviation.nextInt(levelDev));
+		level = modifier + (rand.nextInt(randomLevelDeviation) - rand.nextInt(randomLevelDeviation));
 		
 		// Ensure level is never below 1.
 		if (level < 1)
 			level = 1;
+		
+		// Make sure that mobs are not a higher level than the worlds level cap.
+		if (levelCap > 0 && level > levelCap)
+			level = levelCap;
 		
 		// Increases stats based on monster level.
 		difficultyCoefficient = (1 + modifier / FC_Rpg.balanceConfig.getDifficultyScalor());
@@ -242,7 +257,7 @@ public class RpgMonster extends RpgEntity
 		
 		if (!wm.getIsRpgWorld(entity.getWorld().getName()))
 			return;
-
+		
 		// Make all non-hostile mobs level 1.
 		if (getMobAggressionCheck() == false)
 			return;
@@ -254,7 +269,7 @@ public class RpgMonster extends RpgEntity
 
 	public void handleHostileMobDrops(Location dropSpot)
 	{
-		List<ItemStack> drops = FC_Rpg.treasureConfig.getRandomDrops(level);
+		List<ItemStack> drops = FC_Rpg.treasureConfig.getRandomDrops(level, FC_Rpg.treasureConfig.getLootList(FC_Rpg.balanceConfig.getMobLootList()));
 		
 		for (ItemStack drop : drops)
 			dropSpot.getWorld().dropItem(dropSpot, drop); // Drop the item.

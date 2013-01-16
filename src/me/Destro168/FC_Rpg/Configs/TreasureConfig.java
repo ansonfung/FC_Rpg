@@ -21,22 +21,8 @@ public class TreasureConfig extends ConfigGod
 	
 	private Random rand;
 	private ItemStack drop;
+	private String lootList = "";
 	private int totalDropsCount;
-	
-	private void setDropChances(int a, int b, int c, int d, int e) { fcw.set(prefix + "dropChances", a + "," + b + "," + c); }
-	private void setEnchantChances(int a, int b, int c, int d, int e) { fcw.set(prefix + "enchantChances", a + "," + b + "," + c + "," + d + "," + e); }
-	
-	private void setEnchantLevelFiveChance(int a, int b, int c, int d) { fcw.set(prefix + "enchantLevelFiveChance", a + "," + b + "," + c + "," + d); }
-	private void setEnchantLevelFourChance(int a, int b, int c) { fcw.set(prefix + "enchantLevelFourChance", a + "," + b + "," + c); }
-	private void setEnchantLevelThreeChance(int a, int b) { fcw.set(prefix + "enchantLevelThreeChance", a + "," + b); }
-	private void setEnchantLevelTwoChance(int a) { fcw.set(prefix + "enchantLevelTwoChance", a); }
-	
-	private List<Integer> getDropChances() { return converter.getIntegerListFromString(fcw.getString(prefix + "dropChances")); }
-	private List<Integer> getEnchantChances() { return converter.getIntegerListFromString(fcw.getString(prefix + "enchantChances")); }
-	private List<Integer> getEnchantLevelFiveChance() { return converter.getIntegerListFromString(fcw.getString(prefix + "enchantLevelFiveChance")); }
-	private List<Integer> getEnchantLevelFourChance() { return converter.getIntegerListFromString(fcw.getString(prefix + "enchantLevelFourChance")); }
-	private List<Integer> getEnchantLevelThreeChance() { return converter.getIntegerListFromString(fcw.getString(prefix + "enchantLevelThreeChance")); }
-	private int getEnchantLevelTwoChance() { return fcw.getInt(prefix + "enchantLevelTwoChance"); }
 	
 	public TreasureConfig()
 	{
@@ -55,21 +41,21 @@ public class TreasureConfig extends ConfigGod
 	
 	private void handleUpdates()
 	{
-		if (getVersion() < 0.1)
-		{
-			setVersion(0.1);
-			
-			//Reset settings.
-			setDropChances(3500,2000,1000,300,100);
-			setEnchantChances(8000,6000,4000,4000,4000);
-			setEnchantLevelFiveChance(8000,7000,6000,5000);
-			setEnchantLevelFourChance(8000,7000,600);
-			setEnchantLevelThreeChance(8000,7000);
-			setEnchantLevelTwoChance(8000);
-		}
+		// Handle version updates.
+		if (getVersion() < 0.2)
+			setVersion(0.2);
+		
+		// Always load up a default satatic loot list.
+		getDropChances();
+		getEnchantChances();
+		getEnchantLevelFiveChance();
+		getEnchantLevelFourChance();
+		getEnchantLevelThreeChance();
+		getEnchantLevelTwoChance();
+		getLootList("default");
 	}
 	
-	public List<ItemStack> getRandomDrops(int entityLevel)
+	public List<ItemStack> getRandomDrops(int entityLevel, List<Integer> materialMatchList)
 	{
 		List<ItemStack> items = new ArrayList<ItemStack>();
 		rand = new Random();
@@ -82,7 +68,7 @@ public class TreasureConfig extends ConfigGod
 			drop = null;
 			
 			while (drop == null)
-				drop = getRandomItem(entityLevel);
+				drop = getRandomItem(entityLevel, materialMatchList);
 			
 			items.add(drop);
 		}
@@ -90,11 +76,12 @@ public class TreasureConfig extends ConfigGod
 		return items;
 	}
 	
-	public List<ItemStack> getRandomTreasure(int entityLevel, int size)
+	public List<ItemStack> getRandomTreasure(int entityLevel, int size, List<Integer> materialMatchList)
 	{
+		//Variable Declarations
 		List<ItemStack> items = new ArrayList<ItemStack>();
-		rand = new Random();
 		ItemStack drop = null;
+		rand = new Random();
 		totalDropsCount = 0;
 		
 		//Get a fixed amount of loot.
@@ -103,7 +90,7 @@ public class TreasureConfig extends ConfigGod
 			drop = null;
 			
 			while (drop == null)
-				drop = getRandomItem(entityLevel);
+				drop = getRandomItem(entityLevel, materialMatchList);
 			
 			items.add(drop);
 		}
@@ -132,7 +119,7 @@ public class TreasureConfig extends ConfigGod
 		return false;
 	}
 	
-	private ItemStack getRandomItem(int mobLevel)
+	private ItemStack getRandomItem(int mobLevel, List<Integer> materialMatchList)
 	{
 		//Assign variables
 		Random rand = new Random();
@@ -142,7 +129,7 @@ public class TreasureConfig extends ConfigGod
 		//We want to remove all items that don't have a range above -1.
 		for (RpgItem ri : FC_Rpg.rpgItemList)
 		{
-			if (ri.dropLevelMin != -1)
+			if (ri.dropLevelMin != -1 && materialMatchList.contains(ri.configFieldNumber))
 				itemList.add(ri);
 		}
 		
@@ -240,29 +227,23 @@ public class TreasureConfig extends ConfigGod
 		//Swords
 		if (ml.swords.contains(dropType))
 		{
-			int rollCount = 4;
+			//Variable declaration
+			List<Enchantment> enchantList = new ArrayList<Enchantment>();
 			
-			if (FC_Rpg.balanceConfig.getDefaultItemDrops() == true)
-				rollCount++;
+			enchantList.add(Enchantment.DAMAGE_ALL);
+			enchantList.add(Enchantment.DAMAGE_UNDEAD);
+			enchantList.add(Enchantment.DAMAGE_ARTHROPODS);
 			
-			//Roll a type of enchantment to put on.
-			enchantmentType = rand.nextInt(rollCount);
+			// Add knockback if sword knockback is enabled.
+			if (FC_Rpg.balanceConfig.getSwordKnockback())
+				enchantList.add(Enchantment.KNOCKBACK);
 			
-			//Add that enchantment.
-			if (enchantmentType == 0)
-				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.DAMAGE_ALL, -1);
+			// Add lootbonus if default drops are enabled.
+			if (FC_Rpg.balanceConfig.getDefaultItemDrops())
+				enchantList.add(Enchantment.LOOT_BONUS_MOBS);
 			
-			else if (enchantmentType == 1)
-				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.DAMAGE_UNDEAD, -1);
-			
-			else if (enchantmentType == 2)
-				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.DAMAGE_ARTHROPODS, -1);
-			
-			else if (enchantmentType == 3)
-				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.KNOCKBACK, -1);
-			
-			else if (enchantmentType == 4)
-				success = addEnchantToEnchantmentMap(enchantmentMap, Enchantment.LOOT_BONUS_MOBS, -1);
+			//Add the enchantment by rolling from available enchants.
+			success = addEnchantToEnchantmentMap(enchantmentMap, enchantList.get(rand.nextInt(enchantList.size())), -1);
 		}
 		
 		//Chest - Legging
@@ -309,7 +290,10 @@ public class TreasureConfig extends ConfigGod
 		else if (dropType.equals(Material.BOW))
 		{
 			//Roll a type of enchantment to put on.
-			enchantmentType = rand.nextInt(3);
+			if (FC_Rpg.balanceConfig.getArrowKnockback())
+				enchantmentType = rand.nextInt(3); // include knockback
+			else
+				enchantmentType = rand.nextInt(2); // don't include knockback
 			
 			//Add that enchantment.
 			if (enchantmentType == 0)
@@ -431,6 +415,31 @@ public class TreasureConfig extends ConfigGod
 		
 		//Always return 1 by default if no enchant was found.
 		return finalEnchantStrength;
+	}
+	
+	/****************************************************************
+	 ^ Configuration Accessing Methods 
+	 - All Dynamically Accessed
+	****************************************************************/
+	
+	private List<Integer> getDropChances() { return fcw.getStaticCustomIntegerList(prefix + "dropChances","3500,2000,1000,300,100"); }
+	private List<Integer> getEnchantChances() { return fcw.getStaticCustomIntegerList(prefix + "enchantChances","8000,6000,4000,4000,4000"); }
+	private List<Integer> getEnchantLevelFiveChance() { return fcw.getStaticCustomIntegerList(prefix + "enchantLevelFiveChance","8000,7000,6000,5000"); }
+	private List<Integer> getEnchantLevelFourChance() { return fcw.getStaticCustomIntegerList(prefix + "enchantLevelFourChance","8000,7000,600"); }
+	private List<Integer> getEnchantLevelThreeChance() { return fcw.getStaticCustomIntegerList(prefix + "enchantLevelThreeChance","8000,7000"); }
+	private int getEnchantLevelTwoChance() { return fcw.getStaticInt(prefix + "enchantLevelTwoChance",8000); }
+	
+	public List<Integer> getLootList(String name)
+	{
+		if (lootList.equals(""))
+		{
+			for (int i = 0; i < FC_Rpg.rpgItemList.size() - 1; i++)
+				lootList += String.valueOf(i) + ",";
+			
+			lootList += (FC_Rpg.rpgItemList.size() - 1) + "";
+		}
+		
+		return fcw.getStaticCustomIntegerList(prefix + "lootList." + name, lootList);
 	}
 }
 

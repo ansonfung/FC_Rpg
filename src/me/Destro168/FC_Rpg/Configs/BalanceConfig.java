@@ -11,224 +11,8 @@ public class BalanceConfig extends ConfigGod
 	public static final int passive_InnerFire = 4;
 	public static final int passive_BattleLust = 5;
 	
-	// Sets
-	public void setGlobalExpMultiplier(int x) { fcw.set(prefix + "globalExpMultiplier", x); }
-	
-	private void setRandomMobLevelDeviation(int x) { fcw.set(prefix + "randomMobLevelDeviation", x); }
-	private void setDifficultyScalor(int x) { fcw.set(prefix + "difficultyScalor", x); }
-	private void setWitherLevelBonus(int x) { fcw.set(prefix + "witherLevelBonus", x); }
-	private void setEnderDragonLevelBonus(int x) { fcw.set(prefix + "enderDragonLevelBonus", x); }
-	private void setDefaultItemDrops(boolean x) { fcw.set(prefix + "defaultItemDrops", x); }
-	private void setArrowKnockback(boolean x) { fcw.set(prefix + "arrowKnockback", x); }
-	private void setPowerLevelPrevention(int x) { fcw.set(prefix + "powerLevelPrevention", x); }
-	private void setBonusPercentCap(double x) { fcw.set(prefix + "bonusPercentCap", x); }
-	private void setEnchantmentMultiplierSharpness(double x) { fcw.set(prefix + "enchantmentMultiplier.sharpness", x); }
-	private void setEnchantmentMultiplierBane(double x) { fcw.set(prefix + "enchantmentMultiplier.bane", x); }
-	private void setEnchantmentMultiplierSmite(double x) { fcw.set(prefix + "enchantmentMultiplier.smite", x); }
-	private void setEnchantmentMultiplierPower(double x) { fcw.set(prefix + "enchantmentMultiplier.power", x); }
-	private void setEnchantmentMultiplierProtection(double x) { fcw.set(prefix + "enchantmentMultiplier.protection", x); }
-	private void setEnchantmentMultiplierFire(double x) { fcw.set(prefix + "enchantmentMultiplier.fire", x); }
-	private void setEnchantmentMultiplierExplosion(double x) { fcw.set(prefix + "enchantmentMultiplier.explosion", x); }
-	private void setEnchantmentMultiplierFall(double x) { fcw.set(prefix + "enchantmentMultiplier.fall", x); }
-	private void setEnchantmentMultiplierProjectile(double x) { fcw.set(prefix + "enchantmentMultiplier.projectile", x); }
-	
-	private void setArmorWearRequirementChain(int x) { fcw.set(prefix + "armor.wearRequirement.chain", x); }
-	private void setArmorWearRequirementIron(int x) { fcw.set(prefix + "armor.wearRequirement.iron", x); }
-	private void setArmorWearRequirementDiamond(int x) { fcw.set(prefix + "armor.wearRequirement.diamond", x); }
-	private void setArmorWearRequirementGold(int x) { fcw.set(prefix + "armor.wearRequirement.gold", x); }
-	
-	private void setArmorMultiplierLB(double x) { fcw.set(prefix + "armor.multiplier.leather.boots", x); }
-	private void setArmorMultiplierLH(double x) { fcw.set(prefix + "armor.multiplier.leather.helmet", x); }
-	private void setArmorMultiplierLL(double x) { fcw.set(prefix + "armor.multiplier.leather.leggings", x); }
-	private void setArmorMultiplierLC(double x) { fcw.set(prefix + "armor.multiplier.leather.chestplate", x); }
-	
-	private void setArmorMultiplierCB(double x) { fcw.set(prefix + "armor.multiplier.chain.boots", x); }
-	private void setArmorMultiplierCH(double x) { fcw.set(prefix + "armor.multiplier.chain.helmet", x); }
-	private void setArmorMultiplierCL(double x) { fcw.set(prefix + "armor.multiplier.chain.leggings", x); }
-	private void setArmorMultiplierCC(double x) { fcw.set(prefix + "armor.multiplier.chain.chestplate", x); }
-	
-	private void setArmorMultiplierIB(double x) { fcw.set(prefix + "armor.multiplier.iron.boots", x); }
-	private void setArmorMultiplierIH(double x) { fcw.set(prefix + "armor.multiplier.iron.helmet", x); }
-	private void setArmorMultiplierIL(double x) { fcw.set(prefix + "armor.multiplier.iron.leggings", x); }
-	private void setArmorMultiplierIC(double x) { fcw.set(prefix + "armor.multiplier.iron.chestplate", x); }
-	
-	private void setArmorMultiplierDB(double x) { fcw.set(prefix + "armor.multiplier.diamond.boots", x); }
-	private void setArmorMultiplierDH(double x) { fcw.set(prefix + "armor.multiplier.diamond.helmet", x); }
-	private void setArmorMultiplierDL(double x) { fcw.set(prefix + "armor.multiplier.diamond.leggings", x); }
-	private void setArmorMultiplierDC(double x) { fcw.set(prefix + "armor.multiplier.diamond.chestplate", x); }
-	
-	private void setArmorMultiplierGB(double x) { fcw.set(prefix + "armor.multiplier.gold.boots", x); }
-	private void setArmorMultiplierGH(double x) { fcw.set(prefix + "armor.multiplier.gold.helmet", x); }
-	private void setArmorMultiplierGL(double x) { fcw.set(prefix + "armor.multiplier.gold.leggings", x); }
-	private void setArmorMultiplierGC(double x) { fcw.set(prefix + "armor.multiplier.gold.chestplate", x); }
-	
-	private void setMobCashMultiplier(double x) { fcw.set(prefix + "mob.cashMultiplier", x); }
-	private void setMobExpMultiplier(double x) { fcw.set(prefix + "mob.expMultiplier", x); }
-	private void setMobSpawnWithItemChance(int x) { fcw.set(prefix + "mob.spawnWithItemChance", x); }
-	private void setMobSpawnWithEnchantsChance(int x) { fcw.set(prefix + "mob.spawnWithEnchantsChance", x); }
-	private void setMobAttackHardMultiplier(int x) { fcw.set(prefix + "mob.attackMultiplier", x); }
-	private void setMobConstitutionMultiplier(int x) { fcw.set(prefix + "mob.constitutionMultiplier", x); }
-	
-	private void setSwordMultiplierWood(double x) { fcw.set(prefix + "sword.multiplier.wood", x); }
-	private void setSwordMultiplierStone(double x) { fcw.set(prefix + "sword.multiplier.stone", x); }
-	private void setSwordMultiplierIron(double x) { fcw.set(prefix + "sword.multiplier.iron", x); }
-	private void setSwordMultiplierDiamond(double x) { fcw.set(prefix + "sword.multiplier.diamond", x); }
-	private void setSwordMultiplierGold(double x) { fcw.set(prefix + "sword.multiplier.gold", x); }
-
-	private void setSwordAttackRequirementWood(double x) { fcw.set(prefix + "sword.attackRequirement.wood", x); }
-	private void setSwordAttackRequirementStone(double x) { fcw.set(prefix + "sword.attackRequirement.stone", x); }
-	private void setSwordAttackRequirementIron(double x) { fcw.set(prefix + "sword.attackRequirement.iron", x); }
-	private void setSwordAttackRequirementDiamond(double x) { fcw.set(prefix + "sword.attackRequirement.diamond", x); }
-	private void setSwordAttackRequirementGold(double x) { fcw.set(prefix + "sword.attackRequirement.gold", x); }
-	
-	private void setPlayerBaseHealth(int x) { fcw.set(prefix + "player.baseHealth", x); }
-	private void setPlayerBaseMana(int x) { fcw.set(prefix + "player.baseMana", x); }
-	private void setPlayerStatMagnitudeAttack(int x) { fcw.set(prefix + "player.statMagnitutude.attack", x); }
-	private void setPlayerStatMagnitudeConstitution(int x) { fcw.set(prefix + "player.statMagnitutude.constitution", x); }
-	private void setPlayerStatMagnitudeIntelligence(int x) { fcw.set(prefix + "player.statMagnitutude.intelligence", x); }
-	private void setPlayerLevelsPerSkillPoint(int x) { fcw.set(prefix + "player.levelsPerSkillPoint", x); }
-	private void setPlayerStatsPerLevel(int x) { fcw.set(prefix + "player.statsPerLevel", x); }
-	private void setPlayerExpScaleRate(int x) { fcw.set(prefix + "player.expScaleRate", x); }
-	private void setPlayerExpScaleBase(int x) { fcw.set(prefix + "player.expScaleBase", x); }
-	
-	private void setDamageExplosion(double x) { fcw.set(prefix + "damage.explosion", x); }
-	private void setDamageFall(double x) { fcw.set(prefix + "damage.fall", x); }
-	private void setDamageContact(double x) { fcw.set(prefix + "damage.contact", x); }
-	private void setDamageEntityAttack(double x) { fcw.set(prefix + "damage.entityAttack", x); }
-	private void setDamageLightning(double x) { fcw.set(prefix + "damage.lightning", x); }
-	private void setDamageFire(double x) { fcw.set(prefix + "damage.fire", x); }
-	private void setDamageFireTick(double x) { fcw.set(prefix + "damage.firetick", x); }
-	private void setDamageLava(double x) { fcw.set(prefix + "damage.lava", x); }
-	private void setDamageStarvation(double x) { fcw.set(prefix + "damage.starvation", x); }
-	private void setDamagePoison(double x) { fcw.set(prefix + "damage.poison", x); }
-	private void setDamageMagic(double x) { fcw.set(prefix + "damage.magic", x); }
-	private void setDamageBlockExplosion(double x) { fcw.set(prefix + "damage.blockExplosion", x); }
-	private void setDamageWither(double x) { fcw.set(prefix + "damage.wither", x); }
-	
-	private void setPotionMultiplierStrength(double x) { fcw.set(prefix + "potionMultiplier.strength", x); }
-	private void setPotionMultiplierWeakness(double x) { fcw.set(prefix + "potionMultiplier.weakness", x); }
-	private void setPotionMultiplierResistance(double x) { fcw.set(prefix + "potionMultiplier.resistance", x); }
-	
-	private void setHealPercentEating(double x) { fcw.set(prefix + "healMultiplier.eating", x); }
-	private void setHealPercentMagic(double x) { fcw.set(prefix + "healMultiplier.magic", x); }
-	private void setHealPercentMagicRegen(double x) { fcw.set(prefix + "healMultiplier.magicRegen", x); }
-	private void setHealPercentSatiated(double x) { fcw.set(prefix + "healMultiplier.satiated", x); }
-	
-	private void setPassivesScalingArrows(int x) { fcw.set(prefix + "passives.scalingArrows", x); }
-	private void setPassivesCounterAttack(int x) { fcw.set(prefix + "passives.counterAttack", x); }
-	private void setPassivesStrongerParry(double x) { fcw.set(prefix + "passives.strongerParry", x); }
-	private void setPassivesBattleLust(double x) { fcw.set(prefix + "passives.battleLust", x); }
-	private void setPassivesInnerFlame(double x) { fcw.set(prefix + "passives.innerFlame", x); }
 	
 	// Gets
-	public int getGlobalExpMultiplier() { return fcw.getInt(prefix + "globalExpMultiplier"); }
-	
-	public int getPowerLevelPrevention() { return fcw.getIntS(prefix + "powerLevelPrevention"); }
-	public int getWitherLevelBonus() { return fcw.getIntS(prefix + "witherLevelBonus"); }
-	public int getEnderDragonLevelBonus() { return fcw.getIntS(prefix + "enderDragonLevelBonus"); }
-	public boolean getDefaultItemDrops() { return fcw.getBooleanS(prefix + "defaultItemDrops"); }
-	public boolean getArrowKnockback() { return fcw.getBooleanS(prefix + "arrowKnockback"); }
-	public int getDifficultyScalor() { return fcw.getIntS(prefix + "difficultyScalor"); }
-	public int getRandomMobLevelDeviation() { return fcw.getIntS(prefix + "randomMobLevelDeviation"); }
-	public double getBonusPercentCap() { return fcw.getDoubleS(prefix + "bonusPercentCap"); }
-	public double getEnchantmentMultiplierSharpness() { return fcw.getDoubleS(prefix + "enchantmentMultiplier.sharpness"); }
-	public double getEnchantmentMultiplierBane() { return fcw.getDoubleS(prefix + "enchantmentMultiplier.bane"); }
-	public double getEnchantmentMultiplierSmite() { return fcw.getDoubleS(prefix + "enchantmentMultiplier.smite"); }
-	public double getEnchantmentMultiplierPower() { return fcw.getDoubleS(prefix + "enchantmentMultiplier.power"); }
-	public double getEnchantmentMultiplierProtection() { return fcw.getDoubleS(prefix + "enchantmentMultiplier.protection"); }
-	public double getEnchantmentMultiplierFire() { return fcw.getDoubleS(prefix + "enchantmentMultiplier.fire"); }
-	public double getEnchantmentMultiplierExplosion() { return fcw.getDoubleS(prefix + "enchantmentMultiplier.explosion"); }
-	public double getEnchantmentMultiplierFall() { return fcw.getDoubleS(prefix + "enchantmentMultiplier.fall"); }
-	public double getEnchantmentMultiplierProjectile() { return fcw.getDoubleS(prefix + "enchantmentMultiplier.projectile"); }
-	
-	public int getArmorWearRequirementChain() { return fcw.getIntS(prefix + "armor.wearRequirement.chain"); }
-	public int getArmorWearRequirementIron() { return fcw.getIntS(prefix + "armor.wearRequirement.iron"); }
-	public int getArmorWearRequirementDiamond() { return fcw.getIntS(prefix + "armor.wearRequirement.diamond"); }
-	public int getArmorWearRequirementGold() { return fcw.getIntS(prefix + "armor.wearRequirement.gold"); }
-	
-	public double getArmorMultiplierLB() { return fcw.getDoubleS(prefix + "armor.multiplier.leather.boots"); }
-	public double getArmorMultiplierLH() { return fcw.getDoubleS(prefix + "armor.multiplier.leather.helmet"); }
-	public double getArmorMultiplierLL() { return fcw.getDoubleS(prefix + "armor.multiplier.leather.leggings"); }
-	public double getArmorMultiplierLC() { return fcw.getDoubleS(prefix + "armor.multiplier.leather.chestplate"); }
-	
-	public double getArmorMultiplierCB() { return fcw.getDoubleS(prefix + "armor.multiplier.chain.boots"); }
-	public double getArmorMultiplierCH() { return fcw.getDoubleS(prefix + "armor.multiplier.chain.helmet"); }
-	public double getArmorMultiplierCL() { return fcw.getDoubleS(prefix + "armor.multiplier.chain.leggings"); }
-	public double getArmorMultiplierCC() { return fcw.getDoubleS(prefix + "armor.multiplier.chain.chestplate"); }
-	
-	public double getArmorMultiplierIB() { return fcw.getDoubleS(prefix + "armor.multiplier.iron.boots"); }
-	public double getArmorMultiplierIH() { return fcw.getDoubleS(prefix + "armor.multiplier.iron.helmet"); }
-	public double getArmorMultiplierIL() { return fcw.getDoubleS(prefix + "armor.multiplier.iron.leggings"); }
-	public double getArmorMultiplierIC() { return fcw.getDoubleS(prefix + "armor.multiplier.iron.chestplate"); }
-	
-	public double getArmorMultiplierDB() { return fcw.getDoubleS(prefix + "armor.multiplier.diamond.boots"); }
-	public double getArmorMultiplierDH() { return fcw.getDoubleS(prefix + "armor.multiplier.diamond.helmet"); }
-	public double getArmorMultiplierDL() { return fcw.getDoubleS(prefix + "armor.multiplier.diamond.leggings"); }
-	public double getArmorMultiplierDC() { return fcw.getDoubleS(prefix + "armor.multiplier.diamond.chestplate"); }
-	
-	public double getArmorMultiplierGB() { return fcw.getDoubleS(prefix + "armor.multiplier.gold.boots"); }
-	public double getArmorMultiplierGH() { return fcw.getDoubleS(prefix + "armor.multiplier.gold.helmet"); }
-	public double getArmorMultiplierGL() { return fcw.getDoubleS(prefix + "armor.multiplier.gold.leggings"); }
-	public double getArmorMultiplierGC() { return fcw.getDoubleS(prefix + "armor.multiplier.gold.chestplate"); }
-	
-	public double getMobCashMultiplier() { return fcw.getDoubleS(prefix + "mob.cashMultiplier"); }
-	public double getMobExpMultiplier() { return fcw.getDoubleS(prefix + "mob.expMultiplier"); }
-	public int getMobSpawnWithItemChance() { return fcw.getIntS(prefix + "mob.spawnWithItemChance"); }
-	public int getMobSpawnWithEnchantsChance() { return fcw.getIntS(prefix + "mob.spawnWithEnchantsChance"); }
-	public int getMobAttackMultiplier() { return fcw.getIntS(prefix + "mob.attackMultiplier"); }
-	public int getMobConstitutionMultiplier() { return fcw.getIntS(prefix + "mob.constitutionMultiplier"); }
-	
-	public double getSwordMultiplierWood() { return fcw.getDoubleS(prefix + "sword.multiplier.wood"); }
-	public double getSwordMultiplierStone() { return fcw.getDoubleS(prefix + "sword.multiplier.stone"); }
-	public double getSwordMultiplierIron() { return fcw.getDoubleS(prefix + "sword.multiplier.iron"); }
-	public double getSwordMultiplierDiamond() { return fcw.getDoubleS(prefix + "sword.multiplier.diamond"); }
-	public double getSwordMultiplierGold() { return fcw.getDoubleS(prefix + "sword.multiplier.gold"); }
-
-	public double getSwordAttackRequirementWood() { return fcw.getDoubleS(prefix + "sword.attackRequirement.wood"); }
-	public double getSwordAttackRequirementStone() { return fcw.getDoubleS(prefix + "sword.attackRequirement.stone"); }
-	public double getSwordAttackRequirementIron() { return fcw.getDoubleS(prefix + "sword.attackRequirement.iron"); }
-	public double getSwordAttackRequirementDiamond() { return fcw.getDoubleS(prefix + "sword.attackRequirement.diamond"); }
-	public double getSwordAttackRequirementGold() { return fcw.getDoubleS(prefix + "sword.attackRequirement.gold"); }
-	
-	public int getPlayerBaseHealth() { return fcw.getIntS(prefix + "player.baseHealth"); }
-	public int getPlayerBaseMana() { return fcw.getIntS(prefix + "player.baseMana"); }
-	public int getPlayerStatMagnitudeAttack() { return fcw.getIntS(prefix + "player.statMagnitutude.attack"); }
-	public int getPlayerStatMagnitudeConstitution() { return fcw.getIntS(prefix + "player.statMagnitutude.constitution"); }
-	public int getPlayerStatMagnitudeIntelligence() { return fcw.getIntS(prefix + "player.statMagnitutude.intelligence"); }
-	
-	public int getPlayerLevelsPerSkillPoint() { return fcw.getIntS(prefix + "player.levelsPerSkillPoint"); }
-	public int getPlayerStatsPerLevel() { return fcw.getIntS(prefix + "player.statsPerLevel"); }
-	public double getPlayerExpScaleRate() { return fcw.getDoubleS(prefix + "player.expScaleRate"); }
-	public double getPlayerExpScaleBase() { return fcw.getDoubleS(prefix + "player.expScaleBase"); }
-	
-	public double getDamageExplosion() { return fcw.getDoubleS(prefix + "damage.explosion"); }
-	public double getDamageFall() { return fcw.getDoubleS(prefix + "damage.fall"); }
-	public double getDamageContact() { return fcw.getDoubleS(prefix + "damage.contact"); }
-	public double getDamageEntityAttack() { return fcw.getDoubleS(prefix + "damage.entityAttack"); }
-	public double getDamageLightning() { return fcw.getDoubleS(prefix + "damage.lightning"); }
-	public double getDamageFire() { return fcw.getDoubleS(prefix + "damage.fire"); }
-	public double getDamageFireTick() { return fcw.getDoubleS(prefix + "damage.firetick"); }
-	public double getDamageLava() { return fcw.getDoubleS(prefix + "damage.lava"); }
-	public double getDamageStarvation() { return fcw.getDoubleS(prefix + "damage.starvation"); }
-	public double getDamagePoison() { return fcw.getDoubleS(prefix + "damage.poison"); }
-	public double getDamageMagic() { return fcw.getDoubleS(prefix + "damage.magic"); }
-	public double getDamageBlockExplosion() { return fcw.getDoubleS(prefix + "damage.blockExplosion"); }
-	public double getDamageWither() { return fcw.getDoubleS(prefix + "damage.wither"); }
-	
-	public double getPotionMultiplierStrength() { return fcw.getDoubleS(prefix + "potionMultiplier.strength"); }
-	public double getPotionMultiplierWeakness() { return fcw.getDoubleS(prefix + "potionMultiplier.weakness"); }
-	public double getPotionMultiplierResistance() { return fcw.getDoubleS(prefix + "potionMultiplier.resistance"); }
-	
-	public double getHealPercentEating() { return fcw.getDoubleS(prefix + "healMultiplier.eating"); }
-	public double getHealPercentMagic() { return fcw.getDoubleS(prefix + "healMultiplier.magic"); }
-	public double getHealPercentMagicRegen() { return fcw.getDoubleS(prefix + "healMultiplier.magicRegen"); }
-	public double getHealPercentSatiated() { return fcw.getDoubleS(prefix + "healMultiplier.satiated"); }
-
-	public int getPassivesScalingArrow() { return fcw.getIntS(prefix + "passives.scalingArrows"); }
-	public int getPassivesCounterAttack() { return fcw.getIntS(prefix + "passives.counterAttack"); }
-	public double getPassivesStrongerParry() { return fcw.getDoubleS(prefix + "passives.strongerParry"); }
-	public double getPassivesBattleLust() { return fcw.getDoubleS(prefix + "passives.battleLust"); }
-	public double getPassivesInnerFlame() { return fcw.getDoubleS(prefix + "passives.innerFlame"); }
 	
 	public BalanceConfig()
 	{
@@ -238,136 +22,241 @@ public class BalanceConfig extends ConfigGod
 	
 	public void handleUpdates()
 	{
-		//If no config was previously created, then...
+		// Handle version updates.
 		if (getVersion() < 1.0)
 		{
-			//Set version
-			setVersion(1.0);
-			
-			setDifficultyScalor(100);	//500 = roughly 20% increase from 0-100.
-			setRandomMobLevelDeviation(2);
-			setPowerLevelPrevention(5);
+			setVersion(1.06);
 			setGlobalExpMultiplier(1);
-			setWitherLevelBonus(10);
-			setEnderDragonLevelBonus(100);
-			setDefaultItemDrops(true);
-			setArrowKnockback(false);
-			setBonusPercentCap(2);
-			setEnchantmentMultiplierSharpness(0.02);
-			setEnchantmentMultiplierBane(0.02);
-			setEnchantmentMultiplierSmite(0.02);
-			setEnchantmentMultiplierPower(0.02);
-			setEnchantmentMultiplierProtection(0.025);
-			setEnchantmentMultiplierFire(0.025);
-			setEnchantmentMultiplierExplosion(0.025);
-			setEnchantmentMultiplierFall(0.025);
-			setEnchantmentMultiplierProjectile(0.025);
-			
-			setPlayerBaseHealth(100);
-			setPlayerBaseMana(20);
-			setPlayerStatMagnitudeAttack(1);
-			setPlayerStatMagnitudeConstitution(20);
-			setPlayerStatMagnitudeIntelligence(1);	
-			setPlayerLevelsPerSkillPoint(4);
-			setPlayerStatsPerLevel(10);
-			setPlayerExpScaleRate(3);
-			setPlayerExpScaleBase(11);
-			
-			setMobAttackHardMultiplier(5);
-			setMobConstitutionMultiplier(100);
-			setMobSpawnWithItemChance(50);
-			setMobSpawnWithEnchantsChance(50);
-			setMobCashMultiplier(.8);
-			setMobExpMultiplier(.1);
-			
-			setSwordMultiplierWood(1.25);
-			setSwordMultiplierStone(1.5);
-			setSwordMultiplierIron(1.75);
-			setSwordMultiplierDiamond(2);
-			setSwordMultiplierGold(2.5);
-			
-			setSwordAttackRequirementWood(0);
-			setSwordAttackRequirementStone(60);
-			setSwordAttackRequirementIron(120);
-			setSwordAttackRequirementDiamond(180);
-			setSwordAttackRequirementGold(240);
-			
-			setArmorWearRequirementChain(60);
-			setArmorWearRequirementIron(120);
-			setArmorWearRequirementDiamond(180);
-			setArmorWearRequirementGold(240);
-			
-			//LEATHER - 10% total, .5%, 1%, 1.5%, 2%
-			setArmorMultiplierLB(.005);
-			setArmorMultiplierLH(.01);
-			setArmorMultiplierLL(.015);
-			setArmorMultiplierLC(.02);
-			
-			//CHAIN - 10% total, 1%, 2%, 3%, 4%
-			setArmorMultiplierCB(.01);
-			setArmorMultiplierCH(.02);
-			setArmorMultiplierCL(.03);
-			setArmorMultiplierCC(.04);
-			
-			//IRON - 15% total, 1.5, 3, 4.5, 6
-			setArmorMultiplierIB(.015);
-			setArmorMultiplierIH(.03);
-			setArmorMultiplierIL(.045);
-			setArmorMultiplierIC(.06);
-			
-			//DIAMOND - 20% total, 2,4,6,8
-			setArmorMultiplierDB(.02);
-			setArmorMultiplierDH(.04);
-			setArmorMultiplierDL(.06);
-			setArmorMultiplierDC(.08);
-			
-			//Gold - 25% total, 2.5, 5, 7.5, 10
-			setArmorMultiplierGB(.025);
-			setArmorMultiplierGH(.05);
-			setArmorMultiplierGL(.075);
-			setArmorMultiplierGC(.1);
-			
-			setDamageExplosion(9);
-			setDamageFall(1);
-			setDamageContact(1);
-			setDamageEntityAttack(3);
-			setDamageLightning(50);
-			setDamageFire(2);
-			setDamageFireTick(2);
-			setDamageLava(1);
-			setDamageStarvation(.3);
-			setDamagePoison(.5);
-			setDamageMagic(3);
-			setDamageBlockExplosion(5);
-			setDamageWither(.7);
-			
-			setPotionMultiplierStrength(0.05);
-			setPotionMultiplierWeakness(0.05);
-			setPotionMultiplierResistance(0.05);
-			
-			setHealPercentEating(.05);
-			setHealPercentMagic(.2);
-			setHealPercentMagicRegen(.05);
-			setHealPercentSatiated(.05);
 		}
 		
-		if (getVersion() < 1.01)
-		{
-			setVersion(1.01);
-			
-			setPassivesScalingArrows(28);
-			setPassivesCounterAttack(10);
-			setPassivesStrongerParry(.75);
-			setPassivesBattleLust(.4);
-		}
+		getDefaultItemDrops();
+		getArrowKnockback();
+		getSwordKnockback();
+		getDifficultyScalor();
+		getRandomMobLevelDeviation();
+		getPowerLevelPrevention();
+		getWitherLevelBonus();
+		getEnderDragonLevelBonus();
 		
-		if (getVersion() < 1.05)
-		{
-			setVersion(1.05);
-			
-			setPassivesInnerFlame(.15);
-		}
+		getEnchantmentMultiplierSharpness();
+		getEnchantmentMultiplierBane();
+		getEnchantmentMultiplierSmite();
+		getEnchantmentMultiplierPower();
+		getEnchantmentMultiplierProtection();
+		getEnchantmentMultiplierFire();
+		getEnchantmentMultiplierExplosion();
+		getEnchantmentMultiplierFall();
+		getEnchantmentMultiplierProjectile();
+		
+		getArmorWearRequirementChain();
+		getArmorWearRequirementIron();
+		getArmorWearRequirementDiamond();
+		getArmorWearRequirementGold();
+		
+		getArmorMultiplierLB();
+		getArmorMultiplierLH();
+		getArmorMultiplierLL();
+		getArmorMultiplierLC();
+		
+		getArmorMultiplierCB();
+		getArmorMultiplierCH();
+		getArmorMultiplierCL();
+		getArmorMultiplierCC();
+		
+		getArmorMultiplierIB();
+		getArmorMultiplierIH();
+		getArmorMultiplierIL();
+		getArmorMultiplierIC();
+		
+		getArmorMultiplierDB();
+		getArmorMultiplierDH();
+		getArmorMultiplierDL();
+		getArmorMultiplierDC();
+		
+		getArmorMultiplierGB();
+		getArmorMultiplierGH();
+		getArmorMultiplierGL();
+		getArmorMultiplierGC();
+		
+		getMobCashMultiplier();
+		getMobExpMultiplier();
+		getMobSpawnWithItemChance();
+		getMobSpawnWithEnchantsChance();
+		getMobAttackMultiplier();
+		getMobConstitutionMultiplier();
+		getMobLootList();
+		
+		getSwordMultiplierWood();
+		getSwordMultiplierStone();
+		getSwordMultiplierIron();
+		getSwordMultiplierDiamond();
+		getSwordMultiplierGold();
+
+		getSwordAttackRequirementWood();
+		getSwordAttackRequirementStone();
+		getSwordAttackRequirementIron();
+		getSwordAttackRequirementDiamond();
+		getSwordAttackRequirementGold();
+		
+		getPlayerBaseHealth();
+		getPlayerBaseMana();
+		getPlayerStatMagnitudeAttack();
+		getPlayerStatMagnitudeConstitution();
+		getPlayerStatMagnitudeIntelligence();
+		getPlayerLevelsPerSkillPoint();
+		getPlayerStatsPerLevel();
+		getPlayerExpScaleRate();
+		getPlayerExpScaleBase();
+		
+		getDamageExplosion();
+		getDamageFall();
+		getDamageContact();
+		getDamageEntityAttack();
+		getDamageLightning();
+		getDamageFire();
+		getDamageFireTick();
+		getDamageLava();
+		getDamageStarvation();
+		getDamagePoison();
+		getDamageMagic();
+		getDamageBlockExplosion();
+		getDamageWither();
+		
+		getPotionMultiplierStrength();
+		getPotionMultiplierWeakness();
+		getPotionMultiplierResistance();
+		
+		getHealPercentEating();
+		getHealPercentMagic();
+		getHealPercentMagicRegen();
+		getHealPercentSatiated();
+		
+		getPassivesScalingArrow();
+		getPassivesCounterAttack();
+		getPassivesStrongerParry();
+		getPassivesBattleLust();
+		getPassivesInnerFlame();
 	}
+	
+	/****************************************************************
+	 ^ Configuration Accessing Methods 
+	 - All Dyanmically Accessed
+	****************************************************************/
+	
+	public void setGlobalExpMultiplier(int x) { fcw.set(prefix + "globalExpMultiplier", x); }
+	public int getGlobalExpMultiplier() { return fcw.getInt(prefix + "globalExpMultiplier"); }
+	
+	/****************************************************************
+	 - All Statically Accessed
+	****************************************************************/
+	
+	public boolean getDefaultItemDrops() { return fcw.getStaticBoolean(prefix + "defaultItemDrops", true); }
+	public boolean getArrowKnockback() { return fcw.getStaticBoolean(prefix + "arrowKnockback", false); }
+	public boolean getSwordKnockback() { return fcw.getStaticBoolean(prefix + "swordKnockback", false); }
+	public int getDifficultyScalor() { return fcw.getStaticInt(prefix + "difficultyScalor", 100); } //500 = roughly 20% increase from 0-100.
+	public int getRandomMobLevelDeviation() { return fcw.getStaticInt(prefix + "randomMobLevelDeviation", 2); }
+	public int getPowerLevelPrevention() { return fcw.getStaticInt(prefix + "powerLevelPrevention", 5); }
+	public int getWitherLevelBonus() { return fcw.getStaticInt(prefix + "witherLevelBonus", 10); }
+	public int getEnderDragonLevelBonus() { return fcw.getStaticInt(prefix + "enderDragonLevelBonus", 100); }
+	
+	public double getEnchantmentMultiplierSharpness() { return fcw.getStaticDouble(prefix + "enchantmentMultiplier.sharpness", 0.02); }
+	public double getEnchantmentMultiplierBane() { return fcw.getStaticDouble(prefix + "enchantmentMultiplier.bane", 0.02); }
+	public double getEnchantmentMultiplierSmite() { return fcw.getStaticDouble(prefix + "enchantmentMultiplier.smite", 0.02); }
+	public double getEnchantmentMultiplierPower() { return fcw.getStaticDouble(prefix + "enchantmentMultiplier.power", 0.02); }
+	public double getEnchantmentMultiplierProtection() { return fcw.getStaticDouble(prefix + "enchantmentMultiplier.protection", 0.025); }
+	public double getEnchantmentMultiplierFire() { return fcw.getStaticDouble(prefix + "enchantmentMultiplier.fire", 0.025); }
+	public double getEnchantmentMultiplierExplosion() { return fcw.getStaticDouble(prefix + "enchantmentMultiplier.explosion", 0.025); }
+	public double getEnchantmentMultiplierFall() { return fcw.getStaticDouble(prefix + "enchantmentMultiplier.fall", 0.025); }
+	public double getEnchantmentMultiplierProjectile() { return fcw.getStaticDouble(prefix + "enchantmentMultiplier.projectile", 0.025); }
+	
+	public int getArmorWearRequirementChain() { return fcw.getStaticInt(prefix + "armor.wearRequirement.chain", 60); }
+	public int getArmorWearRequirementIron() { return fcw.getStaticInt(prefix + "armor.wearRequirement.iron", 120); }
+	public int getArmorWearRequirementDiamond() { return fcw.getStaticInt(prefix + "armor.wearRequirement.diamond", 180); }
+	public int getArmorWearRequirementGold() { return fcw.getStaticInt(prefix + "armor.wearRequirement.gold", 240); }
+	
+	public double getArmorMultiplierLB() { return fcw.getStaticDouble(prefix + "armor.multiplier.leather.boots", .005); }	//LEATHER - 10% total, .5%, 1%, 1.5%, 2%
+	public double getArmorMultiplierLH() { return fcw.getStaticDouble(prefix + "armor.multiplier.leather.helmet", .01); }
+	public double getArmorMultiplierLL() { return fcw.getStaticDouble(prefix + "armor.multiplier.leather.leggings", .015); }
+	public double getArmorMultiplierLC() { return fcw.getStaticDouble(prefix + "armor.multiplier.leather.chestplate", .02); }
+	
+	public double getArmorMultiplierCB() { return fcw.getStaticDouble(prefix + "armor.multiplier.chain.boots", .01); }	//CHAIN - 10% total, 1%, 2%, 3%, 4%
+	public double getArmorMultiplierCH() { return fcw.getStaticDouble(prefix + "armor.multiplier.chain.helmet", .02); }
+	public double getArmorMultiplierCL() { return fcw.getStaticDouble(prefix + "armor.multiplier.chain.leggings", .03); }
+	public double getArmorMultiplierCC() { return fcw.getStaticDouble(prefix + "armor.multiplier.chain.chestplate", .04); }
+	
+	public double getArmorMultiplierIB() { return fcw.getStaticDouble(prefix + "armor.multiplier.iron.boots", .015); }	//IRON - 15% total, 1.5, 3, 4.5, 6
+	public double getArmorMultiplierIH() { return fcw.getStaticDouble(prefix + "armor.multiplier.iron.helmet", .03); }
+	public double getArmorMultiplierIL() { return fcw.getStaticDouble(prefix + "armor.multiplier.iron.leggings", .045); }
+	public double getArmorMultiplierIC() { return fcw.getStaticDouble(prefix + "armor.multiplier.iron.chestplate", .06); }
+	
+	public double getArmorMultiplierDB() { return fcw.getStaticDouble(prefix + "armor.multiplier.diamond.boots", .02); }	//DIAMOND - 20% total, 2,4,6,8
+	public double getArmorMultiplierDH() { return fcw.getStaticDouble(prefix + "armor.multiplier.diamond.helmet", .04); }
+	public double getArmorMultiplierDL() { return fcw.getStaticDouble(prefix + "armor.multiplier.diamond.leggings", .06); }
+	public double getArmorMultiplierDC() { return fcw.getStaticDouble(prefix + "armor.multiplier.diamond.chestplate", .08); }
+	
+	public double getArmorMultiplierGB() { return fcw.getStaticDouble(prefix + "armor.multiplier.gold.boots", .025); }	//Gold - 25% total, 2.5, 5, 7.5, 10
+	public double getArmorMultiplierGH() { return fcw.getStaticDouble(prefix + "armor.multiplier.gold.helmet", .05); }
+	public double getArmorMultiplierGL() { return fcw.getStaticDouble(prefix + "armor.multiplier.gold.leggings", .075); }
+	public double getArmorMultiplierGC() { return fcw.getStaticDouble(prefix + "armor.multiplier.gold.chestplate", .1); }
+	
+	public double getMobCashMultiplier() { return fcw.getStaticDouble(prefix + "mob.cashMultiplier", .8); }
+	public double getMobExpMultiplier() { return fcw.getStaticDouble(prefix + "mob.expMultiplier", .1); }
+	public int getMobSpawnWithItemChance() { return fcw.getStaticInt(prefix + "mob.spawnWithItemChance", 50); }
+	public int getMobSpawnWithEnchantsChance() { return fcw.getStaticInt(prefix + "mob.spawnWithEnchantsChance", 50); }
+	public int getMobAttackMultiplier() { return fcw.getStaticInt(prefix + "mob.attackMultiplier", 5); }
+	public int getMobConstitutionMultiplier() { return fcw.getStaticInt(prefix + "mob.constitutionMultiplier", 100); }
+	public String getMobLootList() { return fcw.getStaticString(prefix + "mob.lootList", "default"); }
+	
+	public double getSwordMultiplierWood() { return fcw.getStaticDouble(prefix + "sword.multiplier.wood", 1.25); }
+	public double getSwordMultiplierStone() { return fcw.getStaticDouble(prefix + "sword.multiplier.stone", 1.5); }
+	public double getSwordMultiplierIron() { return fcw.getStaticDouble(prefix + "sword.multiplier.iron", 1.75); }
+	public double getSwordMultiplierDiamond() { return fcw.getStaticDouble(prefix + "sword.multiplier.diamond", 2); }
+	public double getSwordMultiplierGold() { return fcw.getStaticDouble(prefix + "sword.multiplier.gold", 2.5); }
+	
+	public double getSwordAttackRequirementWood() { return fcw.getStaticDouble(prefix + "sword.attackRequirement.wood", 0); }
+	public double getSwordAttackRequirementStone() { return fcw.getStaticDouble(prefix + "sword.attackRequirement.stone", 60); }
+	public double getSwordAttackRequirementIron() { return fcw.getStaticDouble(prefix + "sword.attackRequirement.iron", 120); }
+	public double getSwordAttackRequirementDiamond() { return fcw.getStaticDouble(prefix + "sword.attackRequirement.diamond", 180); }
+	public double getSwordAttackRequirementGold() { return fcw.getStaticDouble(prefix + "sword.attackRequirement.gold", 240); }
+	
+	public int getPlayerBaseHealth() { return fcw.getStaticInt(prefix + "player.baseHealth", 100); }
+	public int getPlayerBaseMana() { return fcw.getStaticInt(prefix + "player.baseMana", 20); }
+	public int getPlayerStatMagnitudeAttack() { return fcw.getStaticInt(prefix + "player.statMagnitutude.attack", 1); }
+	public int getPlayerStatMagnitudeConstitution() { return fcw.getStaticInt(prefix + "player.statMagnitutude.constitution", 20); }
+	public int getPlayerStatMagnitudeIntelligence() { return fcw.getStaticInt(prefix + "player.statMagnitutude.intelligence", 1); }
+	public int getPlayerLevelsPerSkillPoint() { return fcw.getStaticInt(prefix + "player.levelsPerSkillPoint", 4); }
+	public int getPlayerStatsPerLevel() { return fcw.getStaticInt(prefix + "player.statsPerLevel", 10); }
+	public double getPlayerExpScaleRate() { return fcw.getStaticDouble(prefix + "player.expScaleRate", 3); }
+	public double getPlayerExpScaleBase() { return fcw.getStaticDouble(prefix + "player.expScaleBase", 11); }
+	
+	public double getDamageExplosion() { return fcw.getStaticDouble(prefix + "damage.explosion", 9); }
+	public double getDamageFall() { return fcw.getStaticDouble(prefix + "damage.fall", 1); }
+	public double getDamageContact() { return fcw.getStaticDouble(prefix + "damage.contact", 1); }
+	public double getDamageEntityAttack() { return fcw.getStaticDouble(prefix + "damage.entityAttack", 3); }
+	public double getDamageLightning() { return fcw.getStaticDouble(prefix + "damage.lightning", 50); }
+	public double getDamageFire() { return fcw.getStaticDouble(prefix + "damage.fire", 2); }
+	public double getDamageFireTick() { return fcw.getStaticDouble(prefix + "damage.firetick", 2); }
+	public double getDamageLava() { return fcw.getStaticDouble(prefix + "damage.lava", 1); }
+	public double getDamageStarvation() { return fcw.getStaticDouble(prefix + "damage.starvation", .3); }
+	public double getDamagePoison() { return fcw.getStaticDouble(prefix + "damage.poison", .5); }
+	public double getDamageMagic() { return fcw.getStaticDouble(prefix + "damage.magic", 3); }
+	public double getDamageBlockExplosion() { return fcw.getStaticDouble(prefix + "damage.blockExplosion", 5); }
+	public double getDamageWither() { return fcw.getStaticDouble(prefix + "damage.wither", .7); }
+	
+	public double getPotionMultiplierStrength() { return fcw.getStaticDouble(prefix + "potionMultiplier.strength", 0.05); }
+	public double getPotionMultiplierWeakness() { return fcw.getStaticDouble(prefix + "potionMultiplier.weakness", 0.05); }
+	public double getPotionMultiplierResistance() { return fcw.getStaticDouble(prefix + "potionMultiplier.resistance", 0.05); }
+	
+	public double getHealPercentEating() { return fcw.getStaticDouble(prefix + "healMultiplier.eating", .05); }
+	public double getHealPercentMagic() { return fcw.getStaticDouble(prefix + "healMultiplier.magic", .2); }
+	public double getHealPercentMagicRegen() { return fcw.getStaticDouble(prefix + "healMultiplier.magicRegen", .05); }
+	public double getHealPercentSatiated() { return fcw.getStaticDouble(prefix + "healMultiplier.satiated", .05); }
+	
+	public int getPassivesScalingArrow() { return fcw.getStaticInt(prefix + "passives.scalingArrows", 28); }
+	public int getPassivesCounterAttack() { return fcw.getStaticInt(prefix + "passives.counterAttack", 10); }
+	public double getPassivesStrongerParry() { return fcw.getStaticDouble(prefix + "passives.strongerParry", .75); }
+	public double getPassivesBattleLust() { return fcw.getStaticDouble(prefix + "passives.battleLust", .4); }
+	public double getPassivesInnerFlame() { return fcw.getStaticDouble(prefix + "passives.innerFlame", .15); }
 }
 
 

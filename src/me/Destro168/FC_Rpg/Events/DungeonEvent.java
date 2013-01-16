@@ -65,7 +65,7 @@ public class DungeonEvent extends GeneralEvent
 	{
 		//Variable declarations.
 		MessageLib msgLib = new MessageLib(player);
-		int level = FC_Rpg.rpgEntityManager.getRpgPlayer(player).getPlayerConfig().getClassLevel();
+		int level = FC_Rpg.rpgEntityManager.getRpgPlayer(player).playerConfig.getClassLevel();
 		
 		//Update the dungeonNumber
 		setDungeonNumber(dungeonNumber);
@@ -160,7 +160,7 @@ public class DungeonEvent extends GeneralEvent
 			return;
 		
 		Date now = new Date();
-		FC_Rpg.rpgEntityManager.getRpgPlayer(playerToRemove).getPlayerConfig().setLastDungeonCompletion(now.getTime());
+		FC_Rpg.rpgEntityManager.getRpgPlayer(playerToRemove).playerConfig.setLastDungeonCompletion(now.getTime());
 		
 		if (participantList.size() == 0)
 			end(false);
@@ -209,14 +209,9 @@ public class DungeonEvent extends GeneralEvent
 		
 		//Check boss location, somehow makes the boss location work. Don't question the magic!
 		if (isSafe(bossLocation) == false)
-		{
 			FC_Rpg.plugin.getLogger().info("[ERROR] Boss Spawn Location Is NOT Safe!");
-		}
 		else
-		{
-			//Spawn a boss monster.
-			spawnedMobs[mobCountMinusOne] = (LivingEntity) dungeonWorld.spawnEntity(bossLocation, returnRandomLivingEntity());
-		}
+			spawnedMobs[mobCountMinusOne] = (LivingEntity) dungeonWorld.spawnEntity(bossLocation, returnRandomLivingEntity());	//Spawn a boss monster.
 		
 		//Add loot to chests.
 		addChestLoot(true);
@@ -305,7 +300,7 @@ public class DungeonEvent extends GeneralEvent
 		{
 			if (player != null)
 			{
-				level = FC_Rpg.rpgEntityManager.getRpgPlayer(player).getPlayerConfig().getClassLevel();
+				level = FC_Rpg.rpgEntityManager.getRpgPlayer(player).playerConfig.getClassLevel();
 				
 				if (level < lowestLevel)
 					lowestLevel = level;
@@ -324,7 +319,7 @@ public class DungeonEvent extends GeneralEvent
 		{
 			if (player != null)
 			{
-				if (FC_Rpg.rpgEntityManager.getRpgPlayer(player).getPlayerConfig().getClassLevel() > lowestLevel + 5)
+				if (FC_Rpg.rpgEntityManager.getRpgPlayer(player).playerConfig.getClassLevel() > lowestLevel + 5)
 				{
 					//Refund players
 					FC_Rpg.economy.depositPlayer(player.getName(), FC_Rpg.dungeonConfig.getEntryFee(dungeonNumber));
@@ -497,7 +492,7 @@ public class DungeonEvent extends GeneralEvent
 	{
 		//Variable Declarations
 		Random rand = new Random();
-		List<ItemStack> drops = FC_Rpg.treasureConfig.getRandomTreasure(lowestLevel, rand.nextInt(5) + 1); // Get the list of random treasure.
+		List<ItemStack> drops = FC_Rpg.treasureConfig.getRandomTreasure(lowestLevel, rand.nextInt(5) + 1, FC_Rpg.treasureConfig.getLootList(FC_Rpg.dungeonConfig.getLootList(dungeonNumber))); // Get the list of random treasure.
 		Block chestBlock;
 		Chest chest;
 		int x = (int) chestLocation.getX();
@@ -700,7 +695,7 @@ public class DungeonEvent extends GeneralEvent
 					for (Player player: participantList)
 					{
 						Date now = new Date();
-						FC_Rpg.rpgEntityManager.getRpgPlayer(player).getPlayerConfig().setLastDungeonCompletion(now.getTime());
+						FC_Rpg.rpgEntityManager.getRpgPlayer(player).playerConfig.setLastDungeonCompletion(now.getTime());
 					}
 					
 					//Reset everything.
@@ -720,7 +715,7 @@ public class DungeonEvent extends GeneralEvent
 			for (Player player: participantList)
 			{
 				Date now = new Date();
-				FC_Rpg.rpgEntityManager.getRpgPlayer(player).getPlayerConfig().setLastDungeonCompletion(now.getTime());
+				FC_Rpg.rpgEntityManager.getRpgPlayer(player).playerConfig.setLastDungeonCompletion(now.getTime());
 			}
 			
 			//Reset everything.

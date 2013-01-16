@@ -80,7 +80,7 @@ public class SpellCaster
 	{
 		//Variable Initialization
 		rpgCaster = spellCaster_;
-		String activeSpell = rpgCaster.getPlayerConfig().getActiveSpell();
+		String activeSpell = rpgCaster.playerConfig.getActiveSpell();
 		
 		//First check that the player has an active spell before continuing.
 		if (activeSpell == null)
@@ -91,11 +91,11 @@ public class SpellCaster
 		damage = damage_;
 		damageType = damageType_;
 		playerCaster = spellCaster_.getPlayer();
-		combatClass = rpgCaster.getPlayerConfig().getCombatClass();
+		combatClass = rpgCaster.playerConfig.getCombatClass();
 		
 		//Variable Declarations
 		MessageLib msgLib = new MessageLib(playerCaster);
-		List<Spell> spellBook = rpgCaster.getPlayerConfig().getRpgClass().getSpellBook();
+		List<Spell> spellBook = rpgCaster.playerConfig.getRpgClass().getSpellBook();
 		
 		if (rpgCaster.getIsCasting() == true)
 			return false;
@@ -129,7 +129,7 @@ public class SpellCaster
 		try { if (spell.getUncastable()) { msgLib.standardError("This spell cannot be cast normally conditions."); return false; } } catch (NullPointerException e) { }
 		
 		//Assign Variables.
-		spellTier = rpgCaster.getPlayerConfig().getSpellLevels().get(spellNumber) - 1;
+		spellTier = rpgCaster.playerConfig.getSpellLevels().get(spellNumber) - 1;
 		
 		//If the spell is restricted, then...
 		if (spell.getRequiresTarget())
@@ -176,7 +176,7 @@ public class SpellCaster
 		}
 		
 		//Reset active spell for caster.
-		rpgCaster.getPlayerConfig().resetActiveSpell();
+		rpgCaster.playerConfig.resetActiveSpell();
 		
 		//Store spell information for use later.
 		try { duration = spell.getDuration().get(spellTier); } catch (NullPointerException e) {  }
@@ -208,7 +208,7 @@ public class SpellCaster
 		}
 		
 		else if (x == EffectIDs.FIRE_ARROW)
-			rpgCaster.getPlayerConfig().setStatusUses(x, (int) finalSpellMagnitude);
+			rpgCaster.playerConfig.setStatusUses(x, (int) finalSpellMagnitude);
 		
 		else if (x == EffectIDs.DAMAGE_BOOST)
 			damage = damage * finalSpellMagnitude;
@@ -334,8 +334,8 @@ public class SpellCaster
 		for (final RpgPlayer p : playerConfigs)
 		{
 			//Give buff to only caster.
-			p.getPlayerConfig().setStatusDuration(effectID, duration);
-			p.getPlayerConfig().setStatusMagnitude(effectID, finalSpellMagnitude);
+			p.playerConfig.setStatusDuration(effectID, duration);
+			p.playerConfig.setStatusMagnitude(effectID, finalSpellMagnitude);
 			
 			if (FC_Rpg.playerBuffTimerTIDs.containsKey(p.getPlayer()))
 				Bukkit.getScheduler().cancelTask(FC_Rpg.playerBuffTimerTIDs.get(p.getPlayer()));
@@ -449,7 +449,7 @@ public class SpellCaster
 		if (target instanceof Player)
 		{
 			final RpgPlayer finalPlayerDefender = FC_Rpg.rpgEntityManager.getRpgPlayer((Player) target);
-			final double finalDamage = rpgDefender.getMaxHealth() * .02;
+			final double finalDamage = rpgDefender.playerConfig.maxHealth * .02;
 			
 			for (int i = 0; i < length; i++)
 			{
@@ -601,7 +601,7 @@ public class SpellCaster
 			rpgMobDefender.setStatusDisabled((int) finalSpellMagnitude);
 		
 		else if (playerDefender != null)
-			rpgDefender.getPlayerConfig().setStatusMagnitude(EffectIDs.DISABLED, finalSpellMagnitude);
+			rpgDefender.playerConfig.setStatusMagnitude(EffectIDs.DISABLED, finalSpellMagnitude);
 		
 		return true;
 	}
@@ -613,7 +613,7 @@ public class SpellCaster
 	
 	private void effect_Sacrifice_Health_For_Damage()
 	{
-		double hpToLose = rpgCaster.getCurHealth() * .2;
+		double hpToLose = rpgCaster.playerConfig.curHealth * .2;
 		rpgCaster.dealDamage(hpToLose);
 		damage = rpgCaster.getTotalAttack() * finalSpellMagnitude;
 	}
@@ -622,13 +622,13 @@ public class SpellCaster
 	{
 		if (playerDefender != null)
 		{
-			rpgDefender.healHealth(rpgDefender.getMaxHealth() * finalSpellMagnitude);
+			rpgDefender.healHealth(rpgDefender.playerConfig.maxHealth * finalSpellMagnitude);
 			rpgCaster.attemptHealOtherNotification(rpgDefender);
 		}
 		else
 		{
-			rpgCaster.healHealth(rpgCaster.getMaxHealth() * finalSpellMagnitude);
-			rpgCaster.attemptHealSelfNotification(rpgCaster.getMaxHealth() * finalSpellMagnitude);
+			rpgCaster.healHealth(rpgCaster.playerConfig.maxHealth * finalSpellMagnitude);
+			rpgCaster.attemptHealSelfNotification(rpgCaster.playerConfig.maxHealth * finalSpellMagnitude);
 		}
 	}
 	
@@ -636,14 +636,14 @@ public class SpellCaster
 	{
 		if (playerDefender != null)
 		{
-			rpgDefender.healHealth(rpgDefender.getMaxHealth() * finalSpellMagnitude);
+			rpgDefender.healHealth(rpgDefender.playerConfig.maxHealth * finalSpellMagnitude);
 			rpgCaster.attemptHealOtherNotification(rpgDefender);
 		}
 	}
 	
 	private void effect_Heal_Self_Percent()
 	{
-		double healAmount = rpgCaster.getMaxHealth() * finalSpellMagnitude;
+		double healAmount = rpgCaster.playerConfig.maxHealth * finalSpellMagnitude;
 		
 		rpgCaster.healHealth(healAmount);
 		rpgCaster.attemptHealSelfNotification(healAmount);

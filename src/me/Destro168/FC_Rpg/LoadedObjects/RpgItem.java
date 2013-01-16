@@ -13,6 +13,7 @@ public class RpgItem
 	public int dropLevelMin;
 	public int dropAmountFlat;
 	public int dropAmountRandom;
+	public int configFieldNumber;
 	
 	public Material getMaterial() { return Material.getMaterial(material); }
 	

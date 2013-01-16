@@ -22,6 +22,10 @@ public class WorldConfig extends ConfigGod
 	private void setIsSpawn(String name, boolean x) { fcw.set(prefix + name + ".isSpawn", x); }	//Pvp
 	private void setIsAoEWorld(String name, boolean x) { fcw.set(prefix + name + ".isAoEWorld", x); }	//Pvp
 	private void setIsMobWorld(String name, boolean x) { fcw.set(prefix + name + ".isMobWorld", x); }	//Pvp
+	private void setLevelCap(String name, int x) { fcw.set(prefix + name + ".levelCap", x); }	//Pvp
+	private void setScaleX(String name, double x) { fcw.set(prefix + name + ".scale.x", x); }	//Pvp
+	private void setScaleY(String name, double x) { fcw.set(prefix + name + ".scale.y", x); }	//Pvp
+	private void setScaleZ(String name, double x) { fcw.set(prefix + name + ".scale.z", x); }	//Pvp
 	
 	public Location getWorldSpawn(String worldName) { return fcw.getLocation(prefix + worldName + ".spawn"); }
 	public Location getLevelOne(String worldName) { return fcw.getLocation(prefix + worldName + ".levelOne"); }
@@ -31,6 +35,10 @@ public class WorldConfig extends ConfigGod
 	public boolean getIsSpawn(String name) { return fcw.getBoolean(prefix + name + ".isSpawn"); }
 	public boolean getIsAoEWorld(String name) { return fcw.getBoolean(prefix + name + ".isAoEWorld"); }
 	public boolean getIsMobWorld(String name) { return fcw.getBoolean(prefix + name + ".isMobWorld"); }
+	public int getLevelCap(String name) { return fcw.getInt(prefix + name + ".levelCap"); }
+	public double getScaleX(String name) { return fcw.getDouble(prefix + name + ".scale.x"); }
+	public double getScaleY(String name) { return fcw.getDouble(prefix + name + ".scale.y"); }
+	public double getScaleZ(String name) { return fcw.getDouble(prefix + name + ".scale.z"); }
 	
 	public void removeWorld(String name) { fcw.set(prefix + name, null); }
 	
@@ -56,12 +64,18 @@ public class WorldConfig extends ConfigGod
 			FC_Rpg.plugin.saveConfig();
 		}
 		
-		if (getVersion() < 0.2)
+		//Update verison to 0.3
+		if (getVersion() < 0.3)
 		{
-			setVersion(0.2);
+			setVersion(0.3);
 			
-			//for (World world : Bukkit.getServer().getWorlds())
-				//setLevelOne(world.getName(),0,70,0,0,0);
+			for (World world : getRpgWorlds())
+			{
+				setLevelCap(world.getName(), -1);
+				setScaleX(world.getName(), 20);
+				setScaleY(world.getName(), 20);
+				setScaleZ(world.getName(), -25);
+			}
 		}
 	}
 	

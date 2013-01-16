@@ -48,9 +48,10 @@ public class RpgEntityManager
 			//Cancel past player updates.
 			stopPlayerUpdates();
 			
-			if (rpgPlayer.getPlayerConfig().getIsActive() == false)
+			if (rpgPlayer.playerConfig.getIsActive() == false)
 				return;
 			
+			// Every 60 seconds we want to run this task to perform actions.
 			updateTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(FC_Rpg.plugin, new Runnable()
 			{
 				@Override
@@ -59,6 +60,7 @@ public class RpgEntityManager
 					rpgPlayer.attemptGiveTimedItems();
 					rpgPlayer.calculateHealthAndMana();
 					rpgPlayer.updateTimePlayed();
+					rpgPlayer.playerConfig.save(); // Save all player information every 60 seconds.
 				}
 			}, 0, 1200);
 		}
@@ -68,7 +70,7 @@ public class RpgEntityManager
 			//Cancel any past mana regenerations.
 			cancelManaRegen();
 			
-			if (rpgPlayer.getPlayerConfig().getIsActive() == false)
+			if (rpgPlayer.playerConfig.getIsActive() == false)
 				return;
 			
 			//Start a new mana regeneration.
@@ -209,7 +211,7 @@ public class RpgEntityManager
     		if (forceStart == true) //Ignore for new
     		{
     			//If they aren't active, then we want to make them active by creating their rpg player.
-        		if (rpgPlayer.getPlayerConfig().getIsActive() == false)
+        		if (rpgPlayer.playerConfig.getIsActive() == false)
         			setPlayerStart("Swordsman", player, false);	//Store the player as a new player.
         		
         		piMap.get(player).startTasks();
@@ -286,7 +288,7 @@ public class RpgEntityManager
     	{
     		piMap.get(player).stopTasks();
     		piMap.get(player).getRpgPlayer().updateTimePlayed();
-    		piMap.get(player).getRpgPlayer().dumpCriticalInformation();
+    		piMap.get(player).getRpgPlayer().playerConfig.save();
     		piMap.remove(player);
     	}
     }

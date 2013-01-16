@@ -1,11 +1,16 @@
 ~ FC_Rpg Changelog ~
 
-Version 1.23:
+Version 1.23-1.24:
+
+Small Disclaimer: As with all new features, please bear with any bugs. There are quite a few new features, updates, and bug fixes in this update so please make tickets if anything is wrong. This is one of (AND PROBABLY IS) the biggest (yes, you read that right, biggest) updates so far.
 
 General:
 - A few string upgrades.
 - Added new customizable timer for amount of milliseconds a person has to wait before they can re-enter a dungeon. 5 minutes by default.
 - Updated class view command display a lot.
+- Fixed issue with first time dungeon configs bugging out. (Nobody experienced this, was a 1.22 bug).
+- Perfect birch setting now only applies to rpg worlds.
+- New default dungeon tool is a diamond ore.
 
 Commands:
 - /rpgHelp made back to /rpg by default. /radmin is still /radmin.
@@ -13,7 +18,46 @@ Commands:
 
 Combat:
 - Leveling up now shoots out fireworks. :)
-- Bows can have enchantments.
+- Bows can have enchantments. (again)
+- Added the ability to disable sword knockback.
+- Enchantments will not be dropped from mobs if they are disabled. (arrow knockback, I think punch, and sword knockback now included)
+- Fixed level from /radmin spawn command now applies to non-dungeon monsters as well.
+
+Enchanting:
+- Enchantments are now restricted based on your configured settings (can't get knockback if knockback is disabled, etc.). All fire enchants banned.
+
+Guilds:
+- Fixed being unable to open guilds.
+- No longer using the guild list setting in guilds config. I am now directly getting the list of guilds from the folder. (Java noob, didn't know I could do this till I researched, :D lol)
+- Fixed issue with guilds not properly reassigning leader when a member left.
+- Experience is split between guild members that are within 50 blocks of you now, rather than being global.
+
+Worlds:
+- Can now set the scale x,y,z setting per world.
+- Can also now set a level cap per world in which mobs can't spawn higher than that level. This is a HARD cap, meaning it effects dungeons, level bonuses, everything! Only applies when set higher than 0.
+- Both new settings will automatically be updated in world config. Also old scale setting will be removed from general config.
+
+Treasure:
+- Added in these brand new LOOTCONFIGS that you can create. Basically, you can define the items to drop from monsters and dungeons. If more instances of custom loot are needed, this will be expanded. See help for more info.
+
+Dungeons:
+- Added in the ability to set the level of a dungeon to some static value. This means that monsters that spawn in the dungeon will always be this level.
+- Added new dungeon config setting that will allow you to set the loot setting (from treasure config) that will be monster loot.
+
+Balance:
+- Added new config setting to change loot drops of all monsters.
+
+Warps:
+- Warps have 3 new settings. A class requirement setting. A job level requirement setting. A level minimum before you can enter.
+
+Setup.txt:
+- Updated the lettering in the table of contents to match the actual fields. There were off in a lot of cases.
+- Added in new settings and explanations on how to use them.
+- Made the file look a little bit fancier on headers so they stand out more.
+
+Internal/FC_Suite_Shared:
+- Taking greater advantage of a lot of new and old classes I created to increase code reusability.
+- Heavy optimizations to the way that information is handled.
 
 Version 1.22:
 

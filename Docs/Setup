@@ -11,33 +11,46 @@
     \:\__\        \::/  /                 /:/  /       \::/  /         \:\__\      \::/  /       \:\__\  
      \/__/         \/__/                  \/__/         \/__/           \/__/       \/__/         \/__/  
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Table of Contents:
+* Table of Contents ~ FC_Rpg Setup *
+
 I: Introduction
     a: Command Usage
     b: Configuration General
+    
 II: Getting Started
     a: Configuring Groups.yml
     b: Configuring General.yml
+    c: Configuring Worlds.yml
+    
 III: Intermediate Steps
-    a. Configuring Worlds.yml
-    b. Configuring Faqs.yml
-    c. Configuring Spells.yml
-    d. Configuring Classes.yml
-    e. Configuring Dungeon.yml
-    f. Configuring Treasure.yml
-    g. Configuring Warp.yml
-    f. Configuring Pvp.yml
-    g. Configuring Balance.yml
-    h. Configuring Guilds.yml
+    a. Configuring Faqs.yml
+    b. Configuring Spells.yml
+    c. Configuring Classes.yml
+    d. Configuring Dungeon.yml
+    e. Configuring Treasure.yml
+    f. Configuring Warp.yml
+    g. Configuring Pvp.yml
+    h. Configuring Balance.yml
+    i. Configuring Guilds.yml
+    
 IV: FAQs and Bonus Information
 
-I: Introduction:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
+~*
+	I: Introduction:
+~*
+~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
 
     Welcome to the setup for FC_Rpg. I will be blunt, complete configuration of this plugin WILL take you a long time if you want to use it optimally. Yes, you can run the plugin and everything should work fine but you will NOT be satisfied by how things are set up. Expect to spend a good bit of time setting up the hundreds of settings that FC_Rpg has. However, if you do decide to set up FC_Rpg to the fullest, you will experience a new level of configuration for a plugin that will allow you almost perfect control of every single setting. It's truly a beautiful feeling. The goal of this help document is to provide insight into configuring FC_RPG primarily. Thus, every section refers to explaining how to understand and configure the several configuration files.
     
-a: Command Usage:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~
+	a: Command Usage:
+~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     To begin using FC_Rpg you need to immediately familiarize yourself with the help command, /rpg. /rpg is the most important command as it shows the help for all commands. I intentionally tried to name commands such that they do not override some other major plugins. For example, warp is /w, rather than /warp to prevent conflicts with Essentials warp command. Conversely, the /world command for FC_Rpg conflicts with the /world command for Essentials. So immediately it is in your best interest to disable the world command Essentials by following their instructions. If disabling a command for Essentials is too difficult for you, then, once again I can only stress the amount of difficulty you will probably soon be experiencing!
     
@@ -49,7 +62,11 @@ a: Command Usage:
 	
 	These are the basic commands to get you started. There are several more so feel free to explore them. :)
     
-b: Configuration General
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~
+	b: Configuration General
+~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     This section is to teach you how to handle the overarching format of all my configuration files, so that you can understand my unique data storage techniques, as well as understand my mindset a bit on how everything is stored. I would like to emphasize that if you do not understand something that you please post a comment on the plugin page. If you post about something mentioned on the help pages, I will tell you simply to read the help. Thank you!
     
@@ -61,13 +78,21 @@ b: Configuration General
     
     Disclaimer: This tutorial assumes that the reader is a YAML expert. If you don't know how YAML works please go read some tutorials!
 
-II: Getting Started
+~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
+~*
+	II: Getting Started
+~*
+~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
 
     Alright, it's time to begin configuring the plugin for YOUR needs and how YOU want it. Make sure that you followed the FC general plugin installation general procedure and that you have FC_Suite_Shared installed with FC_Rpg installed. Also make sure that you have no errors on the first run of the two plugins and that configuration files have generated for you in your ~/plugins/FC_Rpg/ directory. If everything went off without a hitch, then you're setup and ready to start configuring. If you received errors and such, you probably need to post a ticket. :)
     
     So now you want to first setup your Groups.yml and General.yml The groups.yml should AUTO-PROPOGATE with values from your default permissions provider. If it didn't, because something with FC_Rpg malfunctioned, then you will have to add your groups by hand. If you simply have no groups with your permissions provider, then you will need to add a single group. Basically you need one default group specified minimum in the groups.yml The next section is a breakdown of how to setup groups.yml
-    
-a: Configuring Groups.yml
+   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~
+	a: Configuring Groups.yml
+~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Groups are a mirror image of the groups in your permissions file. FC_Rpg is NOT a permissions provider and will never conflict with GM, PEX, or anything of that nature. By default when this file is generated, all of the groups recognized by FC_Rpg from your permissions provider will be mirrored in. As well, the groups will be given a random color for the lulz for the display name as well as a jobReq of -1 and timeReq of -1.
 
@@ -85,7 +110,12 @@ Groups:
 
     Order shouldn't matter with optimal setup, but I recommend that you place the least obtainable ranks first followed by the most obtainable ranks last. If you want somebody to never be moved out of a group, set the jobReq and the timeReq for it to -1 each. This will prevent them from ever being kicked out of the group.
 
-b: Configuring General.yml
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~
+	b: Configuring General.yml
+~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     
     Now that you have groups.yml setup, you will want to go into General.yml and set "defaultPrefix: " to whatever your default group is for all players. Congratulations! This is your face major milestone! Now that you have set up the basic permissions it's time to start configuring the main settings for FC_Rpg. Once again go into general.yml and prepare to configure all of the settings.
 
@@ -110,7 +140,6 @@ b: Configuring General.yml
     This is one of my "compressed" lists. Normally Bukkit puts lists on several lines, but I personally feel that took up too much space so I made it so lists are on one line. Put all entries one by one separated by a comma for compressed lists.
 
 - notificationInterval - This determines exactly how often a player will receive an attack, heal, dodge, thorns, etc. notification. This is in milliseconds. Almost all time inputs are either milliseconds or seconds. If you see a lot of zeroes after a default entry, the time is probably in milliseconds.
-- scale - The scale entry is for determining how fast mobs level up the further they move away from the "levelone" setting for a world; we'll see more on that in the world.yml section. - x - This number determines how many blocks you must go in an x direction before mobs increase a level. - z- Same as x but in z direction. - y - This number decides how fast monsters will level as you go further down the y scale. Increasing this number will make mobs level slower, decreasing will make monsters level faster.
 - timedItems - These are items given to all players for every time interval. It's basically free gifts for players! - ids - The id for the item you want to give to players. Disable timed items by setting to 0. - counts - The amount to give of the item that correlates to the block id. - datavalues - The data value for the items. - interval - How often to give out the items.
 - disableEnderPearls - Disable enderpearls if you want.
 - dungeonSelectionToolID - This is the a tool that can be used to select points to help view information for dungeon setup with /dungeon print, (more information later).
@@ -123,8 +152,14 @@ b: Configuring General.yml
 - commandKeyWord - Changing these settings allow you to change any command inside of FC_Rpg. Simply change it's command name in plugin.yml for the command rename to take effect.
 - recordExpRewards - Trade in records for experience! Gold = 100% (garunteed levelup), Green = 50%, Record_4 = 1%, 5 = 5%, 6 = 10%, 7 = 15%, 8 = 20%, 9 = 25%.
 - customChatExclusion - Allows you to disable custom rpg chat when specified phrases appear in the chat format of player messages. Don't change if you don't understand chat formats. Disables custom chat for towny private chat channels by default.
+- levelCap: -1 - Monsters will never spawn above the level specified here. Set to a number from 0 and lower to disable.
+- scale - The scale entry is for determining how fast mobs level up the further they move away from the "levelone" setting for a world. - x - This number determines how many blocks you must go in an x direction before mobs increase a level. - z- Same as x but in z direction. - y - This number decides how fast monsters will level as you go further down the y scale. Increasing this number will make mobs level slower, decreasing will make monsters level faster.
 
-c: Configuring World.yml
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~
+	c: Configuring Worlds.yml
+~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     The worlds section allows you to manage worlds for the FC_Rpg plugin. The main structure is Worlds followed by the world name, followed by settings for the world.
 
@@ -139,11 +174,19 @@ c: Configuring World.yml
 
 Please note that there are commands in-game in the /radmin section section that will help you greatly in setting the spawn and levelOne settings.
 
-III: Intermediate Steps
+~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
+~*
+	III: Intermediate Steps
+~*
+~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
 
     Alright so you have now configured two configs but there are eleven more! Some configs can be entirely ignored if you don't want to use the features that are provided by it. For example, if you don't want FC_Rpg world management, then you are welcome to simply ignore the worlds config entirely. If you don't want to use the warps, ignore the warps config. Same goes for faqs, dungeons, etc. etc. You, the server owner, have to determine what you want enabled for your server and so this section will provide the information for how to set up configs. So enjoy the freethinking that you are allowed to do here and once everything is configured, you're good to go! Good luck!
 
-b. Configuring Faqs.yml
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~
+	a. Configuring Faqs.yml
+~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     The Faqs section allows you to setup useful information for your server that any player can view by typing /faq. This is a very useful feature as it allows servers to setup their help pages easily in the form of easily selectable topics! Simply follow the format of the default faq to help you in setting up a faq. It might also be helpful to use the /faq command on the server to get a feel for how it works.
 
@@ -152,7 +195,11 @@ b. Configuring Faqs.yml
 - faq1 - Faqs can be split into two parts so that you can use two colors. Put the first half of a faq here.
 - faq2 - This is the second part of a faq. If you only want to use one part, the first color, then put in '[empty]' in the matching location for faq1. It is important that your faq1 and faq2 be ordered together if you want faqs to be displayed properly.
 
-c. Configuring Spells.yml
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~
+	b. Configuring Spells.yml
+~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     The spell configuration allows you to create spells to have specific settings as to how you want. Due to the nature of there being so many effect ids, and that they are all utilized in the default generation of the spells config, please refer to a default spells config file to see what each effect id does. That means you should probably make a backup of the default for reference :D. Please note that spells are setup so that you can have fields missing (like attack magnitude doesn't need to be included if you don't want that to be applied to your spell) and it won't mess things up.
 
@@ -172,7 +219,11 @@ c. Configuring Spells.yml
 
 Happy Casting!
 
-d. Configuring Classes.yml
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~
+	c. Configuring Classes.yml
+~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	The class configuration allows you to define a class with the features that you desire. Classes can currently only have up to five spells (will be modified soon in an upcoming version).
 
@@ -194,7 +245,11 @@ restrictionIDs
 - 1 = Requires a bow to cast restricted spells.
 - 2 = Requires a stick to cast restricted spells.
 
-e. Configuring Dungeon.yml
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~
+	d. Configuring Dungeon.yml
+~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	Dungeons are probably the most interesting and complicated feature to setup. I can honestly only advise that you read this section extremely carefully and possibly multiple times. I will have a video specifically for dungeons only tomorrow added. I can't make one now as it's 3 am.
 
@@ -252,10 +307,16 @@ Dungeons:
         '0': 100
       mobList:
         '0': ZOMBIE,PIGZOMBIE,SKELETON,SPIDER <- See -> http://jd.bukkit.org/apidocs/index.html, find EntityType on the lefthand side and you will see a list of acceptable entities to spawn. Don't add spaces.
-
+	staticLevel: -1 <- Mobs will always spawn at the level specified here! Set to 0 or lower to disable.
+	lootList: default <- Set the loot file that will determine monster drops. (See Section III.e. for information on loot files)
+	
 	Simply count up to add more spawn ranges and make sure you add in some solid numbers. 100 spawn chance = 100% chance to spawn there. Spawn chance numbers don't need to add up to 100 so you can do 33, 33, 33 for 3 platforms if you would like.
 
-f. Configuring Treasure.yml
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~
+	e. Configuring Treasure.yml
+~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	The treasure config handles loot from dungeon chests as well as mob drops. In a future version all item drops will be configurable. Please note that all of the chance variables should be read as X.XX%. This means, like 100.00% = 10000. All of the chance percents are out of 100. If you want a 35.3% chance of an item dropping, you MUST enter 3530. The key is adding the zero at the end. Zero's to the right are important but those on the far left aren't.
 
@@ -265,8 +326,16 @@ f. Configuring Treasure.yml
 -  enchantLevelFourChance -  This determines the chance for rolling a stronger enchantment for enchants that have four maximum levels.
 -  enchantLevelThreeChance - I think you can figure this out :D.
 -  enchantLevelTwoChance - :D
+-  lootList:
+    default: 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83
 
-g. Configuring Warps.yml
+The loot list setting allows you to specify a list of item field numbers that correlate with the items listed in the Items.yml file. The default list will always regenerate if deleted and have a list of all items from the Items.yml file. So basically if you want dungeon monsters to only drop diamond shovels, you need to go into Items.yml, find the number that diamond shovel is at, and put that as a new entry under lootlist. Then you would put the name of the new lootlist, lets say you called it shovel, into the lootlist setting of another config as needed. A WARNING THOUGH! If you create loot lists that don't contain certain items you WILL crash your server. For example, if you create a lootlist called low-end monster loot that only has items with drop levels from 1-20, and you assign that loot list to a dungeon with a static level of 80, then no item will ever be found and your server will crash when the dungeon looks for loot. BE EXTREMELY CAREFUL with this setting. This setting has the HIGHEST potential of crashing your server.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~
+	f. Configuring Warps.yml
+~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The Warp section allows you to list out warps you want on your server. The following is the format for a warp sign: http://dev.bukkit.org/thumbman/images/47/305/600x434/2012-09-23_01.33.22.png.-m1.png. Note that the brackets around the warp name are optional.
 
@@ -280,8 +349,15 @@ By default your configuration file will create warps to all of your worlds. This
 - admin - Specify if only admins can use the warp or not.
 - donator - Specify if only donators can use the warp or not.
 - destination - Specify the location the warp will take you too.
+- classRequirement: -1 - Set a class that a player must be to use a warp. This corresponds to the field number of classes in the Classes.yml file. By default 0 = Swordsman, so if you want only swordsman to use a warp, set to 0.
+- jobRankMinimum: -1 - Set a job rank minimum for players to use a warp. Set to 0 or lower to disable.
+- levelMinimum: -1 - - Set a rpg class level minimum for players to use a warp. Set to 0 or lower to disable.
 
-f. Configuring Pvp.yml
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~
+	g. Configuring Pvp.yml
+~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The pvp section lets you run a VERY minimalist pvp arena. If you want an extreme pvp arena, get something else. This is just a very basic one. I am going to expand on the features of this a little bit in the future. Right now exits are the pvp worlds spawn by default.
 
@@ -293,7 +369,7 @@ The pvp section lets you run a VERY minimalist pvp arena. If you want an extreme
 
 I know there are teams, but it's actually free for all... I'll make the spawn points a list in the future. The pvp arena is the most underdeveloped feature currently in my opinion. It was never a big focus of the plugin but I wanted something simple for my server without a massive plugin.
 
-g. Configuring Balance.yml
+h. Configuring Balance.yml
 
 Welp, it was asked that players could configure the balance of the plugin, so here you go! Plugin balance. Customize the effectiveness of a leather chestplate, or a diamondsword, make regen stronger. Anything is entirely customizable with the balance config.
 
@@ -347,6 +423,7 @@ Configuration settings:
 	spawnWithEnchantsChance: 40 <- Chance mob items will be enchanted.
 	cashMultiplier: 0.8 <- Final cash amount given by monsters will be multiplied by this.
 	expMultiplier: 1.0 <- Final experience amount given by monsters will be multiplied by this.
+	lootList: default <- Set the loot file that will determine monster drops. (See Section III.e. for information on loot files)
 - sword:
 	multiplier: <- Change the strength of swords based on the type.
 		wood: 1.25 <- Note that you HAVE to add the 1 or you will start dealing with losing damage for decimals.
@@ -420,11 +497,22 @@ Configuration settings:
     counterAttack: 10 <- The percent chance to randomly counter-attack (not a decimal)
     strongerParry: 0.75 <- The damage multiplier for when people parry (damage * strongerParry).
     battleLust: 0.4 <- Damage multiplier based on missing health lost. Used on berserker class.
-	
-h. Configuring Guilds.yml
 
-No need to configure anything in this file currently. It's best if you don't ever alter this file currently.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~
+	i. Configuring Guilds.yml
+~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-IV: FAQs and Bonus Information
+The guilds setting only has one setting. This is the cost to create a guild.
 
-I have created this section to give a little bit of advice about random tidbits that will hopefully HELP you use my plugin even futher. These are 
+- creationCost: 10.0 <- Set to any amount that you want players to have to pay to create a guild.
+
+~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
+~*
+	IV: FAQs and Bonus Information
+~*
+~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
+
+I have created this section to give a little bit of advice about random tidbits that will hopefully HELP you use my plugin even futher. Currently there aren't really any that I can give, so this section remains empty. However, I will fill it in later when information that is quite frequently requested appears.
+

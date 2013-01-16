@@ -2,11 +2,11 @@
 
 ^Todo List^
 
-General:
+- Replace berserker spell with something other than teleport. Need ideas on this :/ *sigh*.
+- Add warloc and necromancer.
+- Add in commands to handle some of the new features after they have been tested as completely bug free.
 
-- Dungeons have "static level" field and "lootconfig" field.
-- Class requirement / Job Rank minimum / Minimum level requirement for warps.
-- X,Y,Z scaling per world.
+Long Term Todo aka "Stuff that MIGHT get done, maybe, if I'm in a good mood, maybe":
 
 Guilds:
 - Guild mods
@@ -33,36 +33,24 @@ Guilds:
 		
 		- 200000000 = 1% mana regen for guild members.
 
-- Experience between guild members is split between nearby party members. Not exclusive to leader.
-
-Long Term Todo (Maybe):
 - Axes as increment for damage, 30, 60, 90, 120 attack req.
 
 ^Potential CraftBukkit Bugs^
 - Can't attack with weakness.
 - Skeletons don't change yaw when rotating.
 
-Data Upgrade Plan:
+- Fast Method Stripper
+Replace: (public)(.+?)(get)(.+?)( \{ return)(.+?)(; })
+With: \3\4;
 
-A new way to handle data retrieval, schema.
+- Fast Method form updated:
+Replace: (\.get)(.+?)(S)
+With: \1\Static\2
 
-* Data Storage.
 
-Data can be either static or dynamic.
 
-- Static Data.
 
-Data we expect to be static, we will load into hashmaps. All fields for a program will be added to List<String> fieldList = new ArrayList<Field>();
 
-HashMap examples: Map<String, Object> staticObjectMap = new HashMapMap<String, Object>();
-HashMap examples: Map<String, Object> staticLocationMap = new HashMapMap<String, Object>();
 
-- Dynamic Data
 
-Data that will be dynamic, we will load directly into memory. Any time changes are made to the data, the information will be changed in memory. Every interval of time, the data will be auto-saved back into the files.
-
-For MySQL, we can still perform the same logic.
-
-* Data Retreival
-
-We want to always make sure that the variable exists first. For static data, if the value doesn't exist, then we will create a default for it. For dynamic data, if there are no entries, we want to return null.
+	 

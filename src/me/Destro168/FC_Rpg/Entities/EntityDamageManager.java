@@ -60,7 +60,7 @@ public class EntityDamageManager
 		{
 			Random rand = new Random();
 			
-			if (rand.nextInt(100) < rpgDefender.getPlayerConfig().getStatusMagnitude(EffectIDs.DODGE))
+			if (rand.nextInt(100) < rpgDefender.playerConfig.getStatusMagnitude(EffectIDs.DODGE))
 			{
 				rpgDefender.attemptDamageAvoidNotification(false);
 				return;
@@ -104,7 +104,7 @@ public class EntityDamageManager
 		// Deal thorns damage before anything is calculated.
 		if (rpgDefender.getStatusActiveRpgPlayer(EffectIDs.THORNS))
 		{
-			double thornsDamage = damage * rpgDefender.getPlayerConfig().getStatusMagnitude(EffectIDs.THORNS);
+			double thornsDamage = damage * rpgDefender.playerConfig.getStatusMagnitude(EffectIDs.THORNS);
 			
 			// Attempt a dodge notification
 			rpgDefender.attemptThornsNotification(thornsDamage);
@@ -130,7 +130,7 @@ public class EntityDamageManager
 		if (playerDefender.isBlocking() == true)
 		{
 			// Variable Declaration.
-			RpgClass rpgClass = rpgDefender.getPlayerConfig().getRpgClass();
+			RpgClass rpgClass = rpgDefender.playerConfig.getRpgClass();
 			
 			if (rpgClass != null)
 			{
@@ -147,7 +147,7 @@ public class EntityDamageManager
 		if (rpgDefender.getStatusActiveRpgPlayer(EffectIDs.TAUNT) == true)
 		{
 			// Apply taunt damage reduction.
-			damage = damage * rpgDefender.getPlayerConfig().getStatusMagnitude(EffectIDs.TAUNT);
+			damage = damage * rpgDefender.playerConfig.getStatusMagnitude(EffectIDs.TAUNT);
 		}
 
 		// Deal damage greater than 0.
@@ -163,12 +163,12 @@ public class EntityDamageManager
 		if (rpgAttacker != null)
 		{
 			handle_Postoffense_Buffs(rpgAttacker, playerDefender, damage);
-			rpgAttacker.attemptAttackNotification(rpgDefender.getPlayer().getName(), rpgDefender.getPlayerConfig().getClassLevel(), rpgDefender.getCurHealth(), rpgDefender.getMaxHealth(), damage);
+			rpgAttacker.attemptAttackNotification(rpgDefender.getPlayer().getName(), rpgDefender.playerConfig.getClassLevel(), rpgDefender.playerConfig.curHealth, rpgDefender.playerConfig.maxHealth, damage);
 			applyKnockback(rpgAttacker.getPlayer(), playerDefender, damageType);
 		}
 		
 		// Set the players health based current health out of maximum health.
-		hc = new HealthConverter(rpgDefender.getMaxHealth(), rpgDefender.getCurHealth());
+		hc = new HealthConverter(rpgDefender.playerConfig.maxHealth, rpgDefender.playerConfig.curHealth);
 
 		playerDefender.setHealth(hc.getPlayerHearts());
 
@@ -176,7 +176,7 @@ public class EntityDamageManager
 		increaseArmorDurabilities(playerDefender);
 
 		// If the players has 0 health, kill minecraft body and set to dead.
-		if (rpgDefender.getCurHealth() < 1)
+		if (rpgDefender.playerConfig.curHealth < 1)
 		{
 			// Damage the player defender.
 			playerDefender.damage(10000);
@@ -188,7 +188,7 @@ public class EntityDamageManager
 		{
 			if (rpgAttacker != null)
 			{
-				rpgDefender.attemptDefenseNotification(damage, rpgAttacker.getPlayer().getName(), rpgAttacker.getPlayerConfig().getClassLevel());
+				rpgDefender.attemptDefenseNotification(damage, rpgAttacker.getPlayer().getName(), rpgAttacker.playerConfig.getClassLevel());
 				handle_Defense_Passives(damage, rpgDefender, rpgAttacker.getPlayer());
 			}
 			else if (rpgMobAttacker != null)
@@ -350,25 +350,22 @@ public class EntityDamageManager
 	{
 		ItemStack handItem = attacker.getItemInHand();
 		float knockback = 0;
-		boolean allowArrowKnockback = FC_Rpg.balanceConfig.getArrowKnockback();
 		
-		//Increase knockback based on damage type.
-		if (handItem.containsEnchantment(Enchantment.KNOCKBACK))
-			knockback += handItem.getEnchantmentLevel(Enchantment.KNOCKBACK);
-		
-		// If arrow knockback is on, then...
-		if (allowArrowKnockback == true)
+		// If arrow knockback is on, and the damage is arrow type, then...
+		if (FC_Rpg.balanceConfig.getArrowKnockback() == true && damageType == 1)
 		{
-			// If the damage type was arrow, then...
-			if (damageType == 1)
-			{
-				//Add knockback.
-				knockback += 1;
-				
-				//Add in additional knockback based on the punch enchants strength.
-				if (handItem.containsEnchantment(Enchantment.ARROW_KNOCKBACK))
-					knockback += handItem.getEnchantmentLevel(Enchantment.ARROW_KNOCKBACK);
-			}
+			//Add knockback.
+			knockback += 1;
+			
+			//Add in additional knockback based on the punch enchants strength.
+			if (handItem.containsEnchantment(Enchantment.ARROW_KNOCKBACK))
+				knockback += handItem.getEnchantmentLevel(Enchantment.ARROW_KNOCKBACK);
+		}
+		else if (FC_Rpg.balanceConfig.getSwordKnockback())
+		{
+			//Increase knockback based on damage type.
+			if (handItem.containsEnchantment(Enchantment.KNOCKBACK))
+				knockback += handItem.getEnchantmentLevel(Enchantment.KNOCKBACK);
 		}
 		
 		// If there is a knockback the we apply it.
@@ -383,7 +380,7 @@ public class EntityDamageManager
 		Player playerAttacker = rpgAttacker.getPlayer();
 		LivingEntity entityDefender = rpgMobDefender.getEntity();
 		String guild = null;
-		int fireUses = rpgAttacker.getPlayerConfig().getStatusUses(EffectIDs.FIRE_ARROW);
+		int fireUses = rpgAttacker.playerConfig.getStatusUses(EffectIDs.FIRE_ARROW);
 		int partyMemberCount = 1;
 		
 		// Make sure that the mob wasn't attacked too recently.
@@ -406,7 +403,7 @@ public class EntityDamageManager
 				((LivingEntity) entityDefender).setFireTicks(20); // set the mob on fire!
 				
 				// Remove a fire arrow use.
-				rpgAttacker.getPlayerConfig().setStatusUses(EffectIDs.FIRE_ARROW, fireUses - 1);
+				rpgAttacker.playerConfig.setStatusUses(EffectIDs.FIRE_ARROW, fireUses - 1);
 				
 				// Then return
 				return;
@@ -420,7 +417,7 @@ public class EntityDamageManager
 		if (rpgAttacker.getStatusActiveRpgPlayer(EffectIDs.ATTACK))
 		{
 			// Increase attack damage by its magnitude.
-			damage = damage * rpgAttacker.getPlayerConfig().getStatusMagnitude(EffectIDs.ATTACK);
+			damage = damage * rpgAttacker.playerConfig.getStatusMagnitude(EffectIDs.ATTACK);
 		}
 		
 		if (damageType == 0)
@@ -499,7 +496,7 @@ public class EntityDamageManager
 			if (rpgMobDefender.getMobAggressionCheck())
 			{
 				// Give the attacker a mob kill
-				rpgAttacker.getPlayerConfig().setLifetimeMobKills(rpgAttacker.getPlayerConfig().getLifetimeMobKills() + 1);
+				rpgAttacker.playerConfig.setLifetimeMobKills(rpgAttacker.playerConfig.getLifetimeMobKills() + 1);
 				
 				// If the player is in a party, then...
 				if (guild != null)
@@ -514,7 +511,7 @@ public class EntityDamageManager
 					attemptGiveBattleWinnings(guild, playerAttacker, rpgMobDefender); // Else if not in a party, give loot to the single player.
 				
 				// Don't drop loot if the monster level is too high/low.
-				if ((rpgMobDefender.getLevel() - rpgAttacker.getPlayerConfig().getClassLevel()) > FC_Rpg.balanceConfig.getPowerLevelPrevention() * -1)
+				if ((rpgMobDefender.getLevel() - rpgAttacker.playerConfig.getClassLevel()) > FC_Rpg.balanceConfig.getPowerLevelPrevention() * -1)
 					rpgMobDefender.handleHostileMobDrops(entityDefender.getLocation()); // Drop rpg items for hostile mobs.
 			}
 			else
@@ -534,8 +531,7 @@ public class EntityDamageManager
 	
 	private void attemptGiveBattleWinnings(String guild, Player playerLooter, RpgMonster rpgMobDefender)
 	{
-		List<Player> recipients = new ArrayList<Player>();
-		RpgPlayer rpgLooter;
+		List<RpgPlayer> recipients = new ArrayList<RpgPlayer>();
 		double cash;
 		double exp;
 		double guildBonus = 1;
@@ -548,23 +544,20 @@ public class EntityDamageManager
 		
 		if (guild != null)
 		{
-			recipients = FC_Rpg.guildConfig.getOnlineGuildPlayerList(guild);
-			guildBonus = FC_Rpg.guildConfig.getGuildBonus(guild);
+			recipients = FC_Rpg.rpgEntityManager.getNearbyPartiedRpgPlayers(playerLooter, 50);
+			guildBonus = FC_Rpg.guildConfig.getGuildBonus(recipients.size());
 		}
 		else
-			recipients.add(playerLooter);
+			recipients.add(FC_Rpg.rpgEntityManager.getRpgPlayer(playerLooter));
 		
-		for (Player p : recipients)
+		for (RpgPlayer rpgLooter : recipients)
 		{
-			//Get new rpgLooter.
-			rpgLooter = FC_Rpg.rpgEntityManager.getRpgPlayer(p);
-			
 			//Mob level - player level : Positive = Mob stronger, negative = mob weaker.
-			levelDifference = rpgMobDefender.getLevel() - rpgLooter.getPlayerConfig().getClassLevel();
+			levelDifference = rpgMobDefender.getLevel() - rpgLooter.playerConfig.getClassLevel();
 			
 			if (checkPowerLeveling && levelDifference < powerLevelPrevention * -1)
 			{
-				MessageLib msgLib = new MessageLib(p);
+				MessageLib msgLib = new MessageLib(rpgLooter.getPlayer());
 				msgLib.standardError("You annhilated the monster so brutally most loot was destroyed.");
 			}
 			else if (checkPowerLeveling && levelDifference > powerLevelPrevention)
@@ -585,7 +578,7 @@ public class EntityDamageManager
 				exp = rpgMobDefender.getLevel() * FC_Rpg.balanceConfig.getMobExpMultiplier() * FC_Rpg.eventExpMultiplier;
 				
 				// Calculate how much loot and experience to aquire by donator
-				if (rpgLooter.getPlayerConfig().isDonator())
+				if (rpgLooter.playerConfig.isDonator())
 				{
 					cash = cash * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
 					exp = exp * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
@@ -615,8 +608,8 @@ public class EntityDamageManager
 					exp = exp * guildBonus;
 				}
 				
-				FC_Rpg.economy.depositPlayer(p.getName(),cash);
-				FC_Rpg.rpgEntityManager.getRpgPlayer(p).addClassExperience(exp, true);
+				FC_Rpg.economy.depositPlayer(rpgLooter.getPlayer().getName(),cash);
+				FC_Rpg.rpgEntityManager.getRpgPlayer(rpgLooter.getPlayer()).addClassExperience(exp, true);
 				
 				// Send a message to the player showing experience and loot gains.
 				rpgLooter.attemptMonsterDeathNotification(rpgMobDefender.getLevel(), exp, cash);
@@ -629,7 +622,7 @@ public class EntityDamageManager
 	{
 		// Variable Declarations
 		Random rand = new Random();
-		RpgClass rpgClass = rpgDefender.getPlayerConfig().getRpgClass();
+		RpgClass rpgClass = rpgDefender.playerConfig.getRpgClass();
 		
 		if (rpgClass != null)
 		{
@@ -645,7 +638,7 @@ public class EntityDamageManager
 	private double handle_Offense_Passives(double damage, RpgPlayer rpgAttacker, LivingEntity entityDefender)
 	{
 		// Variable Declaration.
-		RpgClass rpgClass = rpgAttacker.getPlayerConfig().getRpgClass();
+		RpgClass rpgClass = rpgAttacker.playerConfig.getRpgClass();
 		
 		if (rpgClass != null)
 		{
@@ -663,7 +656,7 @@ public class EntityDamageManager
 	{
 		if (caster.getStatusActiveRpgPlayer(EffectIDs.LIFESTEAL))
 		{
-			double healAmount = damage * caster.getPlayerConfig().getStatusMagnitude(EffectIDs.LIFESTEAL);
+			double healAmount = damage * caster.playerConfig.getStatusMagnitude(EffectIDs.LIFESTEAL);
 			
 			caster.attemptHealSelfNotification(healAmount);
 			caster.healHealth(healAmount);

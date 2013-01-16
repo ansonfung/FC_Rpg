@@ -61,6 +61,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -198,17 +199,18 @@ public class FC_Rpg extends JavaPlugin
 		pvp = new PvpEvent();
 		spellConfig = new SpellConfig();
 		classConfig = new ClassConfig();
+		itemConfig = new ItemConfig();
+		handleRpgItemList();	//Have to do item config and rpgItem list before treasure config.
 		treasureConfig = new TreasureConfig();
 		warpConfig = new WarpConfig();
 		balanceConfig = new BalanceConfig();
 		dungeonConfig = new DungeonConfig();
-		itemConfig = new ItemConfig();
 		
 		// Set up the economy.
 		setupEconomy();
 		
 		// Initialize dungeons.
-		dungeonConfig.initializeDungeons();
+		reloadDungeons();
 		
 		// Register Listeners
 		getServer().getPluginManager().registerEvents(new FishingListener(), plugin);
@@ -233,6 +235,7 @@ public class FC_Rpg extends JavaPlugin
 		getServer().getPluginManager().registerEvents(new ArrowFireListener(), plugin);
 		getServer().getPluginManager().registerEvents(new TeleportListener(), plugin);
 		getServer().getPluginManager().registerEvents(new PlayerTeleportListener(), plugin);
+		getServer().getPluginManager().registerEvents(new EnchantEventListener(), plugin);
 		
 		// Register Commands
 		commandCE = new CommandGod();
@@ -279,8 +282,6 @@ public class FC_Rpg extends JavaPlugin
 		
 		msm = new MobSpawnManager();
 		
-		handleRpgItemList();
-		
 		if (FC_Rpg.generalConfig.getRecordExpRewards())
 			handleRecordExpMap();
 		
@@ -309,6 +310,33 @@ public class FC_Rpg extends JavaPlugin
 		recordExpBonuses.put(Material.GOLD_RECORD, 1D);
 	}
 	
+	public static void reloadDungeons()
+	{
+		// Variable Declarations/Initializations
+		int count = 0;
+		trueDungeonNumbers = new HashMap<Integer, Integer>();
+		
+		// Attempt to store all dungeon names.
+		for (int i = 0; i < 1000; i++)
+		{
+			if (dungeonConfig.getNameIsSet(i) == true)
+			{
+				trueDungeonNumbers.put(i, count);
+				count++;
+			}
+		}
+		
+		// Store number of dungeons.
+		dungeonCount = trueDungeonNumbers.size();
+
+		// Create dungeonEvents based on size of dungeons.
+		dungeonEventArray = new DungeonEvent[FC_Rpg.dungeonCount];
+
+		// Initate the dungeons.
+		for (int i = 0; i < FC_Rpg.dungeonCount; i++)
+			dungeonEventArray[i] = new DungeonEvent(i);
+	}
+	
 	// Listen for block growth
 	public class CreativeControlListeners implements Listener
 	{
@@ -318,7 +346,11 @@ public class FC_Rpg extends JavaPlugin
 			// If perfect birch is disabled return.
 			if (generalConfig.getPerfectBirch() == false)
 				return;
-
+			
+			// Multi-world check for perfrect birch.
+			if (!FC_Rpg.worldConfig.getIsRpg(event.getLocation().getWorld().getName()))
+				return;
+			
 			// For birch trees
 			if (event.getSpecies() == TreeType.BIRCH)
 			{
@@ -695,7 +727,7 @@ public class FC_Rpg extends JavaPlugin
 				event.setCancelled(true);
 				
 				// Set the magnitude to heal by the players max health.
-				magnitudeModifier = rpgEntityManager.getRpgPlayer(player).getMaxHealth();
+				magnitudeModifier = rpgEntityManager.getRpgPlayer(player).playerConfig.maxHealth;
 				
 				// Heal the player different amounts for different things.
 				if (event.getRegainReason() == RegainReason.EATING)
@@ -723,7 +755,7 @@ public class FC_Rpg extends JavaPlugin
 				rpgEntityManager.getRpgPlayer(player).healHealth(magnitudeModifier);
 				
 				// Update health
-				hc = new HealthConverter(rpgEntityManager.getRpgPlayer(player).getMaxHealth(), rpgEntityManager.getRpgPlayer(player).getCurHealth());
+				hc = new HealthConverter(rpgEntityManager.getRpgPlayer(player).playerConfig.maxHealth, rpgEntityManager.getRpgPlayer(player).playerConfig.curHealth);
 				
 				player.setHealth(hc.getPlayerHearts());
 			}
@@ -807,10 +839,10 @@ public class FC_Rpg extends JavaPlugin
 			if (chatFormat.equalsIgnoreCase(""))
 				return;
 			
-			chatFormat = chatFormat.replaceAll("%time%", timeStamp.format(now));
+			chatFormat = chatFormat.replaceAll("%time%", timeStamp.format(now.getTime()));
 			chatFormat = chatFormat.replaceAll("%prefix%", rpgPlayer.updatePrefix());
 			
-			String name = rpgPlayer.getPlayerConfig().getName();
+			String name = rpgPlayer.playerConfig.getName();
 			
 			Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
 			
@@ -824,7 +856,7 @@ public class FC_Rpg extends JavaPlugin
 			
 			chatFormat = chatFormat.replaceAll("%name%", name);
 			chatFormat = chatFormat.replaceAll("%chat%", "%2\\$s");
-			chatFormat = chatFormat.replaceAll("%level%", rpgPlayer.getPlayerConfig().getClassLevel() + "");
+			chatFormat = chatFormat.replaceAll("%level%", rpgPlayer.playerConfig.getClassLevel() + "");
 			
 			event.setFormat(FC_Rpg.cl.parse(chatFormat));
 		}
@@ -1036,17 +1068,17 @@ public class FC_Rpg extends JavaPlugin
 			RpgPlayer rpgPlayer = FC_Rpg.rpgEntityManager.getRpgPlayer((Player) event.getEntity());
 			
 			// If the player has a class with the faster arrows passive, then give faster arrows.
-			if (rpgPlayer.getPlayerConfig().getRpgClass() != null)
+			if (rpgPlayer.playerConfig.getRpgClass() != null)
 			{
-				if (rpgPlayer.getPlayerConfig().getRpgClass().getPassiveID() == BalanceConfig.passive_ScalingArrows)
+				if (rpgPlayer.playerConfig.getRpgClass().getPassiveID() == BalanceConfig.passive_ScalingArrows)
 				{
-					speed = arrow.getVelocity().multiply((rpgPlayer.getPlayerConfig().getClassLevel() / FC_Rpg.balanceConfig.getPassivesScalingArrow()) + 1);
+					speed = arrow.getVelocity().multiply((rpgPlayer.playerConfig.getClassLevel() / FC_Rpg.balanceConfig.getPassivesScalingArrow()) + 1);
 					arrow.setVelocity(speed);
 				}
 			}
 			
 			// If auto-cast is enabled.
-			if (rpgPlayer.getPlayerConfig().getAutoCast() == true)
+			if (rpgPlayer.playerConfig.getAutoCast() == true)
 				rpgPlayer.prepareSpell(false); // Prepare the spell.
 		}
 	}
@@ -1088,6 +1120,46 @@ public class FC_Rpg extends JavaPlugin
 				FC_Rpg.msm.endMobSpawns(p);
 			else
 				FC_Rpg.msm.beginMobSpawns(p);
+		}
+	}
+	
+	public class EnchantEventListener implements Listener
+	{
+		@EventHandler
+		public void onEnchantItem(EnchantItemEvent event)
+		{
+			if (!FC_Rpg.worldConfig.getIsRpgWorld(event.getEnchantBlock().getWorld().getName()))
+				return;
+			
+			Map<Enchantment, Integer> enchantMap = event.getEnchantsToAdd();
+			
+			//Ban all fire enchants.
+			if (enchantMap.containsKey(Enchantment.FIRE_ASPECT))
+				enchantMap.remove(Enchantment.FIRE_ASPECT);
+			
+			if (enchantMap.containsKey(Enchantment.ARROW_FIRE))
+				enchantMap.remove(Enchantment.ARROW_FIRE);
+			
+			// Remove arrow knockback if blocked.
+			if (!FC_Rpg.balanceConfig.getArrowKnockback())
+			{
+				if (enchantMap.containsKey(Enchantment.ARROW_KNOCKBACK))
+					enchantMap.remove(Enchantment.ARROW_KNOCKBACK);
+			}
+			
+			// Remove sword knockback if blocked.
+			if (!FC_Rpg.balanceConfig.getSwordKnockback())
+			{
+				if (enchantMap.containsKey(Enchantment.KNOCKBACK))
+					enchantMap.remove(Enchantment.KNOCKBACK);
+			}
+			
+			// Remove looting if blocked.
+			if (!FC_Rpg.balanceConfig.getDefaultItemDrops())
+			{
+				if (enchantMap.containsKey(Enchantment.LOOT_BONUS_MOBS))
+					enchantMap.remove(Enchantment.LOOT_BONUS_MOBS);
+			}
 		}
 	}
 	
@@ -1134,3 +1206,16 @@ public class FC_Rpg extends JavaPlugin
 		return (economy != null);
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

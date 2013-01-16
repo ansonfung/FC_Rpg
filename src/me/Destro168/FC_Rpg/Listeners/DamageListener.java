@@ -123,7 +123,7 @@ public class DamageListener implements Listener
 				Player player = (Player) event.getEntity();
 				
 				// Prevent damage done to already dead players
-				if (FC_Rpg.rpgEntityManager.getRpgPlayer(player).getPlayerConfig().getIsActive() == true)
+				if (FC_Rpg.rpgEntityManager.getRpgPlayer(player).playerConfig.getIsActive() == true)
 				{
 					if (FC_Rpg.rpgEntityManager.getRpgPlayer(player).getIsAlive() == false)
 						return;
@@ -252,7 +252,7 @@ public class DamageListener implements Listener
 			// We handle spells on non-fireball player attacks.
 			if (damageType != 2)
 			{
-				if (rpgAttacker.getPlayerConfig().getAutoCast() == true)
+				if (rpgAttacker.playerConfig.getAutoCast() == true)
 					rpgAttacker.prepareSpell(false);
 				
 				if (rpgMobDefender != null)
@@ -401,7 +401,7 @@ public class DamageListener implements Listener
 				{
 					// Variable Initializations
 					rpgAttacker = rpgPlayer;
-					spellBook = rpgAttacker.getPlayerConfig().getRpgClass().getSpellBook();
+					spellBook = rpgAttacker.playerConfig.getRpgClass().getSpellBook();
 					damageType = 2;
 					
 					for (int i = 0; i < spellBook.size(); i++)
@@ -409,7 +409,7 @@ public class DamageListener implements Listener
 						if (spellBook.get(i).getEffectID() == EffectIDs.FIREBALL)
 						{
 							SpellCaster sc = new SpellCaster();
-							damage = sc.updatefinalSpellMagnitude(rpgAttacker, spellBook.get(i), (rpgAttacker.getPlayerConfig().getSpellLevels().get(i) - 1));
+							damage = sc.updatefinalSpellMagnitude(rpgAttacker, spellBook.get(i), (rpgAttacker.playerConfig.getSpellLevels().get(i) - 1));
 							break;
 						}
 					}
@@ -444,7 +444,7 @@ public class DamageListener implements Listener
 				rpgAttacker = FC_Rpg.rpgEntityManager.getRpgPlayer(playerAttacker);
 
 				// Set damage of arrows.
-				damage = rpgAttacker.getPlayerConfig().getAttack() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeAttack();
+				damage = rpgAttacker.playerConfig.getAttack() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeAttack();
 			}
 			else
 			{
@@ -522,7 +522,7 @@ public class DamageListener implements Listener
 		if (rpgAttacker != null)
 		{
 			// If disabled cancel attack
-			if (rpgAttacker.getStatusActiveEntity(rpgAttacker.getPlayerConfig().getStatusDuration(EffectIDs.DISABLED)))
+			if (rpgAttacker.getStatusActiveEntity(rpgAttacker.playerConfig.getStatusDuration(EffectIDs.DISABLED)))
 			{
 				cancelRpgDamage = true;
 				return 0;

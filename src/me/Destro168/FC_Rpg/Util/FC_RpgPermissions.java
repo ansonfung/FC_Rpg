@@ -9,8 +9,6 @@ public class FC_RpgPermissions extends PermissionManager
 	public FC_RpgPermissions(Player player_) 
 	{
 		super(player_);
-		
-		setupPermissions();
 	}
 	
 	public FC_RpgPermissions(boolean isConsole_) 

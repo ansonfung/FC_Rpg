@@ -43,15 +43,15 @@ public class SpellConfig extends ConfigGod
 	public int getEffectID(int i) { return fcw.getInt(prefix + i + ".effectID"); }
 	public String getName(int i) { return fcw.getString(prefix + i + ".name"); }
 	public String getDescription(int i) { return fcw.getString(prefix + i + ".description"); }
-	public List<Double> getManaCost(int i) { return converter.getDoubleListFromString(fcw.getString(prefix + i + ".manaCost")); }
+	public List<Double> getManaCost(int i) { return fcw.getCustomDoubleList(prefix + i + ".manaCost"); }
 	
-	public List<Integer> getDuration(int i) { try { return converter.getIntegerListFromString(fcw.getString(prefix + i + ".duration")); } catch (NullPointerException e) { return null; } }
-	public List<Double> getConstantMagnitude(int i) { try { return converter.getDoubleListFromString(fcw.getString(prefix + i + ".constantMagnitude")); } catch (NullPointerException e) { return null; } }
-	public List<Double> getAttackMagnitude(int i) { try { return converter.getDoubleListFromString(fcw.getString(prefix + i + ".attackMagnitude")); } catch (NullPointerException e) { return null; } }
-	public List<Double> getMagicMagnitude(int i) { try { return converter.getDoubleListFromString(fcw.getString(prefix + i + ".magicMagnitude")); } catch (NullPointerException e) { return null; } }
-	public List<Double> getIntelligenceMagnitude(int i) { try { return converter.getDoubleListFromString(fcw.getString(prefix + i + ".intelligenceMagnitude")); } catch (NullPointerException e) { return null; } }
-	public List<Double> getConstitutionMagnitude(int i) { try { return converter.getDoubleListFromString(fcw.getString(prefix + i + ".constitutionMagnitude")); } catch (NullPointerException e) { return null; } }
-	public List<Integer> getRadius(int i) { try { return converter.getIntegerListFromString(fcw.getString(prefix + i + ".radius")); } catch (NullPointerException e) { return null; } }
+	public List<Integer> getDuration(int i) { try { return fcw.getCustomIntegerList(prefix + i + ".duration"); } catch (NullPointerException e) { return null; } }
+	public List<Double> getConstantMagnitude(int i) { try { return fcw.getCustomDoubleList(prefix + i + ".constantMagnitude"); } catch (NullPointerException e) { return null; } }
+	public List<Double> getAttackMagnitude(int i) { try { return fcw.getCustomDoubleList(prefix + i + ".attackMagnitude"); } catch (NullPointerException e) { return null; } }
+	public List<Double> getMagicMagnitude(int i) { try { return fcw.getCustomDoubleList(prefix + i + ".magicMagnitude"); } catch (NullPointerException e) { return null; } }
+	public List<Double> getIntelligenceMagnitude(int i) { try { return fcw.getCustomDoubleList(prefix + i + ".intelligenceMagnitude"); } catch (NullPointerException e) { return null; } }
+	public List<Double> getConstitutionMagnitude(int i) { try { return fcw.getCustomDoubleList(prefix + i + ".constitutionMagnitude"); } catch (NullPointerException e) { return null; } }
+	public List<Integer> getRadius(int i) { try { return fcw.getCustomIntegerList(prefix + i + ".radius"); } catch (NullPointerException e) { return null; } }
 	
 	public boolean getTargetParty(int i) { return fcw.getBoolean(prefix + i + ".targetParty"); }
 	public boolean getIsClassRestricted(int i) { return fcw.getBoolean(prefix + i + ".isClassRestricted"); }

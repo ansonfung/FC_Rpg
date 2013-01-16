@@ -13,7 +13,7 @@ public class RpgBroadcast extends BroadcastLib
 {
 	public RpgBroadcast() { }
 	
-	public boolean rpgBroadcast(String msg)
+	public boolean rpgBroadcast(String... msg)
 	{
 		List<World> rpgWorlds = FC_Rpg.worldConfig.getRpgWorlds();
 		ColorLib colorLib = new ColorLib();
@@ -25,7 +25,7 @@ public class RpgBroadcast extends BroadcastLib
 		{
 			for (Player p : rpgWorld.getPlayers())
 			{
-				p.sendMessage(colorLib.parseCustom(cm.primaryColor, cm.broadcastTag + msg));
+				p.sendMessage(colorLib.parseCustom(cm.primaryColor, cm.broadcastTag + toString(msg)));
 			}
 		}
 		

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.Destro168.FC_Suite_Shared.ConfigManagers.ConfigGod;
+import me.Destro168.FC_Suite_Shared.ConfigManagers.ListGetter;
 import me.Destro168.FC_Rpg.FC_Rpg;
 
 import org.bukkit.Bukkit;
@@ -12,6 +13,8 @@ import org.bukkit.World;
 
 public class WarpConfig extends ConfigGod
 {
+	public List<Integer> getWarpList() { ListGetter lg = new ListGetter(fcw, prefix); return lg.getFieldIntegerList(); }
+	
 	public void setName(int i, String x) { fcw.set(prefix + i + ".name", x); }
 	public void setDescription(int i, String x) { fcw.set(prefix + i + ".description", x); }
 	public void setDescription(int i, List<String> x) { fcw.setList(prefix + i + ".description", x); }
@@ -30,6 +33,10 @@ public class WarpConfig extends ConfigGod
 		
 		fcw.setLocation(prefix + i + ".destination", loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
 	}
+	public void setClassRequirement(int i, int x) { fcw.set(prefix + i + ".classRequirement", x); }
+	public void setJobRankMinimum(int i, int x) { fcw.set(prefix + i + ".jobRankMinimum", x); }
+	public void setLevelMinimum(int i, int x) { fcw.set(prefix + i + ".levelMinimum", x); }
+	
 	
 	public String getName(int i) { return fcw.getString(prefix + i + ".name"); }
 	public List<String> getDescription(int i) { return fcw.getStringList(prefix + i + ".description"); }
@@ -39,6 +46,9 @@ public class WarpConfig extends ConfigGod
 	public boolean getAdmin(int i) { return fcw.getBoolean(prefix + i + ".admin"); }
 	public boolean getDonator(int i) { return fcw.getBoolean(prefix + i + ".donator"); }
 	public Location getDestination(int i) { return fcw.getLocation(prefix + i + ".destination"); }
+	public int getClassRequirement(int i) { return fcw.getInt(prefix + i + ".classRequirement"); }
+	public int getJobRankMinimum(int i) { return fcw.getInt(prefix + i + ".jobRankMinimum"); }
+	public int getLevelMinimum(int i) { return fcw.getInt(prefix + i + ".levelMinimum"); }
 	
 	public void setNull(int i) { fcw.set(prefix + i, null); }
 	
@@ -66,21 +76,24 @@ public class WarpConfig extends ConfigGod
 			//Save default warps.
 			FC_Rpg.plugin.saveConfig();
 		}
+		
+		if (getVersion() < 0.2)
+		{
+			for (int i : getWarpList())
+			{
+				setClassRequirement(i,-1);
+				setJobRankMinimum(i,-1);
+				setLevelMinimum(i,-1);
+			}
+		}
 	}
 	
 	public int getWarpIDByName(String name)
 	{
-		String warpName = "";
-		
-		for (int i = 0; i < 10000; i++)
+		for (int i : getWarpList())
 		{
-			warpName = getName(i);
-			
-			if (warpName != null)
-			{
-				if (warpName.equalsIgnoreCase(name))
-					return i;
-			}
+			if (getName(i).equalsIgnoreCase(name))
+				return i;
 		}
 		
 		return -1;

@@ -53,11 +53,12 @@ public class DistanceModifierLib
 			z = z * -1;
 	}
 	
-	private int calculateXYZModifier()
+	private int calculateXYZModifier(String worldName)
 	{
-		double xScale = FC_Rpg.generalConfig.getScaleX();
-		double zScale = FC_Rpg.generalConfig.getScaleZ();
-		double yScale = FC_Rpg.generalConfig.getScaleY();
+		// Variable Declarations
+		double xScale = FC_Rpg.worldConfig.getScaleX(worldName);
+		double zScale = FC_Rpg.worldConfig.getScaleZ(worldName);
+		double yScale = FC_Rpg.worldConfig.getScaleY(worldName);
 		double xFinal;
 		double zFinal;
 		double yFinal;
@@ -111,15 +112,16 @@ public class DistanceModifierLib
 	{
 		//Variable Declarations
 		WorldConfig wm = new WorldConfig();
+		String worldName = entityLoc.getWorld().getName();
 		
 		//Set base coords and shift amount for the distance modifier.
 		setBaseCoordsByLocation(entityLoc);
 		
 		//Set shift location.
-		setShiftByLocation(wm.getLevelOne(entityLoc.getWorld().getName()));
+		setShiftByLocation(wm.getLevelOne(worldName));
 		
 		//Return a pure distance modifier that is exactly corrolated to distance.
-		return calculateXYZModifier();
+		return calculateXYZModifier(worldName);
 	}
 }
 

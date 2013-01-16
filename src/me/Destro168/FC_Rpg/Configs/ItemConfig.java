@@ -37,7 +37,7 @@ public class ItemConfig extends ConfigGod
 
 	public Material getMaterial(int i) { return Material.getMaterial(fcw.getInt(prefix + i + ".materialName")); }
 	
-	public void setAll(int i, String matName, int datavalue, boolean enchantable, double priceBuy, double priceSell,
+	public void setAll(int i, String matName, short datavalue, boolean enchantable, double priceBuy, double priceSell,
 			int dropLevelMin, int dropLevelMax, int dropAmountFlat, int dropAmountRandom)
 	{ 
 		setMaterialID(i, matName);
@@ -81,6 +81,8 @@ public class ItemConfig extends ConfigGod
 	{
 		RpgItem item = new RpgItem(getMaterialName(i),getDataValue(i),getEnchantable(i),getPriceBuy(i),getPriceSell(i),
 				getDropLevelMin(i),getDropLevelMax(i),getDropAmountFlat(i),getDropAmountRandom(i));
+		
+		item.configFieldNumber = i;
 		
 		return item;
 	}

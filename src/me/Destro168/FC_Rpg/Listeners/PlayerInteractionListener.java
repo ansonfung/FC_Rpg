@@ -120,7 +120,7 @@ public class PlayerInteractionListener implements Listener
 		if (rp == null)
 			return;
 		
-		boolean autocast = rp.getPlayerConfig().getAutoCast();
+		boolean autocast = rp.playerConfig.getAutoCast();
 		boolean leftClick = false;
 		boolean hasBow = false;
 		
@@ -157,10 +157,10 @@ public class PlayerInteractionListener implements Listener
 				//Then cast the spell.
 				rp.castSpell(null, 0, 0);
 			}
-			else if (rp.getPlayerConfig().getActiveSpell() != null)
+			else if (rp.playerConfig.getActiveSpell() != null)
 			{
 				//If a spell is ready to be cast, then...
-				if (!rp.getPlayerConfig().getActiveSpell().equals("none"))
+				if (!rp.playerConfig.getActiveSpell().equals("none"))
 				{
 					//Then set active spell.
 					rp.prepareSpell(false);
@@ -304,7 +304,7 @@ public class PlayerInteractionListener implements Listener
 		{
 			//Perform calculations
 			RpgPlayer rPlayer = FC_Rpg.rpgEntityManager.getRpgPlayer(player);
-			int expAmount = (int) (rPlayer.getPlayerConfig().getLevelUpAmount() * FC_Rpg.recordExpBonuses.get(mat));
+			int expAmount = (int) (rPlayer.playerConfig.getLevelUpAmount() * FC_Rpg.recordExpBonuses.get(mat));
 			
 			//Add experience
 			rPlayer.addClassExperience(expAmount, true);
@@ -363,6 +363,29 @@ public class PlayerInteractionListener implements Listener
 					if (warpConfig.getDonator(i) == true && (rpgPlayer.isDonatorOrAdmin() == false))
 					{
 						msgLib.standardError("Sorry but you can't use this warp because you aren't a donator.");
+						break;
+					}
+					
+					// Variable Declaration
+					int classRequirement = warpConfig.getClassRequirement(i);
+					int jobRankMinimum = warpConfig.getJobRankMinimum(i);
+					int levelMinimum = warpConfig.getLevelMinimum(i);
+					
+					if (classRequirement > -1 && rpgPlayer.playerConfig.getCombatClass() != classRequirement)
+					{
+						msgLib.standardError("Sorry but you aren't the proper class to use this warp.");
+						break;
+					}
+					
+					if (jobRankMinimum > -1 && rpgPlayer.playerConfig.getJobRank() < jobRankMinimum)
+					{
+						msgLib.standardError("Sorry but you need a higher job rank to use this warp.");
+						break;
+					}
+					
+					if (levelMinimum > -1 && rpgPlayer.playerConfig.getClassLevel() < jobRankMinimum)
+					{
+						msgLib.standardError("Sorry but you need a higher job rank to use this warp.");
 						break;
 					}
 					

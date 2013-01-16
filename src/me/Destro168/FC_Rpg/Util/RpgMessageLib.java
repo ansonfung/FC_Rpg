@@ -111,7 +111,7 @@ public class RpgMessageLib extends MessageLib
 
 		if (rpgPlayer != null)
 		{
-			if (rpgPlayer.getPlayerConfig().getHasAlchemy())
+			if (rpgPlayer.playerConfig.getHasAlchemy())
 				standardMessage("/alchemy", "Help for alchemy");
 
 			if (rpgPlayer.isDonatorOrAdmin())
@@ -213,7 +213,7 @@ public class RpgMessageLib extends MessageLib
 				if (hasInfiniteTickets)
 					standardMessage("- You have [Infinite] tickets remaining.");
 				else
-					standardMessage("- You have " + rpgPlayer.getPlayerConfig().getClassChangeTickets() + " tickets remaining.");
+					standardMessage("- You have " + rpgPlayer.playerConfig.getClassChangeTickets() + " tickets remaining.");
 			}
 		}
 
@@ -248,14 +248,14 @@ public class RpgMessageLib extends MessageLib
 		standardMessage("/spell autocast", "Toggles spell autocast on/off.");
 
 		if (rpgPlayer != null)
-			infiniteMessage("Automatic Casting Currently: ", rpgPlayer.getPlayerConfig().getAutoCast() + "");
+			infiniteMessage("Automatic Casting Currently: ", rpgPlayer.playerConfig.getAutoCast() + "");
 
 		return true;
 	}
 
 	public boolean helpAlchemy()
 	{
-		if (rpgPlayer == null || !rpgPlayer.getPlayerConfig().getHasAlchemy())
+		if (rpgPlayer == null || !rpgPlayer.playerConfig.getHasAlchemy())
 			return true;
 
 		standardHeader("Alchemy Commands");
@@ -263,7 +263,7 @@ public class RpgMessageLib extends MessageLib
 		standardMessage("/alchemy [list] <startpoint>", "List items purchasable with Arcanium.");
 		standardMessage("/alchemy [buy] [num] [count]", "Buy items from the alchemy list.");
 		standardMessage("/alchemy [smelt] <all>", "Break down an item in your hand or all of your items into Arcanium.");
-		infiniteMessage("You currently have ", FC_Rpg.df.format(rpgPlayer.getPlayerConfig().getArcanium()), " Arcanium.");
+		infiniteMessage("You currently have ", FC_Rpg.df.format(rpgPlayer.playerConfig.getArcanium()), " Arcanium.");
 
 		return true;
 	}

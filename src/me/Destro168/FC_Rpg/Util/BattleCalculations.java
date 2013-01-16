@@ -55,7 +55,7 @@ public class BattleCalculations
 	{
 		Player player = rpgPlayer.getPlayer();
 		double armorBonus = 1;
-		int constitution = rpgPlayer.getPlayerConfig().getConstitution();
+		int constitution = rpgPlayer.playerConfig.getConstitution();
 
 		armorBonus -= getArmorPieceBonus(player.getInventory().getHelmet(), constitution);
 		armorBonus -= getArmorPieceBonus(player.getInventory().getLeggings(), constitution);
