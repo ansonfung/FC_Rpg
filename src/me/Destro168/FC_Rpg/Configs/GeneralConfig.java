@@ -11,7 +11,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class GeneralConfig extends ConfigGod
 {
-	public List<ItemStack> timedItems = new ArrayList<ItemStack>();
+	public List<ItemStack> timedItems;
 	
 	public GeneralConfig()
 	{
@@ -29,6 +29,9 @@ public class GeneralConfig extends ConfigGod
 			fcw.set(prefix + "commandKeyWord.rp", null);
 			fcw.setNull(prefix + "scale");
 		}
+		
+		if (getVersion() < 1.25)
+			setVersion(1.25);
 		
 		// Load static information
 		getCustomChatExclusions();
@@ -92,6 +95,12 @@ public class GeneralConfig extends ConfigGod
 		List<Byte> itemDataValues = fcw.getStaticCustomByteList(prefix + "timedItems.dataValues", "0,1");
 		ItemStack newItem;
 		Material mat;
+		
+		// If the item id is set to null, then return.
+		if (itemIDs.get(0).equals(-1))
+			return;
+		
+		timedItems = new ArrayList<ItemStack>();
 		
 		for (int i = 0; i < itemIDs.size(); i++)
 		{

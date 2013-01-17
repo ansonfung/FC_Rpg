@@ -46,8 +46,8 @@ public class PlayerConfig extends ConfigGod
 	public double maxHealth;
 	
 	// Gets
-	public List<Integer> getSpellLevels() { return fcw.getIntegerList(prefix + "spell.levels"); }
-	public List<Integer> getSpellBinds() { return fcw.getIntegerList(prefix + "spell.binds"); }
+	public List<Integer> getSpellLevels() { return fcw.getCustomIntegerList(prefix + "spell.levels"); }
+	public List<Integer> getSpellBinds() { return fcw.getCustomIntegerList(prefix + "spell.binds"); }
 	public String getCustomPrefix() { return fcw.getString(prefix + "customPrefix"); }
 	public String getActiveSpell() { return fcw.getString(prefix + "activeSpell"); }
     public long getDonatorTime() { return fcw.getLong(prefix + "donatorTime"); }
