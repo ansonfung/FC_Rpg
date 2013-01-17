@@ -15,14 +15,14 @@
 * Table of Contents ~ FC_Rpg Setup *
 
 I: Introduction
-    a: Command Usage
+    a: Getting Started
     b: Configuration General
     
-II: Getting Started
+II: Very Important Configurations
     a: Configuring Groups.yml
     b: Configuring General.yml
     c: Configuring Worlds.yml
-    
+	
 III: Intermediate Steps
     a. Configuring Faqs.yml
     b. Configuring Spells.yml
@@ -52,13 +52,15 @@ IV: FAQs and Bonus Information
 ~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    To begin using FC_Rpg you need to immediately familiarize yourself with the help command, /rpg. /rpg is the most important command as it shows the help for all commands. I intentionally tried to name commands such that they do not override some other major plugins. For example, warp is /w, rather than /warp to prevent conflicts with Essentials warp command. Conversely, the /world command for FC_Rpg conflicts with the /world command for Essentials. So immediately it is in your best interest to disable the world command Essentials by following their instructions. If disabling a command for Essentials is too difficult for you, then, once again I can only stress the amount of difficulty you will probably soon be experiencing!
+	To begin using FC_Rpg you need to, you need to immediately familiarize yourself with the help command, /rpg. /rpg is the most important command as it shows the help for all commands. I intentionally tried to name commands such that they do not override some other major plugins. For example, warp is /w, rather than /warp to prevent conflicts with Essentials warp command. Conversely, the /world command for FC_Rpg conflicts with the /world command for Essentials. So immediately it is in your best interest to disable the world command Essentials by following their instructions, assuming that FC_Rpg isn't overriding it. If disabling a command for Essentials is too difficult for you, then, once again I can only stress the amount of difficulty you will probably soon be experiencing!
     
     All of the permissions for the plugin are inside of the doc folder inside of FC_Rpg.jar Just unzip FC_Rpg to gain access to the docs folder. Most permissions are related to commands but there are a few non-command related permissions.
 	
-	The first command you will need to run is /radmin wall. Find yourself a nice clear area that won't be griefed and type /radmin wall. This command is more like a board... if you fly like 5 blocks into the air and type it you will be more than fine. I would just try not to use it DIRECTLY next to something as it creates an unremovable board. You will need to select your class off of the new board that you generated. Class selection is done through signs.
+	The first command you will need to run is /world toggleRpg. This command will mark the world you are currently in as an rpg world. The majority of this plugin is multi-worlded and will NOT work in worlds not marked as rpg. If you want commands to only work in rpg worlds, setup your permissions such that players only have command permissions in rpg worlds.
 	
-	The next command you will likely need to use is /world levelone. Go find a spot where you want level 1 monsters to spawn and type in /world levelone.
+	The second command you will need to run is /radmin wall.  Find yourself a nice clear area that won't be griefed and type /radmin wall. This command is more like a board... if you fly like 5 blocks into the air and type it you will be more than fine. I would just try not to use it DIRECTLY next to something as it creates an unremovable board. If you weren't automatically given a class, then you will need to select your class off of the new board that you generated. Class selection is done through signs and commands, but for now only worry about signs.
+	
+	The final command you will want to use is /world levelone. Go find a spot where you want level 1 monsters to spawn and type in /world levelone. If you can't use this command then you will have to go into the worlds config and do this.
 	
 	These are the basic commands to get you started. There are several more so feel free to explore them. :)
     
@@ -71,9 +73,13 @@ IV: FAQs and Bonus Information
     This section is to teach you how to handle the overarching format of all my configuration files, so that you can understand my unique data storage techniques, as well as understand my mindset a bit on how everything is stored. I would like to emphasize that if you do not understand something that you please post a comment on the plugin page. If you post about something mentioned on the help pages, I will tell you simply to read the help. Thank you!
     
     Do NOT change version numbers when you are editing your configuration unless this is requested in a change log update or in response to help. If you lower the number, then that particular configuration file will update from that version number to the most recent version supported by your currently installed version on FC_Rpg. If you raise the version number, then you risk the configuration file not updating during future updates.
+	
     I attempt to store lists of items in compressed forms. The reason why is because I can achieve upwards of 80% line compression and make files go from 500 lines to only 100. Locations are in the format of "world name", x, y, z, yaw, pitch. Yaw = Facing direction in degrees of 360. Pitch is equal to up-down looking direction. I use Bukkit's yaw, this means that if you put 0 in, it will be aligned with what Bukkit does. The reason I say this is because some other plugins will display differently than Bukkit. Please note that I don't use spaces after commas in any of my storage mechanisms. You can assume that anything that is not a location is a list of numbers, or a list of words, etc. etc. Feel free to add as many as you would like to them.
+	
     When you see settings that start at one and count up to five, please do NOT decide to use a number like fifty rather than two when editing the configuration. Try to keep numbers counting in order or things may break. The current tolerance is about fifty numbers for most config checking before a value won't be found, meaning that if FC_Rpg finds fifty empty entries before trying to find an entry it's looking for, it will assume the entry doesn't exist.
+	
     I will have numbers of all sorts that you will have to enter into your configuration file. This can get really confusing at times. Please read descriptions carefully, I will try to make sure that the default number gives you a general idea of what kind of number you might have to enter and as needed I will put down specifics inputs needed.
+	
     This requires a bit of "common sense" but I commonly use a technique of requiring information filled in for only one thing, but under several fields. For example, you will see in the general config file the setting "timedItems" has four parts. Each one of those lines has two items by default and the information each of those items is spread over three lines. Make sure to fill empty fields in with 0 and that each field for the item has the same number of entries.
     
     Disclaimer: This tutorial assumes that the reader is a YAML expert. If you don't know how YAML works please go read some tutorials!

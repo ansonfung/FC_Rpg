@@ -5,7 +5,7 @@
 	<classpathentry kind="lib" path="C:/Users/Destro/Desktop/Locathost server/plugins/Vault.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Destro/Desktop/Locathost server/plugins/FC_Suite_Shared.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Destro/Desktop/Plugin Dev/PluginStuff/mcMMO.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Destro/Desktop/Locathost server/plugins/Essentials.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Destro/Desktop/Locathost server/bukkit.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Destro/Desktop/Plugin Dev/PluginStuff/qQuests.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -424,6 +424,7 @@ public class RpgMessageLib extends MessageLib
 
 		standardHeader("World Commands");
 		standardMessage("/world list", "List all worlds on your server.");
+		standardMessage("/world toggleRpg", "Marks current world as an rpg world..");
 		standardMessage("/world tp [worldname]", "Teleport to a worlds spawn.");
 		standardMessage("/world new [worldname]", "Add a world to world config.");
 		standardMessage("/world levelone", "Set a worlds level one to your loc.");

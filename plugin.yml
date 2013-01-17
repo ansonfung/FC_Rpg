@@ -49,5 +49,5 @@ commands:
       description: This command accesses buff commands.
    world:
       description: This command accesses world commands.
-softdepend: [Multiverse, mcMMO, Essentials]
+softdepend: [Multiverse, mcMMO, qQuests]
 depend: [FC_Suite_Shared]

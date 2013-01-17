@@ -41,6 +41,9 @@ import me.Destro168.FC_Suite_Shared.AutoUpdate;
 import me.Destro168.FC_Suite_Shared.ColorLib;
 import me.Destro168.FC_Suite_Shared.SelectionVector;
 import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
+// import me.Destro168.qQuest.MinimumRPGLevelRequirement;
+// import me.quaz3l.qQuests.qQuests;
+import me.quaz3l.qQuests.API.QuestAPI;
 import net.milkbowl.vault.economy.Economy;
 
 import org.bukkit.Bukkit;
@@ -85,9 +88,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.util.Vector;
 
-import com.earth2me.essentials.Essentials;
-import com.earth2me.essentials.User;
-
 public class FC_Rpg extends JavaPlugin
 {
 	//Public global variables.
@@ -95,6 +95,7 @@ public class FC_Rpg extends JavaPlugin
 	public static final DecimalFormat df = new DecimalFormat("#.#");
 	public static final DecimalFormat df2 = new DecimalFormat("#.##");
 	public static final DecimalFormat df3 = new DecimalFormat("#.###");
+	public QuestAPI qAPI = null;
 	
 	//Uncommon class globals.
 	public static FC_Rpg plugin;
@@ -291,6 +292,13 @@ public class FC_Rpg extends JavaPlugin
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		// Call qQuest questing API.
+		// this.setupQQuests();
+		
+		// quaz3l's code
+		// if (this.qAPI != null)
+	    //     this.qAPI.getRequirementHandler().addRequirement(new MinimumRPGLevelRequirement());
 		
 		// We want to perform promotion checks.
 		this.getLogger().info("Enabled");
@@ -844,16 +852,6 @@ public class FC_Rpg extends JavaPlugin
 			
 			String name = rpgPlayer.playerConfig.getName();
 			
-			Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
-			
-			if (ess != null)
-			{
-				User uPG = ess.getUser(player);
-
-				if (uPG != null)
-					name = uPG.getNick(true);
-			}
-			
 			chatFormat = chatFormat.replaceAll("%name%", name);
 			chatFormat = chatFormat.replaceAll("%chat%", "%2\\$s");
 			chatFormat = chatFormat.replaceAll("%level%", rpgPlayer.playerConfig.getClassLevel() + "");
@@ -1205,6 +1203,23 @@ public class FC_Rpg extends JavaPlugin
 
 		return (economy != null);
 	}
+	
+	/*
+	private boolean setupQQuests()
+    {
+        qQuests qQuests = (qQuests) getServer().getPluginManager().getPlugin("qQuests");
+        
+        if (this.qAPI == null) {
+            if (qQuests != null) {
+                this.qAPI = qQuests.qAPI;
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    */
 }
 
 

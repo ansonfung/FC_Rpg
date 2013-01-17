@@ -77,8 +77,8 @@ public class PlayerConfig extends ConfigGod
 	
 	// Sets
 	public void setSpellLevels(int x) { fcw.set(prefix + "spell.levels", x); }
-	public void setSpellBinds(int x) { fcw.set(prefix + "spell.binds", x); }
 	public void setSpellLevels(List<Integer> x) { fcw.setCustomList(prefix + "spell.levels", x); }
+	public void setSpellBinds(int x) { fcw.set(prefix + "spell.binds", x); }
 	public void setSpellBinds(List<Integer> x) { fcw.setCustomList(prefix + "spell.binds", x); }
 	public void setCustomPrefix(String x) { fcw.set(prefix + "customPrefix", x); }
 	public void setActiveSpell(String x) { fcw.set(prefix + "activeSpell", x); }
@@ -234,7 +234,18 @@ public class PlayerConfig extends ConfigGod
 			return;
 		
 		if (getVersion() < 1.0)
+		{
+			setVersion(1.0);
 			setLastDungeonCompletion(0);
+		}
+		
+		if (getVersion() < 1.1)
+		{
+			setVersion(1.1);
+			
+			try { setSpellLevels(fcw.getIntegerList(prefix + "spell.levels")); } catch (IndexOutOfBoundsException e) { }
+			try { setSpellBinds(fcw.getIntegerList(prefix + "spell.binds")); } catch (IndexOutOfBoundsException e) { }
+		}
 	}
 	
 	public void save()

@@ -47,6 +47,10 @@ With: \3\4;
 Replace: (\.get)(.+?)(S)
 With: \1\Static\2
 
+Upcoming:
+- qQuests is now a quest plugin that is compatible with FC_Rpg. Me and qauz3l are excitedly working together to bring in solid integration.
+
+
 
 
 

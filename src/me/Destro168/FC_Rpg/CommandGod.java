@@ -95,6 +95,11 @@ public class CommandGod implements CommandExecutor
 			HatCE cmd = new HatCE();
 			return cmd.execute();
 		}
+		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordWorld()))
+		{
+			WorldCE cmd = new WorldCE();
+			return cmd.execute();
+		}
 		
 		//Check if the player is active for future commands.
 		if (isActive == false)
@@ -166,11 +171,6 @@ public class CommandGod implements CommandExecutor
 		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordBuff()))
 		{
 			BuffCE cmd = new BuffCE();
-			return cmd.execute();
-		}
-		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordWorld()))
-		{
-			WorldCE cmd = new WorldCE();
 			return cmd.execute();
 		}
 		
@@ -3307,6 +3307,8 @@ public class CommandGod implements CommandExecutor
 			if (args[0].equalsIgnoreCase(""))
 				return msgLib.helpWorld();
 			
+			String playerWorld = player.getWorld().getName();
+			
 			//List worlds
 			if (args[0].equalsIgnoreCase("list"))
 			{
@@ -3334,13 +3336,21 @@ public class CommandGod implements CommandExecutor
 				return true;
 			}
 			
+			else if (args[0].equalsIgnoreCase("toggleRpg"))
+			{
+				if (console != null)
+					return msgLib.errorConsoleCantUseCommand();
+				
+				FC_Rpg.worldConfig.setIsRpg(playerWorld, !FC_Rpg.worldConfig.getIsRpg(playerWorld));
+				return msgLib.successCommand();
+			}
+			
 			else if (args[0].equalsIgnoreCase("levelone"))
 			{
-				WorldConfig worldConfig = new WorldConfig();
+				if (console != null)
+					return msgLib.errorConsoleCantUseCommand();
 				
-				worldConfig.setLevelOne(player.getWorld().getName(), player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(),
-						player.getLocation().getYaw(), player.getLocation().getPitch());
-				
+				FC_Rpg.worldConfig.setLevelOne(player.getLocation());
 				return msgLib.successCommand();
 			}
 			
@@ -3350,6 +3360,9 @@ public class CommandGod implements CommandExecutor
 			//Teleport to different worlds.
 			else if (args[0].equalsIgnoreCase("tp"))
 			{
+				if (console != null)
+					return msgLib.errorConsoleCantUseCommand();
+				
 				//Teleport the player to the world they specify if it exists.
 				for (World world : Bukkit.getServer().getWorlds())
 				{
@@ -3382,8 +3395,7 @@ public class CommandGod implements CommandExecutor
 					if (console != null)
 						return msgLib.errorConsoleCantUseCommand();
 					
-					worldConfig.setWorldSpawn(player.getWorld().getName(), player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(),
-							player.getLocation().getYaw(), player.getLocation().getPitch());
+					worldConfig.setWorldSpawn(player.getLocation());
 				}
 				else
 				{
