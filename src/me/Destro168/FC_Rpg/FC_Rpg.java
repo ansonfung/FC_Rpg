@@ -980,7 +980,7 @@ public class FC_Rpg extends JavaPlugin
 
 				if (refNumber >= 5 && refNumber <= 8)
 					equipment.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, rand.nextInt(4) + 1);
-
+				
 				else if (refNumber == 4)
 					equipment.addEnchantment(Enchantment.DAMAGE_ARTHROPODS, rand.nextInt(5) + 1);
 			}
@@ -1130,16 +1130,16 @@ public class FC_Rpg extends JavaPlugin
 		{
 			if (!FC_Rpg.worldConfig.getIsRpgWorld(event.getEnchantBlock().getWorld().getName()))
 				return;
-
+			
 			Map<Enchantment, Integer> enchantMap = event.getEnchantsToAdd();
-
+			
 			// Ban all fire enchants.
 			if (enchantMap.containsKey(Enchantment.FIRE_ASPECT))
 				enchantMap.remove(Enchantment.FIRE_ASPECT);
 
 			if (enchantMap.containsKey(Enchantment.ARROW_FIRE))
 				enchantMap.remove(Enchantment.ARROW_FIRE);
-
+			
 			// Remove arrow knockback if blocked.
 			if (!FC_Rpg.balanceConfig.getArrowKnockback())
 			{

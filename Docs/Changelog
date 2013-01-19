@@ -1,5 +1,9 @@
 ~ FC_Rpg Changelog ~
 
+Version 1.26 v2:
+
+- Unbreaking is now no longer calculated when performing alchemy.
+
 Version 1.26:
 
 - The /world toggleRpg command will automatically pick a player class when setting a world to be rpg.

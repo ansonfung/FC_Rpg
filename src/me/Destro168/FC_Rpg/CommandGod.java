@@ -2595,6 +2595,7 @@ public class CommandGod implements CommandExecutor
 			
 			//If alchemy set alchemy to true.
 			Spell spell = rpgPlayer.playerConfig.getRpgClass().getSpellBook().get(intArg1);
+			
 			if (spell.getEffectID() == EffectIDs.ALCHEMY)
 				rpgPlayer.playerConfig.hasAlchemy = true;
 			
@@ -2875,7 +2876,7 @@ public class CommandGod implements CommandExecutor
 			
 			for (Enchantment enchant : Enchantment.values())
 			{
-				if (item.containsEnchantment(enchant))
+				if (!enchant.equals(Enchantment.DURABILITY) && item.containsEnchantment(enchant))
 					enchantmentStrength = item.getEnchantmentLevel(enchant);
 			}
 			
