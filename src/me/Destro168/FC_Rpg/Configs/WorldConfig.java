@@ -9,6 +9,7 @@ import me.Destro168.FC_Rpg.FC_Rpg;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 
 public class WorldConfig extends ConfigGod
 {
@@ -41,6 +42,14 @@ public class WorldConfig extends ConfigGod
 	public double getScaleY(String name) { return fcw.getDouble(prefix + name + ".scale.y"); }
 	public double getScaleZ(String name) { return fcw.getDouble(prefix + name + ".scale.z"); }
 	public void removeWorld(String name) { fcw.set(prefix + name, null); }
+	
+	public void setIsRpg(String name, boolean x, Player player) 
+	{ 
+		setIsRpg(name, x);
+		
+		if (x == true)
+			FC_Rpg.rpgEntityManager.checkPlayerRegistration(player, true);
+	}
 	
 	public WorldConfig()
 	{

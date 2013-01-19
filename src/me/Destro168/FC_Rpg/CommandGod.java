@@ -1999,12 +1999,9 @@ public class CommandGod implements CommandExecutor
 		
 		public boolean execute()
 	    {
+			// Without permissions, then return.
 			if (!perms.commandRpg())
 				return msgLib.errorNoPermission();
-			
-			//Only let active players use this command.
-			if (isActive == false)
-				return msgLib.errorCreateCharacter();
 			
 			//Handle admin commands with /rpg.
 			if (!perms.isAdmin())
@@ -3341,7 +3338,8 @@ public class CommandGod implements CommandExecutor
 				if (console != null)
 					return msgLib.errorConsoleCantUseCommand();
 				
-				FC_Rpg.worldConfig.setIsRpg(playerWorld, !FC_Rpg.worldConfig.getIsRpg(playerWorld));
+				FC_Rpg.worldConfig.setIsRpg(playerWorld, !FC_Rpg.worldConfig.getIsRpg(playerWorld), player);
+				
 				return msgLib.successCommand();
 			}
 			

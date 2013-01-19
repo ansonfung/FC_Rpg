@@ -1,18 +1,6 @@
 ~ FC_Rpg Changelog ~
 
-Version 1.25 v2:
+Version 1.26:
 
-General:
-- Removed old Essentials related code.
-- Added new /world command. Optimized world code a bit. Updated Setup to emphasize use of new command /world toggleRpg. I am sorry, the help does say you need to set the world to rpg but the ordering of the help was wrong. Very deeply sorry.
-- Fixed a few versioning errors with player configs.
-- Fixed an issue with spell levels and spell binds being broken. Big pain. :/
-
-Worlds:
-- Forcing reupdate of world levelone settings. Apparently I broke the order in 1.24, my bad on that.
-
-Version 1.25:
-
-General:
-- Updated timed items section. Put down -1 as an entry for the ids field if you want to disable giving timed items.
-- Fixed no commands working unless you use them as console.
+- The /world toggleRpg command will automatically pick a player class when setting a world to be rpg.
+- The /radmin command is now usable without having a class chosen.

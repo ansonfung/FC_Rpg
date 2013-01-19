@@ -22,16 +22,8 @@ public class GeneralConfig extends ConfigGod
 	public void handleUpdates()
 	{
 		// Handle version updates.
-		if (getVersion() < 1.24)
-		{
-			setVersion(1.24);
-			fcw.set(prefix + "commandKeyWord.rpgHelp", null); 
-			fcw.set(prefix + "commandKeyWord.rp", null);
-			fcw.setNull(prefix + "scale");
-		}
-		
-		if (getVersion() < 1.25)
-			setVersion(1.25);
+		if (getVersion() < 1.26)
+			setVersion(1.26);
 		
 		// Load static information
 		getCustomChatExclusions();
