@@ -509,6 +509,9 @@ Configuration settings:
     counterAttack: 10 <- The percent chance to randomly counter-attack (not a decimal)
     strongerParry: 0.75 <- The damage multiplier for when people parry (damage * strongerParry).
     battleLust: 0.4 <- Damage multiplier based on missing health lost. Used on berserker class.
+- attackDelay:
+    hard: -1 <- Sets a hard cap for how many times a player can attack a target per second. Set to -1 to cancel.
+    soft: 125 <- Sets a cap on how many times a player can attack a target per second. The more guild members that are online with a player, the more times a target can be attacked.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~

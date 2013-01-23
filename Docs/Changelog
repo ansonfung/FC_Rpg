@@ -1,5 +1,10 @@
 ~ FC_Rpg Changelog ~
 
+Version 1.27 v2:
+
+Balance:
+- Added a soft and hard attack cap setting. Forgot to mention in 1.27. Updated in setup files now.
+
 Version 1.27:
 
 General:
