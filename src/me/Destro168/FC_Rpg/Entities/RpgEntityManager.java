@@ -1,7 +1,6 @@
 package me.Destro168.FC_Rpg.Entities;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -160,9 +159,7 @@ public class RpgEntityManager
 		for (Player guildMember : FC_Rpg.guildConfig.getOnlineGuildPlayerList(guild))
 		{
 			if (ell.isNearby(player, guildMember, distance))
-			{
-				playerList.add(getRpgPlayer(player));
-			}
+				playerList.add(getRpgPlayer(guildMember));
 		}
 		
 		return playerList;
@@ -323,7 +320,7 @@ public class RpgEntityManager
     	//If we have an invalid class chosen, then return.
     	if (intClass < 0)
     	{
-    		FC_Rpg.plugin.getLogger().info("Critical error creating RPGPlayer class.");
+    		FC_Rpg.plugin.getLogger().info("Critical Error Creating FC_RPG Player Class.");
     		return;
     	}
     	
@@ -339,7 +336,6 @@ public class RpgEntityManager
     public void clearOldPlayerData()
 	{
     	//Variable Declarations
-    	Date now = new Date();
     	Long timeDifference;
     	BroadcastLib bLib = new BroadcastLib();
     	
@@ -358,7 +354,7 @@ public class RpgEntityManager
 			//Only delete files when the player record is considered "active".
 			if (file.getIsActive() == true)
 			{
-				timeDifference = now.getTime() - player.getLastPlayed();
+				timeDifference = System.currentTimeMillis() - player.getLastPlayed();
 				long deleteTime = FC_Rpg.generalConfig.getInactivePlayerFileDeleteTime();
 				
 				if ((deleteTime > 0) && (timeDifference >= deleteTime))

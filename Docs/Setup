@@ -375,7 +375,11 @@ The pvp section lets you run a VERY minimalist pvp arena. If you want an extreme
 
 I know there are teams, but it's actually free for all... I'll make the spawn points a list in the future. The pvp arena is the most underdeveloped feature currently in my opinion. It was never a big focus of the plugin but I wanted something simple for my server without a massive plugin.
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~
 h. Configuring Balance.yml
+~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Welp, it was asked that players could configure the balance of the plugin, so here you go! Plugin balance. Customize the effectiveness of a leather chestplate, or a diamondsword, make regen stronger. Anything is entirely customizable with the balance config.
 
@@ -408,17 +412,19 @@ Configuration settings:
 	explosion: 0.025
 	fall: 0.025
 	projectile: 0.025
-	player:
+- player: <- Player settings
 	baseHealth: 100
 	baseMana: 20
-- statMagnitutude:
-	attack: 1 <- Determine how much damage a point of attack gives.
-	constitution: 20 <- Determine how much health a point of constitution gives.
-	intelligence: 1 <- Determine how much mana a point of intelligence gives.
-- levelsPerSkillPoint: 4 <- Determine how many levelups a player has to undergo before recieving a skill point.
-- statsPerLevel: 10 <- Determine how many stat points a player recieves per levelup.
-- expScaleRate: 3 <- Used in experience formula.
-- expScaleBase: 11 <- Used in experience formula.
+    baseHealth: 100
+    baseMana: 20
+    statMagnitutude:
+		attack: 1 <- Determine how much damage a point of attack gives.
+		constitution: 20 <- Determine how much health a point of constitution gives.
+		intelligence: 1 <- Determine how much mana a point of intelligence gives.
+    levelsPerSpellPoint: 4 <- Determine how many levelups a player has to undergo before recieving a spell point.
+    statsPerLevel: 10 <- Determine how many stat points a player recieves per levelup.
+    expScaleRate: 3.0  <- Used in experience formula.
+    expScaleBase: 11.0  <- Used in experience formula.
 - mob:
 	attackMultiplier: 2 <- Set the rate that mob attack scales in mob attack formula.
 	constitutionMultiplier: 100 <- Set the rate that mob constution scales in mob constitution formula. The mob constitution formula is the same as the attackMultiplier except for the two facts that it revolves around constitution and non-hostile mobs have a constitution of 1 by defualt.

@@ -1,7 +1,6 @@
 package me.Destro168.FC_Rpg.Entities;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -47,7 +46,7 @@ public class EntityDamageManager
 		// Check to see if the player was recently attacked to make sure he isn't attacked too much.
 		if (canAttack(rpgDefender.getLastDamagedLong(), memberCount) == false)
 			return;
-
+		
 		// Handle immortality effect first.
 		if (rpgDefender.getStatusActiveRpgPlayer(EffectIDs.IMMORTAL))
 		{
@@ -393,6 +392,10 @@ public class EntityDamageManager
 				return;
 		}
 		
+		// Check to see if the player was recently attacked to make sure he isn't attacked too much.
+		if (canAttack(rpgMobDefender.getLastDamagedLong(), partyMemberCount) == false)
+			return;
+		
 		// If the player has the fire arrow status, then...
 		if (fireUses > 0)
 		{
@@ -552,6 +555,7 @@ public class EntityDamageManager
 		
 		for (RpgPlayer rpgLooter : recipients)
 		{
+			
 			//Mob level - player level : Positive = Mob stronger, negative = mob weaker.
 			levelDifference = rpgMobDefender.getLevel() - rpgLooter.playerConfig.getClassLevel();
 			
@@ -671,15 +675,19 @@ public class EntityDamageManager
 	
 	public boolean canAttack(long time, int partySize)
 	{
-		Date now = new Date();
+		// Variable Declaration.
+		int check = 0;
 		
-		// Check to see if entity was damage in last .25 seconds.
-		if ((now.getTime() - time) < (125 / partySize))
-			return false;
+		// Set attack delay equal to setting.
+		if (FC_Rpg.balanceConfig.getAttackDelayHard() > -1)
+			check = FC_Rpg.balanceConfig.getAttackDelayHard();
 		else
-			return true;
+			check = FC_Rpg.balanceConfig.getAttackDelaySoft() / partySize;
+		
+		// Return true if time difference is great enough.
+		return (System.currentTimeMillis() - time) >= check;
 	}
-
+	
 	public void nukeMob(LivingEntity entity)
 	{
 		// Get The Entity.

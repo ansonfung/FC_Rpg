@@ -2571,7 +2571,7 @@ public class CommandGod implements CommandExecutor
 		private boolean upgradeSubCommand()
 		{
 			//If the player doesn't have enough spell points tell them.
-			if (rpgPlayer.playerConfig.getSpellPoints() < 1 && !perms.isAdmin())
+			if (rpgPlayer.playerConfig.getSpellPoints() < 1)
 			{
 				msgLib.standardError("You don't have enough spell points");
 				return true;

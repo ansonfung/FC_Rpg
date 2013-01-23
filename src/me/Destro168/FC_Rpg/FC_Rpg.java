@@ -4,7 +4,6 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -839,7 +838,6 @@ public class FC_Rpg extends JavaPlugin
 			Player player = event.getPlayer();
 			FC_RpgPermissions perms = new FC_RpgPermissions(player);
 			DateFormat timeStamp = new SimpleDateFormat("HH:mm:ss");
-			Date now = new Date();
 			String chatFormat;
 
 			if (perms.chatAdmin())
@@ -849,7 +847,7 @@ public class FC_Rpg extends JavaPlugin
 			if (chatFormat.equalsIgnoreCase(""))
 				return;
 
-			chatFormat = chatFormat.replaceAll("%time%", timeStamp.format(now.getTime()));
+			chatFormat = chatFormat.replaceAll("%time%", timeStamp.format(System.currentTimeMillis()));
 			chatFormat = chatFormat.replaceAll("%prefix%", rpgPlayer.updatePrefix());
 
 			String name = rpgPlayer.playerConfig.getName();
@@ -1022,7 +1020,7 @@ public class FC_Rpg extends JavaPlugin
 		{
 			int expAmount = event.getAmount();
 			int million = 1000000;
-
+			
 			if (expAmount > million)
 			{
 				event.setAmount(expAmount - million);
@@ -1110,7 +1108,7 @@ public class FC_Rpg extends JavaPlugin
 
 			World from = event.getFrom().getWorld();
 			World to = event.getTo().getWorld();
-
+			
 			if (from == to)
 				return;
 

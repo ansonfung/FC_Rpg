@@ -1,10 +1,26 @@
 ~ FC_Rpg Changelog ~
 
-Version 1.26 v2:
+Version 1.27:
 
-- Unbreaking is now no longer calculated when performing alchemy.
+General:
+- RpgPlayer class selection failure error string message updated.
 
-Version 1.26:
+Commands:
+- Admins no longer have infinite spell points. They have to use the modify command to get spell points.
 
-- The /world toggleRpg command will automatically pick a player class when setting a world to be rpg.
-- The /radmin command is now usable without having a class chosen.
+Players:
+- Fixed issue where players couldn't get spell points. Was giving them a stat point (derp). Sorry. Player configurations will automatically be checked for inconsistency on login and if they are bugged then the player will have their stats and spell points respec'd and fixed.
+- Fixed so that at level 100 you get everything checked still (get stat points).
+- Removed level 1 spell point. Giving that 1 spell point at level one causes the issue of a player being level 100 having 1 spell point which means they get the spell point usage notification frequently. (Will also be force respec'd now if they don't have proper number of spell points for this update.)
+
+BalanceConfig:
+- Renamed balance config setting from getLevelsPerSkillPoint to getLevelsPerStatPoints.
+- Updated a bit of setup to help make balance config section more up to date.
+- Fixed small balance config versioning issue that prevented modification to globalexpmodifier setting.
+
+Guilds:
+- Fixed issue where guild rewards were all being given to guild leader and not rest of guild members.
+
+Worlds:
+- Forcing world spawn settings to be readded to worlds.
+- Added x,y,z to default world generation settings which will prevent future issues with toggling worlds to rpg and mobs being buggy.

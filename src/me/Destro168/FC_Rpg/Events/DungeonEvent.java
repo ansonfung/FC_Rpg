@@ -1,6 +1,5 @@
 package me.Destro168.FC_Rpg.Events;
 
-import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -159,8 +158,7 @@ public class DungeonEvent extends GeneralEvent
 		if (isHappening() == false)
 			return;
 		
-		Date now = new Date();
-		FC_Rpg.rpgEntityManager.getRpgPlayer(playerToRemove).playerConfig.setLastDungeonCompletion(now.getTime());
+		FC_Rpg.rpgEntityManager.getRpgPlayer(playerToRemove).playerConfig.setLastDungeonCompletion(System.currentTimeMillis());
 		
 		if (participantList.size() == 0)
 			end(false);
@@ -694,8 +692,7 @@ public class DungeonEvent extends GeneralEvent
 					//For all the participants in the dungeon set they just completed a dungeon.
 					for (Player player: participantList)
 					{
-						Date now = new Date();
-						FC_Rpg.rpgEntityManager.getRpgPlayer(player).playerConfig.setLastDungeonCompletion(now.getTime());
+						FC_Rpg.rpgEntityManager.getRpgPlayer(player).playerConfig.setLastDungeonCompletion(System.currentTimeMillis());
 					}
 					
 					//Reset everything.
@@ -713,10 +710,7 @@ public class DungeonEvent extends GeneralEvent
 			
 			//For all the participants in the dungeon set they just completed a dungeon.
 			for (Player player: participantList)
-			{
-				Date now = new Date();
-				FC_Rpg.rpgEntityManager.getRpgPlayer(player).playerConfig.setLastDungeonCompletion(now.getTime());
-			}
+				FC_Rpg.rpgEntityManager.getRpgPlayer(player).playerConfig.setLastDungeonCompletion(System.currentTimeMillis());
 			
 			//Reset everything.
 			setDungeonDefaults(dungeonNumber);

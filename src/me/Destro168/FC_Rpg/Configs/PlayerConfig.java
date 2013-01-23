@@ -246,6 +246,27 @@ public class PlayerConfig extends ConfigGod
 			try { setSpellLevels(fcw.getIntegerList(prefix + "spell.levels")); } catch (IndexOutOfBoundsException e) { }
 			try { setSpellBinds(fcw.getIntegerList(prefix + "spell.binds")); } catch (IndexOutOfBoundsException e) { }
 		}
+		
+		if (getVersion() < 1.2)
+		{
+			setVersion(1.2);
+			
+			int totalStats = getAttack() + getIntelligence() + getConstitution() + getMagic() + getStats();
+			int shouldHaveStats = getClassLevel() * FC_Rpg.balanceConfig.getPlayerStatsPerLevel();
+			int shouldHaveSpellPoints = (int) Math.floor(getClassLevel() / FC_Rpg.balanceConfig.getPlayerLevelsPerSpellPoint());
+			
+			if (totalStats != shouldHaveStats)
+			{
+				respecStatPoints();
+				setStats(shouldHaveStats);
+			}
+			
+			if (getSpellPoints() != shouldHaveSpellPoints)
+			{
+				this.respectSpellPoints();
+				setSpellPoints(shouldHaveSpellPoints);
+			}
+		}
 	}
 	
 	public void save()
@@ -258,9 +279,6 @@ public class PlayerConfig extends ConfigGod
 	
 	public void setDefaults()
 	{
-		//Variable Declarations
-		Date now = new Date();
-
 		//Set variables to the new style
 		setCustomPrefix(FC_Rpg.generalConfig.getDefaultPrefix());
 		setIsActive(false);
@@ -291,7 +309,7 @@ public class PlayerConfig extends ConfigGod
 
 		setLifetimeMobKills(0);
 		setAutomaticAllocation(true);
-		setLastRecievedHourlyItems(now.getTime());
+		setLastRecievedHourlyItems(System.currentTimeMillis());
 		setClassChangeTickets(0);
 		
 		if (getSecondsPlayed() == 0)
@@ -313,9 +331,9 @@ public class PlayerConfig extends ConfigGod
 		setSpellLevels(levels);
 		setSpellBinds(binds);
 
-		setSpellPoints(1);
+		setSpellPoints(0);
 		setAutoCast(false);
-
+		
 		setLastDungeonCompletion(0);
 		
 		save();
@@ -347,13 +365,11 @@ public class PlayerConfig extends ConfigGod
 	
     public boolean isDonator() 
 	{
-		Date now = new Date();
-		
 		//Store time into memory
 		Long time = getDonatorTime();
 		
 		//If the donator time is less than what time is currently is.
-		if (time > now.getTime()) 
+		if (time > System.currentTimeMillis()) 
 			return true;
 		else
 		{
@@ -408,15 +424,8 @@ public class PlayerConfig extends ConfigGod
 			setClassLevel(getClassLevel() + 1);
 			
 			//Spell points.
-			if (getClassLevel() % FC_Rpg.balanceConfig.getPlayerLevelsPerSkillPoint() == 0)
-				setStats(getStats() + 1);
-			
-			//Acount for level cap.
-			if (getClassLevel() == levelCap)
-			{
-				setClassExperience(0);
-				return false;
-			}
+			if ((getClassLevel() % FC_Rpg.balanceConfig.getPlayerLevelsPerSpellPoint()) == 0)
+				setSpellPoints(getSpellPoints() + 1);
 			
 			//Manage Stat Points
 			if (getManualAllocation() == true)
@@ -428,36 +437,44 @@ public class PlayerConfig extends ConfigGod
 			{
 				if (getClassLevel() >= 50)
 					FC_Rpg.rpgBroadcast.rpgBroadcast(name + " is now level [" + String.valueOf(getClassLevel()) + "]!");	//Broadcast that he leveled up
-				else
+				else if (rpgPlayer != null)
 				{
-					if (rpgPlayer != null)
-					{
-						MessageLib msgLib = new MessageLib(rpgPlayer.getPlayer());
-						msgLib.infiniteMessage("You have just reached level [",getClassLevel() + "","]!");
-					}
+					MessageLib msgLib = new MessageLib(rpgPlayer.getPlayer());
+					msgLib.infiniteMessage("You have just reached level [",getClassLevel() + "","]!");
 				}
 				
-				for (int i = 0; i < 3; i++)
+				// Attempt to shoot fireworks if rpgPlayer isn't null.
+				if (rpgPlayer != null)
 				{
-					Location pLoc = rpgPlayer.getPlayer().getLocation();
-					
-					Firework fw = (Firework) pLoc.getWorld().spawnEntity(pLoc, EntityType.FIREWORK);
-					FireworkMeta fwMeta = fw.getFireworkMeta();
-					
-					fwMeta.setPower(i);
-					
-					fwMeta.addEffect(FireworkEffect.builder()
-							.flicker(true)
-							.trail(true)
-							.with(Type.BALL_LARGE)
-							.withColor(getRandomColor(), getRandomColor(), getRandomColor())
-							.withFade(getRandomColor(), getRandomColor(), getRandomColor())
-							.withFlicker()
-							.withTrail()
-							.build());
-					
-					fw.setFireworkMeta(fwMeta);
+					for (int i = 0; i < 3; i++)
+					{
+						Location pLoc = rpgPlayer.getPlayer().getLocation();
+						
+						Firework fw = (Firework) pLoc.getWorld().spawnEntity(pLoc, EntityType.FIREWORK);
+						FireworkMeta fwMeta = fw.getFireworkMeta();
+						
+						fwMeta.setPower(i);
+						
+						fwMeta.addEffect(FireworkEffect.builder()
+								.flicker(true)
+								.trail(true)
+								.with(Type.BALL_LARGE)
+								.withColor(getRandomColor(), getRandomColor(), getRandomColor())
+								.withFade(getRandomColor(), getRandomColor(), getRandomColor())
+								.withFlicker()
+								.withTrail()
+								.build());
+						
+						fw.setFireworkMeta(fwMeta);
+					}
 				}
+			}
+			
+			//Acount for level cap.
+			if (getClassLevel() == levelCap)
+			{
+				setClassExperience(0);
+				return false;
 			}
 		}
 		
@@ -515,7 +532,7 @@ public class PlayerConfig extends ConfigGod
 		
 		gc.setGregorianChange(now);
 		gc.add(GregorianCalendar.DATE, 30 * periods);
-
+		
 		//Give the donator their time.
 		setDonatorTime(gc.getTime().getTime());
 	}
@@ -543,6 +560,37 @@ public class PlayerConfig extends ConfigGod
 		parts[5] = ")";
 		
 		return parts;
+	}
+    
+    public void respecStatPoints()
+	{
+		//Reset stats
+		int stats = getStats();
+		
+		stats += getAttack();
+		stats += getConstitution();
+		stats += getMagic();
+		stats += getIntelligence();
+		
+		setAttack(0);
+		setConstitution(0);
+		setMagic(0);
+		setIntelligence(0);
+		
+		setStats(stats);
+	}
+	
+	public void respectSpellPoints()
+	{
+		int spellPoints = getSpellPoints();
+		
+		for (int i = 0; i < getRpgClass().getSpellBook().size(); i++)
+		{
+			spellPoints += getSpellLevels().get(i);
+			updateSpellLevel(i, 0);
+		}
+		
+		setSpellPoints(spellPoints);
 	}
 }
 

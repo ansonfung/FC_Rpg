@@ -3,8 +3,8 @@
 ^Todo List^
 
 - Replace berserker spell with something other than teleport. Need ideas on this :/ *sigh*.
-- Add warloc and necromancer.
 - Add in commands to handle some of the new features after they have been tested as completely bug free.
+- Customizable mob stats.
 
 Long Term Todo aka "Stuff that MIGHT get done, maybe, if I'm in a good mood, maybe":
 
@@ -34,6 +34,7 @@ Guilds:
 		- 200000000 = 1% mana regen for guild members.
 
 - Axes as increment for damage, 30, 60, 90, 120 attack req.
+- Add warloc and necromancer.
 
 ^Potential CraftBukkit Bugs^
 - Can't attack with weakness.

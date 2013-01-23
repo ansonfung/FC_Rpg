@@ -51,9 +51,7 @@ public class RpgEntity
 	
 	public boolean getStatusActiveEntity(Long statusExpirationDate)
 	{
-		Date now = new Date();
-		
-		if (now.getTime() < statusExpirationDate)
+		if (System.currentTimeMillis() < statusExpirationDate)
 			return true;
 		
 		return false;

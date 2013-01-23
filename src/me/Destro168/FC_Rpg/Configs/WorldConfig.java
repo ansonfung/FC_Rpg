@@ -73,10 +73,10 @@ public class WorldConfig extends ConfigGod
 			FC_Rpg.plugin.saveConfig();
 		}
 		
-		//Update verison to 0.3
-		if (getVersion() < 0.4)
+		//Update verison to 0.5
+		if (getVersion() < 0.5)
 		{
-			setVersion(0.4);
+			setVersion(0.5);
 			
 			for (World world : getRpgWorlds())
 			{
@@ -187,6 +187,11 @@ public class WorldConfig extends ConfigGod
 		
 		//Set level one.
 		setLevelOne(worldName,0,70,0,0,0);
+		
+		// Add x,y,z settings.
+		setScaleX(worldName, 20);
+		setScaleY(worldName, -25);
+		setScaleZ(worldName, 20);
 		
 		return true;
 	}

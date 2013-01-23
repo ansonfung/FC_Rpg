@@ -499,39 +499,8 @@ public class RpgPlayer extends RpgEntity
 	//Return stat points to a player.
 	public void respecAll()
 	{
-		respecStats();
-		respecSkills();
-	}
-	
-	public void respecStats()
-	{
-		//Reset stats
-		int stats = playerConfig.getStats();
-		
-		stats += playerConfig.getAttack();
-		stats += playerConfig.getConstitution();
-		stats += playerConfig.getMagic();
-		stats += playerConfig.getIntelligence();
-		
-		playerConfig.setAttack(0);
-		playerConfig.setConstitution(0);
-		playerConfig.setMagic(0);
-		playerConfig.setIntelligence(0);
-
-		playerConfig.setStats(stats);
-	}
-	
-	public void respecSkills()
-	{
-		int spellPoints = playerConfig.getSpellPoints();
-		
-		for (int i = 0; i < playerConfig.getRpgClass().getSpellBook().size(); i++)
-		{
-			spellPoints += playerConfig.getSpellLevels().get(i);
-			playerConfig.updateSpellLevel(i, 0);
-		}
-		
-		playerConfig.setSpellPoints(spellPoints);
+		playerConfig.respecStatPoints();
+		playerConfig.respectSpellPoints();
 	}
 	
 	public boolean useStats(int stat, int amount)
@@ -576,9 +545,7 @@ public class RpgPlayer extends RpgEntity
 	
 	private boolean getCanNotify(Date time, int NotificationRepeatInterval)
 	{
-		Date now = new Date();
-		
-		if ((now.getTime() - time.getTime()) < NotificationRepeatInterval)
+		if ((System.currentTimeMillis() - time.getTime()) < NotificationRepeatInterval)
 			return false;
 		
 		return true;
@@ -723,7 +690,6 @@ public class RpgPlayer extends RpgEntity
 			return;
 		
 		//Variable Declarations
-		Date now = new Date();
 		WorldConfig wm = new WorldConfig();
 		
 		//Only give steak in rpg world.
@@ -731,7 +697,7 @@ public class RpgPlayer extends RpgEntity
 			return;
 		
 		//Wait an amount of time before giving items.
-		if (now.getTime() - playerConfig.getLastRecievedHourlyItems() > FC_Rpg.generalConfig.getTimedItemsInterval())
+		if (System.currentTimeMillis() - playerConfig.getLastRecievedHourlyItems() > FC_Rpg.generalConfig.getTimedItemsInterval())
 		{
 			for (ItemStack hourlyItem : timedItems)
 				addItemToInventory(hourlyItem);
@@ -739,7 +705,7 @@ public class RpgPlayer extends RpgEntity
 			msgLib.standardMessage("Timed item(s) given to you!");
 			
 			//Update last ate time.
-			playerConfig.setLastRecievedHourlyItems(now.getTime());
+			playerConfig.setLastRecievedHourlyItems(System.currentTimeMillis());
 		}
 	}
 	
@@ -752,9 +718,7 @@ public class RpgPlayer extends RpgEntity
 			return true;
 		
 		//Check time for non-admins to see if they are allowed to enter again.
-		Date now = new Date();
-		
-		if (now.getTime() >= playerConfig.getLastDungeonCompletion() + FC_Rpg.generalConfig.getDungeonEnterWaitPeriod())
+		if (System.currentTimeMillis() >= playerConfig.getLastDungeonCompletion() + FC_Rpg.generalConfig.getDungeonEnterWaitPeriod())
 			return true;
 		
 		return false;
@@ -762,8 +726,7 @@ public class RpgPlayer extends RpgEntity
 	
 	public int getDungeonWaitTime()
 	{
-		Date now = new Date();
-		return (int) (((playerConfig.getLastDungeonCompletion() + FC_Rpg.generalConfig.getDungeonEnterWaitPeriod() - now.getTime())) * .001);
+		return (int) (((playerConfig.getLastDungeonCompletion() + FC_Rpg.generalConfig.getDungeonEnterWaitPeriod() - System.currentTimeMillis())) * .001);
 	}
 	
 	public void addItemToInventory(ItemStack itemStack)
@@ -1060,13 +1023,12 @@ public class RpgPlayer extends RpgEntity
 	public void updateTimePlayed()
 	{
 		//Variable Declarations
-		Date now = new Date();
 		Long timeDifference;
 		int intDifference;
 		int timePlayedInSeconds = playerConfig.getSecondsPlayed();
 		
 		//We want to first set how long we have played in the configuration file.
-		timeDifference = now.getTime() - logonDate.getTime(); //Calulate how long we have been online.
+		timeDifference = System.currentTimeMillis() - logonDate.getTime(); //Calulate how long we have been online.
 		intDifference = (int) (timeDifference / 1000); //Convert that time to seconds.
 		timePlayedInSeconds = timePlayedInSeconds + intDifference;	//Update time played.
 		playerConfig.setSecondsPlayed(timePlayedInSeconds); //Store it
@@ -1245,9 +1207,7 @@ public class RpgPlayer extends RpgEntity
 	
 	public boolean getStatusActiveRpgPlayer(int effectID)
 	{
-		Date now = new Date();
-		
-		if (now.getTime() < playerConfig.getStatusDuration(effectID))
+		if (System.currentTimeMillis() < playerConfig.getStatusDuration(effectID))
 			return true;
 		
 		return false;

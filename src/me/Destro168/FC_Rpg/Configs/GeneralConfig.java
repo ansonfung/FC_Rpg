@@ -22,8 +22,8 @@ public class GeneralConfig extends ConfigGod
 	public void handleUpdates()
 	{
 		// Handle version updates.
-		if (getVersion() < 1.26)
-			setVersion(1.26);
+		if (getVersion() < 1.27)
+			setVersion(1.27);
 		
 		// Load static information
 		getCustomChatExclusions();

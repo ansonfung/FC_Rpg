@@ -11,9 +11,7 @@ public class BalanceConfig extends ConfigGod
 	public static final int passive_InnerFire = 4;
 	public static final int passive_BattleLust = 5;
 	
-	
 	// Gets
-	
 	public BalanceConfig()
 	{
 		super(FC_Rpg.dataFolderAbsolutePath, "Balance");
@@ -23,10 +21,18 @@ public class BalanceConfig extends ConfigGod
 	public void handleUpdates()
 	{
 		// Handle version updates.
-		if (getVersion() < 1.0)
+		if (getVersion() < 1.06)
 		{
 			setVersion(1.06);
 			setGlobalExpMultiplier(1);
+		}
+		
+		if (getVersion() < 1.07)
+		{
+			setVersion(1.07);
+			
+			fcw.set(prefix + "player.levelsPerSpellPoint", fcw.getInt(prefix + "player.levelsPerSkillPoint"));
+			fcw.setNull(prefix + "player.levelsPerSkillPoint");
 		}
 		
 		getDefaultItemDrops();
@@ -37,6 +43,8 @@ public class BalanceConfig extends ConfigGod
 		getPowerLevelPrevention();
 		getWitherLevelBonus();
 		getEnderDragonLevelBonus();
+		getAttackDelayHard();
+		getAttackDelaySoft();
 		
 		getEnchantmentMultiplierSharpness();
 		getEnchantmentMultiplierBane();
@@ -103,7 +111,7 @@ public class BalanceConfig extends ConfigGod
 		getPlayerStatMagnitudeAttack();
 		getPlayerStatMagnitudeConstitution();
 		getPlayerStatMagnitudeIntelligence();
-		getPlayerLevelsPerSkillPoint();
+		getPlayerLevelsPerSpellPoint();
 		getPlayerStatsPerLevel();
 		getPlayerExpScaleRate();
 		getPlayerExpScaleBase();
@@ -158,6 +166,8 @@ public class BalanceConfig extends ConfigGod
 	public int getPowerLevelPrevention() { return fcw.getStaticInt(prefix + "powerLevelPrevention", 5); }
 	public int getWitherLevelBonus() { return fcw.getStaticInt(prefix + "witherLevelBonus", 10); }
 	public int getEnderDragonLevelBonus() { return fcw.getStaticInt(prefix + "enderDragonLevelBonus", 100); }
+	public int getAttackDelayHard() { return fcw.getStaticInt(prefix + "attackDelay.hard", -1); }
+	public int getAttackDelaySoft() { return fcw.getStaticInt(prefix + "attackDelay.soft", 125); }
 	
 	public double getEnchantmentMultiplierSharpness() { return fcw.getStaticDouble(prefix + "enchantmentMultiplier.sharpness", 0.02); }
 	public double getEnchantmentMultiplierBane() { return fcw.getStaticDouble(prefix + "enchantmentMultiplier.bane", 0.02); }
@@ -224,7 +234,7 @@ public class BalanceConfig extends ConfigGod
 	public int getPlayerStatMagnitudeAttack() { return fcw.getStaticInt(prefix + "player.statMagnitutude.attack", 1); }
 	public int getPlayerStatMagnitudeConstitution() { return fcw.getStaticInt(prefix + "player.statMagnitutude.constitution", 20); }
 	public int getPlayerStatMagnitudeIntelligence() { return fcw.getStaticInt(prefix + "player.statMagnitutude.intelligence", 1); }
-	public int getPlayerLevelsPerSkillPoint() { return fcw.getStaticInt(prefix + "player.levelsPerSkillPoint", 4); }
+	public int getPlayerLevelsPerSpellPoint() { return fcw.getStaticInt(prefix + "player.levelsPerSpellPoint", 4); }
 	public int getPlayerStatsPerLevel() { return fcw.getStaticInt(prefix + "player.statsPerLevel", 10); }
 	public double getPlayerExpScaleRate() { return fcw.getStaticDouble(prefix + "player.expScaleRate", 3); }
 	public double getPlayerExpScaleBase() { return fcw.getStaticDouble(prefix + "player.expScaleBase", 11); }
