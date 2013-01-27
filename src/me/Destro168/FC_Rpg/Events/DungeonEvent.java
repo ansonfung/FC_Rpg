@@ -160,6 +160,9 @@ public class DungeonEvent extends GeneralEvent
 		
 		FC_Rpg.rpgEntityManager.getRpgPlayer(playerToRemove).playerConfig.setLastDungeonCompletion(System.currentTimeMillis());
 		
+		// Teleport player out of dungeon.
+		playerToRemove.teleport(FC_Rpg.dungeonConfig.getExit(dungeonNumber));
+		
 		if (participantList.size() == 0)
 			end(false);
 	}
@@ -490,7 +493,7 @@ public class DungeonEvent extends GeneralEvent
 	{
 		//Variable Declarations
 		Random rand = new Random();
-		List<ItemStack> drops = FC_Rpg.treasureConfig.getRandomTreasure(lowestLevel, rand.nextInt(5) + 1, FC_Rpg.treasureConfig.getLootList(FC_Rpg.dungeonConfig.getLootList(dungeonNumber))); // Get the list of random treasure.
+		List<ItemStack> drops = FC_Rpg.treasureConfig.getRandomItemStackList(lowestLevel, rand.nextInt(5) + 1, FC_Rpg.treasureConfig.getLootList(FC_Rpg.dungeonConfig.getLootList(dungeonNumber))); // Get the list of random treasure.
 		Block chestBlock;
 		Chest chest;
 		int x = (int) chestLocation.getX();

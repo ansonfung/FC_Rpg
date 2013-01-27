@@ -35,6 +35,7 @@ III: Intermediate Steps
     i. Configuring Guilds.yml
     
 IV: FAQs and Bonus Information
+	a. Effect IDs Table
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -209,7 +210,7 @@ Please note that there are commands in-game in the /radmin section section that 
 
     The spell configuration allows you to create spells to have specific settings as to how you want. Due to the nature of there being so many effect ids, and that they are all utilized in the default generation of the spells config, please refer to a default spells config file to see what each effect id does. That means you should probably make a backup of the default for reference :D. Please note that spells are setup so that you can have fields missing (like attack magnitude doesn't need to be included if you don't want that to be applied to your spell) and it won't mess things up.
 
-- effectID: Determines exactly what the spell does. Decides if a spell will be dodge, taunt, a fireball, strikes lightning etc.
+- effectID: Determines exactly what the spell does. Reference table in section IV.
 - name: The name of the spell
 - description: A short description of the spell.
 - duration: How long you want the spell to last at each rank.
@@ -257,7 +258,7 @@ restrictionIDs
 ~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-	Dungeons are probably the most interesting and complicated feature to setup. I can honestly only advise that you read this section extremely carefully and possibly multiple times. I will have a video specifically for dungeons only tomorrow added. I can't make one now as it's 3 am.
+	Dungeons are probably the most interesting and complicated feature to setup. I can honestly only advise that you read this section extremely carefully and possibly multiple times. Here is a video to help with creating a dungeon. The information in the video should be used in conjunction with the information listed here -> Dungeon Setup Video: http://www.youtube.com/watch?v=1Zcr3xzoSrg.
 
 First:
 
@@ -509,7 +510,7 @@ Configuration settings:
     counterAttack: 10 <- The percent chance to randomly counter-attack (not a decimal)
     strongerParry: 0.75 <- The damage multiplier for when people parry (damage * strongerParry).
     battleLust: 0.4 <- Damage multiplier based on missing health lost. Used on berserker class.
-- attackDelay:
+- attackDelay:d
     hard: -1 <- Sets a hard cap for how many times a player can attack a target per second. Set to -1 to cancel.
     soft: 125 <- Sets a cap on how many times a player can attack a target per second. The more guild members that are online with a player, the more times a target can be attacked.
 
@@ -529,5 +530,55 @@ The guilds setting only has one setting. This is the cost to create a guild.
 ~*
 ~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
 
-I have created this section to give a little bit of advice about random tidbits that will hopefully HELP you use my plugin even futher. Currently there aren't really any that I can give, so this section remains empty. However, I will fill it in later when information that is quite frequently requested appears.
+I have created this section to give a little bit of advice about random tidbits that will hopefully help you use my plugin even futher. As well, important tables of information will be listed here. Rembmer to use the /rpg help command in game to see valuable help!
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~
+	a. Effect IDs Table
+~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+General format is: [Spell Effect Name] = [Effect ID] | [What Constant Magnitude Setting Does For This Spell]
+
+[0 - 999] Normal Effects
+
+DEFENSE = 0 | Multiplier. .96 = Damage will only be 96% when you're hit. (4% reduction)
+DAMAGE_BONUS = 1 | Multiplier. 1.04 = 4% bonus.
+IMMORTAL = 2 | Duration in seconds
+THORNS = 3 | Multiplier. .04 = 4% returned
+HEALTH_STEAL = 4 | Multiplier. .04 = 4% stolen
+DODGE = 5 | Chance to dodge. 0 = 0% to dodge, 100 = 100% chance.
+MANA_STEAL = 6 | Multiplier. .04 = 4% stolen
+TELEPORT_STRIKE = 7 | No effect. Recommended use as buff/enchant only. (Very Buggy due to Bukkit issues, recommended not to use)
+DISABLED = 8 | Duration in milliseconds. 500 = .5 seconds.
+SPEED = 9 | Strength of speed up or slowdown. Defaults = .28, .36, .42, .50, .58. Recommended not o go past .6 (upside down-ness)
+FIREBALL = 10 | Constant Modifier. As stated before, all constant modifiers stack with magic magnitude.
+POISON = 11 | Damage Modifier per tick (5 total). 1.2 = 120% base damage each tick. 1 tick = 1 second.
+BLEED = 12 | Number of ticks to deal 2% hp. 2 = 2 ticks.
+AOE = 13 | Radius in blocks to do damage.
+FROST_STRIKE_AOE = 14 | Radius in blocks to freeze.
+HEAL_SELF = 15 | Constant Modifier.
+HEAL_OTHER = 16 | Constant Modifier.
+WEAKEN = 17 | Percent to lower stats by. .03 = 3% reduction.
+LIGHTNING = 18 | Constant damage modifier. Stacks with MagicMagnitude.
+BOOST_STATS = 19 | Percent to raise stats by. .03 = 3% boost.
+DAMAGE_SCALED_BY_MISSING_HEALTH = 20 | Multiplier. Really intricate feature, not explaining here. Check code if you want to see the mechanics behind missing health calculations. Increase for more damage, lower for less.
+DAMAGE_BY_MISSING_HEALTH = 21 | Multiplier. Also intricate. Increase for more damage, lower for less.
+SACRIFICE_HEALTH_FOR_DAMAGE = 22 | Multiplier. 1.6 = 60% more damage.
+HEAL_SELF_OR_OTHER = 23 | Constant Modifier.
+HEAL_SELF_PERCENT = 24 | Constant Modifier.
+
+CRITICAL_DAMAGE_DOUBLE = 25 | Chance to crit. 0 = 0%, 100 = 100%.
+HEAL_CHANCE = 26 | Multiplier. 1.01 = Heal 1%. 1.05 = Heal 5%.
+BONUS_STATS = 27 | ~TODO
+FIRE_STRIKE = 28 | Number of charges. 5 = 5 uses.
+IGNORE_ARMOR = 29 | No effect. Recommended use as buff only.
+FROST_STRIKE = 30 | Strength of slowdown.
+
+[1000 - 1999] Extremely Custom Effects
+
+BONUS_GOLD = 1000 | ~TODO
+BONUS_EXPERIENCE = 1001 | ~TODO
+TAUNT = 1003 | Strength of defense buff. See "DEFENSE" for info on defense buff.
+ALCHEMY = 1004 | Amount of arcanium to give during smelting. .125 = 12.5%.
+MANA_REGEN = 1005 | ~TODO

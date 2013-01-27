@@ -4,43 +4,26 @@ import java.util.List;
 
 public class Spell 
 {
-	private int effectID;
-	private String name;
-	private String description;
-	private List<Integer> duration;
-	private List<Double> manaCost;
-	private List<Double> constantMagnitude;
-	private List<Double> attackMagnitude;
-	private List<Double> magicMagnitude;
-	private List<Double> intelligenceMagnitude;
-	private List<Double> constitutionMagnitude;
-	private List<Integer> radius;
-	private boolean targetParty;
-	private boolean getIsClassRestricted;
-	private boolean getRequiresTarget;
-	private boolean uncastable;
-	
-	//Gets
-	public int getEffectID() { return effectID; }
-	public String getName() { return name; }
-	public String getDescription() { return description; }
-	public List<Integer> getDuration() { return duration; }
-	public List<Double> getManaCost() { return manaCost; }
-	public List<Double> getConstantMagnitude() { return constantMagnitude; }
-	public List<Double> getAttackMagnitude() { return attackMagnitude; }
-	public List<Double> getMagicMagnitude() { return magicMagnitude; }
-	public List<Double> getIntelligenceMagnitude() { return intelligenceMagnitude; }
-	public List<Double> getConstitutionMagnitude() { return constitutionMagnitude; }
-	public List<Integer> getRadius() { return radius; }
-	public boolean getTargetParty() { return targetParty; }
-	public boolean getIsClassRestricted() { return getIsClassRestricted; }
-	public boolean getRequiresTarget() { return getRequiresTarget; }
-	public boolean getUncastable() { return uncastable; }
+	public int effectID;
+	public String name;
+	public String description;
+	public List<Integer> duration;
+	public List<Double> manaCost;
+	public List<Double> constantMagnitude;
+	public List<Double> attackMagnitude;
+	public List<Double> magicMagnitude;
+	public List<Double> intelligenceMagnitude;
+	public List<Double> constitutionMagnitude;
+	public List<Integer> radius;
+	public boolean targetParty;
+	public boolean classRestricted;
+	public boolean requiresTarget;
+	public boolean uncastable;
 	
 	//Constructor
 	public Spell(int effectID_, String name_, String description_, List<Integer> duration_, List<Double> manaCost_, List<Double> constantMagnitude_,
 			List<Double> attackMagnitude_, List<Double> magicMagnitude_, List<Double> intelligenceMagnitude_, List<Double> constitutionMagnitude_,
-			List<Integer> radius_, boolean targetParty_, boolean getIsClassRestricted_, boolean getRequiresTarget_, boolean uncastable_)
+			List<Integer> radius_, boolean targetParty_, boolean classRestricted_, boolean requiresTarget_, boolean uncastable_)
 	{
 		effectID = effectID_;
 		name = name_;
@@ -54,8 +37,8 @@ public class Spell
 		constitutionMagnitude = constitutionMagnitude_;
 		radius = radius_;
 		targetParty = targetParty_;
-		getIsClassRestricted = getIsClassRestricted_;
-		getRequiresTarget = getRequiresTarget_;
+		classRestricted = classRestricted_;
+		requiresTarget = requiresTarget_;
 		uncastable = uncastable_;
 	}
 }

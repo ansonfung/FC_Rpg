@@ -22,8 +22,11 @@ public class GeneralConfig extends ConfigGod
 	public void handleUpdates()
 	{
 		// Handle version updates.
-		if (getVersion() < 1.27)
-			setVersion(1.27);
+		if (getVersion() < 1.3)
+		{
+			setVersion(1.3);
+			fcw.setNull(prefix + "commandKeyWord.world");
+		}
 		
 		// Load static information
 		getCustomChatExclusions();
@@ -52,8 +55,9 @@ public class GeneralConfig extends ConfigGod
 		getCommandKeyWordModify();
 		getCommandKeyWordW();
 		getCommandKeyWordBuff();
-		getCommandKeyWordWorld();
+		getCommandKeyWordRealm();
 		getCommandKeyWordPlayers();
+		getNickPrefix();
 		getTimedItemsInterval();
 		getInactivePlayerFileDeleteTime();
 		getDungeonEnterWaitPeriod();
@@ -134,8 +138,9 @@ public class GeneralConfig extends ConfigGod
 	public String getCommandKeyWordModify() { return fcw.getStaticString(prefix + "commandKeyWord.modify", "modify"); }
 	public String getCommandKeyWordW() { return fcw.getStaticString(prefix + "commandKeyWord.w", "w"); }
 	public String getCommandKeyWordBuff() { return fcw.getStaticString(prefix + "commandKeyWord.buff", "buff"); }
-	public String getCommandKeyWordWorld() { return fcw.getStaticString(prefix + "commandKeyWord.world", "world"); }
+	public String getCommandKeyWordRealm() { return fcw.getStaticString(prefix + "commandKeyWord.realm", "realm"); }
 	public String getCommandKeyWordPlayers() { return fcw.getStaticString(prefix + "commandKeyWord.players", "players"); }
+	public String getNickPrefix() { return fcw.getStaticString(prefix + "nickPrefix", "~"); }
 	public long getTimedItemsInterval() { return fcw.getStaticLong(prefix + "timedItems.interval", 3600000); }
 	public long getInactivePlayerFileDeleteTime() { return fcw.getStaticLong(prefix + "inactivePlayerFileDeleteTime", 1209600000); }
 	public long getDungeonEnterWaitPeriod() { return fcw.getStaticLong(prefix + "dungeonEnterWaitPeriod", 3600000); }

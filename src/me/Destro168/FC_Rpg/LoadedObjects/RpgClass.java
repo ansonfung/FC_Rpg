@@ -33,10 +33,10 @@ public class RpgClass
 		statGrowth = statGrowth_;
 		restrictionID = restrictionID_;
 		
-		getSpells(spellArray);
+		loadSpellBook(spellArray);
 	}
 	
-	private void getSpells(List<Integer> spellArray)
+	private void loadSpellBook(List<Integer> spellArray)
 	{
 		//Variable Declarations and Initializations
 		Spell spell;

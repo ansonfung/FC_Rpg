@@ -12,20 +12,30 @@ import me.Destro168.FC_Rpg.Spells.EffectIDs;
 //Rename spell manager
 public class SpellConfig extends ConfigGod
 {
-	private final int SPELL_COUNT_MAX = 1000;
+	public final static int SPELL_COUNT_MAX = 1000;
 	public final static int SPELL_TIERS = 5;
 	
-	private Map<Integer, Spell> spells;
+	protected Map<Integer, Spell> spells;
 	
 	public Spell getSpell(int i) { return spells.get(i); }
 	public int getSpellCount() { return spells.size(); }
+	
+	public Spell getSpellByEffectID(int effectID)
+	{
+		for (int i = 0; i < spells.size(); i++)
+		{
+			if (spells.get(i).effectID == effectID)
+				return spells.get(i);
+		}
+		
+		return null;
+	}
 	
 	//Sets
 	public void setEffectID(int i, int x) { fcw.set(prefix + i + ".effectID", x); }
 	public void setName(int i, String x) { fcw.set(prefix + i + ".name", x); }
 	public void setDescription(int i, String x) { fcw.set(prefix + i + ".description", x); }
 	public void setManaCost(int i, double a, double b, double c, double d, double e) { fcw.set(prefix + i + ".manaCost", a + "," + b + "," + c + "," + d + "," + e); }
-	
 	public void setDuration(int i, int a, int b, int c, int d, int e) { fcw.set(prefix + i + ".duration", a + "," + b + "," + c + "," + d + "," + e); }
 	public void setConstantMagnitude(int i, double a, double b, double c, double d, double e) { fcw.set(prefix + i + ".constantMagnitude", a + "," + b + "," + c + "," + d + "," + e); }
 	public void setAttackMagnitude(int i, double a, double b, double c, double d, double e) { fcw.set(prefix + i + ".attackMagnitude", a + "," + b + "," + c + "," + d + "," + e); }
@@ -33,7 +43,6 @@ public class SpellConfig extends ConfigGod
 	public void setIntelligenceMagnitude(int i, double a, double b, double c, double d, double e) { fcw.set(prefix + i + ".intelligenceMagnitude", a + "," + b + "," + c + "," + d + "," + e); }
 	public void setConstitutionMagnitude(int i, double a, double b, double c, double d, double e) { fcw.set(prefix + i + ".constitutionMagnitude", a + "," + b + "," + c + "," + d + "," + e); }
 	public void setRadius(int i, int a, int b, int c, int d, int e) { fcw.set(prefix + i + ".radius", a + "," + b + "," + c + "," + d + "," + e); }
-	
 	public void setTargetParty(int i, boolean x) { fcw.set(prefix + i + ".targetParty", x); }
 	public void setIsClassRestricted(int i, boolean x) { fcw.set(prefix + i + ".isClassRestricted", x); }
 	public void setRequiresTarget(int i, boolean x) { fcw.set(prefix + i + ".requiresTarget", x); }
@@ -44,7 +53,6 @@ public class SpellConfig extends ConfigGod
 	public String getName(int i) { return fcw.getString(prefix + i + ".name"); }
 	public String getDescription(int i) { return fcw.getString(prefix + i + ".description"); }
 	public List<Double> getManaCost(int i) { return fcw.getCustomDoubleList(prefix + i + ".manaCost"); }
-	
 	public List<Integer> getDuration(int i) { try { return fcw.getCustomIntegerList(prefix + i + ".duration"); } catch (NullPointerException e) { return null; } }
 	public List<Double> getConstantMagnitude(int i) { try { return fcw.getCustomDoubleList(prefix + i + ".constantMagnitude"); } catch (NullPointerException e) { return null; } }
 	public List<Double> getAttackMagnitude(int i) { try { return fcw.getCustomDoubleList(prefix + i + ".attackMagnitude"); } catch (NullPointerException e) { return null; } }
@@ -52,7 +60,6 @@ public class SpellConfig extends ConfigGod
 	public List<Double> getIntelligenceMagnitude(int i) { try { return fcw.getCustomDoubleList(prefix + i + ".intelligenceMagnitude"); } catch (NullPointerException e) { return null; } }
 	public List<Double> getConstitutionMagnitude(int i) { try { return fcw.getCustomDoubleList(prefix + i + ".constitutionMagnitude"); } catch (NullPointerException e) { return null; } }
 	public List<Integer> getRadius(int i) { try { return fcw.getCustomIntegerList(prefix + i + ".radius"); } catch (NullPointerException e) { return null; } }
-	
 	public boolean getTargetParty(int i) { return fcw.getBoolean(prefix + i + ".targetParty"); }
 	public boolean getIsClassRestricted(int i) { return fcw.getBoolean(prefix + i + ".isClassRestricted"); }
 	public boolean getRequiresTarget(int i) { return fcw.getBoolean(prefix + i + ".requiresTarget"); }
@@ -75,9 +82,6 @@ public class SpellConfig extends ConfigGod
 			//Set the default spells.
 			setDefaultSpells();
 		}
-		
-		//Save the config.
-		FC_Rpg.plugin.saveConfig();
 	}
 	
 	public void loadConfigValues()
@@ -100,7 +104,7 @@ public class SpellConfig extends ConfigGod
 		}
 	}
 	
-	private void setBuffStats(int i)
+	protected void setBuffStats(int i)
 	{
 		setDuration(i, 10000, 12500, 15000, 17500, 20000);
 		setManaCost(i, 10, 20, 30, 40, 50);
@@ -108,7 +112,7 @@ public class SpellConfig extends ConfigGod
 		setRequiresTarget(i, false);
 	}
 	
-	private void setD1Stats(int i)
+	protected void setD1Stats(int i)
 	{
 		setManaCost(i, 2, 4, 6, 8, 10);
 		setIsClassRestricted(i, true);
@@ -127,13 +131,15 @@ public class SpellConfig extends ConfigGod
 		setBuffStats(0);
 		setConstantMagnitude(0, 4, 8, 12, 16, 20);
 		
-		setEffectID(1, EffectIDs.ATTACK);
+		setEffectID(1, EffectIDs.DAMAGE_BONUS);
 		setName(1, "Morale");
 		setDescription(1, "Apply a (x)% damage boost to your entire party.");
 		setBuffStats(1);
 		setConstantMagnitude(1, 1.04, 1.08, 1.12, 1.16, 1.20);
+		setTargetParty(1, true);
+		setRadius(1,20,20,20,20,20);
 		
-		setEffectID(2, EffectIDs.DAMAGE_BOOST);
+		setEffectID(2, EffectIDs.DAMAGE_BONUS);
 		setName(2, "Empower");
 		setDescription(2, "Empowers your next attack to deal (x)% bonus damage.");
 		setD1Stats(2);
@@ -164,14 +170,14 @@ public class SpellConfig extends ConfigGod
 		setRequiresTarget(5, false);
 		setConstantMagnitude(5, .28, .36, .42, .50, .58);
 		
-		setEffectID(6, EffectIDs.FIRE_ARROW);
+		setEffectID(6, EffectIDs.FIRE_STRIKE);
 		setName(6, "Flame");
 		setDescription(6, "Gives your arrows a burning effect for (x) shots. Fire insta-kills mobs but does not " +
 				"give loot/exp/items from them or kill bosses.");
 		setD1Stats(6);
 		setConstantMagnitude(6, 1, 2, 3, 4, 5);
 		
-		setEffectID(7, EffectIDs.DAMAGE_BOOST);
+		setEffectID(7, EffectIDs.DAMAGE_BONUS);
 		setName(7, "Force");
 		setDescription(7, "Strengthens your next arrow to deal (x)% bonus damage.");
 		setD1Stats(7);
@@ -185,7 +191,7 @@ public class SpellConfig extends ConfigGod
 		setIsClassRestricted(8, true);
 		setRequiresTarget(8, true);
 		
-		setEffectID(9, EffectIDs.FROST_ARROW);
+		setEffectID(9, EffectIDs.FROST_STRIKE_AOE);
 		setName(9, "Frost");
 		setDescription(9, "Hit a target with an arrow to freeze everything within (x) radius for (x) seconds.");
 		setDuration(9,40,55,70,85,100);
@@ -203,6 +209,7 @@ public class SpellConfig extends ConfigGod
 		setDescription(10, "Teleport and set aggro of all monsters in 12 block radius to you. Increases party defense by (x)%.");
 		setBuffStats(10);
 		setConstantMagnitude(10, .96, .92, .88, .84, .80);
+		setRadius(1,20,20,20,20,20);
 		
 		setEffectID(11, EffectIDs.THORNS);
 		setName(11, "Thorns");
@@ -283,10 +290,10 @@ public class SpellConfig extends ConfigGod
 		setRequiresTarget(19, false);
 		
 		/*******************************************
-		 * Bloodthirster
+		 * Berserker
 		*******************************************/
 		
-		setEffectID(20, EffectIDs.LIFESTEAL);
+		setEffectID(20, EffectIDs.HEALTH_STEAL);
 		setName(20, "Bloodthirst");
 		setDescription(20, "Steal (x)% life from all damage.");
 		setBuffStats(20);
@@ -296,15 +303,15 @@ public class SpellConfig extends ConfigGod
 		setName(21, "Undying");
 		setDescription(21, "Become immune to death for (x) seconds.");
 		setBuffStats(21);
-		setConstantMagnitude(21,3,3.5,4,4.5,5);
+		setDuration(21, 3000, 3500, 4000, 4500, 5000);
 		
-		setEffectID(22, EffectIDs.TELEPORT_STRIKE);
+		setEffectID(22, EffectIDs.IGNORE_ARMOR);
 		setName(22, "Ferocity");
-		setDescription(22, "Imbue your normal strength with magic to attack with such strength that you teleport behind targets for (x) seconds.");
+		setDescription(22, "Ignore the defense values of player armor with your next strike.");
 		setBuffStats(22);
-		setConstantMagnitude(22, 3, 3.5, 4, 4.5, 5);
+		setDuration(22, 3000, 3500, 4000, 4500, 5000);
 		
-		setEffectID(23, EffectIDs.DAMAGE_BY_MISSING_HEALTH);
+		setEffectID(23, EffectIDs.DAMAGE_SCALED_BY_MISSING_HEALTH);
 		setName(23, "Unbalanced");
 		setDescription(23, "Deal missing health as (x)% instant bonus damage.");
 		setD1Stats(23);

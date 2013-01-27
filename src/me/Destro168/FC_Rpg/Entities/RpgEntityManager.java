@@ -13,6 +13,7 @@ import me.Destro168.FC_Suite_Shared.Messaging.BroadcastLib;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -59,7 +60,7 @@ public class RpgEntityManager
 					rpgPlayer.attemptGiveTimedItems();
 					rpgPlayer.calculateHealthAndMana();
 					rpgPlayer.updateTimePlayed();
-					rpgPlayer.playerConfig.save(); // Save all player information every 60 seconds.
+					rpgPlayer.onlineSave(); // Save all player information every 60 seconds.
 				}
 			}, 0, 1200);
 		}
@@ -145,46 +146,36 @@ public class RpgEntityManager
 	{
 		// Variable Declarations
 		List<RpgPlayer> playerList = new ArrayList<RpgPlayer>();
-		EntityLocationLib ell = new EntityLocationLib();
-		String guild = FC_Rpg.guildConfig.getGuildByMember(player.getName());
 		
-		// If no party return the source player in list form.
-		if (guild == null)
-		{
-			playerList.add(getRpgPlayer(player));
-			return playerList;
-		}
+		for (Player p : getNearbyPartiedPlayers(player, distance))
+			playerList.add(getRpgPlayer(p));
 		
-		//If the guild isn't null, then we get online guild members and add them.
-		for (Player guildMember : FC_Rpg.guildConfig.getOnlineGuildPlayerList(guild))
-		{
-			if (ell.isNearby(player, guildMember, distance))
-				playerList.add(getRpgPlayer(guildMember));
-		}
-		
+		// Always return player list
 		return playerList;
 	}
 	
-	public List<Player> getNearbyPartiedPlayers(Player player, int distance)
+	public List<Player> getNearbyPartiedPlayers(Player sourcePlayer, int distance)
 	{
 		// Variable Declarations
 		List<Player> playerList = new ArrayList<Player>();
-		EntityLocationLib ell = new EntityLocationLib();
-		String guild = FC_Rpg.guildConfig.getGuildByMember(player.getName());
+		String guild = FC_Rpg.guildConfig.getGuildByMember(sourcePlayer.getName());
 		
-		// If no party return the source player in list form.
-		if (guild == null)
-		{
-			playerList.add(player);
-			return playerList;
-		}
+		// Always add source player
+		playerList.add(sourcePlayer);
 		
-		//If the guild isn't null, then we get online guild members and add them.
-		for (Player guildMember : FC_Rpg.guildConfig.getOnlineGuildPlayerList(guild))
+		// If there is a guild then we will get all online guild members.
+		if (guild != null)
 		{
-			if (ell.isNearby(player, guildMember, distance))
+			List<Player> guildMembers = FC_Rpg.guildConfig.getOnlineGuildPlayerList(guild);
+			guildMembers.remove(sourcePlayer);
+			
+			for (Entity e : sourcePlayer.getNearbyEntities(50, 50, 50))
 			{
-				playerList.add(player);
+				if (e instanceof Player)
+				{
+					if (guildMembers.contains(e))
+						playerList.add((Player) e);
+				}
 			}
 		}
 		
@@ -218,6 +209,9 @@ public class RpgEntityManager
     
     public RpgPlayer getRpgPlayer(Player player)
     {
+    	if (player == null)
+    		return null;
+    	
     	//Create a pcf to check if a player config file is created or not.
     	PlayerConfig pcf = new PlayerConfig(player.getName());
     	
@@ -285,7 +279,7 @@ public class RpgEntityManager
     	{
     		piMap.get(player).stopTasks();
     		piMap.get(player).getRpgPlayer().updateTimePlayed();
-    		piMap.get(player).getRpgPlayer().playerConfig.save();
+    		piMap.get(player).getRpgPlayer().onlineSave();
     		piMap.remove(player);
     	}
     }
@@ -367,43 +361,21 @@ public class RpgEntityManager
 	}
 }
 
-//Bukkit.getServer().broadcastMessage("You never found mob: " + String.valueOf(x));
-//Bukkit.getServer().broadcastMessage("You never found player: " + name);
-
-/*
-public void registerEntityById(int id)
-{
-	for (int i = 0; i < MAX_ENTITIES; i++)
-	{
-		if (monsterId[i] == -1)
-		{
-			monsterId[i] = id;
-			rpgMonster[i] = new RpgMonster();
-			i = MAX_ENTITIES;
-		}
-	}
-}
-
-public void entityRemove(Entity entity)
-{
-	for (int i = 0; i < MAX_ENTITIES; i++)
-	{
-		if (monsterId[i] == entity.getEntityId())
-		{
-			monsterId[i] = -1;
-			rpgMonster[i].clear();
-		}
-	}
-}
-*/
 
 
-/* - Code Alogorithm for storing mobs/players
-Problem: Store player ids and overlap and remove old records after all 99,999 places are used.
-Solution: 
-- We keep track of the currentArray we are using with currentArray.
-- We go into our current array and we use that array. Whenever it is full, it won't return a value
-	so we clear out the other array and set our current array to the other array. */
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

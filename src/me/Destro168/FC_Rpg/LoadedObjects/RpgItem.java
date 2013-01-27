@@ -6,7 +6,7 @@ public class RpgItem
 {
 	public String material;
 	public short dataValue;
-	public boolean enchantable;
+	public int enchantType;
 	public double priceBuy;
 	public double priceSell;
 	public int dropLevelMax;
@@ -17,12 +17,12 @@ public class RpgItem
 	
 	public Material getMaterial() { return Material.getMaterial(material); }
 	
-	public RpgItem(String materialName, int datavalue_, boolean enchantable_, double priceBuy_, double priceSell_,
+	public RpgItem(String materialName, int datavalue_, int enchantType_, double priceBuy_, double priceSell_,
 			int dropLevelMin_, int dropLevelMax_, int dropAmountFlat_, int dropAmountRandom_)
 	{ 
 		material = materialName;
 		dataValue = (short) datavalue_;
-		enchantable = enchantable_;
+		enchantType = enchantType_;
 		priceBuy = priceBuy_;
 		priceSell = priceSell_;
 		dropLevelMin = dropLevelMin_;

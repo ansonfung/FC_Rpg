@@ -26,36 +26,37 @@ public class EntityDamageManager
 {
 	public EntityDamageManager() { }
 	
-	//Player combat.
 	public void attackPlayerDefender(RpgPlayer rpgDefender, RpgPlayer rpgAttacker, RpgMonster rpgMobAttacker, double damage, int damageType, String typeString)
 	{
+		EntityDamageByEntityEvent edbe;
 		Player playerDefender = rpgDefender.getPlayer();
-		String party = "";
+		String guildName = "";
 		HealthConverter hc = null;
-		int memberCount = 0;
+		boolean ignoreArmor = false;
+		int guildMemberCount = 0;
 		
 		// Get party and member count.
 		if (FC_Rpg.guildConfig.getGuildByMember(playerDefender.getName()) != null)
 		{
-			party = FC_Rpg.guildConfig.getGuildByMember(playerDefender.getName());
-			memberCount = FC_Rpg.guildConfig.getOnlineGuildPlayerList(party).size();
+			guildName = FC_Rpg.guildConfig.getGuildByMember(playerDefender.getName());
+			guildMemberCount = FC_Rpg.guildConfig.getOnlineGuildPlayerList(guildName).size();
 		}
 		else
-			memberCount = 1;
+			guildMemberCount = 1;
 		
 		// Check to see if the player was recently attacked to make sure he isn't attacked too much.
-		if (canAttack(rpgDefender.getLastDamagedLong(), memberCount) == false)
+		if (canAttack(rpgDefender.getLastDamagedLong(), guildMemberCount) == false)
 			return;
 		
 		// Handle immortality effect first.
-		if (rpgDefender.getStatusActiveRpgPlayer(EffectIDs.IMMORTAL))
+		if (rpgDefender.playerConfig.getStatusActiveRpgPlayer(EffectIDs.IMMORTAL))
 		{
 			rpgDefender.attemptDamageAvoidNotification(true);
 			return;
 		}
-
+		
 		// Check if the player has dodge status on them.
-		if (rpgDefender.getStatusActiveRpgPlayer(EffectIDs.DODGE))
+		if (rpgDefender.playerConfig.getStatusActiveRpgPlayer(EffectIDs.DODGE))
 		{
 			Random rand = new Random();
 			
@@ -66,42 +67,38 @@ public class EntityDamageManager
 			}
 		}
 		
+		if (rpgDefender.playerConfig.getStatusActiveRpgPlayer(EffectIDs.HEAL_CHANCE))
+			rpgDefender.healHealth(rpgDefender.playerConfig.maxHealth * rpgDefender.playerConfig.getStatusMagnitude(EffectIDs.HEAL_CHANCE));
+		
 		// Set the last damage cause for players.
-		EntityDamageByEntityEvent edbe;
-
 		if (rpgAttacker != null)
 		{
 			updateSwordDurabilities(rpgAttacker.getPlayer());
 			
 			edbe = new EntityDamageByEntityEvent(rpgAttacker.getPlayer(), playerDefender, DamageCause.ENTITY_ATTACK, 0);
 			playerDefender.setLastDamageCause(edbe);
+			damage *= FC_Rpg.battleCalculations.getPotionOffenseBonus(playerDefender);
 			
-			// Handle sharpness enchant.
-			if (damageType == 0)
-				damage = damage * FC_Rpg.battleCalculations.getPlayerEnchantmentBonus(rpgAttacker.getPlayer(), Enchantment.DAMAGE_ALL);
-			
-			if (damageType == 1)
-				damage = damage * FC_Rpg.battleCalculations.getPlayerEnchantmentBonus(rpgAttacker.getPlayer(), Enchantment.ARROW_DAMAGE);
-			
-			damage = damage * FC_Rpg.battleCalculations.getPotionOffenseBonus(playerDefender);
+			// True gets returned, we ignore armor.
+			ignoreArmor = rpgAttacker.playerConfig.getStatusActiveRpgPlayer(EffectIDs.IGNORE_ARMOR);
 		}
 		else if (rpgMobAttacker != null)
 		{
 			edbe = new EntityDamageByEntityEvent(rpgMobAttacker.getEntity(), rpgDefender.getPlayer(), DamageCause.ENTITY_ATTACK, 0);
 			playerDefender.setLastDamageCause(edbe);
-			
+
 			// Handle sharpness enchant.
 			if (damageType == 0)
-				damage = damage * FC_Rpg.battleCalculations.getEntityEnchantmentBonus(rpgMobAttacker.getEntity(), Enchantment.DAMAGE_ARTHROPODS);
-			
+				damage *= FC_Rpg.battleCalculations.getEntityEnchantmentBonus(rpgMobAttacker.getEntity(), Enchantment.DAMAGE_ARTHROPODS);
+
 			if (damageType == 1)
-				damage = damage * FC_Rpg.battleCalculations.getEntityEnchantmentBonus(rpgMobAttacker.getEntity(), Enchantment.ARROW_DAMAGE);
+				damage *= FC_Rpg.battleCalculations.getEntityEnchantmentBonus(rpgMobAttacker.getEntity(), Enchantment.ARROW_DAMAGE);
 			
-			damage = damage * FC_Rpg.battleCalculations.getPotionOffenseBonus(rpgMobAttacker.getEntity());
+			damage *= FC_Rpg.battleCalculations.getPotionOffenseBonus(rpgMobAttacker.getEntity());
 		}
 		
 		// Deal thorns damage before anything is calculated.
-		if (rpgDefender.getStatusActiveRpgPlayer(EffectIDs.THORNS))
+		if (rpgDefender.playerConfig.getStatusActiveRpgPlayer(EffectIDs.THORNS))
 		{
 			double thornsDamage = damage * rpgDefender.playerConfig.getStatusMagnitude(EffectIDs.THORNS);
 			
@@ -114,16 +111,20 @@ public class EntityDamageManager
 				rpgMobAttacker.dealDamage(thornsDamage);
 		}
 		
-		// Calculate damage based on players armor.
-		damage = damage * FC_Rpg.battleCalculations.getArmorBonus(rpgDefender);
+		// If the attacker doesn't have the ignore defense status, then...
+		if (!ignoreArmor)
+		{
+			// Calculate damage based on players armor.
+			damage *= FC_Rpg.battleCalculations.getArmorBonus(rpgDefender);
+
+			// Add in enchantment bonuses.
+			damage *= FC_Rpg.battleCalculations.getArmorEnchantmentBonus(playerDefender, Enchantment.PROTECTION_ENVIRONMENTAL);
+
+			if (damageType == 1)
+				damage *= FC_Rpg.battleCalculations.getArmorEnchantmentBonus(playerDefender, Enchantment.PROTECTION_PROJECTILE);
+		}
 		
-		// Add in enchantment bonuses.
-		damage = damage * FC_Rpg.battleCalculations.getArmorEnchantmentBonus(playerDefender, Enchantment.PROTECTION_ENVIRONMENTAL);
-		
-		if (damageType == 1)
-			damage = damage * FC_Rpg.battleCalculations.getArmorEnchantmentBonus(playerDefender, Enchantment.PROTECTION_PROJECTILE);
-		
-		damage = damage * FC_Rpg.battleCalculations.getPotionDefenseBonus(playerDefender);
+		damage *= FC_Rpg.battleCalculations.getPotionDefenseBonus(playerDefender);
 		
 		// Handle block.
 		if (playerDefender.isBlocking() == true)
@@ -134,34 +135,38 @@ public class EntityDamageManager
 			if (rpgClass != null)
 			{
 				if (rpgClass.getPassiveID() == BalanceConfig.passive_StrongerParry)
-					damage = damage * FC_Rpg.balanceConfig.getPassivesStrongerParry(); // 25% damage reduction for blocking as defender.
+					damage *= FC_Rpg.balanceConfig.getPassivesStrongerParry(); // 25% damage reduction for blocking as defender.
 				else
-					damage = damage * .9; // 10% damage reduction for blocking.
+					damage *= .9; // 10% damage reduction for blocking.
 			}
 			else
-				damage = damage * .9; // 10% damage reduction for blocking.
+				damage *= .9; // 10% damage reduction for blocking.
 		}
 
 		// If taunt status is active, then...
-		if (rpgDefender.getStatusActiveRpgPlayer(EffectIDs.TAUNT) == true)
+		if (rpgDefender.playerConfig.getStatusActiveRpgPlayer(EffectIDs.TAUNT) == true)
 		{
 			// Apply taunt damage reduction.
-			damage = damage * rpgDefender.playerConfig.getStatusMagnitude(EffectIDs.TAUNT);
+			damage *= rpgDefender.playerConfig.getStatusMagnitude(EffectIDs.TAUNT);
 		}
-
+		
 		// Deal damage greater than 0.
 		if (damage < 0.1)
 			damage = 0.1;
 		
 		// Deal the damage to the player
 		rpgDefender.dealDamage(damage);
-		
+
 		// Perform damage effect.
 		playerDefender.playEffect(EntityEffect.HURT);
-
+		
 		if (rpgAttacker != null)
 		{
-			handle_Postoffense_Buffs(rpgAttacker, playerDefender, damage);
+			handle_Post_Offense_Buffs(rpgAttacker, playerDefender, damage);
+			
+			if (playerDefender != null)
+				handle_Post_Offense_Buffs(rpgAttacker, playerDefender, damage);
+			
 			rpgAttacker.attemptAttackNotification(rpgDefender.getPlayer().getName(), rpgDefender.playerConfig.getClassLevel(), rpgDefender.playerConfig.curHealth, rpgDefender.playerConfig.maxHealth, damage);
 			applyKnockback(rpgAttacker.getPlayer(), playerDefender, damageType);
 		}
@@ -173,13 +178,13 @@ public class EntityDamageManager
 
 		// Check armor durabilities for the player defender.
 		increaseArmorDurabilities(playerDefender);
-
+		
 		// If the players has 0 health, kill minecraft body and set to dead.
 		if (rpgDefender.playerConfig.curHealth < 1)
 		{
 			// Damage the player defender.
 			playerDefender.damage(10000);
-
+			
 			// Set the player to alive.
 			rpgDefender.setIsAlive(false);
 		}
@@ -201,187 +206,16 @@ public class EntityDamageManager
 			}
 		}
 	}
-	
-	private void updateSwordDurabilities(final Player p)
-	{
-		//Variable Declaration
-		ItemStack handItem = p.getItemInHand();
-		int handItemDurability = handItem.getDurability();
-		int maxDurability = handItem.getType().getMaxDurability();
-		int unbreakingLevel = handItem.getEnchantmentLevel(Enchantment.DURABILITY);
-		Random rand = new Random();
-		
-		//Adjust durability of sword.
-		if (FC_Rpg.mLib.swords.contains(handItem.getType()) || handItem.getType().equals(Material.BOW))
-		{
-			//If the item has unbreaking, then we have to give the item a chance to not break based on it.
-			if (handItem.getEnchantments().size() == 0)
-				return;
-			
-			//Handle sword unbreaking level.
-			if (unbreakingLevel > 0)
-			{
-				if ((rand.nextInt(unbreakingLevel)) == 0)
-					return;
-			}
-			
-			// Increase durability.
-			handItem.setDurability((short) (handItemDurability + 1));
-			
-			// Set the hand item 
-			if (handItemDurability >= maxDurability)
-				p.setItemInHand(new ItemStack(Material.AIR));
-		}
-	}
-	
-	private void increaseArmorDurabilities(Player p)
-	{
-		short currentDurability = 0;
-		boolean setAir = false;
-		ItemStack boots = p.getInventory().getBoots();
-		ItemStack chest = p.getInventory().getChestplate();
-		ItemStack legs = p.getInventory().getLeggings();
-		ItemStack helm = p.getInventory().getHelmet();
-		ItemStack air = new ItemStack(Material.AIR);
 
-		if (boots != null)
-		{
-			if (boots.getEnchantments().size() > 0)
-			{
-				boots.setDurability((short) (boots.getDurability() + 1));
-				currentDurability = boots.getDurability();
-
-				if (boots.getType() == Material.LEATHER_BOOTS && currentDurability >= Material.LEATHER_BOOTS.getMaxDurability())
-					setAir = true;
-				else if (boots.getType() == Material.CHAINMAIL_BOOTS && currentDurability >= Material.CHAINMAIL_BOOTS.getMaxDurability())
-					setAir = true;
-				else if (boots.getType() == Material.IRON_BOOTS && currentDurability >= Material.IRON_BOOTS.getMaxDurability())
-					setAir = true;
-				else if (boots.getType() == Material.DIAMOND_BOOTS && currentDurability >= Material.DIAMOND_BOOTS.getMaxDurability())
-					setAir = true;
-				else if (boots.getType() == Material.GOLD_BOOTS && currentDurability >= Material.GOLD_BOOTS.getMaxDurability())
-					setAir = true;
-
-				if (setAir == true)
-					p.getInventory().setBoots(air);
-				else
-					p.getInventory().setBoots(boots);
-			}
-		}
-
-		if (chest != null)
-		{
-			if (chest.getEnchantments().size() > 0)
-			{
-				chest.setDurability((short) (chest.getDurability() + 1));
-				currentDurability = chest.getDurability();
-
-				if (chest.getType() == Material.LEATHER_CHESTPLATE && currentDurability >= Material.LEATHER_CHESTPLATE.getMaxDurability())
-					setAir = true;
-				else if (chest.getType() == Material.CHAINMAIL_CHESTPLATE && currentDurability >= Material.CHAINMAIL_CHESTPLATE.getMaxDurability())
-					setAir = true;
-				else if (chest.getType() == Material.IRON_CHESTPLATE && currentDurability >= Material.IRON_CHESTPLATE.getMaxDurability())
-					setAir = true;
-				else if (chest.getType() == Material.DIAMOND_CHESTPLATE && currentDurability >= Material.DIAMOND_CHESTPLATE.getMaxDurability())
-					setAir = true;
-				else if (chest.getType() == Material.GOLD_CHESTPLATE && currentDurability >= Material.GOLD_CHESTPLATE.getMaxDurability())
-					setAir = true;
-
-				if (setAir == true)
-					p.getInventory().setChestplate(air);
-				else
-					p.getInventory().setChestplate(chest);
-			}
-		}
-
-		if (legs != null)
-		{
-			if (legs.getEnchantments().size() > 0)
-			{
-				legs.setDurability((short) (legs.getDurability() + 1));
-				currentDurability = legs.getDurability();
-
-				if (legs.getType() == Material.LEATHER_LEGGINGS && currentDurability >= Material.LEATHER_LEGGINGS.getMaxDurability())
-					setAir = true;
-				else if (legs.getType() == Material.CHAINMAIL_LEGGINGS && currentDurability >= Material.CHAINMAIL_LEGGINGS.getMaxDurability())
-					setAir = true;
-				else if (legs.getType() == Material.IRON_LEGGINGS && currentDurability >= Material.IRON_LEGGINGS.getMaxDurability())
-					setAir = true;
-				else if (legs.getType() == Material.DIAMOND_LEGGINGS && currentDurability >= Material.DIAMOND_LEGGINGS.getMaxDurability())
-					setAir = true;
-				else if (legs.getType() == Material.GOLD_LEGGINGS && currentDurability >= Material.GOLD_LEGGINGS.getMaxDurability())
-					setAir = true;
-
-				if (setAir == true)
-					p.getInventory().setLeggings(air);
-				else
-					p.getInventory().setLeggings(legs);
-			}
-		}
-
-		if (helm != null)
-		{
-			if (helm.getEnchantments().size() > 0)
-			{
-				helm.setDurability((short) (helm.getDurability() + 1));
-				currentDurability = helm.getDurability();
-
-				if (helm.getType() == Material.LEATHER_HELMET && currentDurability >= Material.LEATHER_HELMET.getMaxDurability())
-					setAir = true;
-				else if (helm.getType() == Material.CHAINMAIL_HELMET && currentDurability >= Material.CHAINMAIL_HELMET.getMaxDurability())
-					setAir = true;
-				else if (helm.getType() == Material.IRON_HELMET && currentDurability >= Material.IRON_HELMET.getMaxDurability())
-					setAir = true;
-				else if (helm.getType() == Material.DIAMOND_HELMET && currentDurability >= Material.DIAMOND_HELMET.getMaxDurability())
-					setAir = true;
-				else if (helm.getType() == Material.GOLD_HELMET && currentDurability >= Material.GOLD_HELMET.getMaxDurability())
-					setAir = true;
-
-				if (setAir == true)
-					p.getInventory().setHelmet(air);
-				else
-					p.getInventory().setHelmet(helm);
-			}
-		}
-	}
-
-	private void applyKnockback(Player attacker, LivingEntity attacked, int damageType)
-	{
-		ItemStack handItem = attacker.getItemInHand();
-		float knockback = 0;
-		
-		// If arrow knockback is on, and the damage is arrow type, then...
-		if (FC_Rpg.balanceConfig.getArrowKnockback() == true && damageType == 1)
-		{
-			//Add knockback.
-			knockback += 1;
-			
-			//Add in additional knockback based on the punch enchants strength.
-			if (handItem.containsEnchantment(Enchantment.ARROW_KNOCKBACK))
-				knockback += handItem.getEnchantmentLevel(Enchantment.ARROW_KNOCKBACK);
-		}
-		else if (FC_Rpg.balanceConfig.getSwordKnockback())
-		{
-			//Increase knockback based on damage type.
-			if (handItem.containsEnchantment(Enchantment.KNOCKBACK))
-				knockback += handItem.getEnchantmentLevel(Enchantment.KNOCKBACK);
-		}
-		
-		// If there is a knockback the we apply it.
-		if (knockback > 0)
-			attacked.setVelocity(attacked.getVelocity().add(attacked.getLocation().toVector().subtract(attacker.getLocation().toVector()).normalize().multiply(knockback)));
-	}
-	
-	//Mob combat
+	// Mob combat
 	public void attackMobDefender(RpgMonster rpgMobDefender, RpgPlayer rpgAttacker, double damage, int damageType)
 	{
 		// Variable Declarations.
 		Player playerAttacker = rpgAttacker.getPlayer();
 		LivingEntity entityDefender = rpgMobDefender.getEntity();
 		String guild = null;
-		int fireUses = rpgAttacker.playerConfig.getStatusUses(EffectIDs.FIRE_ARROW);
 		int partyMemberCount = 1;
-		
+
 		// Make sure that the mob wasn't attacked too recently.
 		if (FC_Rpg.guildConfig.getGuildByMember(playerAttacker.getName()) != null)
 		{
@@ -397,7 +231,7 @@ public class EntityDamageManager
 			return;
 		
 		// If the player has the fire arrow status, then...
-		if (fireUses > 0)
+		if (rpgAttacker.playerConfig.getStatusActiveRpgPlayer(EffectIDs.FIRE_STRIKE))
 		{
 			// If the mob is alive and not a boss.
 			if (rpgMobDefender.getIsBoss() == false && rpgMobDefender.getIsAlive() == true)
@@ -405,52 +239,48 @@ public class EntityDamageManager
 				// Put mob on fire
 				((LivingEntity) entityDefender).setFireTicks(20); // set the mob on fire!
 				
-				// Remove a fire arrow use.
-				rpgAttacker.playerConfig.setStatusUses(EffectIDs.FIRE_ARROW, fireUses - 1);
-				
 				// Then return
 				return;
 			}
 		}
 		
-		//Update sword durabilities.
-		updateSwordDurabilities(rpgAttacker.getPlayer());
+		// Update sword durabilities.
+		updateSwordDurabilities(playerAttacker);
 		
 		// If the player has the attack buff, then...
-		if (rpgAttacker.getStatusActiveRpgPlayer(EffectIDs.ATTACK))
+		if (rpgAttacker.playerConfig.getStatusActiveRpgPlayer(EffectIDs.DAMAGE_BONUS))
 		{
 			// Increase attack damage by its magnitude.
-			damage = damage * rpgAttacker.playerConfig.getStatusMagnitude(EffectIDs.ATTACK);
+			damage *= rpgAttacker.playerConfig.getStatusMagnitude(EffectIDs.DAMAGE_BONUS);
 		}
 		
-		if (damageType == 0)
+		if (rpgAttacker.playerConfig.getStatusActiveRpgPlayer(EffectIDs.CRITICAL_DAMAGE_DOUBLE))
 		{
-			damage = damage * FC_Rpg.battleCalculations.getPlayerEnchantmentBonus(rpgAttacker.getPlayer(), Enchantment.DAMAGE_ALL);
+			Random rand = new Random();
 			
-			if (entityDefender.getType() == EntityType.SPIDER || entityDefender.getType() == EntityType.CAVE_SPIDER)
-				damage = damage * FC_Rpg.battleCalculations.getPlayerEnchantmentBonus(rpgAttacker.getPlayer(), Enchantment.DAMAGE_ARTHROPODS);
-			else if (entityDefender.getType() == EntityType.ZOMBIE || entityDefender.getType() == EntityType.PIG_ZOMBIE || entityDefender.getType() == EntityType.SKELETON)
-				damage = damage * FC_Rpg.battleCalculations.getPlayerEnchantmentBonus(rpgAttacker.getPlayer(), Enchantment.DAMAGE_UNDEAD);
+			// Increase attack damage by its magnitude.
+			if (rand.nextInt(100) > rpgAttacker.playerConfig.getStatusMagnitude(EffectIDs.CRITICAL_DAMAGE_DOUBLE))
+				damage *= 2;
 		}
-		
-		if (damageType == 1)
-			damage = damage * FC_Rpg.battleCalculations.getPlayerEnchantmentBonus(rpgAttacker.getPlayer(), Enchantment.ARROW_DAMAGE);
 		
 		// Handle the passives for attacking players.
 		damage = handle_Offense_Passives(damage, rpgAttacker, playerAttacker);
 		
-		// Calculate damage based on monsters defense.
-		damage = damage * FC_Rpg.battleCalculations.getArmorBonus(rpgMobDefender);
+		// If the attacker doesn't have the ignore defense status, then...
+		if (rpgAttacker.playerConfig.getStatusActiveRpgPlayer(EffectIDs.IGNORE_ARMOR) == false)
+		{
+			damage *= FC_Rpg.battleCalculations.getArmorBonus(rpgMobDefender);
+			
+			// Add in enchantment bonuses.
+			damage *= FC_Rpg.battleCalculations.getArmorEnchantmentBonus(rpgMobDefender.getEntity(), Enchantment.PROTECTION_ENVIRONMENTAL);
+			
+			if (damageType == 1)
+				damage *= FC_Rpg.battleCalculations.getArmorEnchantmentBonus(rpgMobDefender.getEntity(), Enchantment.PROTECTION_PROJECTILE);
+		}
 		
-		// Add in enchantment bonuses.
-		damage = damage * FC_Rpg.battleCalculations.getArmorEnchantmentBonus(rpgMobDefender.getEntity(), Enchantment.PROTECTION_ENVIRONMENTAL);
-		
-		if (damageType == 1)
-			damage = damage * FC_Rpg.battleCalculations.getArmorEnchantmentBonus(rpgMobDefender.getEntity(), Enchantment.PROTECTION_PROJECTILE);
-		
-		//Account for potions.
-		damage = damage * FC_Rpg.battleCalculations.getPotionOffenseBonus(playerAttacker);
-		damage = damage * FC_Rpg.battleCalculations.getPotionDefenseBonus(rpgMobDefender.getEntity());
+		// Account for potions.
+		damage *= FC_Rpg.battleCalculations.getPotionOffenseBonus(playerAttacker);
+		damage *= FC_Rpg.battleCalculations.getPotionDefenseBonus(rpgMobDefender.getEntity());
 		
 		// Damage must always be 1 or 0. If it is negative it will heal the creature (not good).
 		if (damage < 0.1)
@@ -458,7 +288,7 @@ public class EntityDamageManager
 		
 		// Find the attacker and deal damage from the attacker to the defender.
 		rpgMobDefender.dealDamage(damage);
-
+		
 		// Perform damage effect.
 		entityDefender.playEffect(EntityEffect.HURT);
 		
@@ -478,14 +308,14 @@ public class EntityDamageManager
 		rpgAttacker.attemptAttackNotification(rpgMobDefender.getEntity().getType().toString(), rpgMobDefender.getLevel(), rpgMobDefender.getCurHealth(), rpgMobDefender.getMaxHealth(), damage);
 		
 		// Handle berserker class spells
-		handle_Postoffense_Buffs(rpgAttacker, entityDefender, damage);
+		handle_Post_Offense_Buffs(rpgAttacker, entityDefender, damage);
 		
 		if (playerAttacker != null)
 			applyKnockback(playerAttacker, entityDefender, damageType);
-		
-		//Put entity damage by entity event on both attacker and defender.
-		EntityDamageByEntityEvent edbe = new EntityDamageByEntityEvent(rpgAttacker.getPlayer(), entityDefender, DamageCause.ENTITY_ATTACK, 0);
-		rpgAttacker.getPlayer().setLastDamageCause(edbe);
+
+		// Put entity damage by entity event on both attacker and defender.
+		EntityDamageByEntityEvent edbe = new EntityDamageByEntityEvent(playerAttacker, entityDefender, DamageCause.ENTITY_ATTACK, 0);
+		playerAttacker.setLastDamageCause(edbe);
 		entityDefender.setLastDamageCause(edbe);
 		
 		// If the mob has 0 health handle it's death processes AND drop loot.
@@ -493,7 +323,7 @@ public class EntityDamageManager
 		{
 			if (rpgMobDefender.getIsAlive() == false)
 				return;
-
+			
 			rpgMobDefender.setIsAlive(false);
 			
 			if (rpgMobDefender.getMobAggressionCheck())
@@ -503,15 +333,10 @@ public class EntityDamageManager
 				
 				// If the player is in a party, then...
 				if (guild != null)
-				{
-					// Add a mob kill for that party.
-					FC_Rpg.guildConfig.addMobKill(guild);
-					
-					//Give battle winnings
-					attemptGiveBattleWinnings(guild, rpgAttacker.getPlayer(), rpgMobDefender);
-				}
-				else
-					attemptGiveBattleWinnings(guild, playerAttacker, rpgMobDefender); // Else if not in a party, give loot to the single player.
+					FC_Rpg.guildConfig.addMobKill(guild);	// Add a mob kill for that party.
+				
+				// Give battle winnings
+				attemptGiveBattleWinnings(guild, playerAttacker, rpgMobDefender);
 				
 				// Don't drop loot if the monster level is too high/low.
 				if ((rpgMobDefender.getLevel() - rpgAttacker.playerConfig.getClassLevel()) > FC_Rpg.balanceConfig.getPowerLevelPrevention() * -1)
@@ -523,27 +348,210 @@ public class EntityDamageManager
 				if (FC_Rpg.balanceConfig.getDefaultItemDrops() == false)
 					rpgMobDefender.handlePassiveMobDrops(entityDefender.getLocation());
 			}
-			
-			//Drop experience
+
+			// Drop experience
 			rpgMobDefender.dropExperience();
-			
+
 			// Remove the mob
 			removeMob(entityDefender);
 		}
 	}
 	
+	// Player combat private functions
+	private void updateSwordDurabilities(final Player p)
+	{
+		// Variable Declaration
+		ItemStack handItem = p.getItemInHand();
+		int handItemDurability = handItem.getDurability();
+		Random rand = new Random();
+		
+		// Increase then decrease durability to fix client issues.
+		handItem.setDurability((short) (0));
+		handItem.setDurability((short) (handItemDurability));
+		
+		// Adjust durability of sword.
+		if (handItem.getType().equals(Material.BOW) && rand.nextInt(30) != 0)
+			return;
+		else if (handItem.getType().equals(Material.WOOD_SWORD) && rand.nextInt(73) != 0)
+			return;
+		else if (handItem.getType().equals(Material.STONE_SWORD) && rand.nextInt(36) != 0)
+			return;
+		else if (handItem.getType().equals(Material.IRON_SWORD) && rand.nextInt(20) != 0)
+			return;
+		else if (handItem.getType().equals(Material.DIAMOND_SWORD) && rand.nextInt(3) != 0)
+			return;
+		else if (handItem.getType().equals(Material.GOLD_SWORD) && rand.nextInt(150) != 0)
+			return;
+		
+		// Increase durability.
+		handItem.setDurability((short) (handItemDurability + 1));
+		
+		// Set the hand item
+		if (handItemDurability >= handItem.getType().getMaxDurability())
+			p.setItemInHand(new ItemStack(Material.AIR));
+	}
+	
+	private void increaseArmorDurabilities(Player p)
+	{
+		short currentDurability = 0;
+		ItemStack boots = p.getInventory().getBoots();
+		ItemStack chest = p.getInventory().getChestplate();
+		ItemStack legs = p.getInventory().getLeggings();
+		ItemStack helm = p.getInventory().getHelmet();
+		ItemStack air = new ItemStack(Material.AIR);
+		Random rand = new Random();
+		short maxDurability = 0;
+		int leatherCheck = 200;
+		int chainCheck = 66;
+		int diamondCheck = 30;
+		int goldCheck = 140;
+		
+		if (boots != null)
+		{
+			if (boots.getType() == Material.LEATHER_BOOTS && rand.nextInt(leatherCheck) == 0)
+				maxDurability = Material.LEATHER_BOOTS.getMaxDurability();
+			else if (boots.getType() == Material.CHAINMAIL_BOOTS && rand.nextInt(chainCheck) == 0)
+				maxDurability = Material.CHAINMAIL_BOOTS.getMaxDurability();
+			else if (boots.getType() == Material.IRON_BOOTS && rand.nextInt(chainCheck) == 0)
+				maxDurability = Material.IRON_BOOTS.getMaxDurability();
+			else if (boots.getType() == Material.DIAMOND_BOOTS && rand.nextInt(diamondCheck) == 0)
+				maxDurability = Material.DIAMOND_BOOTS.getMaxDurability();
+			else if (boots.getType() == Material.GOLD_BOOTS && rand.nextInt(goldCheck) == 0)
+				maxDurability = Material.GOLD_BOOTS.getMaxDurability();
+			
+			if (maxDurability == 0)
+				return;
+			
+			boots.setDurability((short) (boots.getDurability() + 1));
+			currentDurability = boots.getDurability();
+			
+			if (currentDurability >= maxDurability)
+				p.getInventory().setBoots(air);
+			else
+				p.getInventory().setBoots(boots);
+		}
+		
+		if (chest != null)
+		{
+			if (chest.getType() == Material.LEATHER_CHESTPLATE && rand.nextInt(leatherCheck) == 0)
+				maxDurability = Material.LEATHER_CHESTPLATE.getMaxDurability();
+			else if (chest.getType() == Material.CHAINMAIL_CHESTPLATE && rand.nextInt(chainCheck) == 0)
+				maxDurability = Material.CHAINMAIL_CHESTPLATE.getMaxDurability();
+			else if (chest.getType() == Material.IRON_CHESTPLATE && rand.nextInt(chainCheck) == 0)
+				maxDurability = Material.IRON_CHESTPLATE.getMaxDurability();
+			else if (chest.getType() == Material.DIAMOND_CHESTPLATE && rand.nextInt(diamondCheck) == 0)
+				maxDurability = Material.DIAMOND_CHESTPLATE.getMaxDurability();
+			else if (chest.getType() == Material.GOLD_CHESTPLATE && rand.nextInt(goldCheck) == 0)
+				maxDurability = Material.GOLD_CHESTPLATE.getMaxDurability();
+			
+			if (maxDurability == 0)
+				return;
+			
+			chest.setDurability((short) (chest.getDurability() + 1));
+			currentDurability = chest.getDurability();
+			
+			if (currentDurability >= maxDurability)
+				p.getInventory().setChestplate(air);
+			else
+				p.getInventory().setChestplate(chest);
+		}
+		
+		if (legs != null)
+		{
+			if (legs.getType() == Material.LEATHER_LEGGINGS && rand.nextInt(leatherCheck) == 0)
+				maxDurability = Material.LEATHER_LEGGINGS.getMaxDurability();
+			else if (legs.getType() == Material.CHAINMAIL_LEGGINGS && rand.nextInt(chainCheck) == 0)
+				maxDurability = Material.CHAINMAIL_LEGGINGS.getMaxDurability();
+			else if (legs.getType() == Material.IRON_LEGGINGS && rand.nextInt(chainCheck) == 0)
+				maxDurability = Material.IRON_LEGGINGS.getMaxDurability();
+			else if (legs.getType() == Material.DIAMOND_LEGGINGS && rand.nextInt(diamondCheck) == 0)
+				maxDurability = Material.DIAMOND_LEGGINGS.getMaxDurability();
+			else if (legs.getType() == Material.GOLD_LEGGINGS && rand.nextInt(goldCheck) == 0)
+				maxDurability = Material.GOLD_LEGGINGS.getMaxDurability();
+			
+			if (maxDurability == 0)
+				return;
+			
+			legs.setDurability((short) (legs.getDurability() + 1));
+			currentDurability = legs.getDurability();
+			
+			if (currentDurability >= maxDurability)
+				p.getInventory().setLeggings(air);
+			else
+				p.getInventory().setLeggings(legs);
+		}
+
+		if (helm != null)
+		{
+			if (helm.getType() == Material.LEATHER_LEGGINGS && rand.nextInt(leatherCheck) == 0)
+				maxDurability = Material.LEATHER_LEGGINGS.getMaxDurability();
+			else if (helm.getType() == Material.CHAINMAIL_LEGGINGS && rand.nextInt(chainCheck) == 0)
+				maxDurability = Material.CHAINMAIL_LEGGINGS.getMaxDurability();
+			else if (helm.getType() == Material.IRON_LEGGINGS && rand.nextInt(chainCheck) == 0)
+				maxDurability = Material.IRON_LEGGINGS.getMaxDurability();
+			else if (helm.getType() == Material.DIAMOND_LEGGINGS && rand.nextInt(diamondCheck) == 0)
+				maxDurability = Material.DIAMOND_LEGGINGS.getMaxDurability();
+			else if (helm.getType() == Material.GOLD_LEGGINGS && rand.nextInt(goldCheck) == 0)
+				maxDurability = Material.GOLD_LEGGINGS.getMaxDurability();
+			
+			if (maxDurability == 0)
+				return;
+			
+			helm.setDurability((short) (helm.getDurability() + 1));
+			currentDurability = helm.getDurability();
+			
+			if (currentDurability >= maxDurability)
+				p.getInventory().setHelmet(air);
+			else
+				p.getInventory().setHelmet(helm);
+		}
+	}
+
+	private void applyKnockback(Player attacker, LivingEntity attacked, int damageType)
+	{
+		ItemStack handItem = attacker.getItemInHand();
+		float knockback = 0;
+
+		// If arrow knockback is on, and the damage is arrow type, then...
+		if (FC_Rpg.balanceConfig.getArrowKnockback() == true && damageType == 1)
+		{
+			// Add knockback.
+			knockback += 1;
+
+			// Add in additional knockback based on the punch enchants strength.
+			if (handItem.containsEnchantment(Enchantment.ARROW_KNOCKBACK))
+				knockback += handItem.getEnchantmentLevel(Enchantment.ARROW_KNOCKBACK);
+		}
+		else if (FC_Rpg.balanceConfig.getSwordKnockback())
+		{
+			// Increase knockback based on damage type.
+			if (handItem.containsEnchantment(Enchantment.KNOCKBACK))
+				knockback += handItem.getEnchantmentLevel(Enchantment.KNOCKBACK);
+		}
+
+		// If there is a knockback the we apply it.
+		if (knockback > 0)
+			attacked.setVelocity(attacked.getVelocity().add(attacked.getLocation().toVector().subtract(attacker.getLocation().toVector()).normalize().multiply(knockback)));
+	}
+	
+	// Mob combat private functions
 	private void attemptGiveBattleWinnings(String guild, Player playerLooter, RpgMonster rpgMobDefender)
 	{
 		List<RpgPlayer> recipients = new ArrayList<RpgPlayer>();
+		double baseCash;
+		double baseExp;
+		double donatorBaseCash;
+		double donatorBaseExp;
 		double cash;
 		double exp;
 		double guildBonus = 1;
 		int powerLevelPrevention = FC_Rpg.balanceConfig.getPowerLevelPrevention();
-		int levelDifference;
-		boolean checkPowerLeveling = (powerLevelPrevention > -1);
-		
-		if (checkPowerLeveling && rpgMobDefender.getIsBoss())
+		boolean checkPowerLeveling;
+
+		if (rpgMobDefender.getIsBoss())
 			checkPowerLeveling = false;
+		else
+			checkPowerLeveling = (powerLevelPrevention > -1);
 		
 		if (guild != null)
 		{
@@ -553,73 +561,86 @@ public class EntityDamageManager
 		else
 			recipients.add(FC_Rpg.rpgEntityManager.getRpgPlayer(playerLooter));
 		
+		// Determine base amount of cash and experience to give.
+		baseCash = rpgMobDefender.baseCash * FC_Rpg.eventCashMultiplier;
+		baseExp = rpgMobDefender.baseExp * FC_Rpg.eventExpMultiplier;
+		
+		// Add in guild bonus if there is one.
+		if (guildBonus > 1)
+		{
+			baseCash *= guildBonus;
+			baseExp *= guildBonus;
+		}
+		
+		// For slimes we reduce the gold and exp based on size.
+		if (rpgMobDefender.getEntity() instanceof Slime)
+		{
+			Slime slime = (Slime) rpgMobDefender.getEntity();
+			int slimeSize = slime.getSize();
+
+			if (slimeSize == 2)
+			{
+				baseExp *= .25;
+				baseCash *= .25;
+			}
+			else if (slimeSize == 1)
+			{
+				baseExp *= .125;
+				baseCash *= .125;
+			}
+		}
+		
+		donatorBaseCash = baseCash * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
+		donatorBaseExp = baseExp * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
+		
+		// If we check power leveling and the player isn't solo, then...
+		if (checkPowerLeveling && recipients.size() != 1)
+		{
+			// Variable Declaration
+			RpgPlayer rPlayer = FC_Rpg.rpgEntityManager.getRpgPlayer(playerLooter);
+			
+			// Check to see if killer is too strong to give exp.
+			// Mob Level - Player Level = levelDifference : Positive = Mob stronger, negative = mob weaker.
+			if (rpgMobDefender.getLevel() - rPlayer.playerConfig.getClassLevel() > powerLevelPrevention) {
+				rPlayer.attemptMonsterOutOfRangeNotification();
+				return;
+			}
+			else if (rpgMobDefender.getLevel() - rPlayer.playerConfig.getClassLevel() < powerLevelPrevention * -1)
+			{
+				MessageLib msgLib = new MessageLib(rPlayer.getPlayer());
+				msgLib.standardError("You annhilated the monster so brutally most loot was destroyed.");
+				return;
+			}
+		}
+		
 		for (RpgPlayer rpgLooter : recipients)
 		{
-			
-			//Mob level - player level : Positive = Mob stronger, negative = mob weaker.
-			levelDifference = rpgMobDefender.getLevel() - rpgLooter.playerConfig.getClassLevel();
-			
-			if (checkPowerLeveling && levelDifference < powerLevelPrevention * -1)
+			// Set up loot amounts.
+			if (rpgLooter.playerConfig.isDonator())
 			{
-				MessageLib msgLib = new MessageLib(rpgLooter.getPlayer());
-				msgLib.standardError("You annhilated the monster so brutally most loot was destroyed.");
-			}
-			else if (checkPowerLeveling && levelDifference > powerLevelPrevention)
-			{
-				//Allow solo players to still recieve loot from stronger level monsters.
-				if (recipients.size() == 1)
-					levelDifference = powerLevelPrevention;
-				else
-				{
-					rpgLooter.attemptMonsterOutOfRangeNotification();
-					return;
-				}
+				cash = donatorBaseCash;
+				exp = donatorBaseExp;
 			}
 			else
 			{
-				// Set up loot amounts.
-				cash = rpgMobDefender.getLevel() * FC_Rpg.balanceConfig.getMobCashMultiplier() * FC_Rpg.eventCashMultiplier;;
-				exp = rpgMobDefender.getLevel() * FC_Rpg.balanceConfig.getMobExpMultiplier() * FC_Rpg.eventExpMultiplier;
-				
-				// Calculate how much loot and experience to aquire by donator
-				if (rpgLooter.playerConfig.isDonator())
-				{
-					cash = cash * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
-					exp = exp * (1 + FC_Rpg.generalConfig.getDonatorLootBonusPercent());
-				}
-				
-				// For slimes we reduce the gold and exp based on size.
-				if (rpgMobDefender.getEntity() instanceof Slime)
-				{
-					Slime slime = (Slime) rpgMobDefender.getEntity();
-					int slimeSize = slime.getSize();
-					
-					if (slimeSize == 2)
-					{
-						exp = exp * .25;
-						cash = cash * .25;
-					}
-					else if (slimeSize == 1)
-					{
-						exp = exp * .125;
-						cash = cash * .125;
-					}
-				}
-				
-				if (guildBonus > 1)
-				{
-					cash = cash * guildBonus;
-					exp = exp * guildBonus;
-				}
-				
-				FC_Rpg.economy.depositPlayer(rpgLooter.getPlayer().getName(),cash);
-				FC_Rpg.rpgEntityManager.getRpgPlayer(rpgLooter.getPlayer()).addClassExperience(exp, true);
-				
-				// Send a message to the player showing experience and loot gains.
-				rpgLooter.attemptMonsterDeathNotification(rpgMobDefender.getLevel(), exp, cash);
+				cash = baseCash;
+				exp = baseExp;
 			}
+			
+			if (rpgLooter.playerConfig.getStatusActiveRpgPlayer(EffectIDs.BONUS_EXPERIENCE))
+				exp *= rpgLooter.playerConfig.getStatusMagnitude(EffectIDs.BONUS_EXPERIENCE);
+			
+			if (rpgLooter.playerConfig.getStatusActiveRpgPlayer(EffectIDs.BONUS_GOLD))
+				exp *= rpgLooter.playerConfig.getStatusMagnitude(EffectIDs.BONUS_GOLD);
+			
+			FC_Rpg.economy.depositPlayer(rpgLooter.getPlayer().getName(), cash);
+			rpgLooter.addClassExperience(exp, true);
+			
+			// Send a message to the player showing experience and loot gains.
+			rpgLooter.attemptMonsterDeathNotification(rpgMobDefender.getLevel(), exp, cash);
 		}
 	}
+
 	
 	// Handle player defense skills
 	private void handle_Defense_Passives(double damage, RpgPlayer rpgDefender, LivingEntity entityAttacker)
@@ -627,7 +648,7 @@ public class EntityDamageManager
 		// Variable Declarations
 		Random rand = new Random();
 		RpgClass rpgClass = rpgDefender.playerConfig.getRpgClass();
-		
+
 		if (rpgClass != null)
 		{
 			if (rpgClass.getPassiveID() == BalanceConfig.passive_CounterAttack)
@@ -643,33 +664,48 @@ public class EntityDamageManager
 	{
 		// Variable Declaration.
 		RpgClass rpgClass = rpgAttacker.playerConfig.getRpgClass();
-		
+
 		if (rpgClass != null)
 		{
 			if (rpgClass.getPassiveID() == BalanceConfig.passive_BattleLust)
 			{
 				// Scale damage by 1/4th
-				damage = damage * (1 + rpgAttacker.getMissingHealthDecimal() * FC_Rpg.balanceConfig.getPassivesBattleLust());
+				damage *= (1 + rpgAttacker.getMissingHealthDecimal() * FC_Rpg.balanceConfig.getPassivesBattleLust());
 			}
 		}
 
 		return damage;
 	}
 
-	private void handle_Postoffense_Buffs(RpgPlayer caster, LivingEntity defender, double damage)
+	private void handle_Post_Offense_Buffs(RpgPlayer bearer, LivingEntity defender, double damage)
 	{
-		if (caster.getStatusActiveRpgPlayer(EffectIDs.LIFESTEAL))
+		if (bearer.playerConfig.getStatusActiveRpgPlayer(EffectIDs.HEALTH_STEAL))
 		{
-			double healAmount = damage * caster.playerConfig.getStatusMagnitude(EffectIDs.LIFESTEAL);
-			
-			caster.attemptHealSelfNotification(healAmount);
-			caster.healHealth(healAmount);
+			double healAmount = damage * bearer.playerConfig.getStatusMagnitude(EffectIDs.HEALTH_STEAL);
+
+			bearer.attemptHealthHealSelfNotification(healAmount);
+			bearer.healHealth(healAmount);
+			bearer.dequeHealMessage();
 		}
 		
-		if (caster.getStatusActiveRpgPlayer(EffectIDs.TELEPORT_STRIKE))
+		if (bearer.playerConfig.getStatusActiveRpgPlayer(EffectIDs.TELEPORT_STRIKE))
 		{
 			EntityLocationLib ell = new EntityLocationLib();
-			caster.getPlayer().teleport(ell.getLocationBehindEntity(defender.getLocation()));
+			bearer.getPlayer().teleport(ell.getLocationBehindEntity(defender.getLocation()));
+		}
+	}
+	
+	// This will check for Pvp buffs
+	public void handle_Post_Offense_Buffs(RpgPlayer bearer, RpgPlayer playerDefender, double damage)
+	{
+		if (bearer.playerConfig.getStatusActiveRpgPlayer(EffectIDs.MANA_STEAL))
+		{
+			double drainAmount = damage * bearer.playerConfig.getStatusMagnitude(EffectIDs.MANA_STEAL);
+			
+			// Give to bearer.
+			bearer.healMana(drainAmount);
+			bearer.attemptManaHealSelfNotification(drainAmount);
+			bearer.dequeHealMessage();
 		}
 	}
 	
@@ -677,22 +713,22 @@ public class EntityDamageManager
 	{
 		// Variable Declaration.
 		int check = 0;
-		
+
 		// Set attack delay equal to setting.
 		if (FC_Rpg.balanceConfig.getAttackDelayHard() > -1)
 			check = FC_Rpg.balanceConfig.getAttackDelayHard();
 		else
 			check = FC_Rpg.balanceConfig.getAttackDelaySoft() / partySize;
-		
+
 		// Return true if time difference is great enough.
 		return (System.currentTimeMillis() - time) >= check;
 	}
-	
+
 	public void nukeMob(LivingEntity entity)
 	{
 		// Get The Entity.
 		RpgMonster monster = FC_Rpg.rpgEntityManager.getRpgMonster(entity);
-		
+
 		if (monster == null)
 			entity.remove();
 		else
@@ -703,7 +739,7 @@ public class EntityDamageManager
 	{
 		// Unregister a mob.
 		FC_Rpg.rpgEntityManager.unregisterRpgMonster(entity);
-		
+
 		// Remove the mob.
 		entity.damage(99999);
 	}

@@ -2,7 +2,9 @@ package me.Destro168.FC_Rpg.Entities;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 import me.Destro168.FC_Rpg.FC_Rpg;
@@ -10,6 +12,7 @@ import me.Destro168.FC_Rpg.Configs.BalanceConfig;
 import me.Destro168.FC_Rpg.Configs.GroupConfig;
 import me.Destro168.FC_Rpg.Configs.PlayerConfig;
 import me.Destro168.FC_Rpg.Configs.WorldConfig;
+import me.Destro168.FC_Rpg.Enchantment.Enchantment;
 import me.Destro168.FC_Rpg.LoadedObjects.Group;
 import me.Destro168.FC_Rpg.LoadedObjects.RpgClass;
 import me.Destro168.FC_Rpg.Spells.SpellCaster;
@@ -31,6 +34,8 @@ public class RpgPlayer extends RpgEntity
 	public PlayerConfig playerConfig;
 	
 	private List<String> queuedHealMessage;
+	private Map<Enchantment, Integer> offensiveEnchantments = new HashMap<Enchantment, Integer>();
+	private Map<Enchantment, Integer> defensiveEnchantments = new HashMap<Enchantment, Integer>();
 	private MessageLib msgLib;
 	private ItemStack air;
 	private Player player;
@@ -111,10 +116,10 @@ public class RpgPlayer extends RpgEntity
 		//Create the player config
 		playerConfig = new PlayerConfig(player.getName());
 		
-		playerConfig.curHealth = 0;
-		playerConfig.maxHealth = 0;
-		playerConfig.curMana = 0;
-		playerConfig.maxMana = 0;
+		playerConfig.curHealth = playerConfig.getCurHealthFile();
+		playerConfig.maxHealth = playerConfig.getMaxHealthFile();
+		playerConfig.curMana = playerConfig.getCurManaFile();
+		playerConfig.maxMana = playerConfig.getMaxManaFile();
 		
 		//Check for infinite donator.
 		FC_RpgPermissions perms = new FC_RpgPermissions(player);
@@ -140,6 +145,9 @@ public class RpgPlayer extends RpgEntity
 		
 		//Check and apply donator bonuses
 		updateDonatorStats();
+		
+		// Load up enchants.
+		loadAllEnchants();
 	}
 	
 	public void createPlayerRecord(Player player_, int pickedClass, boolean manualDistribution)
@@ -423,7 +431,7 @@ public class RpgPlayer extends RpgEntity
 		calculateHealthAndMana();
 		
 		healHealth(d);
-		restoreMana(d);
+		healMana(d);
 	}
 	
 	public void healFull()
@@ -461,9 +469,9 @@ public class RpgPlayer extends RpgEntity
 		calculateHealthAndMana();
 		
 		if (playerConfig.getRpgClass().getPassiveID() == BalanceConfig.passive_InnerFire)
-			restoreMana(playerConfig.maxMana * .2); //20% mana regeneration per 5 seconds (4% per sec)
+			healMana(playerConfig.maxMana * .2); //20% mana regeneration per 5 seconds (4% per sec)
 		else
-			restoreMana(playerConfig.maxMana * .05); //5% mana regeneration per 5 seconds (1% per sec)
+			healMana(playerConfig.maxMana * .05); //5% mana regeneration per 5 seconds (1% per sec)
 		
 		//Attempt to restore mana.
 		if (playerConfig.curMana > playerConfig.maxMana)
@@ -483,7 +491,7 @@ public class RpgPlayer extends RpgEntity
 			playerConfig.curHealth = playerConfig.maxHealth;
 	}
 	
-	public void restoreMana(double amount) 
+	public void healMana(double amount) 
 	{
 		//Update health and mana.
 		calculateHealthAndMana();
@@ -573,7 +581,7 @@ public class RpgPlayer extends RpgEntity
 		
 		if (level > -1)
 			msgLib.infiniteMessage("DMG: ",ChatColor.RED + String.valueOf(FC_Rpg.df.format(damage))," // HP: (",
-					p[0],p[1],p[2],p[3],p[4],p[5] + " // ",type,"(",level+"",")");
+					p[0],p[1],p[2],p[3],p[4],p[5] + " // ",type,"(",ChatColor.GREEN + String.valueOf(level),")");
 		else
 			msgLib.infiniteMessage("DMG: ",ChatColor.RED + String.valueOf(FC_Rpg.df.format(damage))," // HP: (",
 					p[0],p[1],p[2],p[3],p[4],p[5] + " // ",type);
@@ -598,14 +606,12 @@ public class RpgPlayer extends RpgEntity
 		
 		lastHealNotification = new Date();
 		
-		//String[] d = getRemainingX(curMana,maxMana,1);
 		String[] p = playerConfig.getRemainingX(healTarget.playerConfig.curHealth,healTarget.playerConfig.maxHealth,0);
 		
 		queuedHealMessage = Arrays.asList("[","-Healed Other-","] Target HP: (",p[0],p[1],p[2],p[3],p[4],p[5]);
 	}
 	
-	
-	public void attemptHealSelfNotification(double healAmount)
+	public void attemptHealthHealSelfNotification(double healAmount)
 	{
 		if (getCanNotify(lastHealNotification) == false)
 			return;
@@ -613,7 +619,18 @@ public class RpgPlayer extends RpgEntity
 		String[] p = playerConfig.getRemainingX(playerConfig.curHealth,playerConfig.maxHealth,0);
 		lastHealNotification = new Date();
         
-		queuedHealMessage = Arrays.asList("[","-Heal-","] Amount: ",healAmount + ""," // HP: (",p[0],p[1],p[2],p[3],p[4],p[5]);
+		queuedHealMessage = Arrays.asList("[","-Heal-","] Amount: ",FC_Rpg.df.format(healAmount)," // HP: (",p[0],p[1],p[2],p[3],p[4],p[5]);
+	}
+	
+	public void attemptManaHealSelfNotification(double healAmount)
+	{
+		if (getCanNotify(lastHealNotification) == false)
+			return;
+		
+		String[] p = playerConfig.getRemainingX(playerConfig.curMana,playerConfig.maxMana,0);
+		lastHealNotification = new Date();
+        
+		queuedHealMessage = Arrays.asList("[","-Heal-","] Amount: ",FC_Rpg.df.format(healAmount)," // MP: (",p[0],p[1],p[2],p[3],p[4],p[5]);
 	}
 	
 	public void dequeHealMessage()
@@ -631,7 +648,7 @@ public class RpgPlayer extends RpgEntity
 		
 		lastMonsterDeathNotification = new Date();
 		
-		msgLib.infiniteMessage("[_","Mob Slain","_] Level: ",String.valueOf(level)," // Experience: ",FC_Rpg.df.format(exp)," (",
+		msgLib.infiniteMessage("[","Mob Slain","] Level: ",String.valueOf(level)," // Experience: ",FC_Rpg.df.format(exp)," (",
 				FC_Rpg.df.format(playerConfig.getRequiredExpPercent()) + "%",") // Money: ",FC_Rpg.df.format(loot));
 	}
 	
@@ -797,7 +814,7 @@ public class RpgPlayer extends RpgEntity
 		bootsCheck();
 	}
 	
-	private boolean helmetCheck()
+	public boolean helmetCheck()
 	{
 		ItemStack helmet = player.getInventory().getHelmet();
 		Material headType;
@@ -853,7 +870,7 @@ public class RpgPlayer extends RpgEntity
 		return true;
 	}
 	
-	private boolean chestCheck()
+	public boolean chestCheck()
 	{
 		ItemStack chest = player.getInventory().getChestplate();
 		Material chestType;
@@ -909,7 +926,7 @@ public class RpgPlayer extends RpgEntity
 		return true;
 	}
 	
-	private boolean leggingCheck()
+	public boolean leggingCheck()
 	{
 		ItemStack leggings = player.getInventory().getLeggings();
 		Material leggingsType;
@@ -965,7 +982,7 @@ public class RpgPlayer extends RpgEntity
 		return true;
 	}
 	
-	private boolean bootsCheck()
+	public boolean bootsCheck()
 	{
 		ItemStack boots = player.getInventory().getBoots();
 		Material bootsType;
@@ -1139,7 +1156,7 @@ public class RpgPlayer extends RpgEntity
 		}
 		
 		//Set the active spell.
-		playerConfig.setActiveSpell(playerConfig.getRpgClass().getSpell(spellNumber).getName());
+		playerConfig.setActiveSpell(playerConfig.getRpgClass().getSpell(spellNumber).name);
 		
 		if (displaySuccess == true)
 			msgLib.standardMessage("Successfully prepared spell.");
@@ -1149,7 +1166,7 @@ public class RpgPlayer extends RpgEntity
 	
 	public boolean hasEnoughMana(int spellNumber, int spellLevel)
 	{
-		if (playerConfig.curMana > playerConfig.getRpgClass().getSpell(spellNumber).getManaCost().get(spellLevel))
+		if (playerConfig.curMana > playerConfig.getRpgClass().getSpell(spellNumber).manaCost.get(spellLevel))
 			return true;
 		
 		return false;
@@ -1178,7 +1195,7 @@ public class RpgPlayer extends RpgEntity
 		
 		//Initiates the spell cast.
 		if (scm.init_spellCast(this, target, damage, damageType) == false)
-			return damage;
+			return -1;
 		
 		//Get the success.
 		success = scm.handleEffects();
@@ -1202,15 +1219,128 @@ public class RpgPlayer extends RpgEntity
 		if (scm.getDamage() > 0)
 			return scm.getDamage();
 		
+		return -1;
+	}
+	
+	public void onlineSave()
+	{
+		if (!FC_Rpg.worldConfig.getIsRpgWorld(player.getWorld().getName()))
+			return;
+		
+		playerConfig.offlineSave();
+	}
+	
+	public void loadAllEnchants()
+	{
+		loadArmorEnchants();
+		loadWeaponEnchants();
+	}
+	
+	public void loadArmorEnchants()
+	{
+		ItemStack[] armor = player.getInventory().getArmorContents();
+		
+		for (int i = 0; i < armor.length; i++)
+			parseItemEnchant(armor[i]);
+	}
+	
+	public void loadWeaponEnchants()
+	{
+		parseItemEnchant(player.getInventory().getItemInHand());
+	}
+	
+	public void loadItemEnchant(ItemStack item)
+	{
+		parseItemEnchant(item);
+	}
+	
+	public void parseItemEnchant(ItemStack item)
+	{
+		// Prevent null items and air from being evaluated.
+		if (item == null || item.getType() == Material.AIR)
+			return;
+		
+		// If not an rpg item, return.
+		if (item.getItemMeta() != null || item.getItemMeta().getLore().get(0).equals(""))
+			return;
+		
+		// Variable Declarations
+		String name = item.getItemMeta().getDisplayName();
+		int plusValue = 1;
+		
+		for (int i = 1; i < 6; i++)
+		{
+			if (name.contains("[+"+i+"]"))
+			{
+				plusValue += i;
+				break;
+			}
+		}
+		
+		for (Enchantment enchant : FC_Rpg.enchantmentConfig.armorSuffixList)
+		{
+			if (name.contains(enchant.name))
+			{
+				if (defensiveEnchantments.containsKey(enchant))
+					defensiveEnchantments.remove(enchant);
+
+				defensiveEnchantments.put(enchant, plusValue);
+			}
+		}
+		
+		for (Enchantment enchant : FC_Rpg.enchantmentConfig.weaponSuffixList)
+		{
+			if (name.contains(enchant.name))
+			{
+				if (offensiveEnchantments.containsKey(enchant))
+					offensiveEnchantments.remove(enchant);
+				
+				offensiveEnchantments.put(enchant, plusValue);
+			}
+		}
+	}
+	
+	public double autocastOffense(LivingEntity target, double damage)
+	{
+		//Variable Declarations
+		SpellCaster scm = new SpellCaster();
+		double totalDamage = 0;
+		
+		// Calculate weapon enchantments.
+		for (Enchantment e : offensiveEnchantments.keySet())
+		{
+			scm.fastOffensiveCast(this, target, damage, e.spell.effectID, offensiveEnchantments.get(e));
+			damage = 0;
+			damage += scm.getDamage();
+			scm.applyBuff(e.spell.effectID);
+		}
+		
+		for (Integer activeBuff : playerConfig.getAllActiveBuffs())
+		{
+			scm.fastOffensiveCast(this, target, damage, activeBuff, playerConfig.getStatusTier(activeBuff));
+			damage = 0;
+			damage += scm.getDamage();
+		}
+		
+		if (totalDamage > 0)
+			return totalDamage;
+		
 		return damage;
 	}
 	
-	public boolean getStatusActiveRpgPlayer(int effectID)
+	public void autocastDefense()
 	{
-		if (System.currentTimeMillis() < playerConfig.getStatusDuration(effectID))
-			return true;
+		SpellCaster scm = new SpellCaster();
 		
-		return false;
+		// Calculate armor enchantments.
+		for (Enchantment e : defensiveEnchantments.keySet())
+		{
+			scm.fastDefensiveCast(this, e.spell.effectID, defensiveEnchantments.get(e));
+			scm.applyBuff(e.spell.effectID);
+		}
+		
+		for (Integer activeBuff : playerConfig.getAllActiveBuffs())
+			scm.fastDefensiveCast(this, activeBuff, playerConfig.getStatusTier(activeBuff));
 	}
 }
 

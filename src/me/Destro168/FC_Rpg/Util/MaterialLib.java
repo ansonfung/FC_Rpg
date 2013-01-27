@@ -8,6 +8,7 @@ import org.bukkit.Material;
 public class MaterialLib
 {
 	public static final int TIER_TOTAL_ITEMS = 9;
+	public static final int ARMOR_START_VALUE = 6;
 	
 	public List<List<Material>> tierList = new ArrayList<List<Material>>();
 	
@@ -26,6 +27,8 @@ public class MaterialLib
 	public List<Material> helmets = new ArrayList<Material>();
 	public List<Material> leggings = new ArrayList<Material>();
 	public List<Material> chestplates = new ArrayList<Material>();
+
+	public List<Material> fullarmor = new ArrayList<Material>();
 	
 	public MaterialLib()
 	{
@@ -107,6 +110,84 @@ public class MaterialLib
 			leggings.add(tierList.get(i).get(7));
 			chestplates.add(tierList.get(i).get(8));
 		}
+	}
+	
+	public static String getCleanMaterialName(String itemName)
+	{
+		itemName = itemName.toLowerCase();
+		char[] c = itemName.toCharArray();
+		
+		c[0] = toUpper(c[0]);
+		
+		for (int i = 0; i < c.length; i++)
+		{
+			if (c[i] == '_')
+			{
+				c[i] = ' ';
+				c[i+1] = toUpper(c[i+1]);
+				break;
+			}
+		}
+		
+		return String.valueOf(c);
+	}
+	
+	private static char toUpper(char c)
+	{
+		if (c == 'a')
+			return 'A';
+		else if (c == 'b')
+			return 'B';
+		else if (c == 'c')
+			return 'C';
+		else if (c == 'd')
+			return 'D';
+		else if (c == 'e')
+			return 'E';
+		else if (c == 'f')
+			return 'F';
+		else if (c == 'g')
+			return 'G';
+		else if (c == 'h')
+			return 'H';
+		else if (c == 'i')
+			return 'I';
+		else if (c == 'j')
+			return 'J';
+		else if (c == 'k')
+			return 'K';
+		else if (c == 'l')
+			return 'L';
+		else if (c == 'm')
+			return 'M';
+		else if (c == 'n')
+			return 'N';
+		else if (c == 'o')
+			return 'O';
+		else if (c == 'p')
+			return 'P';
+		else if (c == 'q')
+			return 'Q';
+		else if (c == 'r')
+			return 'R';
+		else if (c == 's')
+			return 'S';
+		else if (c == 't')
+			return 'T';
+		else if (c == 'u')
+			return 'U';
+		else if (c == 'v')
+			return 'V';
+		else if (c == 'w')
+			return 'W';
+		else if (c == 'x')
+			return 'X';
+		else if (c == 'y')
+			return 'Y';
+		else if (c == 'z')
+			return 'Z';
+		
+		return c;
 	}
 }
 

@@ -12,6 +12,7 @@ import java.util.Random;
 import me.Destro168.FC_Rpg.Configs.BalanceConfig;
 import me.Destro168.FC_Rpg.Configs.ClassConfig;
 import me.Destro168.FC_Rpg.Configs.DungeonConfig;
+import me.Destro168.FC_Rpg.Configs.EnchantmentConfig;
 import me.Destro168.FC_Rpg.Configs.FaqConfig;
 import me.Destro168.FC_Rpg.Configs.GeneralConfig;
 import me.Destro168.FC_Rpg.Configs.GroupConfig;
@@ -40,13 +41,12 @@ import me.Destro168.FC_Suite_Shared.AutoUpdate;
 import me.Destro168.FC_Suite_Shared.ColorLib;
 import me.Destro168.FC_Suite_Shared.SelectionVector;
 import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
-// import me.Destro168.qQuest.MinimumRPGLevelRequirement;
-// import me.quaz3l.qQuests.qQuests;
-import me.quaz3l.qQuests.API.QuestAPI;
+import me.Destro168.qAPI.qQuestsHandler;
 import net.milkbowl.vault.economy.Economy;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.TreeType;
@@ -71,9 +71,12 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -94,7 +97,7 @@ public class FC_Rpg extends JavaPlugin
 	public static final DecimalFormat df = new DecimalFormat("#.#");
 	public static final DecimalFormat df2 = new DecimalFormat("#.##");
 	public static final DecimalFormat df3 = new DecimalFormat("#.###");
-	public QuestAPI qAPI = null;
+	public static final DecimalFormat df4 = new DecimalFormat("#.####");
 
 	// Uncommon class globals.
 	public static FC_Rpg plugin;
@@ -111,6 +114,7 @@ public class FC_Rpg extends JavaPlugin
 	public static PvpEvent pvp;
 	public static RpgBroadcast rpgBroadcast;
 	public static WorldConfig worldConfig;
+	public static EnchantmentConfig enchantmentConfig;
 	public static Economy economy = null;
 	public static DungeonEvent[] dungeonEventArray;
 	public static SelectionVector sv;
@@ -118,7 +122,7 @@ public class FC_Rpg extends JavaPlugin
 	public static BattleCalculations battleCalculations;
 	public static MobSpawnManager msm;
 	public static ColorLib cl = new ColorLib();
-
+	
 	// Common class globals.
 	public static Map<Player, String> classSelection = new HashMap<Player, String>();
 	public static Map<Integer, Integer> trueDungeonNumbers;
@@ -136,7 +140,9 @@ public class FC_Rpg extends JavaPlugin
 	public static int tid3;
 	public static int tid4;
 	public static int dungeonCount;
-
+	
+    public qQuestsHandler qHandler;
+    
 	// Private variables.
 	private final double MAX_HP = 999999;
 	private CommandGod commandCE;
@@ -149,18 +155,16 @@ public class FC_Rpg extends JavaPlugin
 
 		// Save all players times for being logged on.
 		for (Player player : Bukkit.getOnlinePlayers())
-		{
-			rpgEntityManager.unregisterRpgPlayer(player);
-			msm.endMobSpawns(player);
-			player.setWalkSpeed(0.2F);
-		}
-
+			playerRpgWorldExitCheck(player);
+		
+		// End all dungeons.
 		for (int i = 0; i < dungeonCount; i++)
 		{
 			if (dungeonEventArray[FC_Rpg.trueDungeonNumbers.get(i)].isHappening() == true)
 				dungeonEventArray[FC_Rpg.trueDungeonNumbers.get(i)].end(false);
 		}
-
+		
+		// Unvanish vanished admins.
 		for (String s : vanishedPlayers)
 		{
 			Player t = Bukkit.getServer().getPlayer(s);
@@ -182,7 +186,8 @@ public class FC_Rpg extends JavaPlugin
 		// World manager = new world manager;
 		mLib = new MaterialLib();
 		sv = new SelectionVector();
-
+		enchantmentConfig = new EnchantmentConfig();
+		
 		battleCalculations = new BattleCalculations();
 		generalConfig = new GeneralConfig();
 
@@ -223,7 +228,7 @@ public class FC_Rpg extends JavaPlugin
 		// Register chat listener if chat is enabled.
 		if (!generalConfig.getChatFormat().equalsIgnoreCase("") && !generalConfig.getChatFormatAdmin().equalsIgnoreCase(""))
 			getServer().getPluginManager().registerEvents(new AyncPlayerChatListener(), plugin);
-
+		
 		getServer().getPluginManager().registerEvents(new PlayerInteractionListener(), plugin);
 		getServer().getPluginManager().registerEvents(new PlayerQuitListener(), plugin);
 		getServer().getPluginManager().registerEvents(new SignChangeListener(), plugin);
@@ -236,7 +241,9 @@ public class FC_Rpg extends JavaPlugin
 		getServer().getPluginManager().registerEvents(new TeleportListener(), plugin);
 		getServer().getPluginManager().registerEvents(new PlayerTeleportListener(), plugin);
 		getServer().getPluginManager().registerEvents(new EnchantEventListener(), plugin);
-
+		getServer().getPluginManager().registerEvents(new ItemEquipListener(), plugin);
+		getServer().getPluginManager().registerEvents(new ItemChangeEvent(), plugin);
+		
 		// Register Commands
 		commandCE = new CommandGod();
 
@@ -260,10 +267,10 @@ public class FC_Rpg extends JavaPlugin
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordModify()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordW()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordBuff()).setExecutor(commandCE);
-		getCommand(FC_Rpg.generalConfig.getCommandKeyWordWorld()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordRealm()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordHead()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordPlayers()).setExecutor(commandCE);
-
+		
 		// Handle tasks that happen every 30 minutes. Delay'd by 5 seconds.
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable()
 		{
@@ -293,14 +300,12 @@ public class FC_Rpg extends JavaPlugin
 		{
 			e.printStackTrace();
 		}
-
-		// Call qQuest questing API.
-		// this.setupQQuests();
-
-		// quaz3l's code
-		// if (this.qAPI != null)
-		// this.qAPI.getRequirementHandler().addRequirement(new MinimumRPGLevelRequirement());
-
+		
+		// Enable qQuests support
+		qHandler = new qQuestsHandler(this);
+	    qHandler.setupQQuests();
+	    qHandler.addRequirements();
+	    
 		// We want to perform promotion checks.
 		this.getLogger().info("Enabled");
 	}
@@ -634,23 +639,12 @@ public class FC_Rpg extends JavaPlugin
 		{
 			// Variable Declarations
 			final Player player = (Player) event.getPlayer();
-
-			// If the player is null, we want to return.
-			if (player == null)
-				return;
-
-			if (!FC_Rpg.worldConfig.getIsRpgWorld(player.getWorld().getName()))
-				return;
 			
-			// Register the player if needed.
-			FC_Rpg.rpgEntityManager.checkPlayerRegistration(player, true);
-			
-			msm.beginMobSpawns(player);
-
-			player.setWalkSpeed(0.2F);
+			// Handle player world join checks.
+			playerRpgWorldJoinCheck(player);
 		}
 	}
-
+	
 	public class PlayerQuitListener implements Listener
 	{
 		@EventHandler
@@ -658,19 +652,8 @@ public class FC_Rpg extends JavaPlugin
 		{
 			// Variable Declaration
 			Player player = event.getPlayer();
-
-			// Remove from any potential pvp events they may be in.
-			if (pvp.isEventPlayer(player))
-				pvp.removePvper(player, player, false);
-
-			// Unregister the player from the object pool.
-			rpgEntityManager.unregisterRpgPlayer(player);
-
-			// Remove from any dungeons.
-			for (int i = 0; i < dungeonCount; i++)
-				dungeonEventArray[i].removeDungeoneer(player, player, false);
-
-			msm.endMobSpawns(player);
+			
+			playerRpgWorldExitCheck(player);
 		}
 	}
 
@@ -839,23 +822,33 @@ public class FC_Rpg extends JavaPlugin
 			FC_RpgPermissions perms = new FC_RpgPermissions(player);
 			DateFormat timeStamp = new SimpleDateFormat("HH:mm:ss");
 			String chatFormat;
-
+			
+			// Chat admins get colored chat
 			if (perms.chatAdmin())
+			{
 				chatFormat = FC_Rpg.generalConfig.getChatFormatAdmin();
+				event.setMessage(cl.parse(event.getMessage()));
+			}
 			else
 				chatFormat = FC_Rpg.generalConfig.getChatFormat();
+			
 			if (chatFormat.equalsIgnoreCase(""))
 				return;
 
 			chatFormat = chatFormat.replaceAll("%time%", timeStamp.format(System.currentTimeMillis()));
 			chatFormat = chatFormat.replaceAll("%prefix%", rpgPlayer.updatePrefix());
-
-			String name = rpgPlayer.playerConfig.getName();
-
-			chatFormat = chatFormat.replaceAll("%name%", name);
+			
+			String name;
+			
+			if (rpgPlayer.playerConfig.getNick().equals("none") || rpgPlayer.playerConfig.getNick().equals(""))
+				name = rpgPlayer.playerConfig.getName();
+			else
+				name = FC_Rpg.generalConfig.getNickPrefix() + rpgPlayer.playerConfig.getNick();
+			
+			chatFormat = chatFormat.replaceAll("%name%", cl.parse(name));
 			chatFormat = chatFormat.replaceAll("%chat%", "%2\\$s");
 			chatFormat = chatFormat.replaceAll("%level%", rpgPlayer.playerConfig.getClassLevel() + "");
-
+			
 			event.setFormat(FC_Rpg.cl.parse(chatFormat));
 		}
 	}
@@ -1115,9 +1108,9 @@ public class FC_Rpg extends JavaPlugin
 			Player p = event.getPlayer();
 
 			if (!FC_Rpg.worldConfig.getIsRpgWorld(to.getName()))
-				FC_Rpg.msm.endMobSpawns(p);
+				playerRpgWorldExitCheck(p);
 			else
-				FC_Rpg.msm.beginMobSpawns(p);
+				playerRpgWorldJoinCheck(p);	// Handle player world join checks.
 		}
 	}
 
@@ -1160,7 +1153,39 @@ public class FC_Rpg extends JavaPlugin
 			}
 		}
 	}
-
+	
+	public class ItemEquipListener implements Listener
+	{
+		@EventHandler
+		public void onItemClick(InventoryClickEvent event)
+		{
+			// Only handle this in rpg worlds.
+			if (!FC_Rpg.worldConfig.getIsRpgWorld(event.getWhoClicked().getWorld().getName()))
+				return;
+			
+			// Variable Declarations
+			int slotNumber = event.getSlot();
+			Player playerClicker = Bukkit.getServer().getPlayer(event.getWhoClicked().getName());
+			
+			if (playerClicker.getGameMode() != GameMode.SURVIVAL)
+				return;
+			
+			if (slotNumber >= 36 && slotNumber <= 39 && (event.getSlotType() == SlotType.QUICKBAR) && playerClicker != null)
+				FC_Rpg.rpgEntityManager.getRpgPlayer(playerClicker).loadItemEnchant(playerClicker.getInventory().getItem(event.getSlot()));
+			else if (slotNumber >= 0 && slotNumber <= 9)
+				FC_Rpg.rpgEntityManager.getRpgPlayer(playerClicker).loadItemEnchant(playerClicker.getInventory().getItem(event.getSlot()));
+		}
+	}
+	
+	public class ItemChangeEvent implements Listener
+	{
+		@EventHandler
+		public void onItemSwitch(PlayerItemHeldEvent event)
+		{
+			FC_Rpg.rpgEntityManager.getRpgPlayer(event.getPlayer()).loadItemEnchant(event.getPlayer().getInventory().getItem(event.getNewSlot()));
+		}
+	}
+	
 	public void handleRpgItemList()
 	{
 		// Variable Declarations
@@ -1197,20 +1222,47 @@ public class FC_Rpg extends JavaPlugin
 		RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
 
 		if (economyProvider != null)
-		{
 			economy = economyProvider.getProvider();
-		}
-
+		
 		return (economy != null);
 	}
-
-	/*
-	 * private boolean setupQQuests() { qQuests qQuests = (qQuests) getServer().getPluginManager().getPlugin("qQuests");
-	 * 
-	 * if (this.qAPI == null) { if (qQuests != null) { this.qAPI = qQuests.qAPI; return true; } }
-	 * 
-	 * return false; }
-	 */
+	
+	private void playerRpgWorldJoinCheck(Player player)
+	{
+		// If the player is null, we want to return.
+		if (player == null)
+			return;
+		
+		// Return if not in an rpg world.
+		if (!FC_Rpg.worldConfig.getIsRpgWorld(player.getWorld().getName()))
+			return;
+		
+		// Register the player if needed.
+		FC_Rpg.rpgEntityManager.checkPlayerRegistration(player, true);
+		
+		// Begin mob spawns.
+		msm.beginMobSpawns(player);
+		
+		// Fix walk speed always.
+		player.setWalkSpeed(0.2F);
+	}
+	
+	private void playerRpgWorldExitCheck(Player player)
+	{
+		// Remove from any potential pvp events they may be in.
+		if (pvp.isEventPlayer(player))
+			pvp.removePvper(player, player, false);
+		
+		// Unregister the player from the object pool.
+		rpgEntityManager.unregisterRpgPlayer(player);
+		
+		// Remove from any dungeons.
+		for (int i = 0; i < dungeonCount; i++)
+			dungeonEventArray[i].removeDungeoneer(player, player, false);
+		
+		// End mob spawns
+		msm.endMobSpawns(player);
+	}
 }
 
 

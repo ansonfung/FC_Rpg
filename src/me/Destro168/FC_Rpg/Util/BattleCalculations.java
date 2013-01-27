@@ -10,7 +10,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -19,35 +19,62 @@ public class BattleCalculations
 	public BattleCalculations() { }
 	
 	//Get weapon bonuses.
-	public double getWeaponModifier(Material weapon, int strength)
+	public double getWeaponModifier(ItemStack weapon, int strength)
 	{
-		if (weapon.equals(Material.WOOD_SWORD))
+		Material weaponType = weapon.getType();
+		double swordBonus = 0;
+		
+		// Get sword bonus based on sword type.
+		if (weaponType.equals(Material.WOOD_SWORD))
 		{
 			if (strength >= FC_Rpg.balanceConfig.getSwordAttackRequirementWood())
-				return FC_Rpg.balanceConfig.getSwordMultiplierWood();
+				swordBonus = FC_Rpg.balanceConfig.getSwordMultiplierWood();
 		}
-		else if (weapon.equals(Material.STONE_SWORD))
+		else if (weaponType.equals(Material.STONE_SWORD))
 		{
 			if (strength >= FC_Rpg.balanceConfig.getSwordAttackRequirementStone())
-				return FC_Rpg.balanceConfig.getSwordMultiplierStone();
+				swordBonus = FC_Rpg.balanceConfig.getSwordMultiplierStone();
 		}
-		else if (weapon.equals(Material.IRON_SWORD))
+		else if (weaponType.equals(Material.IRON_SWORD))
 		{
 			if (strength >= FC_Rpg.balanceConfig.getSwordAttackRequirementIron())
-				return FC_Rpg.balanceConfig.getSwordMultiplierIron();
+				swordBonus = FC_Rpg.balanceConfig.getSwordMultiplierIron();
 		}
-		else if (weapon.equals(Material.DIAMOND_SWORD))
+		else if (weaponType.equals(Material.DIAMOND_SWORD))
 		{
 			if (strength >= FC_Rpg.balanceConfig.getSwordAttackRequirementDiamond())
-				return FC_Rpg.balanceConfig.getSwordMultiplierDiamond();
+				swordBonus = FC_Rpg.balanceConfig.getSwordMultiplierDiamond();
 		}
-		else if (weapon.equals(Material.GOLD_SWORD))
+		else if (weaponType.equals(Material.GOLD_SWORD))
 		{
 			if (strength >= FC_Rpg.balanceConfig.getSwordAttackRequirementGold())
-				return FC_Rpg.balanceConfig.getSwordMultiplierGold();
+				swordBonus = FC_Rpg.balanceConfig.getSwordMultiplierGold();
 		}
 		
-		return 1;
+		// Increase sword bonus basedo n item meta
+		if (swordBonus > 0)
+		{
+			if (weapon.getItemMeta().getLore() != null && weapon.getItemMeta().getLore().size() >= 2)
+			{
+				ItemMeta iMeta = weapon.getItemMeta();
+				String tier = iMeta.getLore().get(1);
+				
+				if (tier.toLowerCase().contains("common"))
+					swordBonus *= .8;
+				else if (tier.toLowerCase().contains("rare"))
+					swordBonus *= 1.1;
+				else if (tier.toLowerCase().contains("unique"))
+					swordBonus *= 1.2;
+				else if (tier.toLowerCase().contains("mythical"))
+					swordBonus *= 1.3;
+				else if (tier.toLowerCase().contains("legendary"))
+					swordBonus *= 1.5;
+			}
+			
+			return 1 + swordBonus;
+		}
+		else
+			return 1;
 	}
 	
 	// Get armor bonuses.
@@ -56,7 +83,7 @@ public class BattleCalculations
 		Player player = rpgPlayer.getPlayer();
 		double armorBonus = 1;
 		int constitution = rpgPlayer.playerConfig.getConstitution();
-
+		
 		armorBonus -= getArmorPieceBonus(player.getInventory().getHelmet(), constitution);
 		armorBonus -= getArmorPieceBonus(player.getInventory().getLeggings(), constitution);
 		armorBonus -= getArmorPieceBonus(player.getInventory().getChestplate(), constitution);
@@ -100,7 +127,7 @@ public class BattleCalculations
 
 		else if (armor.equals(Material.LEATHER_CHESTPLATE))
 			return FC_Rpg.balanceConfig.getArmorMultiplierLC();
-
+		
 		if (constitution >= FC_Rpg.balanceConfig.getArmorWearRequirementChain())
 		{
 			if (armor.equals(Material.CHAINMAIL_BOOTS))
@@ -165,19 +192,6 @@ public class BattleCalculations
 	}
 	
 	// Get enchantment values.
-	public double getArmorEnchantmentBonus(Player player, Enchantment enchant)
-	{
-		double bonus = 1;
-		PlayerInventory inv = player.getInventory();
-		
-		bonus -= getEnchantValue(inv.getHelmet(), enchant);
-		bonus -= getEnchantValue(inv.getChestplate(), enchant);
-		bonus -= getEnchantValue(inv.getLeggings(), enchant);
-		bonus -= getEnchantValue(inv.getBoots(), enchant);
-		
-		return bonus;
-	}
-
 	public double getArmorEnchantmentBonus(LivingEntity entity, Enchantment enchant)
 	{
 		EntityEquipment entityEquipment = entity.getEquipment();
@@ -215,43 +229,6 @@ public class BattleCalculations
 			return baseProtectionPercentPerPoint * armorPiece.getEnchantmentLevel(enchant);
 		
 		return 0;
-	}
-	
-	public double getPlayerEnchantmentBonus(Player player, Enchantment enchant)
-	{
-		ItemStack checkItem = player.getInventory().getItemInHand();
-		
-		if (checkItem == null)
-			return 1;
-		
-		if (FC_Rpg.mLib.swords.contains(checkItem.getType()))
-		{
-			if (enchant == Enchantment.DAMAGE_ALL)
-			{
-				if (checkItem.containsEnchantment(Enchantment.DAMAGE_ALL))
-					return 1 + FC_Rpg.balanceConfig.getEnchantmentMultiplierSharpness() * checkItem.getEnchantmentLevel(Enchantment.DAMAGE_ALL);
-			}
-			else if (enchant == Enchantment.DAMAGE_ARTHROPODS)
-			{
-				if (checkItem.containsEnchantment(Enchantment.DAMAGE_ARTHROPODS))
-					return 1 + FC_Rpg.balanceConfig.getEnchantmentMultiplierBane() * checkItem.getEnchantmentLevel(Enchantment.DAMAGE_ARTHROPODS);
-			}
-			else if (enchant == Enchantment.DAMAGE_UNDEAD)
-			{
-				if (checkItem.containsEnchantment(Enchantment.DAMAGE_UNDEAD))
-					return 1 + FC_Rpg.balanceConfig.getEnchantmentMultiplierSmite() * checkItem.getEnchantmentLevel(Enchantment.DAMAGE_UNDEAD);
-			}
-		}
-		else if (checkItem.getType() == Material.BOW)
-		{
-			 if (enchant == Enchantment.ARROW_DAMAGE)
-			{
-				if (checkItem.containsEnchantment(Enchantment.ARROW_DAMAGE))
-					return 1 + FC_Rpg.balanceConfig.getEnchantmentMultiplierPower() * checkItem.getEnchantmentLevel(Enchantment.ARROW_DAMAGE);
-			}
-		}
-		
-		return 1;
 	}
 	
 	public double getEntityEnchantmentBonus(LivingEntity entity, Enchantment enchant)

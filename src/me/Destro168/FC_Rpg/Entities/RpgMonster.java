@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import me.Destro168.FC_Suite_Shared.LocationInsideAreaCheck;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.Configs.WorldConfig;
 import me.Destro168.FC_Rpg.Util.DistanceModifierLib;
@@ -34,7 +33,9 @@ public class RpgMonster extends RpgEntity
 	private boolean isBoss;
 	private boolean isWeak;
 	private long statusDisabled;
-
+	public double baseCash;
+	public double baseExp;
+	
 	public LivingEntity getEntity() { return entity; }
 	public int getAttack() { return attack; }
 	public int getConstitution() { return constitution; }
@@ -181,6 +182,10 @@ public class RpgMonster extends RpgEntity
 			constitution = 1;
 		
 		setStartingHealth();
+		
+		// Set base cash and exp
+		baseCash = level * FC_Rpg.balanceConfig.getMobCashMultiplier();
+		baseExp = level * FC_Rpg.balanceConfig.getMobExpMultiplier();
 	}
 	
 	private void setStartingHealth()
@@ -269,7 +274,7 @@ public class RpgMonster extends RpgEntity
 
 	public void handleHostileMobDrops(Location dropSpot)
 	{
-		List<ItemStack> drops = FC_Rpg.treasureConfig.getRandomDrops(level, FC_Rpg.treasureConfig.getLootList(FC_Rpg.balanceConfig.getMobLootList()));
+		List<ItemStack> drops = FC_Rpg.treasureConfig.getRandomItemStackList(level, FC_Rpg.treasureConfig.getLootList(FC_Rpg.balanceConfig.getMobLootList()));
 		
 		for (ItemStack drop : drops)
 			dropSpot.getWorld().dropItem(dropSpot, drop); // Drop the item.
@@ -342,35 +347,10 @@ public class RpgMonster extends RpgEntity
 		
 		dropSpot.getWorld().dropItemNaturally(dropSpot, loot);
 	}
-
-	public boolean checkDungeonOne()
-	{
-		Location pointOne = new Location(entity.getWorld(), 141, 0, 1);
-		Location pointTwo = new Location(entity.getWorld(), 344, 300, 28);
-
-		LocationInsideAreaCheck liac = new LocationInsideAreaCheck(entity.getLocation(), pointOne, pointTwo);
-
-		return liac.getIsInside();
-	}
-
-	public boolean checkDungeonTwo()
-	{
-		Location pointOne = new Location(entity.getWorld(), 148, 0, -42);
-		Location pointTwo = new Location(entity.getWorld(), 355, 300, -20);
-
-		LocationInsideAreaCheck liac = new LocationInsideAreaCheck(entity.getLocation(), pointOne, pointTwo);
-
-		return liac.getIsInside();
-	}
 }
 
-// Bukkit.getServer().broadcastMessage(ChatColor.RED + "Modifier: " +
-// String.valueOf(modifier));
 
-// Bukkit.getServer().broadcastMessage("(Create Function) Active for " +
-// String.valueOf(mobId));
-/*
- * if (entity.getType() == EntityType.CREEPER) { defense = 3; dexterity = 1; constitution = 3; } else if (entity.getType() == EntityType.SPIDER) { defense = 3; dexterity = 1; constitution = 3; } //Projectiles need to be strong so it goes above the 10 point spec. else if (entity.getType() == EntityType.SKELETON) { defense = 3; dexterity = 1; constitution = 3; } else if (entity.getType() == EntityType.ZOMBIE) { defense = 3; dexterity = 1; constitution = 3; }
- * 
- * defense = defense * modifier; dexterity = dexterity * modifier; constitution = constitution * modifier;
- */
+
+
+
+

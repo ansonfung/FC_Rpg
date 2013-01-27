@@ -93,10 +93,12 @@ public class RpgMessageLib extends MessageLib
 	public boolean helpRpg()
 	{
 		standardHeader("FC_Rpg Command Help!");
-
+		
+		standardMessage("/rpg help [page]", "View general help for FC_Rpg.");
+		
 		if (perms.commandFAQ())
 			standardMessage("/faq", "View Server Frequently Asked Questions.");
-
+		
 		if (perms.commandClass())
 			standardMessage("/class", "Help for classes.");
 
@@ -136,13 +138,92 @@ public class RpgMessageLib extends MessageLib
 			standardMessage("[A] /dungeon", "Help for dungeons.");
 			standardMessage("[A] /de", "Help for dungeon setup.");
 			standardMessage("[A] /modify", "Help for modify command.");
-			standardMessage("[A] /world", "Help for world command.");
+			standardMessage("[A] /realm", "Help for realm command.");
 			standardMessage("[A] /radmin", "Admin Commands.");
 		}
 
 		return true;
 	}
-
+	
+	public boolean displayRpgHelp(String strPage)
+	{
+		int page;
+		
+		try { page = Integer.valueOf(strPage); } catch (NumberFormatException e) { page = 1; strPage = "1"; }
+		
+		switch (page)
+		{
+			case 1:
+				standardHeader("FC_Rpg Help Main ~ Page " + strPage);
+				standardMessage("These documents are here to help players explain how to use some of the features of FC_Rpg. FC_Rpg is an rpg plugin designed to bring an RPG experience to servers!" +
+						"The following is a list of the information contained on each page. Feel free to make suggestions to the help documentation in a ticket on the FC_Rpg plugin page.");
+				standardMessage("");
+				standardMessage("Page 1: This Page.");
+				standardMessage("Page 2: Basics");
+				standardMessage("Page 3: Combat");
+				standardMessage("Page 4: Spells");
+				standardMessage("Page 5: Alchemy (Alchemist Only)");
+				standardMessage("Page 6: Guilds");
+				standardMessage("Page 7: Dungeons");
+				break;
+			case 2:
+				standardHeader("Basics ~ Page " + strPage);
+				standardMessage("First and foremost, a disclaimer: FC_Rpg is an extremely customizable plugin. Thus, the information contained here will apply ONLY to default settings. " +
+						"If your server customizes settings, then this help may have innaccuracies. Use this help to get a better general idea of how FC_Rpg works and operates.");
+				secondaryMessage("To get started with FC_Rpg, you will need to find your servers class selection board. Right-Click the signs to select your class. After you select a class, find a finish " +
+						"sign nearby and right-click on that. All signs need to be right-click to be used with FC_Rpg.");
+				standardMessage("Now that you have a class, you should have access to the majority of the plugins commands.");
+				break;
+			case 3:
+				standardHeader("Combat ~ Page " + strPage);
+				standardMessage("Combat in FC_Rpg is simple. There are four stats for players and two stats for monsters. Killing monsters will grant gold and experience so that you become " +
+						"more rich and eventually will levelup. Higher level monsters wear stronger gear, drop better items, reward more gold, and reward more experience.");
+				secondaryMessage("To become powerful in FC_Rpg, slay monsters that you feel comfortable defeating until you levelup. As you level up you will be awarded stat and spell points to allocate " +
+						"into stats and spells.");
+				standardMessage("While it is recommended to fight monsters roughly your level, killing monsters above and below your level will still reward normal experience and loot. Thus, if you find a " +
+						"strategy to kill level 100 monsters at level 1's (cheater), then you will levelup significantly faster than somebody fighting level 1's.");
+				break;
+			case 4:
+				standardHeader("Spells ~ Page " + strPage);
+				standardMessage("FC_Rpg has a diverse set of spells. There are five classes with five spells each. By using the /spell command, you can begin the process of using spells. When you aquire " +
+						"your first spell point at level four, use /spell list to pick a spell. Then upgrade it with /spell upgrade and the name or number of the spell you want to upgrade. After that, " +
+						"to case the spell you need to bind it to an item. Use /spell bind [name,num] to assign the spell to the item you are holding. Now right-click to ready a spell and left-click to cast it." +
+						"Some spells are able to be cast without a target while others require a target. The general trend for this is that offensive spells require targets with notable exceptions for spells like " +
+						"fireball which are ranged whereas defensive, buff, and utility spells will not require a target. Depending on your class, you might have to hold an item to cast spells. For example, the " +
+						"wizard requires a wand to cast spells. A wand can be a stick or a blaze rod <-- THIS IS REALLY BIG, BECAUSE IT LETS YOU BIND TWO SPELLS!!! Consider it a reward for reading the help! :D");
+				break;
+			case 5:
+				standardHeader("Alchemy ~ Page " + strPage);
+				standardMessage("Alchemy is a special mage spell that once invested into, allows access to the command /alchemy. The /alchemy command allows you to convert items into a raw material known by " +
+						"the arcane as arcanium. Arcanium can be extracted from items using magic power. Higher levels of the alchemy spell allow for greater amounts of arcanium to be harvested from items. As well, " +
+						"it is well known in the magic world that enchantments are made of solid arcanium and will grant major bonuses to the amount of arcanium given from items during extraction. The only downside to " +
+						"arcanium is that composing items with it (aka buying) requires significantly more arcanium when used with no raw materials. The greatest mages are break planets apart only to forge " +
+						"them into gold and diamonds.");
+				break;
+			case 6:
+				standardHeader("Guilds ~ Page " + strPage);
+				standardMessage("Guilds are a feature of FC_Rpg that allows players to group up. The main advantages of joining a guild is the experience share, party buffs get applied to members, and" +
+						"the experience bonus. The more online members of a guild there are, the greater the experience bonus that all members of the guild will recieve. The exp bonus caps at 20% with 50 members" +
+						"All experience sharing and bonuses will only take place between members that are nearby each other. Thus, if there are 8 members of a guild online, but only 3 are together killing " +
+						"monsters, then the three players will get a 1.2% exp boost for being near each other. The distance for this check is 50 blocks from monster slayer.");
+				secondaryMessage("Spells can also apply buffs to nearby guild members. Buffs will only apply to nearby guild members. Thus, if you have 50 guild members stacked on top of you and you cast a damage boosting, " +
+						"spell, all 50 members will recieve that damage boost. The distance that a buff applies varies per spell but the distance generally increases per level as well as strength and duration.");
+				standardMessage("A final important note on guilds is that once you join them, you are subject to power leveling rules. Basically, these make it so that whenever you kill a monster, anybody " +
+						"that is significantly stronger or weaker than you will not recieve combat rewards. When fighting solo you will not have the rules applied to yourself but if " +
+						"another guild member is within 50 blocks, you will be subject to the power leveling rules yourself.");
+				break;
+			case 7:
+				standardHeader("Dungeons ~ Page " + strPage);
+				standardMessage("Dungeons are the final topic of this help. Dungeons are a way for players to go kill monsters and get tons of extra loot in the process. Simply find a dungeon, right-click the " +
+						"sign and enter it. After a delay, you will enter and be free to slay monsters. Dungeons are fully instanced, so feel free to loot all the treasure and items you find because they will " +
+						"be gone the next run! Every dungeon has a boss. This boss is placed by the server admin when designed and you should beware " +
+						"of him as he WILL be stronger than the rest of the mobs in the dungeon.");
+				break;
+		}
+		
+		return true;
+	}
+	
 	public boolean helpFaq()
 	{
 		// Variable Declarations
@@ -417,20 +498,20 @@ public class RpgMessageLib extends MessageLib
 		return true;
 	}
 
-	public boolean helpWorld()
+	public boolean helpRealm()
 	{
 		if (!perms.isAdmin())
 			return errorNoPermission();
 
-		standardHeader("World Commands");
-		standardMessage("/world list", "List all worlds on your server.");
-		standardMessage("/world toggleRpg", "Marks current world as an rpg world..");
-		standardMessage("/world tp [worldname]", "Teleport to a worlds spawn.");
-		standardMessage("/world new [worldname]", "Add a world to world config.");
-		standardMessage("/world levelone", "Set a worlds level one to your loc.");
-		standardMessage("/world spawn [worldname] [x] [y] [z] [yaw] [pitch]", "Change a worlds spawn to information you specify.");
-		standardMessage("/world spawn here", "Change a worlds spawn to your loc.");
-
+		standardHeader("Realm Commands");
+		standardMessage("/realm list", "List all worlds on your server.");
+		standardMessage("/realm toggleRpg", "Marks current world as an rpg world..");
+		standardMessage("/realm tp [realmName]", "Teleport to a worlds spawn.");
+		standardMessage("/realm new [realmName]", "Add a world to world config.");
+		standardMessage("/realm levelone", "Set a worlds level one to your loc.");
+		standardMessage("/realm spawn [realmName] [x] [y] [z] [yaw] [pitch]", "Change a worlds spawn to information you specify.");
+		standardMessage("/realm spawn here", "Change a worlds spawn to your loc.");
+		
 		return true;
 	}
 

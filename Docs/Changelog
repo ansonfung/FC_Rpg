@@ -1,31 +1,53 @@
 ~ FC_Rpg Changelog ~
 
-Version 1.27 v2:
+Version 1.28:
 
-Balance:
-- Added a soft and hard attack cap setting. Forgot to mention in 1.27. Updated in setup files now.
+------------------------------------------------------
+FC_Suite_Shared Requirement: Version 2.55
 
-Version 1.27:
+Configs you will have to update in this version:
+- ItemConfig
+- SpellConfig
+------------------------------------------------------
 
 General:
-- RpgPlayer class selection failure error string message updated.
-
-Commands:
-- Admins no longer have infinite spell points. They have to use the modify command to get spell points.
+- Added new nick feature. Comes with generalconfig setting for a prefix on nicks. Can be customized with modify command.
 
 Players:
-- Fixed issue where players couldn't get spell points. Was giving them a stat point (derp). Sorry. Player configurations will automatically be checked for inconsistency on login and if they are bugged then the player will have their stats and spell points respec'd and fixed.
-- Fixed so that at level 100 you get everything checked still (get stat points).
-- Removed level 1 spell point. Giving that 1 spell point at level one causes the issue of a player being level 100 having 1 spell point which means they get the spell point usage notification frequently. (Will also be force respec'd now if they don't have proper number of spell points for this update.)
+- Fixed issue where player health wasn't being loaded on player joins.
+- Optimized health saving.
+- Readded level 1 spell point. Removed spell point given when player is at level cap. Players will be force respec'd to accomodate for this. Sorry >.<. The main issue is that mages need spells to be effective at level 1.
 
-BalanceConfig:
-- Renamed balance config setting from getLevelsPerSkillPoint to getLevelsPerStatPoints.
-- Updated a bit of setup to help make balance config section more up to date.
-- Fixed small balance config versioning issue that prevented modification to globalexpmodifier setting.
+Commands:
+- Added new /rpg help command to allow players to get some insight into how FC_Rpg works.
+- Renamed /world to /realm to prevent conflict with other commands that might use that command (like Essentials). This is just a quick hotfix. Expect any old things named "world" to be all fixed by 1.31.
 
-Guilds:
-- Fixed issue where guild rewards were all being given to guild leader and not rest of guild members.
+Items (ItemConfig/TreasureCofig):
+- FC_Rpg now uses ItemMeta to create custom enchanted loot. Items may have a tier, prefix, suffix, and plusNumber to denote the abilities of said item.
+- ItemConfig settings for sword multipliers are force changed in update. New multipliers remove 1 from old default. This is to help with new enchanted items.
+- Heavily optimized item drop function. LIKE OH MY GOD (why didn't I do this before). Also will now auto-detect if no suitable item drops can be found when you kill monster rather than crashing server.
+- Can no longer rename items at anvil, to prevent abuse.
 
-Worlds:
-- Forcing world spawn settings to be readded to worlds.
-- Added x,y,z to default world generation settings which will prevent future issues with toggling worlds to rpg and mobs being buggy.
+Spells:
+- Whenever you use the /spell reset command your active spell will be reset.
+- Whenever you attempt to use a spell without the proper required item, your active spell will be reset.
+- Both changes targetting at stopping message spam willingly and unwillingly.
+- Several new effect ids in place that can be added to create custom spells. These were made for the enchantments of items BUT can be definately used in spells.
+- Had to overhaul the spell config quite a bit due to the addition of enchantments. Sadly old spell configs will not be compatible with new version. Backup your old configuration file and import settings into the new configuration file if you use custom spells. There are 13 new effect ids, 6 are old effect ids turned into non-buff forms.
+- Any spell can now have a duration. If you want a spell to be a one-time cast, then don't give it a duration and it will only cast once. :)
+- Fixed tons of spell bugs and added some missing features.
+
+Combat:
+- Monster level when hit is now green.
+- Since swords technically will not use regular enchanted items anymore, all swords will break. (No more huge unbreaking levels anymore). However there are hardcoded unbreaking limits. Every item helmet has about 10k uses as refrence. Same applies to armor.
+
+Dungeons:
+- Hitting dungeon leave sign will now properly teleport players out of dungeons once again.
+
+Compatibility:
+- qQuest support being integraded. Working with quaz3l closely on this. He's a fantastic developer and his plugin qQuests is amazing! Right now minimum level requirement added.
+
+Internal:
+- Removed some outdated/unused code related to rpgMonsters.
+- Removed lots of outdated comments for several classes.
+- Performed several small optimizations to battle function in the hopes that it will make it run faster.

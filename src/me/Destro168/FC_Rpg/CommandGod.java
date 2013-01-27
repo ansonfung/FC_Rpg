@@ -83,7 +83,10 @@ public class CommandGod implements CommandExecutor
 		}
 		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordRpg()))
 		{
-			return msgLib.helpRpg();
+			if (args[0].equalsIgnoreCase(""))
+				return msgLib.helpRpg();
+			else if (args[0].equalsIgnoreCase("help"))
+				return msgLib.displayRpgHelp(args[1]);
 		}
 		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordRAdmin()))
 		{
@@ -95,9 +98,9 @@ public class CommandGod implements CommandExecutor
 			HatCE cmd = new HatCE();
 			return cmd.execute();
 		}
-		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordWorld()))
+		else if (command.getName().equalsIgnoreCase(FC_Rpg.generalConfig.getCommandKeyWordRealm()))
 		{
-			WorldCE cmd = new WorldCE();
+			RealmCE cmd = new RealmCE();
 			return cmd.execute();
 		}
 		
@@ -1923,6 +1926,8 @@ public class CommandGod implements CommandExecutor
 			//Evaluate command parts.
 			if (modifable.equalsIgnoreCase("prefix"))
 				playerFile.setCustomPrefix(args[2]);
+			else if (modifable.equalsIgnoreCase("nick"))
+				playerFile.setNick(args[2]);
 			else
 			{
 				if (intArg2 == -1)
@@ -1978,7 +1983,7 @@ public class CommandGod implements CommandExecutor
 					playerFile.setArcanium(intArg2);
 				else
 					return msgLib.errorInvalidCommand();
-
+				
 				// Update the players health and mana
 				playerFile.calculateHealthAndManaOffline();
 
@@ -2520,7 +2525,7 @@ public class CommandGod implements CommandExecutor
 			rpgPlayer.playerConfig.updateSpellBind(intArg1, player.getItemInHand().getTypeId());
 			
 			//Send a success message to the player.
-			msgLib.standardMessage("Successfully bound " + rpgPlayer.playerConfig.getRpgClass().getSpell(intArg1).getName() + " to item: " + player.getItemInHand().getType());
+			msgLib.standardMessage("Successfully bound " + rpgPlayer.playerConfig.getRpgClass().getSpell(intArg1).name + " to item: " + player.getItemInHand().getType());
 			
 			return true;
 		}
@@ -2547,20 +2552,20 @@ public class CommandGod implements CommandExecutor
 				
 				if (spellLevel == 0)
 				{
-					msgLib.standardError("#" + String.valueOf(i+1) + ": " + spell.getName() + "(" +
-							String.valueOf(spellLevel) + "): " + spell.getDescription() + " This spell is unleveled.");
+					msgLib.standardError("#" + String.valueOf(i+1) + ": " + spell.name + "(" +
+							String.valueOf(spellLevel) + "): " + spell.description + " This spell is unleveled.");
 				}
 				else if (spellLevel > 0)
 				{
 					try {
-						msgLib.infiniteMessage("#" + String.valueOf(i+1) + ": " + spell.getName() + "(",
-							String.valueOf(spellLevel),"): ",spell.getDescription() + " This spell costs ",
-							ChatColor.DARK_AQUA + String.valueOf(spell.getManaCost().get(spellLevel - 1)), " Mana." + " Next level costs ",
-							ChatColor.DARK_AQUA + String.valueOf(spell.getManaCost().get(spellLevel)), " Mana.");
+						msgLib.infiniteMessage("#" + String.valueOf(i+1) + ": " + spell.name + "(",
+							String.valueOf(spellLevel),"): ",spell.description + " This spell costs ",
+							ChatColor.DARK_AQUA + String.valueOf(spell.manaCost.get(spellLevel - 1)), " Mana." + " Next level costs ",
+							ChatColor.DARK_AQUA + String.valueOf(spell.manaCost.get(spellLevel)), " Mana.");
 					} catch (IndexOutOfBoundsException e) {
-						msgLib.infiniteMessage("#" + String.valueOf(i+1) + ": " + spell.getName() + "(",
-							String.valueOf(spellLevel),"): ",spell.getDescription() + " This spell costs ",
-							ChatColor.DARK_AQUA + String.valueOf(spell.getManaCost().get(spellLevel - 1)), " Mana." + " This spell is max level.");
+						msgLib.infiniteMessage("#" + String.valueOf(i+1) + ": " + spell.name + "(",
+							String.valueOf(spellLevel),"): ",spell.description + " This spell costs ",
+							ChatColor.DARK_AQUA + String.valueOf(spell.manaCost.get(spellLevel - 1)), " Mana." + " This spell is max level.");
 					}
 				}
 			}
@@ -2596,14 +2601,14 @@ public class CommandGod implements CommandExecutor
 			//If alchemy set alchemy to true.
 			Spell spell = rpgPlayer.playerConfig.getRpgClass().getSpellBook().get(intArg1);
 			
-			if (spell.getEffectID() == EffectIDs.ALCHEMY)
+			if (spell.effectID == EffectIDs.ALCHEMY)
 				rpgPlayer.playerConfig.hasAlchemy = true;
 			
 			//Decrease player spell points.
 			rpgPlayer.playerConfig.setSpellPoints(rpgPlayer.playerConfig.getSpellPoints() - 1);
 			
 			//Return success.
-			return msgLib.infiniteMessage("You have successfully upgraded ",spell.getName(),"!");
+			return msgLib.infiniteMessage("You have successfully upgraded ",spell.name,"!");
 		}
 		
 		private boolean resetSubCommand()
@@ -2613,6 +2618,8 @@ public class CommandGod implements CommandExecutor
 				if (rpgPlayer.playerConfig.getSpellBinds().get(i) == player.getItemInHand().getTypeId())
 					rpgPlayer.playerConfig.updateSpellBind(i, 999);
 			}
+			
+			rpgPlayer.playerConfig.resetActiveSpell();
 			
 			return msgLib.successCommand();
 		}
@@ -2663,7 +2670,7 @@ public class CommandGod implements CommandExecutor
 				for (int i = 0; i < spellCount; i++)
 				{
 					//If the spell argument is equal to the spell name, then we store that index.
-					if (spellArgument.equalsIgnoreCase(rpgPlayer.playerConfig.getRpgClass().getSpell(i).getName()))
+					if (spellArgument.equalsIgnoreCase(rpgPlayer.playerConfig.getRpgClass().getSpell(i).name))
 					{
 						intArg1 = i;
 						break;
@@ -2704,7 +2711,7 @@ public class CommandGod implements CommandExecutor
 			
 			for (int i = 0; i < sb.size(); i++)
 			{
-				if (sb.get(i).getEffectID() == EffectIDs.ALCHEMY)
+				if (sb.get(i).effectID == EffectIDs.ALCHEMY)
 				{
 					spellMagnitude = sc.updatefinalSpellMagnitude(rpgPlayer, sb.get(i),(rpgPlayer.playerConfig.getSpellLevels().get(i) - 1));
 					break;
@@ -3296,14 +3303,14 @@ public class CommandGod implements CommandExecutor
 		}
 	}
 	
-	public class WorldCE
+	public class RealmCE
 	{
-		public WorldCE() { }
+		public RealmCE() { }
 		
 		public boolean execute()
 		{
 			if (args[0].equalsIgnoreCase(""))
-				return msgLib.helpWorld();
+				return msgLib.helpRealm();
 			
 			String playerWorld = player.getWorld().getName();
 			
@@ -3400,7 +3407,7 @@ public class CommandGod implements CommandExecutor
 				{
 					//Make sure all arguments are valid.
 					for (int i = 1; i < 7; i++)
-						if (args[i].equalsIgnoreCase("")) return msgLib.helpWorld();
+						if (args[i].equalsIgnoreCase("")) return msgLib.helpRealm();
 					
 					try
 					{

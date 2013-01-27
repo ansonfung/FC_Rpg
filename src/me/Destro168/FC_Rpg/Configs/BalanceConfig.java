@@ -35,6 +35,17 @@ public class BalanceConfig extends ConfigGod
 			fcw.setNull(prefix + "player.levelsPerSkillPoint");
 		}
 		
+		if (getVersion() < 1.08)
+		{
+			setVersion(1.08);
+			
+			fcw.setNull(prefix + "sword.multiplier.wood");
+			fcw.setNull(prefix + "sword.multiplier.stone");
+			fcw.setNull(prefix + "sword.multiplier.iron");
+			fcw.setNull(prefix + "sword.multiplier.diamond");
+			fcw.setNull(prefix + "sword.multiplier.gold");
+		}
+		
 		getDefaultItemDrops();
 		getArrowKnockback();
 		getSwordKnockback();
@@ -217,11 +228,11 @@ public class BalanceConfig extends ConfigGod
 	public int getMobConstitutionMultiplier() { return fcw.getStaticInt(prefix + "mob.constitutionMultiplier", 100); }
 	public String getMobLootList() { return fcw.getStaticString(prefix + "mob.lootList", "default"); }
 	
-	public double getSwordMultiplierWood() { return fcw.getStaticDouble(prefix + "sword.multiplier.wood", 1.25); }
-	public double getSwordMultiplierStone() { return fcw.getStaticDouble(prefix + "sword.multiplier.stone", 1.5); }
-	public double getSwordMultiplierIron() { return fcw.getStaticDouble(prefix + "sword.multiplier.iron", 1.75); }
-	public double getSwordMultiplierDiamond() { return fcw.getStaticDouble(prefix + "sword.multiplier.diamond", 2); }
-	public double getSwordMultiplierGold() { return fcw.getStaticDouble(prefix + "sword.multiplier.gold", 2.5); }
+	public double getSwordMultiplierWood() { return fcw.getStaticDouble(prefix + "sword.multiplier.wood", .25); }
+	public double getSwordMultiplierStone() { return fcw.getStaticDouble(prefix + "sword.multiplier.stone", .5); }
+	public double getSwordMultiplierIron() { return fcw.getStaticDouble(prefix + "sword.multiplier.iron", .75); }
+	public double getSwordMultiplierDiamond() { return fcw.getStaticDouble(prefix + "sword.multiplier.diamond", 1); }
+	public double getSwordMultiplierGold() { return fcw.getStaticDouble(prefix + "sword.multiplier.gold", 1.5); }
 	
 	public double getSwordAttackRequirementWood() { return fcw.getStaticDouble(prefix + "sword.attackRequirement.wood", 0); }
 	public double getSwordAttackRequirementStone() { return fcw.getStaticDouble(prefix + "sword.attackRequirement.stone", 60); }

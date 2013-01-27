@@ -37,7 +37,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -70,7 +69,7 @@ public class DamageListener implements Listener
 
 	LivingEntity creatureAttacker;
 	LivingEntity mobDefender;
-
+	
 	@EventHandler(priority = EventPriority.HIGH)
 	public void onEntityDamage(EntityDamageEvent event_)
 	{
@@ -231,7 +230,7 @@ public class DamageListener implements Listener
 		// If we are canceling rpg damage, then return.
 		if (cancelRpgDamage == true)
 			return;
-
+		
 		if (customDamage > -1)
 			damage = customDamage;
 
@@ -255,19 +254,41 @@ public class DamageListener implements Listener
 				if (rpgAttacker.playerConfig.getAutoCast() == true)
 					rpgAttacker.prepareSpell(false);
 				
+				double spellDamage = -1;
+				
+				// Attempt to cast a spell.
 				if (rpgMobDefender != null)
-					damage = rpgAttacker.castSpell(rpgMobDefender.getEntity(), damage, damageType);
+					spellDamage = rpgAttacker.castSpell(rpgMobDefender.getEntity(), damage, damageType);
 				else
-					damage = rpgAttacker.castSpell(rpgDefender.getPlayer(), damage, damageType);
+					spellDamage = rpgAttacker.castSpell(rpgDefender.getPlayer(), damage, damageType);
+				
+				// If the spell failed to cast, then we want to do spells/enchantment stuff.
+				if (spellDamage == -1)
+				{
+					// Cast auto spells/enchantment stuff.
+					if (rpgMobDefender != null)
+						spellDamage = rpgAttacker.autocastOffense(rpgMobDefender.getEntity(), damage);
+					else
+						spellDamage = rpgAttacker.autocastOffense(rpgDefender.getPlayer(), damage);
+				}
+				
+				// If the spell damage isn't -1, then we want to store the spell damage.
+				if (spellDamage != -1)
+					damage = spellDamage;
 			}
 		}
 		
+		// Apply randomization to damage.
+		damage = getRandomDamageModifier(damage);
+		
 		// We do a armor check for defenders.
 		if (rpgDefender != null)
+		{
 			rpgDefender.fullArmorCheck();
-		
-		//Apply randomization to damage.
-		damage = getRandomDamageModifier(damage);
+			
+			// Cast armor enchantment stuff.
+			rpgDefender.autocastDefense();
+		}
 		
 		if (rpgMobDefender != null)
 		{
@@ -307,32 +328,6 @@ public class DamageListener implements Listener
 			else if (rpgMobAttacker != null)
 				edm.attackPlayerDefender(rpgDefender, null, rpgMobAttacker, damage, damageType, rpgMobAttacker.getEntity().getType().toString());
 		}
-	}
-
-	private double getRandomDamageModifier(double damage)
-	{
-		double damageMultiplier = damage * .05;
-		
-		Random rand;
-		
-		if (damageMultiplier >= 1)
-		{
-			rand = new Random();
-			
-			if (rand.nextBoolean() == true)
-				damage += rand.nextInt((int) damageMultiplier) + 1;
-			else
-				damage -= rand.nextInt((int) damageMultiplier) - 1;
-		}
-		
-		rand = new Random();
-		
-		if (rand.nextBoolean() == true)
-			damage += rand.nextDouble();
-		else
-			damage -= rand.nextDouble();
-		
-		return damage;
 	}
 	
 	public void prepareDefender(LivingEntity entityDefender)
@@ -406,7 +401,7 @@ public class DamageListener implements Listener
 					
 					for (int i = 0; i < spellBook.size(); i++)
 					{
-						if (spellBook.get(i).getEffectID() == EffectIDs.FIREBALL)
+						if (spellBook.get(i).effectID == EffectIDs.FIREBALL)
 						{
 							SpellCaster sc = new SpellCaster();
 							damage = sc.updatefinalSpellMagnitude(rpgAttacker, spellBook.get(i), (rpgAttacker.playerConfig.getSpellLevels().get(i) - 1));
@@ -486,7 +481,7 @@ public class DamageListener implements Listener
 			damage = rpgAttacker.getTotalAttack() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeAttack();
 			
 			// Add weapon Bonus
-			damage = damage * FC_Rpg.battleCalculations.getWeaponModifier(playerAttacker.getItemInHand().getType(), rpgAttacker.getTotalAttack());
+			damage *= FC_Rpg.battleCalculations.getWeaponModifier(playerAttacker.getItemInHand(), rpgAttacker.getTotalAttack());
 		}
 		
 		// If the entity is a living entity we want to store it.
@@ -500,11 +495,8 @@ public class DamageListener implements Listener
 			
 			damage = rpgMobAttacker.getAttack() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeAttack();
 			
-			// Account for mob weapon type for damage.
-			ItemStack mobWeapon = creatureAttacker.getEquipment().getItemInHand();
-			
-			if (mobWeapon != null)
-				damage = damage * FC_Rpg.battleCalculations.getWeaponModifier(mobWeapon.getType(),999999);
+			if (creatureAttacker.getEquipment().getItemInHand() != null)
+				damage = damage * FC_Rpg.battleCalculations.getWeaponModifier(creatureAttacker.getEquipment().getItemInHand(),999999);
 		}
 		
 		// Else if not it's an error and return the monster strength.
@@ -522,7 +514,7 @@ public class DamageListener implements Listener
 		if (rpgAttacker != null)
 		{
 			// If disabled cancel attack
-			if (rpgAttacker.getStatusActiveEntity(rpgAttacker.playerConfig.getStatusDuration(EffectIDs.DISABLED)))
+			if (rpgAttacker.playerConfig.getStatusActiveRpgPlayer(EffectIDs.DISABLED))
 			{
 				cancelRpgDamage = true;
 				return 0;
@@ -540,6 +532,33 @@ public class DamageListener implements Listener
 		return damage;
 	}
 
+	// General combat private functions
+	private double getRandomDamageModifier(double damage)
+	{
+		double damageMultiplier = damage * .05;
+		
+		Random rand;
+		
+		if (damageMultiplier >= 1)
+		{
+			rand = new Random();
+			
+			if (rand.nextBoolean() == true)
+				damage += rand.nextInt((int) damageMultiplier) + 1;
+			else
+				damage -= rand.nextInt((int) damageMultiplier) - 1;
+		}
+		
+		rand = new Random();
+		
+		if (rand.nextBoolean() == true)
+			damage += rand.nextDouble();
+		else
+			damage -= rand.nextDouble();
+		
+		return damage;
+	}
+	
 	private double getEnviromentalDamage(Player player)
 	{
 		// Variable declarations

@@ -281,7 +281,7 @@ public class PlayerInteractionListener implements Listener
 		else if (sign.getLine(0).contains("Refill Mana!"))
 		{
 			if (FC_Rpg.rpgEntityManager.getRpgPlayer(player) != null)
-				FC_Rpg.rpgEntityManager.getRpgPlayer(player).restoreMana(99999);
+				FC_Rpg.rpgEntityManager.getRpgPlayer(player).healMana(99999);
 			
 			msgLib.standardMessage("Refilled Mana!");
 		}

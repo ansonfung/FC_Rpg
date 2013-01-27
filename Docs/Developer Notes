@@ -2,8 +2,19 @@
 
 ^Todo List^
 
-- Replace berserker spell with something other than teleport. Need ideas on this :/ *sigh*.
-- Add in commands to handle some of the new features after they have been tested as completely bug free.
+- Doublecheck that lifesteal and mana vamp are properly notifying of drained and mana.
+- Make tiers work.
+
+- Add into help that items stored in enderchests lose lore when stored and server restarts.
+
+- I have made it so that spells that normally are one-time cast can last for durations. 
+- Now, I need to make it so that spells that are normally a duration will apply once then be removed. After that, all spells should be done. :)
+
+- Test that enchanted items don't count as lore "the enchants aren't lore" and people can't rename items as a cheat way of getting super items. Maybe think of better method like checking for the dashed lines in lore. That might be better.
+- Test frost strikes not breaking.
+
+- Replace berserker spell with something other than teleport. Need ideas on this :/ *sigh*. "test"
+- Add in commands to handle some of the new features after they have been tested as completely bug free. "test"
 - Customizable mob stats.
 
 Long Term Todo aka "Stuff that MIGHT get done, maybe, if I'm in a good mood, maybe":

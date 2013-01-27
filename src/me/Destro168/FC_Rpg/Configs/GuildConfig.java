@@ -255,7 +255,7 @@ public class GuildConfig extends ConfigGod
 		
 		msgLib.standardMessage(list);
 		
-		//msgLib.standardMessage("Perks",guild.getPerks()); TODO - ADD PERKS
+		//msgLib.standardMessage("Perks",guild.getPerks());
 		msgLib.standardMessage("Private?",String.valueOf(getPrivate()));
 		msgLib.standardMessage("Mob Kills",String.valueOf(getMobKills()));
 		
@@ -358,7 +358,6 @@ public class GuildConfig extends ConfigGod
 		return false;
     }
     
-    
 	public boolean teleportToLeader(Player player) 
 	{
 		if (!checkGuildExists(getGuildByMember(player.getName())))
@@ -405,11 +404,9 @@ public class GuildConfig extends ConfigGod
 	
 	public List<Player> getOnlineGuildPlayerList(String guildName) 
 	{
+		// Check that guild exists, which also updates GFCW
 		if (!checkGuildExists(guildName))
 			return null;
-		
-		// Update the gfcw.
-		this.updateGfcw(guildName);
 		
 		List<Player> playerList = new ArrayList<Player>();
 		Player p;
@@ -427,12 +424,11 @@ public class GuildConfig extends ConfigGod
 
 	public double getGuildBonus(int nearbyCount) 
 	{
-		double totalBonus;
-		
-		totalBonus = 1.0D + nearbyCount * 0.0040D;
+		// Variable Declaration
+		double totalBonus = 1.0D + nearbyCount * 0.0040D;
 		
 		if (totalBonus > 1.2)
-			totalBonus = 1.2;
+			return 1.2;
 		
 		return totalBonus;
 	}

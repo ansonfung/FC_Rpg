@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import me.Destro168.FC_Suite_Shared.ColorLib;
 import me.Destro168.FC_Suite_Shared.ConfigManagers.ConfigGod;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.LoadedObjects.RpgItem;
@@ -14,6 +15,7 @@ import me.Destro168.FC_Rpg.Util.MaterialLib;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public class TreasureConfig extends ConfigGod
 {
@@ -55,7 +57,7 @@ public class TreasureConfig extends ConfigGod
 		getLootList("default");
 	}
 	
-	public List<ItemStack> getRandomDrops(int entityLevel, List<Integer> materialMatchList)
+	public List<ItemStack> getRandomItemStackList(int entityLevel, List<Integer> materialMatchList)
 	{
 		List<ItemStack> items = new ArrayList<ItemStack>();
 		rand = new Random();
@@ -65,18 +67,16 @@ public class TreasureConfig extends ConfigGod
 		//While successful, keep getting items.
 		while (getItemDropChance() == true)
 		{
-			drop = null;
+			drop = getRandomItem(entityLevel, materialMatchList);
 			
-			while (drop == null)
-				drop = getRandomItem(entityLevel, materialMatchList);
-			
-			items.add(drop);
+			if (drop != null)
+				items.add(drop);
 		}
 		
 		return items;
 	}
 	
-	public List<ItemStack> getRandomTreasure(int entityLevel, int size, List<Integer> materialMatchList)
+	public List<ItemStack> getRandomItemStackList(int entityLevel, int size, List<Integer> materialMatchList)
 	{
 		//Variable Declarations
 		List<ItemStack> items = new ArrayList<ItemStack>();
@@ -87,12 +87,10 @@ public class TreasureConfig extends ConfigGod
 		//Get a fixed amount of loot.
 		for (int i = 0; i < size; i++)
 		{
-			drop = null;
+			drop = getRandomItem(entityLevel, materialMatchList);
 			
-			while (drop == null)
-				drop = getRandomItem(entityLevel, materialMatchList);
-			
-			items.add(drop);
+			if (drop != null)
+				items.add(drop);
 		}
 		
 		return items;
@@ -121,41 +119,30 @@ public class TreasureConfig extends ConfigGod
 	
 	private ItemStack getRandomItem(int mobLevel, List<Integer> materialMatchList)
 	{
-		//Assign variables
-		Random rand = new Random();
-		List<RpgItem> itemList = new ArrayList<RpgItem>();
-		int breakLimit = 0;
-		
-		//We want to remove all items that don't have a range above -1.
-		for (RpgItem ri : FC_Rpg.rpgItemList)
-		{
-			if (ri.dropLevelMin != -1 && materialMatchList.contains(ri.configFieldNumber))
-				itemList.add(ri);
-		}
-		
 		//Return if mob level is less than or equal to 0.
 		if (mobLevel <= 0)
 			return null;
 		
-		//Pick a random rpg item.
-		RpgItem rpgItem = itemList.get(rand.nextInt(itemList.size()));
+		//Assign variables
+		Random rand = new Random();
+		List<RpgItem> itemList = new ArrayList<RpgItem>();
+		RpgItem rpgItem;
 		
-		//Get a random item in the treasures mob level range.
-		while (mobLevel < rpgItem.dropLevelMin || mobLevel > rpgItem.dropLevelMax)
+		//We want to remove all items that don't have a range above -1.
+		for (RpgItem ri : FC_Rpg.rpgItemList)
 		{
-			rpgItem = itemList.get(rand.nextInt(itemList.size()));
-			
-			breakLimit++;
-			
-			if (breakLimit > 50)
-			{
-				//Don't attempt to drop items when dungeons are started with no players (ie, while debugging).
-				if (mobLevel == 999999)
-					return null;
-				
-				return null;
-			}
+			if (ri.dropLevelMin != -1 && materialMatchList.contains(ri.configFieldNumber) && mobLevel >= ri.dropLevelMin && mobLevel <= ri.dropLevelMax)
+				itemList.add(ri);
 		}
+		
+		if (itemList.size() == 0)
+		{
+			FC_Rpg.plugin.getLogger().info("ERROR, no valid items found to be dropped from monster");
+			return null;
+		}
+		
+		//Pick a random rpg item.
+		rpgItem = itemList.get(rand.nextInt(itemList.size()));
 		
 		//Create the itemstack
 		drop = new ItemStack(rpgItem.getMaterial(), rpgItem.dropAmountFlat);
@@ -164,40 +151,256 @@ public class TreasureConfig extends ConfigGod
 			drop.setAmount(drop.getAmount() + rand.nextInt(rpgItem.dropAmountRandom));	//Set it's amount.
 		
 		//If it is enchantable, then we enchant.
-		if (rpgItem.enchantable == true)
+		if (rpgItem.enchantType == 1) // 1 = Passive enchants.
 		{
-			drop.addEnchantments(getEnchantment());
-			
-			MaterialLib ml = FC_Rpg.mLib;
+			drop.addEnchantments(getVanillaEnchantments());
+		}
+		else if (rpgItem.enchantType == 2)
+		{
+			// Variable Declarations
 			Material dropType = drop.getType();
+			ItemMeta iMeta = drop.getItemMeta();
+			List<String> lore = new ArrayList<String>();
+			double magnitude = 0;
+			int plusValue = 0;
+			int randValue;
+			String plusValueString = "";
+			String tier = "";
+			String prefix = "";
+			String prefixDescription = "";
+			String suffix = "";
+			String suffixDescription = "";
+			String magString = "Defense Bonus Percent: ";
+			String tierColor = "";
+			String itemName = "";
+			boolean isArmor = true;
 			
-			// Add unbreaking to all armor.
-		    if (ml.chestplates.contains(dropType) || ml.leggings.contains(dropType) || ml.helmets.contains(dropType) || ml.boots.contains(dropType))
-				drop.addUnsafeEnchantment(Enchantment.DURABILITY, 5);
-		    
-		    else if (dropType.equals(Material.BOW))
-				drop.addUnsafeEnchantment(Enchantment.DURABILITY, 30);
-		    
+			// Determine drop effect magnitude (damge for swords, defense % for armor) for first line of lore.
+			if (dropType.equals(Material.BOW))
+			{
+				magnitude = 1;
+				isArmor = false;
+			}
 		    else if (dropType.equals(Material.WOOD_SWORD))
-				drop.addUnsafeEnchantment(Enchantment.DURABILITY, 73);
-		    
+		    {
+		    	magnitude = FC_Rpg.balanceConfig.getSwordMultiplierWood();
+				isArmor = false;
+		    }
 		    else if (dropType.equals(Material.STONE_SWORD))
-				drop.addUnsafeEnchantment(Enchantment.DURABILITY, 36);
-			
+		    {
+		    	magnitude = FC_Rpg.balanceConfig.getSwordMultiplierStone();
+				isArmor = false;
+		    }
 		    else if (dropType.equals(Material.IRON_SWORD))
-				drop.addUnsafeEnchantment(Enchantment.DURABILITY, 20);
-		    
+		    {
+		    	magnitude = FC_Rpg.balanceConfig.getSwordMultiplierIron();
+				isArmor = false;
+		    }
 		    else if (dropType.equals(Material.DIAMOND_SWORD))
-				drop.addUnsafeEnchantment(Enchantment.DURABILITY, 3);
-		    
+		    {
+		    	magnitude = FC_Rpg.balanceConfig.getSwordMultiplierDiamond();
+				isArmor = false;
+		    }
 		    else if (dropType.equals(Material.GOLD_SWORD))
-				drop.addUnsafeEnchantment(Enchantment.DURABILITY, 150);
+		    {
+		    	magnitude = FC_Rpg.balanceConfig.getSwordMultiplierGold();
+				isArmor = false;
+		    }
+		    else if (dropType.equals(Material.LEATHER_BOOTS))
+	    		magnitude = FC_Rpg.balanceConfig.getArmorMultiplierLB();
+			
+			else if (dropType.equals(Material.LEATHER_HELMET))
+				magnitude = FC_Rpg.balanceConfig.getArmorMultiplierLH();
+
+			else if (dropType.equals(Material.LEATHER_LEGGINGS))
+				magnitude = FC_Rpg.balanceConfig.getArmorMultiplierLL();
+
+			else if (dropType.equals(Material.LEATHER_CHESTPLATE))
+				magnitude = FC_Rpg.balanceConfig.getArmorMultiplierLC();
+
+			else if (dropType.equals(Material.CHAINMAIL_BOOTS))
+				magnitude = FC_Rpg.balanceConfig.getArmorMultiplierCB();
+			
+			else if (dropType.equals(Material.CHAINMAIL_HELMET))
+				magnitude = FC_Rpg.balanceConfig.getArmorMultiplierCH();
+
+			else if (dropType.equals(Material.CHAINMAIL_LEGGINGS))
+				magnitude = FC_Rpg.balanceConfig.getArmorMultiplierCL();
+
+			else if (dropType.equals(Material.CHAINMAIL_CHESTPLATE))
+				magnitude = FC_Rpg.balanceConfig.getArmorMultiplierCC();
+
+			else if (dropType.equals(Material.IRON_BOOTS))
+				magnitude = FC_Rpg.balanceConfig.getArmorMultiplierIB();
+
+			else if (dropType.equals(Material.IRON_HELMET))
+				magnitude = FC_Rpg.balanceConfig.getArmorMultiplierIH();
+
+			else if (dropType.equals(Material.IRON_LEGGINGS))
+				magnitude = FC_Rpg.balanceConfig.getArmorMultiplierIL();
+
+			else if (dropType.equals(Material.IRON_CHESTPLATE))
+				magnitude = FC_Rpg.balanceConfig.getArmorMultiplierIC();
+
+			else if (dropType.equals(Material.DIAMOND_BOOTS))
+				magnitude = FC_Rpg.balanceConfig.getArmorMultiplierDB();
+
+			else if (dropType.equals(Material.DIAMOND_HELMET))
+				magnitude = FC_Rpg.balanceConfig.getArmorMultiplierDH();
+
+			else if (dropType.equals(Material.DIAMOND_LEGGINGS))
+				magnitude = FC_Rpg.balanceConfig.getArmorMultiplierDL();
+
+			else if (dropType.equals(Material.DIAMOND_CHESTPLATE))
+				magnitude = FC_Rpg.balanceConfig.getArmorMultiplierDC();
+
+			else if (dropType.equals(Material.GOLD_BOOTS))
+				magnitude = FC_Rpg.balanceConfig.getArmorMultiplierGB();
+
+			else if (dropType.equals(Material.GOLD_HELMET))
+				magnitude = FC_Rpg.balanceConfig.getArmorMultiplierGH();
+
+			else if (dropType.equals(Material.GOLD_LEGGINGS))
+				magnitude = FC_Rpg.balanceConfig.getArmorMultiplierGL();
+
+			else if (dropType.equals(Material.GOLD_CHESTPLATE))
+				magnitude = FC_Rpg.balanceConfig.getArmorMultiplierGC();
+			
+			if (isArmor == false)
+				magString = "Damage Bonus Percent: ";
+			
+			// Determine tier and magnitude from it.
+			rand = new Random();
+			randValue = rand.nextInt(100) + 50;
+			
+			if (randValue < 35)
+			{
+				tier = "Common";
+				magnitude = magnitude * .8;
+				tierColor = "&7";
+			}
+			else if (randValue < 64)
+			{
+				tier = "Normal";
+				tierColor = "&f";
+			}
+			else if (randValue < 84)
+			{
+				tier = "Rare";
+				magnitude = magnitude * 1.1;
+				tierColor = "&9";
+			}
+			else if (randValue < 94)
+			{
+				tier = "Unique";
+				magnitude = magnitude * 1.2;
+				tierColor = "&a";
+			}
+			else if (randValue < 99)
+			{
+				tier = "Mythical";
+				magnitude = magnitude * 1.3;
+				tierColor = "&c";
+			}
+			else if (randValue >= 99)
+			{
+				tier = "Legendary";
+				magnitude = magnitude * 1.5;
+				tierColor = "&6";
+			}
+			
+			// Determine prefix.
+			rand = new Random();
+			randValue = rand.nextInt(100);
+			boolean checkPlusValue = false;
+			
+			// If we roll an enchantment prefix (20% chance of getting one), then...
+			if (randValue < 5)
+			{
+				rand = new Random();
+				randValue = rand.nextInt(FC_Rpg.enchantmentConfig.prefixList.size());
+				prefix = FC_Rpg.enchantmentConfig.prefixList.get(randValue).name;
+				prefixDescription = FC_Rpg.enchantmentConfig.prefixList.get(randValue).description;
+				checkPlusValue = true;
+			}
+			
+			// Determine suffix.
+			rand = new Random();
+			randValue = rand.nextInt(100);
+			
+			// If we roll an enchantment suffix (20% chance of getting one), then...
+			if (randValue < 5)
+			{
+				rand = new Random();
+				
+				// Pick out enchants.
+				if (isArmor)
+				{
+					randValue = rand.nextInt(FC_Rpg.enchantmentConfig.armorSuffixList.size());
+					suffix = FC_Rpg.enchantmentConfig.armorSuffixList.get(randValue).name;
+					suffixDescription = FC_Rpg.enchantmentConfig.armorSuffixList.get(randValue).description;
+				}
+				else
+				{
+					randValue = rand.nextInt(FC_Rpg.enchantmentConfig.weaponSuffixList.size());
+					suffix = FC_Rpg.enchantmentConfig.weaponSuffixList.get(randValue).name;
+					suffixDescription = FC_Rpg.enchantmentConfig.weaponSuffixList.get(randValue).description;
+				}
+				
+				checkPlusValue = true;
+			}
+			
+			if (checkPlusValue)
+			{
+				// Determine plus value
+				rand = new Random();
+				randValue = rand.nextInt(100);
+				
+				if (randValue >= 99) { plusValue++; plusValueString = " [+" + String.valueOf(plusValue) + "]"; }
+				else if (randValue >= 95) { plusValue++; plusValueString = " [+" + String.valueOf(plusValue) + "]"; }
+				else if (randValue >= 82) { plusValue++; plusValueString = " [+" + String.valueOf(plusValue) + "]"; }
+				else if (randValue >= 70) { plusValue++; plusValueString = " [+" + String.valueOf(plusValue) + "]"; }
+			}
+			
+			//Set item name.
+			itemName = MaterialLib.getCleanMaterialName(dropType.toString());
+			
+			// Begin setting item meta with settings.
+			ColorLib cl = new ColorLib();
+			
+			iMeta.setDisplayName(cl.parse(tierColor + prefix + " " + itemName + suffix + plusValueString));
+			
+			// Add spacer.
+			lore.add(cl.parse("&3-----------"));
+			
+			lore.add(cl.parse("&3Tier: " + tierColor + tier));
+			lore.add(cl.parse("&3" + magString + "&b" + FC_Rpg.df4.format(magnitude*100)));
+			
+			int counter = 1;
+			
+			if (!prefix.equalsIgnoreCase(""))
+			{
+				lore.add(cl.parse("&3Enchant " + counter + ": &b" + prefixDescription));
+				counter++;
+			}
+			
+			if (!suffix.equalsIgnoreCase(""))
+			{
+				lore.add(cl.parse("&3Enchant " + counter + ": &b" + suffixDescription));
+				counter++;
+			}
+			
+			//Set the final lore.
+			iMeta.setLore(lore);
+			
+			//Set the final item meta.
+			drop.setItemMeta(iMeta);
 		}
 		
 		return drop;
 	}
 	
-	private Map<Enchantment, Integer> getEnchantment()
+	private Map<Enchantment, Integer> getVanillaEnchantments()
 	{
 		//<Key, Value>
 		Map<Enchantment, Integer> enchantmentMap = new HashMap<Enchantment, Integer>();
@@ -327,6 +530,7 @@ public class TreasureConfig extends ConfigGod
 		
 		return success;
 	}
+	 
 	private Enchantment getToolEnchantment(int enchantmentType)
 	{
 		if (enchantmentType == 0)
