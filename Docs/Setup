@@ -17,7 +17,6 @@
 I: Introduction
     a: Getting Started
     b: Configuration General
-    c: Warnings
     
 II: Very Important Configurations
     a: Configuring Groups.yml
@@ -87,14 +86,6 @@ IV: FAQs and Bonus Information
     
     Disclaimer: This tutorial assumes that the reader is a YAML expert. If you don't know how YAML works please go read some tutorials!
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-~~
-	c: Warnings
-~~
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    I just wanted to put this right here as a fast warning for server owners. During testing, item meta data was entirely wiped from items stored in enderchests during server reloads and restarts. This means that if a player puts an item in an enderchest and the server reloads/restarts, the item will have all of it's custom RPG properties removed and return to a vanilla state. It is STRONGLY recommended to test if item meta is wiped on your server from items stored in EnderChests during server restart and reloads. If it is, then again it is STRONGLY recommended that one gets an enderchest plugin or disable Enderchests altogether. This doesn't apply solely to FC_Rpg so it would be good to get one for other plugins in the event that you have some that change item lore. Testing shows that EnderChestPlus DOES NOT delete item meta on server restarts/reloads. Users are welcome to use their own plugin of choice. However, EnderChestPlus has been tested to preserve all item meta: http://dev.bukkit.org/server-mods/enderchestplus/. 
-
 ~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
 ~*
 	II: Getting Started
@@ -118,7 +109,7 @@ An Example YAML groups.yml
 Groups:
   version: 0.23
   GroupString:
-    '0': Guest,&f[§4Guest&f] ,-1,-1
+    '0': Guest,&f[ï¿½4Guest&f] ,-1,-1
 
 "Guest" is the actual group name straight from your permission provider.
 "&f[&7Guest&f] " is the display for the group when using my custom chat override and in /list.
@@ -145,7 +136,7 @@ Groups:
 - infiniteGold - Determines whether or not gold tools should never break. Useful for making 'useless gold' useful!
 - infiniteDiamond - Determines whether or not diamond tools should never break. This setting is useful for making your server very easy mode. :)
 - betterFishing - Currently only gives fishing rods infinite durability.
-- preventSpongBreak - Set whether players can break sponges or not.  (I have another plugin called FC_Sponge, won’t go into it here though, lol)
+- preventSpongBreak - Set whether players can break sponges or not.  (I have another plugin called FC_Sponge, wonï¿½t go into it here though, lol)
 - donatorBonusStatPercent - Set a bonus percent that donators get to stats.
 
     Since this is the first time that this comes up, I will state right here. Basically whenever you see "percent" that means you have to convert the percent into a decimal. Old school math, 100% = 1. 50% = .5. Basically x% * .01 = % as decimal. So if you want donators to have 20% bonus stats, then set this to 0.2. "Multipliers" will generally mean the same thing but you won't start seeing me use that term really until we start working with Balance.yml The only time you should expect to put in numbers for percents is when dealing with probabilities for numbers. I'll try to be really clear on this throughout all the documentation what is expected as input.
@@ -208,7 +199,7 @@ Groups:
     The Faqs section allows you to setup useful information for your server that any player can view by typing /faq. This is a very useful feature as it allows servers to setup their help pages easily in the form of easily selectable topics! Simply follow the format of the default faq to help you in setting up a faq. It might also be helpful to use the /faq command on the server to get a feel for how it works.
 
 - name - The topic that will be displayed as the header for the faq
-- tag - The keyword to access and view a particular faq topic.<br />
+- tag - The keyword to access and view a particular faq topic.
 - faq1 - Faqs can be split into two parts so that you can use two colors. Put the first half of a faq here.
 - faq2 - This is the second part of a faq. If you only want to use one part, the first color, then put in '[empty]' in the matching location for faq1. It is important that your faq1 and faq2 be ordered together if you want faqs to be displayed properly.
 
