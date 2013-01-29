@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 import me.Destro168.FC_Rpg.FC_Rpg;
@@ -12,7 +13,7 @@ import me.Destro168.FC_Rpg.Configs.BalanceConfig;
 import me.Destro168.FC_Rpg.Configs.GroupConfig;
 import me.Destro168.FC_Rpg.Configs.PlayerConfig;
 import me.Destro168.FC_Rpg.Configs.WorldConfig;
-import me.Destro168.FC_Rpg.Enchantment.Enchantment;
+import me.Destro168.FC_Rpg.LoadedObjects.Enchantment;
 import me.Destro168.FC_Rpg.LoadedObjects.Group;
 import me.Destro168.FC_Rpg.LoadedObjects.RpgClass;
 import me.Destro168.FC_Rpg.Spells.SpellCaster;
@@ -34,10 +35,15 @@ public class RpgPlayer extends RpgEntity
 	public PlayerConfig playerConfig;
 	
 	private List<String> queuedHealMessage;
-	private Map<Enchantment, Integer> offensiveEnchantments = new HashMap<Enchantment, Integer>();
-	private Map<Enchantment, Integer> defensiveEnchantments = new HashMap<Enchantment, Integer>();
+	private Map<Enchantment, Integer> offensiveEnchantments;
+	private Map<Enchantment, Integer> defensiveEnchantments;
+	private Map<String, TempStats> itemBonusMap;
+	private TempStats donatorStats;
 	private MessageLib msgLib;
+	private ItemStack[] armor;
+	private ItemStack weapon;
 	private ItemStack air;
+	private ItemStack queuedEnchantedItem;
 	private Player player;
 	private String prefix = "";
 	private String name = "";
@@ -81,7 +87,10 @@ public class RpgPlayer extends RpgEntity
 	}
 	
 	public void setPlayerDefaults()
-	{
+	{ 
+		offensiveEnchantments = new HashMap<Enchantment, Integer>();
+		defensiveEnchantments = new HashMap<Enchantment, Integer>();
+		itemBonusMap = new HashMap<String, TempStats>();
 		msgLib = null;
 		air = new ItemStack(Material.AIR);
 		player = null;
@@ -146,8 +155,14 @@ public class RpgPlayer extends RpgEntity
 		//Check and apply donator bonuses
 		updateDonatorStats();
 		
-		// Load up enchants.
-		loadAllEnchants();
+		// Load up the armor enchantments.
+		armor = player.getInventory().getArmorContents();
+		
+		for (int i = 0; i < armor.length; i++)
+			loadItemEnchant(armor[i]);
+		
+		// Load up weapon enchantments.
+		loadItemEnchant(player.getInventory().getItemInHand());
 	}
 	
 	public void createPlayerRecord(Player player_, int pickedClass, boolean manualDistribution)
@@ -273,24 +288,28 @@ public class RpgPlayer extends RpgEntity
 		
 		if (playerConfig.isDonator() == true)
 		{
-			resetTempStats();
+			if (donatorStats != null)
+			{
+				tempAttack -= donatorStats.attack;
+				tempConstitution -= donatorStats.constitution;
+				tempMagic -= donatorStats.magic;
+				tempIntelligence -= donatorStats.intelligence;
+			}
 			
-			tempAttack = (int) (playerConfig.getAttack() * donatorBonusPercent);
-			tempConstitution = (int) (playerConfig.getConstitution() * donatorBonusPercent);
-			tempMagic = (int) (playerConfig.getMagic() * donatorBonusPercent);
-			tempIntelligence = (int) (playerConfig.getIntelligence() * donatorBonusPercent);
+			donatorStats = new TempStats();
+			
+			donatorStats.attack = (int) (playerConfig.getAttack() * donatorBonusPercent);
+			donatorStats.constitution = (int) (playerConfig.getConstitution() * donatorBonusPercent);
+			donatorStats.magic = (int) (playerConfig.getMagic() * donatorBonusPercent);
+			donatorStats.intelligence = (int) (playerConfig.getIntelligence() * donatorBonusPercent);
+			
+			tempAttack += donatorStats.attack;
+			tempConstitution += donatorStats.constitution;
+			tempMagic += donatorStats.magic;
+			tempIntelligence += donatorStats.intelligence;
 			
 			calculateHealthAndMana();
 		}
-	}
-	
-	public void resetTempStats()
-	{
-		//Reset temp stats.
-		tempAttack = 0;
-		tempConstitution = 0;
-		tempMagic = 0;
-		tempIntelligence = 0;
 	}
 	
 	public boolean hasClassChangeTicket()
@@ -371,16 +390,16 @@ public class RpgPlayer extends RpgEntity
 		isSupportBuffed = true;
 		
 		//Store old buffs.
-		base[0] = tempAttack;
-		base[1] = tempMagic;
-		base[2] = tempConstitution;
-		base[3] = tempIntelligence;
+		base[0] = (int) (getTotalAttack() * buffStrength);
+		base[1] = (int) (getTotalMagic() * buffStrength);
+		base[2] = (int) (getTotalConstitution() * buffStrength);
+		base[3] = (int) (getTotalIntelligence() * buffStrength);
 		
 		//Update them.
-		tempAttack += (int) (getTotalAttack() * buffStrength);
-		tempMagic += (int) (getTotalMagic() * buffStrength);
-		tempConstitution += (int) (getTotalConstitution() * buffStrength);
-		tempIntelligence += (int) (getTotalIntelligence() * buffStrength);
+		tempAttack += base[0];
+		tempMagic += base[1];
+		tempConstitution += base[2];
+		tempIntelligence += base[3];
 		
 		//Message lib.
 		msgLib.standardMessage("The support spell has been applied to you!");
@@ -394,10 +413,10 @@ public class RpgPlayer extends RpgEntity
 			public void run()
 			{
 				//Revert player stats.
-				tempAttack = base[0];
-				tempMagic = base[1];
-				tempConstitution = base[2];
-				tempIntelligence = base[3];
+				tempAttack -= base[0];
+				tempMagic -= base[1];
+				tempConstitution -= base[2];
+				tempIntelligence -= base[3];
 				
 				//Recalculate health and mana.
 				calculateHealthAndMana();
@@ -1230,74 +1249,251 @@ public class RpgPlayer extends RpgEntity
 		playerConfig.offlineSave();
 	}
 	
-	public void loadAllEnchants()
+	// Item Enchantments
+	public void refreshItemEnchants()
 	{
-		loadArmorEnchants();
-		loadWeaponEnchants();
-	}
-	
-	public void loadArmorEnchants()
-	{
-		ItemStack[] armor = player.getInventory().getArmorContents();
+		ItemStack[] currentArmor = player.getInventory().getArmorContents();
+		ItemStack currentWeapon = player.getItemInHand();
 		
 		for (int i = 0; i < armor.length; i++)
-			parseItemEnchant(armor[i]);
+		{
+			if (isEnchantedRpgItem(currentArmor[i]))
+			{
+				if (!getUniqueNameKey(currentArmor[i]).equals(getUniqueNameKey(armor[i])))
+				{
+					// Reload enchantment.
+					unloadItemEnchant(armor[i]);
+					loadItemEnchant(currentArmor[i]);
+					
+					// Set stored armor to the current armor.
+					armor[i] = currentArmor[i];
+				}
+			}
+			else
+			{
+				unloadItemEnchant(armor[i]);
+				armor[i] = null;
+			}
+		}
+		
+		if (isEnchantedRpgItem(currentWeapon))
+		{
+			if (!getUniqueNameKey(currentWeapon).equals(getUniqueNameKey(weapon)))
+			{
+				unloadItemEnchant(weapon);
+				loadItemEnchant(currentWeapon);
+				weapon = currentWeapon;
+			}
+		}
+		else
+		{
+			unloadItemEnchant(weapon);
+			weapon = null;
+		}
 	}
 	
-	public void loadWeaponEnchants()
+	private String getUniqueNameKey(ItemStack item)
 	{
-		parseItemEnchant(player.getInventory().getItemInHand());
+		if (item == null || item.getItemMeta() == null || item.getItemMeta().getDisplayName() == null)
+			return "";
+		
+		String displayName = item.getItemMeta().getDisplayName();
+		return displayName + item.getItemMeta().getLore();
+	}
+	
+	public void loadWeaponEnchants(ItemStack item)
+	{
+		loadItemEnchant(item);
+	}
+	
+	public void queueItem(ItemStack item)
+	{
+		if (!isEnchantedRpgItem(item))
+			return;
+		
+		queuedEnchantedItem = item;
+	}
+	
+	// Resets queue'd item to null. Returns the queue'd item.
+	public void dequeueItem()
+	{
+		if (queuedEnchantedItem != null)
+		{
+			loadItemEnchant(queuedEnchantedItem);
+			queuedEnchantedItem = null;
+		}
 	}
 	
 	public void loadItemEnchant(ItemStack item)
 	{
-		parseItemEnchant(item);
-	}
-	
-	public void parseItemEnchant(ItemStack item)
-	{
-		// Prevent null items and air from being evaluated.
+		// Return if item is null or air.
 		if (item == null || item.getType() == Material.AIR)
 			return;
 		
-		// If not an rpg item, return.
-		if (item.getItemMeta() != null || item.getItemMeta().getLore().get(0).equals(""))
+		// Variable Declarations
+		String displayName = item.getItemMeta().getDisplayName();
+		
+		// Return null if no display name.
+		if (displayName == null)
 			return;
 		
-		// Variable Declarations
-		String name = item.getItemMeta().getDisplayName();
+		String uniqueString = getUniqueNameKey(item);
 		int plusValue = 1;
 		
 		for (int i = 1; i < 6; i++)
 		{
-			if (name.contains("[+"+i+"]"))
+			if (displayName.contains("[+"+i+"]"))
 			{
 				plusValue += i;
 				break;
 			}
 		}
 		
+		double modifier = .008; // .004 = 10%, .008 = 20% stat boost if you have +4 on all of them.
+		
+		for (Enchantment enchant : FC_Rpg.enchantmentConfig.prefixList)
+		{
+			if (displayName.contains(enchant.name))
+			{
+				if (!itemBonusMap.containsKey(uniqueString))
+				{
+					TempStats ib = new TempStats();
+					
+					if (enchant.modifyAttack == true)
+						ib.attack = (int) (playerConfig.getAttack() * (plusValue * modifier));
+					
+					if (enchant.modifyConstitution == true) 
+						ib.constitution = (int) (playerConfig.getConstitution() * (plusValue * modifier));
+					
+					if (enchant.modifyIntelligence == true)
+						ib.intelligence = (int) (playerConfig.getIntelligence() * (plusValue * modifier));
+					
+					if (enchant.modifyMagic == true)
+						ib.magic = (int) (playerConfig.getMagic() * (plusValue * modifier));
+					
+					itemBonusMap.put(uniqueString, ib);
+					
+					tempAttack += ib.attack;
+					tempConstitution += ib.constitution;
+					tempIntelligence += ib.intelligence;
+					tempMagic += ib.magic;
+				}
+			}
+		}
+		
 		for (Enchantment enchant : FC_Rpg.enchantmentConfig.armorSuffixList)
 		{
-			if (name.contains(enchant.name))
+			if (displayName.contains(enchant.name))
 			{
 				if (defensiveEnchantments.containsKey(enchant))
+				{
+					// If the current item has a higher plus value then we return.
+					if (defensiveEnchantments.get(enchant) < plusValue)
+						break;
+					
 					defensiveEnchantments.remove(enchant);
-
+				}
+				
 				defensiveEnchantments.put(enchant, plusValue);
 			}
 		}
 		
 		for (Enchantment enchant : FC_Rpg.enchantmentConfig.weaponSuffixList)
 		{
-			if (name.contains(enchant.name))
+			if (displayName.contains(enchant.name))
 			{
 				if (offensiveEnchantments.containsKey(enchant))
+				{
+					// If the current item has a higher plus value then we return.
+					if (offensiveEnchantments.get(enchant) < plusValue)
+						break;
+					
 					offensiveEnchantments.remove(enchant);
+				}
 				
 				offensiveEnchantments.put(enchant, plusValue);
 			}
 		}
+	}
+	
+	public class TempStats
+	{
+		int attack;
+		int constitution;
+		int intelligence;
+		int magic;
+		
+		public TempStats() { }
+		
+		public void setAttack(int attack_)
+		{
+			attack = attack_;
+		}
+
+		public void setConstitution(int constitution_)
+		{
+			constitution = constitution_;
+		}
+
+		public void setIntelligence(int intelligence_)
+		{
+			intelligence = intelligence_;
+		}
+
+		public void setMagic(int magic_)
+		{
+			magic = magic_;
+		}
+	}
+	
+	public void unloadItemEnchant(ItemStack item)
+	{
+		if (!isEnchantedRpgItem(item))
+			return;
+		
+		String displayName = item.getItemMeta().getDisplayName();
+		String uniqueString = getUniqueNameKey(item);
+		
+		// Remove player item stat bonuses.
+		if (itemBonusMap.containsKey(uniqueString))
+		{
+			TempStats ib = itemBonusMap.get(uniqueString);
+			
+			tempAttack -= ib.attack;
+			tempConstitution -= ib.constitution;
+			tempIntelligence -= ib.intelligence;
+			tempMagic -= ib.magic;
+			
+			itemBonusMap.remove(uniqueString);
+		}
+		
+		for (Enchantment enchant : FC_Rpg.enchantmentConfig.armorSuffixList)
+		{
+			if (displayName.contains(enchant.name))
+			{
+				if (defensiveEnchantments.containsKey(enchant))
+					defensiveEnchantments.remove(enchant);
+			}
+		}
+		
+		for (Enchantment enchant : FC_Rpg.enchantmentConfig.weaponSuffixList)
+		{
+			if (displayName.contains(enchant.name))
+			{
+				if (offensiveEnchantments.containsKey(enchant))
+					offensiveEnchantments.remove(enchant);
+			}
+		}
+	}
+	
+	private boolean isEnchantedRpgItem(ItemStack item)
+	{
+		// If not an rpg item, return false
+		if (item == null || item.getType() == Material.AIR || item.getItemMeta() == null || item.getItemMeta().getLore() == null || 
+				item.getItemMeta().getLore().size() < 4 || !item.getItemMeta().getLore().get(3).contains("Enchant"))
+			return false;
+		
+		return true;
 	}
 	
 	public double autocastOffense(LivingEntity target, double damage)
@@ -1309,10 +1505,15 @@ public class RpgPlayer extends RpgEntity
 		// Calculate weapon enchantments.
 		for (Enchantment e : offensiveEnchantments.keySet())
 		{
-			scm.fastOffensiveCast(this, target, damage, e.spell.effectID, offensiveEnchantments.get(e));
-			damage = 0;
-			damage += scm.getDamage();
-			scm.applyBuff(e.spell.effectID);
+			Random rand = new Random();
+			
+			if (rand.nextInt(100) < e.procChance)
+			{
+				scm.fastOffensiveCast(this, target, damage, e.spell.effectID, offensiveEnchantments.get(e));
+				damage = 0;
+				damage += scm.getDamage();
+				scm.applyBuff(e.spell.effectID);
+			}
 		}
 		
 		for (Integer activeBuff : playerConfig.getAllActiveBuffs())
@@ -1335,12 +1536,20 @@ public class RpgPlayer extends RpgEntity
 		// Calculate armor enchantments.
 		for (Enchantment e : defensiveEnchantments.keySet())
 		{
-			scm.fastDefensiveCast(this, e.spell.effectID, defensiveEnchantments.get(e));
-			scm.applyBuff(e.spell.effectID);
+			Random rand = new Random();
+			
+			if (rand.nextInt(100) < e.procChance)
+			{
+				scm.fastDefensiveCast(this, e.spell, defensiveEnchantments.get(e));
+				scm.applyBuff(e.spell.effectID);
+			}
 		}
 		
 		for (Integer activeBuff : playerConfig.getAllActiveBuffs())
-			scm.fastDefensiveCast(this, activeBuff, playerConfig.getStatusTier(activeBuff));
+		{
+			Enchantment e = FC_Rpg.enchantmentConfig.getProcEnchantmentByID(activeBuff);
+			scm.fastDefensiveCast(this, e.spell, playerConfig.getStatusTier(activeBuff));
+		}
 	}
 }
 

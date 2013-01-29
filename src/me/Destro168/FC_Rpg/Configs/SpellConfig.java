@@ -7,7 +7,7 @@ import java.util.Map;
 import me.Destro168.FC_Suite_Shared.ConfigManagers.ConfigGod;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.LoadedObjects.Spell;
-import me.Destro168.FC_Rpg.Spells.EffectIDs;
+import me.Destro168.FC_Rpg.Spells.SpellEffect;
 
 //Rename spell manager
 public class SpellConfig extends ConfigGod
@@ -125,13 +125,13 @@ public class SpellConfig extends ConfigGod
 		 * Swordsman
 		*******************************************/
 		
-		setEffectID(0, EffectIDs.DODGE);
+		setEffectID(0, SpellEffect.DODGE.getID());
 		setName(0, "Nimble");
 		setDescription(0, "Grants you (x)% passive dodge chance.");
 		setBuffStats(0);
 		setConstantMagnitude(0, 4, 8, 12, 16, 20);
 		
-		setEffectID(1, EffectIDs.DAMAGE_BONUS);
+		setEffectID(1, SpellEffect.DAMAGE_BONUS.getID());
 		setName(1, "Morale");
 		setDescription(1, "Apply a (x)% damage boost to your entire party.");
 		setBuffStats(1);
@@ -139,19 +139,19 @@ public class SpellConfig extends ConfigGod
 		setTargetParty(1, true);
 		setRadius(1,20,20,20,20,20);
 		
-		setEffectID(2, EffectIDs.DAMAGE_BONUS);
+		setEffectID(2, SpellEffect.DAMAGE_BONUS.getID());
 		setName(2, "Empower");
 		setDescription(2, "Empowers your next attack to deal (x)% bonus damage.");
 		setD1Stats(2);
 		setConstantMagnitude(2, 1.2, 1.4, 1.6, 1.8, 2);
 		
-		setEffectID(3, EffectIDs.BLEED);
+		setEffectID(3, SpellEffect.BLEED.getID());
 		setName(3, "Slice");
 		setDescription(3, "Deal 2% of targets' hp each second for (x) seconds.");
 		setD1Stats(3);
 		setConstantMagnitude(3, 2, 4, 6, 8, 10);
 		
-		setEffectID(4, EffectIDs.AOE);
+		setEffectID(4, SpellEffect.AOE.getID());
 		setName(4, "Vortex");
 		setDescription(4, "Strike all monsters in a (x) block AoE.");
 		setD1Stats(4);
@@ -161,7 +161,7 @@ public class SpellConfig extends ConfigGod
 		 * Assassin
 		*******************************************/
 		
-		setEffectID(5, EffectIDs.SPEED);
+		setEffectID(5, SpellEffect.SPEED.getID());
 		setName(5, "Adreneline");
 		setDescription(5, "Applies an (x)% speed buff on your character.");
 		setDuration(5, 10, 12, 15, 17, 20);
@@ -170,20 +170,20 @@ public class SpellConfig extends ConfigGod
 		setRequiresTarget(5, false);
 		setConstantMagnitude(5, .28, .36, .42, .50, .58);
 		
-		setEffectID(6, EffectIDs.FIRE_STRIKE);
+		setEffectID(6, SpellEffect.FIRE_STRIKE.getID());
 		setName(6, "Flame");
 		setDescription(6, "Gives your arrows a burning effect for (x) shots. Fire insta-kills mobs but does not " +
 				"give loot/exp/items from them or kill bosses.");
 		setD1Stats(6);
 		setConstantMagnitude(6, 1, 2, 3, 4, 5);
 		
-		setEffectID(7, EffectIDs.DAMAGE_BONUS);
+		setEffectID(7, SpellEffect.DAMAGE_BONUS.getID());
 		setName(7, "Force");
 		setDescription(7, "Strengthens your next arrow to deal (x)% bonus damage.");
 		setD1Stats(7);
 		setConstantMagnitude(7, 1.2, 1.4, 1.6, 1.8, 2);
 		
-		setEffectID(8, EffectIDs.POISON);
+		setEffectID(8, SpellEffect.POISON.getID());
 		setName(8, "Poison");
 		setDescription(8, "Your next arrow applies a 5 second long, 1 tick a second poison that does (x) damage.");
 		setManaCost(8, 3, 6, 9, 12, 15);
@@ -191,7 +191,7 @@ public class SpellConfig extends ConfigGod
 		setIsClassRestricted(8, true);
 		setRequiresTarget(8, true);
 		
-		setEffectID(9, EffectIDs.FROST_STRIKE_AOE);
+		setEffectID(9, SpellEffect.FROST_STRIKE_AOE.getID());
 		setName(9, "Frost");
 		setDescription(9, "Hit a target with an arrow to freeze everything within (x) radius for (x) seconds.");
 		setDuration(9,40,55,70,85,100);
@@ -204,27 +204,27 @@ public class SpellConfig extends ConfigGod
 		 * Defender
 		*******************************************/
 		
-		setEffectID(10, EffectIDs.TAUNT);
+		setEffectID(10, SpellEffect.TAUNT.getID());
 		setName(10, "Taunt");
 		setDescription(10, "Teleport and set aggro of all monsters in 12 block radius to you. Increases party defense by (x)%.");
 		setBuffStats(10);
 		setConstantMagnitude(10, .96, .92, .88, .84, .80);
 		setRadius(1,20,20,20,20,20);
 		
-		setEffectID(11, EffectIDs.THORNS);
+		setEffectID(11, SpellEffect.THORNS.getID());
 		setName(11, "Thorns");
 		setDescription(11, "All attacks against you return (x)% of damage.");
 		setBuffStats(11);
 		setConstantMagnitude(11, .04, .08, .12, .16, .20);
 		
-		setEffectID(12, EffectIDs.HEAL_SELF_PERCENT);
+		setEffectID(12, SpellEffect.HEAL_SELF_PERCENT.getID());
 		setName(12, "Undefeated");
 		setDescription(12, "Heal (x)% of your max health.");
 		setBuffStats(12);
 		setManaCost(12, 10,20,30,40,50);
 		setConstantMagnitude(12, .2, .28, .36, .42, .5);
 		
-		setEffectID(13, EffectIDs.WEAKEN);
+		setEffectID(13, SpellEffect.WEAKEN.getID());
 		setName(13, "Weaken");
 		setDescription(13, "Permanently lower all mob stats by (x)%.");
 		setManaCost(13, 3, 6, 9, 12, 15);
@@ -232,7 +232,7 @@ public class SpellConfig extends ConfigGod
 		setIsClassRestricted(13, true);
 		setRequiresTarget(13, true);
 		
-		setEffectID(14, EffectIDs.DISABLED);
+		setEffectID(14, SpellEffect.DISABLED.getID());
 		setName(14, "Bash");
 		setDescription(14, "Disables your targets ability to attack for (x) seconds.");
 		setManaCost(14, 3, 6, 9, 12, 15);
@@ -244,7 +244,7 @@ public class SpellConfig extends ConfigGod
 		 * Wizard
 		*******************************************/
 		
-		setEffectID(15, EffectIDs.FIREBALL);
+		setEffectID(15, SpellEffect.FIREBALL.getID());
 		setName(15, "Fireball");
 		setDescription(15, "Release a fireball exploding an area for (x) damage.");
 		setManaCost(15,3,6,9,12,15);
@@ -254,7 +254,7 @@ public class SpellConfig extends ConfigGod
 		setIsClassRestricted(15, true);
 		setRequiresTarget(15, false);
 		
-		setEffectID(16, EffectIDs.ALCHEMY);
+		setEffectID(16, SpellEffect.ALCHEMY.getID());
 		setName(16, "Alchemy");
 		setDescription(16, "Destroy items for items. Grants /alchemy.");
 		setManaCost(16,0,0,0,0,0);
@@ -263,7 +263,7 @@ public class SpellConfig extends ConfigGod
 		setRequiresTarget(16, false);
 		setUncastable(16, true);
 		
-		setEffectID(17, EffectIDs.LIGHTNING);
+		setEffectID(17, SpellEffect.LIGHTNING.getID());
 		setName(17, "Lightning");
 		setDescription(17, "Strike a target with lightning for (x) damage.");
 		setManaCost(17,1,3,5,7,9);
@@ -272,7 +272,7 @@ public class SpellConfig extends ConfigGod
 		setIsClassRestricted(17, true);
 		setRequiresTarget(17, true);
 		
-		setEffectID(18, EffectIDs.HEAL_SELF_OR_OTHER);
+		setEffectID(18, SpellEffect.HEAL_SELF_OR_OTHER.getID());
 		setName(18, "Remedy");
 		setDescription(18, "Heal yourself or an ally for (x) health.");
 		setManaCost(18,6,12,18,24,30);
@@ -281,7 +281,7 @@ public class SpellConfig extends ConfigGod
 		setIsClassRestricted(18, false);
 		setRequiresTarget(18, false);
 		
-		setEffectID(19, EffectIDs.BOOST_STATS);
+		setEffectID(19, SpellEffect.BOOST_STATS.getID());
 		setName(19, "Invigorate");
 		setDescription(19, "Buff you or an allies stats by (x)% for 20 seconds.");
 		setManaCost(19, 6, 12, 18, 24, 30);
@@ -293,31 +293,31 @@ public class SpellConfig extends ConfigGod
 		 * Berserker
 		*******************************************/
 		
-		setEffectID(20, EffectIDs.HEALTH_STEAL);
+		setEffectID(20, SpellEffect.HEALTH_STEAL.getID());
 		setName(20, "Bloodthirst");
 		setDescription(20, "Steal (x)% life from all damage.");
 		setBuffStats(20);
 		setConstantMagnitude(20, .04, .08, .12, .16, .20);
 		
-		setEffectID(21, EffectIDs.IMMORTAL);
+		setEffectID(21, SpellEffect.IMMORTAL.getID());
 		setName(21, "Undying");
 		setDescription(21, "Become immune to death for (x) seconds.");
 		setBuffStats(21);
 		setDuration(21, 3000, 3500, 4000, 4500, 5000);
 		
-		setEffectID(22, EffectIDs.IGNORE_ARMOR);
+		setEffectID(22, SpellEffect.IGNORE_ARMOR.getID());
 		setName(22, "Ferocity");
 		setDescription(22, "Ignore the defense values of player armor with your next strike.");
 		setBuffStats(22);
 		setDuration(22, 3000, 3500, 4000, 4500, 5000);
 		
-		setEffectID(23, EffectIDs.DAMAGE_SCALED_BY_MISSING_HEALTH);
+		setEffectID(23, SpellEffect.DAMAGE_SCALED_BY_MISSING_HEALTH.getID());
 		setName(23, "Unbalanced");
 		setDescription(23, "Deal missing health as (x)% instant bonus damage.");
 		setD1Stats(23);
 		setConstantMagnitude(23, 3, 3.5, 4, 4.5, 5);
 		
-		setEffectID(24, EffectIDs.SACRIFICE_HEALTH_FOR_DAMAGE);
+		setEffectID(24, SpellEffect.SACRIFICE_HEALTH_FOR_DAMAGE.getID());
 		setName(24, "Reckless");
 		setDescription(24, "Sacrifice 20% of your current hp for (x)% instant bonus damage.");
 		setD1Stats(24);

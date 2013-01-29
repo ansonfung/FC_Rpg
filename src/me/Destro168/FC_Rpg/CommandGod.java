@@ -17,11 +17,12 @@ import me.Destro168.FC_Rpg.Configs.WarpConfig;
 import me.Destro168.FC_Rpg.Configs.WorldConfig;
 import me.Destro168.FC_Rpg.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.Events.DungeonEvent;
+import me.Destro168.FC_Rpg.Listeners.PlayerInteractionListener;
 import me.Destro168.FC_Rpg.LoadedObjects.Group;
 import me.Destro168.FC_Rpg.LoadedObjects.RpgClass;
 import me.Destro168.FC_Rpg.LoadedObjects.RpgItem;
 import me.Destro168.FC_Rpg.LoadedObjects.Spell;
-import me.Destro168.FC_Rpg.Spells.EffectIDs;
+import me.Destro168.FC_Rpg.Spells.SpellEffect;
 import me.Destro168.FC_Rpg.Spells.SpellCaster;
 import me.Destro168.FC_Rpg.Util.FC_RpgPermissions;
 import me.Destro168.FC_Rpg.Util.RpgMessageLib;
@@ -2187,14 +2188,17 @@ public class CommandGod implements CommandExecutor
 						
 						if (j == 0)
 						{
-							try { warpName = FC_Rpg.warpConfig.getName(i); sign.setLine(0, "Teleport:"); sign.setLine(1, warpName); } catch (NullPointerException e) { continue; }
+							try { warpName = FC_Rpg.warpConfig.getName(i); 
+								sign.setLine(0, FC_Rpg.cl.parse(PlayerInteractionListener.signTeleport)); 
+								sign.setLine(1, warpName); 
+							} catch (NullPointerException e) { continue; }
 						}
 						
 						//Create class sign
 						else if (j == 1)
 						{
 							//Set sign text
-							sign.setLine(0, ChatColor.DARK_RED + "Pick Class:");
+							sign.setLine(0, FC_Rpg.cl.parse(PlayerInteractionListener.signPickClass));
 							
 							try { sign.setLine(1, ChatColor.DARK_BLUE + FC_Rpg.classConfig.getRpgClass(i).getName()); }
 							catch (ArrayIndexOutOfBoundsException e) { continue; }
@@ -2203,10 +2207,12 @@ public class CommandGod implements CommandExecutor
 						//Create finish sign.
 						else if (j == 2)
 						{
+							FC_Rpg.plugin.getLogger().info("i: " + i);
+							
 							if (i == 0)
 							{
 								//Set sign text
-								sign.setLine(0, ChatColor.DARK_PURPLE + "Finish!");
+								sign.setLine(0, FC_Rpg.cl.parse(PlayerInteractionListener.signFinish));
 								sign.setLine(1, ChatColor.DARK_RED + "And Assign");
 								sign.setLine(2, ChatColor.DARK_RED + "Stat Points");
 								sign.setLine(3, ChatColor.DARK_RED + "Automatically");
@@ -2214,10 +2220,28 @@ public class CommandGod implements CommandExecutor
 							else if (i == 1)
 							{
 								//Set sign text
-								sign.setLine(0, ChatColor.DARK_PURPLE + "Finish!");
+								sign.setLine(0, FC_Rpg.cl.parse(PlayerInteractionListener.signFinish));
 								sign.setLine(1, ChatColor.DARK_RED + "And Assign Stats");
 								sign.setLine(2, ChatColor.DARK_RED + "Stat Points");
 								sign.setLine(3, ChatColor.DARK_RED + "Manually");
+							}
+							else if (i == 2)
+								sign.setLine(0, FC_Rpg.cl.parse(PlayerInteractionListener.signFillMana));
+							else if (i == 3)
+								sign.setLine(0, FC_Rpg.cl.parse(PlayerInteractionListener.signFillHealth));
+							else if (i == 4)
+							{
+								sign.setLine(0, FC_Rpg.cl.parse(PlayerInteractionListener.signTeleport));
+								sign.setLine(1, "GrassLands");
+								sign.setLine(2, "[Demo For -");
+								sign.setLine(3, "Dungeons]");
+							}
+							else if (i == 5)
+							{
+								sign.setLine(0, FC_Rpg.cl.parse(PlayerInteractionListener.signExit));
+								sign.setLine(1, "GrassLands");
+								sign.setLine(2, "[Demo For -");
+								sign.setLine(3, "Dungeons]");
 							}
 						}
 						
@@ -2226,7 +2250,7 @@ public class CommandGod implements CommandExecutor
 					}
 					catch (ClassCastException e)
 					{
-						
+						continue;
 					}
 				}
 			}
@@ -2379,6 +2403,21 @@ public class CommandGod implements CommandExecutor
 			}
 			
 			//Variable declarations
+			int mobsToSpawn = 0;
+			
+			try { mobsToSpawn = Integer.valueOf(args[2]); } catch (NumberFormatException e) { mobsToSpawn = 1; }
+			
+			for (int i = 0; i < mobsToSpawn; i++)
+			{
+				if (spawnMob() == false)
+					return false;
+			}
+			
+			return true;
+		}
+		
+		private boolean spawnMob()
+		{
 			org.bukkit.entity.LivingEntity entity;
 			
 			try
@@ -2392,13 +2431,14 @@ public class CommandGod implements CommandExecutor
 			}
 			
 			try { 
-				//Register the custom monster.
-				FC_Rpg.rpgEntityManager.registerCustomLevelEntity(entity, Integer.valueOf(args[2]), 0, false);
+				// If input for args[3], then register the custom monster.
+				if (!args[3].equals(""))
+					FC_Rpg.rpgEntityManager.registerCustomLevelEntity(entity, Integer.valueOf(args[3]), 0, false);
 			} catch (NumberFormatException e) { msgLib.errorBadInput(); return false; }
 			
 			return true;
 		}
-	
+		
 		private boolean vanishSubCommand()
 		{
 			if (console != null)
@@ -2601,7 +2641,7 @@ public class CommandGod implements CommandExecutor
 			//If alchemy set alchemy to true.
 			Spell spell = rpgPlayer.playerConfig.getRpgClass().getSpellBook().get(intArg1);
 			
-			if (spell.effectID == EffectIDs.ALCHEMY)
+			if (spell.effectID == SpellEffect.ALCHEMY.getID())
 				rpgPlayer.playerConfig.hasAlchemy = true;
 			
 			//Decrease player spell points.
@@ -2711,7 +2751,7 @@ public class CommandGod implements CommandExecutor
 			
 			for (int i = 0; i < sb.size(); i++)
 			{
-				if (sb.get(i).effectID == EffectIDs.ALCHEMY)
+				if (sb.get(i).effectID == SpellEffect.ALCHEMY.getID())
 				{
 					spellMagnitude = sc.updatefinalSpellMagnitude(rpgPlayer, sb.get(i),(rpgPlayer.playerConfig.getSpellLevels().get(i) - 1));
 					break;

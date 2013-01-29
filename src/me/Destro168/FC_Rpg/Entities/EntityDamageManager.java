@@ -7,7 +7,7 @@ import java.util.Random;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.Configs.BalanceConfig;
 import me.Destro168.FC_Rpg.LoadedObjects.RpgClass;
-import me.Destro168.FC_Rpg.Spells.EffectIDs;
+import me.Destro168.FC_Rpg.Spells.SpellEffect;
 import me.Destro168.FC_Rpg.Util.HealthConverter;
 import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 
@@ -48,59 +48,71 @@ public class EntityDamageManager
 		if (canAttack(rpgDefender.getLastDamagedLong(), guildMemberCount) == false)
 			return;
 		
+		// Refresh player enchants.
+		rpgDefender.refreshItemEnchants();
+		
 		// Handle immortality effect first.
-		if (rpgDefender.playerConfig.getStatusActiveRpgPlayer(EffectIDs.IMMORTAL))
+		if (rpgDefender.playerConfig.getStatusActiveRpgPlayer(SpellEffect.IMMORTAL.getID()))
 		{
 			rpgDefender.attemptDamageAvoidNotification(true);
 			return;
 		}
 		
 		// Check if the player has dodge status on them.
-		if (rpgDefender.playerConfig.getStatusActiveRpgPlayer(EffectIDs.DODGE))
+		if (rpgDefender.playerConfig.getStatusActiveRpgPlayer(SpellEffect.DODGE.getID()))
 		{
 			Random rand = new Random();
 			
-			if (rand.nextInt(100) < rpgDefender.playerConfig.getStatusMagnitude(EffectIDs.DODGE))
+			if (rand.nextInt(100) < rpgDefender.playerConfig.getStatusMagnitude(SpellEffect.DODGE.getID()))
 			{
 				rpgDefender.attemptDamageAvoidNotification(false);
 				return;
 			}
 		}
 		
-		if (rpgDefender.playerConfig.getStatusActiveRpgPlayer(EffectIDs.HEAL_CHANCE))
-			rpgDefender.healHealth(rpgDefender.playerConfig.maxHealth * rpgDefender.playerConfig.getStatusMagnitude(EffectIDs.HEAL_CHANCE));
+		if (rpgDefender.playerConfig.getStatusActiveRpgPlayer(SpellEffect.HEAL_CHANCE.getID()))
+			rpgDefender.healHealth(rpgDefender.playerConfig.maxHealth * rpgDefender.playerConfig.getStatusMagnitude(SpellEffect.HEAL_CHANCE.getID()));
 		
 		// Set the last damage cause for players.
 		if (rpgAttacker != null)
 		{
+			// Refresh player enchants.
+			rpgAttacker.refreshItemEnchants();
+			
+			// Update durability of weapons.
 			updateSwordDurabilities(rpgAttacker.getPlayer());
 			
+			// Apply false EDBEE
 			edbe = new EntityDamageByEntityEvent(rpgAttacker.getPlayer(), playerDefender, DamageCause.ENTITY_ATTACK, 0);
 			playerDefender.setLastDamageCause(edbe);
+			
+			// Calculate potions.
 			damage *= FC_Rpg.battleCalculations.getPotionOffenseBonus(playerDefender);
 			
 			// True gets returned, we ignore armor.
-			ignoreArmor = rpgAttacker.playerConfig.getStatusActiveRpgPlayer(EffectIDs.IGNORE_ARMOR);
+			ignoreArmor = rpgAttacker.playerConfig.getStatusActiveRpgPlayer(SpellEffect.IGNORE_ARMOR.getID());
 		}
 		else if (rpgMobAttacker != null)
 		{
+			// Apply false EDBEE
 			edbe = new EntityDamageByEntityEvent(rpgMobAttacker.getEntity(), rpgDefender.getPlayer(), DamageCause.ENTITY_ATTACK, 0);
 			playerDefender.setLastDamageCause(edbe);
 
-			// Handle sharpness enchant.
+			// Handle enchantments for mobs.
 			if (damageType == 0)
 				damage *= FC_Rpg.battleCalculations.getEntityEnchantmentBonus(rpgMobAttacker.getEntity(), Enchantment.DAMAGE_ARTHROPODS);
-
+			
 			if (damageType == 1)
 				damage *= FC_Rpg.battleCalculations.getEntityEnchantmentBonus(rpgMobAttacker.getEntity(), Enchantment.ARROW_DAMAGE);
 			
+			// Calculate potions.
 			damage *= FC_Rpg.battleCalculations.getPotionOffenseBonus(rpgMobAttacker.getEntity());
 		}
 		
 		// Deal thorns damage before anything is calculated.
-		if (rpgDefender.playerConfig.getStatusActiveRpgPlayer(EffectIDs.THORNS))
+		if (rpgDefender.playerConfig.getStatusActiveRpgPlayer(SpellEffect.THORNS.getID()))
 		{
-			double thornsDamage = damage * rpgDefender.playerConfig.getStatusMagnitude(EffectIDs.THORNS);
+			double thornsDamage = damage * rpgDefender.playerConfig.getStatusMagnitude(SpellEffect.THORNS.getID());
 			
 			// Attempt a dodge notification
 			rpgDefender.attemptThornsNotification(thornsDamage);
@@ -144,10 +156,10 @@ public class EntityDamageManager
 		}
 
 		// If taunt status is active, then...
-		if (rpgDefender.playerConfig.getStatusActiveRpgPlayer(EffectIDs.TAUNT) == true)
+		if (rpgDefender.playerConfig.getStatusActiveRpgPlayer(SpellEffect.TAUNT.getID()) == true)
 		{
 			// Apply taunt damage reduction.
-			damage *= rpgDefender.playerConfig.getStatusMagnitude(EffectIDs.TAUNT);
+			damage *= rpgDefender.playerConfig.getStatusMagnitude(SpellEffect.TAUNT.getID());
 		}
 		
 		// Deal damage greater than 0.
@@ -230,8 +242,11 @@ public class EntityDamageManager
 		if (canAttack(rpgMobDefender.getLastDamagedLong(), partyMemberCount) == false)
 			return;
 		
+		// Refresh player enchants.
+		rpgAttacker.refreshItemEnchants();
+		
 		// If the player has the fire arrow status, then...
-		if (rpgAttacker.playerConfig.getStatusActiveRpgPlayer(EffectIDs.FIRE_STRIKE))
+		if (rpgAttacker.playerConfig.getStatusActiveRpgPlayer(SpellEffect.FIRE_STRIKE.getID()))
 		{
 			// If the mob is alive and not a boss.
 			if (rpgMobDefender.getIsBoss() == false && rpgMobDefender.getIsAlive() == true)
@@ -248,18 +263,18 @@ public class EntityDamageManager
 		updateSwordDurabilities(playerAttacker);
 		
 		// If the player has the attack buff, then...
-		if (rpgAttacker.playerConfig.getStatusActiveRpgPlayer(EffectIDs.DAMAGE_BONUS))
+		if (rpgAttacker.playerConfig.getStatusActiveRpgPlayer(SpellEffect.DAMAGE_BONUS.getID()))
 		{
 			// Increase attack damage by its magnitude.
-			damage *= rpgAttacker.playerConfig.getStatusMagnitude(EffectIDs.DAMAGE_BONUS);
+			damage *= rpgAttacker.playerConfig.getStatusMagnitude(SpellEffect.DAMAGE_BONUS.getID());
 		}
 		
-		if (rpgAttacker.playerConfig.getStatusActiveRpgPlayer(EffectIDs.CRITICAL_DAMAGE_DOUBLE))
+		if (rpgAttacker.playerConfig.getStatusActiveRpgPlayer(SpellEffect.CRITICAL_DAMAGE_DOUBLE.getID()))
 		{
 			Random rand = new Random();
 			
 			// Increase attack damage by its magnitude.
-			if (rand.nextInt(100) > rpgAttacker.playerConfig.getStatusMagnitude(EffectIDs.CRITICAL_DAMAGE_DOUBLE))
+			if (rand.nextInt(100) > rpgAttacker.playerConfig.getStatusMagnitude(SpellEffect.CRITICAL_DAMAGE_DOUBLE.getID()))
 				damage *= 2;
 		}
 		
@@ -267,7 +282,7 @@ public class EntityDamageManager
 		damage = handle_Offense_Passives(damage, rpgAttacker, playerAttacker);
 		
 		// If the attacker doesn't have the ignore defense status, then...
-		if (rpgAttacker.playerConfig.getStatusActiveRpgPlayer(EffectIDs.IGNORE_ARMOR) == false)
+		if (rpgAttacker.playerConfig.getStatusActiveRpgPlayer(SpellEffect.IGNORE_ARMOR.getID()) == false)
 		{
 			damage *= FC_Rpg.battleCalculations.getArmorBonus(rpgMobDefender);
 			
@@ -358,21 +373,20 @@ public class EntityDamageManager
 	}
 	
 	// Player combat private functions
-	private void updateSwordDurabilities(final Player p)
+	private void updateSwordDurabilities(Player p)
 	{
 		// Variable Declaration
 		ItemStack handItem = p.getItemInHand();
-		int handItemDurability = handItem.getDurability();
 		Random rand = new Random();
 		
-		// Increase then decrease durability to fix client issues.
-		handItem.setDurability((short) (0));
-		handItem.setDurability((short) (handItemDurability));
+		// For items with 0 max durability, we return.
+		if (handItem.getType().getMaxDurability() == 0)
+			return;
 		
 		// Adjust durability of sword.
-		if (handItem.getType().equals(Material.BOW) && rand.nextInt(30) != 0)
+		if (handItem.getType().equals(Material.BOW))
 			return;
-		else if (handItem.getType().equals(Material.WOOD_SWORD) && rand.nextInt(73) != 0)
+		else if (handItem.getType().equals(Material.WOOD_SWORD) && rand.nextInt(5) != 0) //73
 			return;
 		else if (handItem.getType().equals(Material.STONE_SWORD) && rand.nextInt(36) != 0)
 			return;
@@ -384,10 +398,10 @@ public class EntityDamageManager
 			return;
 		
 		// Increase durability.
-		handItem.setDurability((short) (handItemDurability + 1));
+		p.getItemInHand().setDurability((short) (p.getItemInHand().getDurability() + 1));
 		
 		// Set the hand item
-		if (handItemDurability >= handItem.getType().getMaxDurability())
+		 if (p.getItemInHand().getDurability() >= handItem.getType().getMaxDurability())
 			p.setItemInHand(new ItemStack(Material.AIR));
 	}
 	
@@ -627,11 +641,11 @@ public class EntityDamageManager
 				exp = baseExp;
 			}
 			
-			if (rpgLooter.playerConfig.getStatusActiveRpgPlayer(EffectIDs.BONUS_EXPERIENCE))
-				exp *= rpgLooter.playerConfig.getStatusMagnitude(EffectIDs.BONUS_EXPERIENCE);
+			if (rpgLooter.playerConfig.getStatusActiveRpgPlayer(SpellEffect.BONUS_EXPERIENCE.getID()))
+				exp *= rpgLooter.playerConfig.getStatusMagnitude(SpellEffect.BONUS_EXPERIENCE.getID());
 			
-			if (rpgLooter.playerConfig.getStatusActiveRpgPlayer(EffectIDs.BONUS_GOLD))
-				exp *= rpgLooter.playerConfig.getStatusMagnitude(EffectIDs.BONUS_GOLD);
+			if (rpgLooter.playerConfig.getStatusActiveRpgPlayer(SpellEffect.BONUS_GOLD.getID()))
+				exp *= rpgLooter.playerConfig.getStatusMagnitude(SpellEffect.BONUS_GOLD.getID());
 			
 			FC_Rpg.economy.depositPlayer(rpgLooter.getPlayer().getName(), cash);
 			rpgLooter.addClassExperience(exp, true);
@@ -679,16 +693,16 @@ public class EntityDamageManager
 
 	private void handle_Post_Offense_Buffs(RpgPlayer bearer, LivingEntity defender, double damage)
 	{
-		if (bearer.playerConfig.getStatusActiveRpgPlayer(EffectIDs.HEALTH_STEAL))
+		if (bearer.playerConfig.getStatusActiveRpgPlayer(SpellEffect.HEALTH_STEAL.getID()))
 		{
-			double healAmount = damage * bearer.playerConfig.getStatusMagnitude(EffectIDs.HEALTH_STEAL);
+			double healAmount = damage * bearer.playerConfig.getStatusMagnitude(SpellEffect.HEALTH_STEAL.getID());
 
 			bearer.attemptHealthHealSelfNotification(healAmount);
 			bearer.healHealth(healAmount);
 			bearer.dequeHealMessage();
 		}
 		
-		if (bearer.playerConfig.getStatusActiveRpgPlayer(EffectIDs.TELEPORT_STRIKE))
+		if (bearer.playerConfig.getStatusActiveRpgPlayer(SpellEffect.TELEPORT_STRIKE.getID()))
 		{
 			EntityLocationLib ell = new EntityLocationLib();
 			bearer.getPlayer().teleport(ell.getLocationBehindEntity(defender.getLocation()));
@@ -698,9 +712,9 @@ public class EntityDamageManager
 	// This will check for Pvp buffs
 	public void handle_Post_Offense_Buffs(RpgPlayer bearer, RpgPlayer playerDefender, double damage)
 	{
-		if (bearer.playerConfig.getStatusActiveRpgPlayer(EffectIDs.MANA_STEAL))
+		if (bearer.playerConfig.getStatusActiveRpgPlayer(SpellEffect.MANA_STEAL.getID()))
 		{
-			double drainAmount = damage * bearer.playerConfig.getStatusMagnitude(EffectIDs.MANA_STEAL);
+			double drainAmount = damage * bearer.playerConfig.getStatusMagnitude(SpellEffect.MANA_STEAL.getID());
 			
 			// Give to bearer.
 			bearer.healMana(drainAmount);

@@ -2,8 +2,13 @@
 
 ^Todo List^
 
-- Doublecheck that lifesteal and mana vamp are properly notifying of drained and mana.
-- Make tiers work.
+- I tried my best. But it seems that I will have to make enchants from items and armor load up each time you are hit. Use unique string to prevent items from needing to be updated constantly.
+
+- Update sign format for dungeons. "Teleport: " "name of dungeon"
+
+- Doublecheck that lifesteal and mana vamp are properly notifying of drained and mana. - done with hp.
+- Make tiers work. - done.
+- Fix fucking durability on swords.
 
 - Add into help that items stored in enderchests lose lore when stored and server restarts.
 

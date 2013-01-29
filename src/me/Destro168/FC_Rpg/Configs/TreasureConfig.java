@@ -55,6 +55,15 @@ public class TreasureConfig extends ConfigGod
 		getEnchantLevelThreeChance();
 		getEnchantLevelTwoChance();
 		getLootList("default");
+		getEnchantChancePrefix();
+		getEnchantChanceSuffix();
+		getMultiplierCommon();
+		getMultiplierRare();
+		getMultiplierUnique();
+		getMultiplierMythical();
+		getMultiplierLegendary();
+		getChancesPlus();
+		getChancesTier();
 	}
 	
 	public List<ItemStack> getRandomItemStackList(int entityLevel, List<Integer> materialMatchList)
@@ -170,7 +179,7 @@ public class TreasureConfig extends ConfigGod
 			String prefixDescription = "";
 			String suffix = "";
 			String suffixDescription = "";
-			String magString = "Defense Bonus Percent: ";
+			String magString = "Damage Reduction: ";
 			String tierColor = "";
 			String itemName = "";
 			boolean isArmor = true;
@@ -178,32 +187,32 @@ public class TreasureConfig extends ConfigGod
 			// Determine drop effect magnitude (damge for swords, defense % for armor) for first line of lore.
 			if (dropType.equals(Material.BOW))
 			{
-				magnitude = 1;
+				magnitude = 1 + FC_Rpg.balanceConfig.getBowMultiplier();
 				isArmor = false;
 			}
 		    else if (dropType.equals(Material.WOOD_SWORD))
 		    {
-		    	magnitude = FC_Rpg.balanceConfig.getSwordMultiplierWood();
+		    	magnitude = 1 + FC_Rpg.balanceConfig.getSwordMultiplierWood();
 				isArmor = false;
 		    }
 		    else if (dropType.equals(Material.STONE_SWORD))
 		    {
-		    	magnitude = FC_Rpg.balanceConfig.getSwordMultiplierStone();
+		    	magnitude = 1 + FC_Rpg.balanceConfig.getSwordMultiplierStone();
 				isArmor = false;
 		    }
 		    else if (dropType.equals(Material.IRON_SWORD))
 		    {
-		    	magnitude = FC_Rpg.balanceConfig.getSwordMultiplierIron();
+		    	magnitude = 1 + FC_Rpg.balanceConfig.getSwordMultiplierIron();
 				isArmor = false;
 		    }
 		    else if (dropType.equals(Material.DIAMOND_SWORD))
 		    {
-		    	magnitude = FC_Rpg.balanceConfig.getSwordMultiplierDiamond();
+		    	magnitude = 1 + FC_Rpg.balanceConfig.getSwordMultiplierDiamond();
 				isArmor = false;
 		    }
 		    else if (dropType.equals(Material.GOLD_SWORD))
 		    {
-		    	magnitude = FC_Rpg.balanceConfig.getSwordMultiplierGold();
+		    	magnitude = 1 + FC_Rpg.balanceConfig.getSwordMultiplierGold();
 				isArmor = false;
 		    }
 		    else if (dropType.equals(Material.LEATHER_BOOTS))
@@ -267,45 +276,46 @@ public class TreasureConfig extends ConfigGod
 				magnitude = FC_Rpg.balanceConfig.getArmorMultiplierGC();
 			
 			if (isArmor == false)
-				magString = "Damage Bonus Percent: ";
+				magString = "Damage Bonus: ";
 			
 			// Determine tier and magnitude from it.
 			rand = new Random();
-			randValue = rand.nextInt(100) + 50;
+			randValue = rand.nextInt(100);
+			List<Integer> chances = getChancesTier();
 			
-			if (randValue < 35)
+			if (randValue < chances.get(0))
 			{
 				tier = "Common";
-				magnitude = magnitude * .8;
+				magnitude = magnitude * getMultiplierCommon();
 				tierColor = "&7";
 			}
-			else if (randValue < 64)
+			else if (randValue < chances.get(1))
 			{
 				tier = "Normal";
 				tierColor = "&f";
 			}
-			else if (randValue < 84)
+			else if (randValue < chances.get(2))
 			{
 				tier = "Rare";
-				magnitude = magnitude * 1.1;
+				magnitude = magnitude * getMultiplierRare();
 				tierColor = "&9";
 			}
-			else if (randValue < 94)
+			else if (randValue < chances.get(3))
 			{
 				tier = "Unique";
-				magnitude = magnitude * 1.2;
+				magnitude = magnitude * getMultiplierUnique();
 				tierColor = "&a";
 			}
-			else if (randValue < 99)
+			else if (randValue < chances.get(4))
 			{
 				tier = "Mythical";
-				magnitude = magnitude * 1.3;
+				magnitude = magnitude * getMultiplierMythical();
 				tierColor = "&c";
 			}
-			else if (randValue >= 99)
+			else if (randValue >= chances.get(5))
 			{
 				tier = "Legendary";
-				magnitude = magnitude * 1.5;
+				magnitude = magnitude * getMultiplierLegendary();
 				tierColor = "&6";
 			}
 			
@@ -314,8 +324,8 @@ public class TreasureConfig extends ConfigGod
 			randValue = rand.nextInt(100);
 			boolean checkPlusValue = false;
 			
-			// If we roll an enchantment prefix (20% chance of getting one), then...
-			if (randValue < 5)
+			// If we roll an enchantment prefix, then...
+			if (randValue < getEnchantChancePrefix())
 			{
 				rand = new Random();
 				randValue = rand.nextInt(FC_Rpg.enchantmentConfig.prefixList.size());
@@ -329,7 +339,7 @@ public class TreasureConfig extends ConfigGod
 			randValue = rand.nextInt(100);
 			
 			// If we roll an enchantment suffix (20% chance of getting one), then...
-			if (randValue < 5)
+			if (randValue < getEnchantChanceSuffix())
 			{
 				rand = new Random();
 				
@@ -355,15 +365,16 @@ public class TreasureConfig extends ConfigGod
 				// Determine plus value
 				rand = new Random();
 				randValue = rand.nextInt(100);
+				chances = getChancesPlus();
 				
-				if (randValue >= 99) { plusValue++; plusValueString = " [+" + String.valueOf(plusValue) + "]"; }
-				else if (randValue >= 95) { plusValue++; plusValueString = " [+" + String.valueOf(plusValue) + "]"; }
-				else if (randValue >= 82) { plusValue++; plusValueString = " [+" + String.valueOf(plusValue) + "]"; }
-				else if (randValue >= 70) { plusValue++; plusValueString = " [+" + String.valueOf(plusValue) + "]"; }
+				if (randValue >= chances.get(0)) { plusValue++; plusValueString = " [+" + String.valueOf(plusValue) + "]"; }
+				if (randValue >= chances.get(1)) { plusValue++; plusValueString = " [+" + String.valueOf(plusValue) + "]"; }
+				if (randValue >= chances.get(2)) { plusValue++; plusValueString = " [+" + String.valueOf(plusValue) + "]"; }
+				if (randValue >= chances.get(3)) { plusValue++; plusValueString = " [+" + String.valueOf(plusValue) + "]"; }
 			}
 			
 			//Set item name.
-			itemName = MaterialLib.getCleanMaterialName(dropType.toString());
+			itemName = MaterialLib.getCleanName(dropType.toString());
 			
 			// Begin setting item meta with settings.
 			ColorLib cl = new ColorLib();
@@ -374,7 +385,7 @@ public class TreasureConfig extends ConfigGod
 			lore.add(cl.parse("&3-----------"));
 			
 			lore.add(cl.parse("&3Tier: " + tierColor + tier));
-			lore.add(cl.parse("&3" + magString + "&b" + FC_Rpg.df4.format(magnitude*100)));
+			lore.add(cl.parse("&3" + magString + "&b" + FC_Rpg.df4.format(magnitude*100) + "&3%"));
 			
 			int counter = 1;
 			
@@ -632,6 +643,16 @@ public class TreasureConfig extends ConfigGod
 	private List<Integer> getEnchantLevelFourChance() { return fcw.getStaticCustomIntegerList(prefix + "enchantLevelFourChance","8000,7000,600"); }
 	private List<Integer> getEnchantLevelThreeChance() { return fcw.getStaticCustomIntegerList(prefix + "enchantLevelThreeChance","8000,7000"); }
 	private int getEnchantLevelTwoChance() { return fcw.getStaticInt(prefix + "enchantLevelTwoChance",8000); }
+
+	private int getEnchantChancePrefix() { return fcw.getStaticInt(prefix + "enchantChance.prefix", 10); }
+	private int getEnchantChanceSuffix() { return fcw.getStaticInt(prefix + "enchantChance.suffix", 10); }
+	public double getMultiplierCommon() { return fcw.getStaticDouble(prefix + "multiplier.common", .9); }
+	public double getMultiplierRare() { return fcw.getStaticDouble(prefix + "multiplier.rare", 1.05); }
+	public double getMultiplierUnique() { return fcw.getStaticDouble(prefix + "multiplier.unique", 1.1); }
+	public double getMultiplierMythical() { return fcw.getStaticDouble(prefix + "multiplier.mythical", 1.15); }
+	public double getMultiplierLegendary() { return fcw.getStaticDouble(prefix + "multiplier.legendary", 1.25); }
+	private List<Integer> getChancesPlus() { return fcw.getStaticCustomIntegerList(prefix + "chances.plus","95,80,65,50"); }
+	private List<Integer> getChancesTier() { return fcw.getStaticCustomIntegerList(prefix + "chances.tier","35,64,84,94,99,99"); }
 	
 	public List<Integer> getLootList(String name)
 	{

@@ -9,6 +9,7 @@ import me.Destro168.FC_Rpg.Entities.RpgMonster;
 import me.Destro168.FC_Rpg.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.LoadedObjects.RpgClass;
 import me.Destro168.FC_Rpg.LoadedObjects.Spell;
+import me.Destro168.FC_Rpg.Util.MaterialLib;
 import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 
 import org.bukkit.Bukkit;
@@ -192,12 +193,10 @@ public class SpellCaster
 		evaluateTarget();
 		
 		//Store spell information for use later.
-		if (FC_Rpg.enchantmentConfig.getEnchantmentByID(effectID) == null)
+		if (FC_Rpg.enchantmentConfig.getProcEnchantmentByID(effectID) == null)
 			return;
 		
-		FC_Rpg.plugin.getLogger().info("FAST CASTING");
-		
-		spell = FC_Rpg.enchantmentConfig.getEnchantmentByID(effectID).spell;
+		spell = FC_Rpg.enchantmentConfig.getProcEnchantmentByID(effectID).spell;
 		spellTier = plusValue;
 		
 		// Store spell info for later use.
@@ -211,7 +210,7 @@ public class SpellCaster
 	}
 	
 	// Handles casts for when you are attacked and have persistant buffs. (items, buffing spells)
-	public void fastDefensiveCast(RpgPlayer spellCaster_, int effectID, int plusValue)
+	public void fastDefensiveCast(RpgPlayer spellCaster_, Spell spell_, int plusValue)
 	{
 		rpgCaster = spellCaster_;
 		playerCaster = spellCaster_.getPlayer();
@@ -220,8 +219,10 @@ public class SpellCaster
 		evaluateTarget();
 		
 		//Store spell information for use later.
-		spell = FC_Rpg.enchantmentConfig.getEnchantmentByID(effectID).spell;
 		spellTier = plusValue;
+		
+		// Store spell.
+		spell = spell_;
 		
 		// Store spell info for later use.
 		storeSpellInfo();
@@ -267,75 +268,75 @@ public class SpellCaster
 		int x = spell.effectID;
 		
 		// Handle effects with custom requirements first.
-		if (x == EffectIDs.TAUNT)
+		if (x == SpellEffect.TAUNT.getID())
 		{
 			effect_Taunt();
 			applyBuff(x);
 			return true;
 		}
-		else if (x == EffectIDs.FIRE_STRIKE)
+		else if (x == SpellEffect.FIRE_STRIKE.getID())
 		{
 			rpgCaster.playerConfig.setStatusUses(x, (int) finalSpellMagnitude);
 			return true;
 		}
-		else if (x == EffectIDs.DISABLED)
+		else if (x == SpellEffect.DISABLED.getID())
 			effect_Disable();
 		
-		else if (x == EffectIDs.BLEED)
+		else if (x == SpellEffect.BLEED.getID())
 			effect_Bleed();
 
-		else if (x == EffectIDs.AOE)
+		else if (x == SpellEffect.AOE.getID())
 			effect_AoE();
 		
-		else if (x == EffectIDs.FROST_STRIKE_AOE)
+		else if (x == SpellEffect.FROST_STRIKE_AOE.getID())
 			effect_Frost_Strike(true);
 		
-		else if (x == EffectIDs.FROST_STRIKE)
+		else if (x == SpellEffect.FROST_STRIKE.getID())
 			effect_Frost_Strike(false);
 		
-		else if (x == EffectIDs.HEAL_SELF)
+		else if (x == SpellEffect.HEAL_SELF.getID())
 			effect_Heal_Self();
 		
-		else if (x == EffectIDs.WEAKEN)
+		else if (x == SpellEffect.WEAKEN.getID())
 			effect_Weaken();
 		
-		else if (x == EffectIDs.DISABLED)
+		else if (x == SpellEffect.DISABLED.getID())
 			effect_Disable();
 
-		else if (x == EffectIDs.FIREBALL)
+		else if (x == SpellEffect.FIREBALL.getID())
 			effect_Fireball();
 		
-		else if (x == EffectIDs.ALCHEMY)
+		else if (x == SpellEffect.ALCHEMY.getID())
 			return false;
 		
-		else if (x == EffectIDs.LIGHTNING)
+		else if (x == SpellEffect.LIGHTNING.getID())
 			effect_Lightning();
 		
-		else if (x == EffectIDs.HEAL_SELF_OR_OTHER)
+		else if (x == SpellEffect.HEAL_SELF_OR_OTHER.getID())
 			effect_Heal_Self_Or_Other();
 		
-		else if (x == EffectIDs.BOOST_STATS)
+		else if (x == SpellEffect.BOOST_STATS.getID())
 			effect_Boost_Stats();
 		
-		else if (x == EffectIDs.DAMAGE_SCALED_BY_MISSING_HEALTH)
+		else if (x == SpellEffect.DAMAGE_SCALED_BY_MISSING_HEALTH.getID())
 			effect_Damage_Scaled_By_Missing_Health();
 		
-		else if (x == EffectIDs.SACRIFICE_HEALTH_FOR_DAMAGE)
+		else if (x == SpellEffect.SACRIFICE_HEALTH_FOR_DAMAGE.getID())
 			effect_Sacrifice_Health_For_Damage();
 		
-		else if (x == EffectIDs.SPEED)
+		else if (x == SpellEffect.SPEED.getID())
 			effect_Speed();
 		
-		else if (x == EffectIDs.POISON)
+		else if (x == SpellEffect.POISON.getID())
 			effect_Poison();
 		
-		else if (x == EffectIDs.HEAL_OTHER)
+		else if (x == SpellEffect.HEAL_OTHER.getID())
 			effect_Heal_Other();
 		
-		else if (x == EffectIDs.HEAL_SELF_PERCENT)
+		else if (x == SpellEffect.HEAL_SELF_PERCENT.getID())
 			effect_Heal_Self_Percent();
 		
-		else if (x == EffectIDs.HEAL_SELF_PERCENT)
+		else if (x == SpellEffect.HEAL_SELF_PERCENT.getID())
 			effect_Heal_Self_Percent();
 		
 		else
@@ -380,7 +381,7 @@ public class SpellCaster
 	}
 	
 	 // Apply buffs for enchants and spell casts
-	public void applyBuff(int effectID)
+	public void applyBuff(final int effectID)
 	{
 		// Variable Declaration(s)
 		List<RpgPlayer> playerConfigs = new ArrayList<RpgPlayer>();
@@ -410,6 +411,9 @@ public class SpellCaster
 			// Cancel past buff related timers.
 			if (FC_Rpg.playerBuffTimerTIDs.containsKey(p.getPlayer()))
 				Bukkit.getScheduler().cancelTask(FC_Rpg.playerBuffTimerTIDs.get(p.getPlayer()));
+
+			final MessageLib msgLib = new MessageLib(p.getPlayer());
+			msgLib.infiniteMessage("Spell Effect: ",MaterialLib.getCleanName(SpellEffect.getSpellEffectName(effectID))," Has Activated.");
 			
 			// Create a new one.
 			FC_Rpg.playerBuffTimerTIDs.put(p.getPlayer(), Bukkit.getScheduler().scheduleSyncDelayedTask(FC_Rpg.plugin, new Runnable()
@@ -417,8 +421,7 @@ public class SpellCaster
 				@Override
 				public void run()
 				{
-					MessageLib msgLib = new MessageLib(p.getPlayer());
-					msgLib.standardMessage("An Effect Has Expired And Been Removed.");
+					msgLib.infiniteMessage("Spell Effect: ",MaterialLib.getCleanName(SpellEffect.getSpellEffectName(effectID))," Has Been Used Up.");
 				}
 			}, (int) (duration * .02)));
 		}
@@ -689,7 +692,7 @@ public class SpellCaster
 			rpgMobDefender.setStatusDisabled((int) finalSpellMagnitude);
 		
 		else if (playerDefender != null)
-			rpgDefender.playerConfig.setStatusMagnitude(EffectIDs.DISABLED, finalSpellMagnitude);
+			rpgDefender.playerConfig.setStatusMagnitude(SpellEffect.DISABLED.getID(), finalSpellMagnitude);
 		
 		return true;
 	}

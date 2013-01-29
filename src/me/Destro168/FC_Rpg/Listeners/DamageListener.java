@@ -9,7 +9,7 @@ import me.Destro168.FC_Rpg.Entities.EntityDamageManager;
 import me.Destro168.FC_Rpg.Entities.RpgMonster;
 import me.Destro168.FC_Rpg.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.LoadedObjects.Spell;
-import me.Destro168.FC_Rpg.Spells.EffectIDs;
+import me.Destro168.FC_Rpg.Spells.SpellEffect;
 import me.Destro168.FC_Rpg.Spells.SpellCaster;
 import me.Destro168.FC_Rpg.Util.DistanceModifierLib;
 import me.Destro168.FC_Rpg.Util.MobAggressionCheck;
@@ -141,11 +141,9 @@ public class DamageListener implements Listener
 			}
 			else
 			{
-				if (event.getCause() != DamageCause.FALL)
-				{
-					if (event.getEntity() instanceof LivingEntity)
-						edm.nukeMob((LivingEntity) event.getEntity());
-				}
+				// If the event entity is a livingentity and the damage isn't fall damage, then nuke.
+				if (event.getCause() != DamageCause.FALL && event.getEntity() instanceof LivingEntity)
+					edm.nukeMob((LivingEntity) event.getEntity());
 			}
 		}
 	}
@@ -223,7 +221,7 @@ public class DamageListener implements Listener
 		
 		// Prepare the defender and attacker variables.
 		prepareDefender(entity);
-
+		
 		// If a damage was passed in, then we don't want to set damage. Else, store new damage
 		damage = prepareAttacker(ed);
 
@@ -401,7 +399,7 @@ public class DamageListener implements Listener
 					
 					for (int i = 0; i < spellBook.size(); i++)
 					{
-						if (spellBook.get(i).effectID == EffectIDs.FIREBALL)
+						if (spellBook.get(i).effectID == SpellEffect.FIREBALL.getID())
 						{
 							SpellCaster sc = new SpellCaster();
 							damage = sc.updatefinalSpellMagnitude(rpgAttacker, spellBook.get(i), (rpgAttacker.playerConfig.getSpellLevels().get(i) - 1));
@@ -439,7 +437,10 @@ public class DamageListener implements Listener
 				rpgAttacker = FC_Rpg.rpgEntityManager.getRpgPlayer(playerAttacker);
 
 				// Set damage of arrows.
-				damage = rpgAttacker.playerConfig.getAttack() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeAttack();
+				damage = rpgAttacker.getTotalAttack() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeAttack();
+				
+				// Add weapon Bonus
+				damage *= FC_Rpg.battleCalculations.getWeaponModifier(playerAttacker.getItemInHand(), rpgAttacker.getTotalAttack());
 			}
 			else
 			{
@@ -476,7 +477,7 @@ public class DamageListener implements Listener
 			
 			if (rpgAttacker == null)
 				return -1;
-
+			
 			// Get base damage.
 			damage = rpgAttacker.getTotalAttack() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeAttack();
 			
@@ -514,7 +515,7 @@ public class DamageListener implements Listener
 		if (rpgAttacker != null)
 		{
 			// If disabled cancel attack
-			if (rpgAttacker.playerConfig.getStatusActiveRpgPlayer(EffectIDs.DISABLED))
+			if (rpgAttacker.playerConfig.getStatusActiveRpgPlayer(SpellEffect.DISABLED.getID()))
 			{
 				cancelRpgDamage = true;
 				return 0;

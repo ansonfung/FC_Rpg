@@ -71,12 +71,9 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerFishEvent;
-import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -241,8 +238,6 @@ public class FC_Rpg extends JavaPlugin
 		getServer().getPluginManager().registerEvents(new TeleportListener(), plugin);
 		getServer().getPluginManager().registerEvents(new PlayerTeleportListener(), plugin);
 		getServer().getPluginManager().registerEvents(new EnchantEventListener(), plugin);
-		getServer().getPluginManager().registerEvents(new ItemEquipListener(), plugin);
-		getServer().getPluginManager().registerEvents(new ItemChangeEvent(), plugin);
 		
 		// Register Commands
 		commandCE = new CommandGod();
@@ -481,33 +476,48 @@ public class FC_Rpg extends JavaPlugin
 
 	public class SignChangeListener implements Listener
 	{
+		FC_RpgPermissions perms;
+		MessageLib msgLib;
+		SignChangeEvent event;
+		
 		@EventHandler
-		public void onSignChange(SignChangeEvent event)
+		public void onSignChange(SignChangeEvent event_)
 		{
-			// Variable Declarations
-			boolean fail = false;
-			FC_RpgPermissions perms = new FC_RpgPermissions(event.getPlayer());
-			MessageLib msgLib = new MessageLib(event.getPlayer());
-
-			// Without adequate permission...
+			// Variable Declarations and initializations
+			event = event_;
+			String rawEventLine = cl.removeColorCodes(event.getLine(0));
+			perms = new FC_RpgPermissions(event.getPlayer());
+			msgLib = new MessageLib(event.getPlayer());
+			
+			FC_Rpg.plugin.getLogger().info("Test: " + rawEventLine + " Teleport: " + PlayerInteractionListener.signTeleport);
+			
+			if (rawEventLine.contains(cl.removeColorCodes(PlayerInteractionListener.signPickClass)))
+				analyzeSign(PlayerInteractionListener.signPickClass);
+			
+			else if (rawEventLine.contains(cl.removeColorCodes(PlayerInteractionListener.signTeleport)))
+				analyzeSign(PlayerInteractionListener.signTeleport);
+			
+			else if (rawEventLine.contains(cl.removeColorCodes(PlayerInteractionListener.signFillMana)))
+				analyzeSign(PlayerInteractionListener.signFillMana);
+			
+			else if (event.getLine(0).contains(cl.removeColorCodes(PlayerInteractionListener.signFinish)))
+				analyzeSign(PlayerInteractionListener.signFinish);
+			
+			else if (event.getLine(0).contains(cl.removeColorCodes(PlayerInteractionListener.signExit)))
+				analyzeSign(PlayerInteractionListener.signExit);
+		}
+		
+		private void analyzeSign(String newLine)
+		{
+			FC_Rpg.plugin.getLogger().info("Test 2");
+			
 			if (!perms.isAdmin())
-			{
-				if (event.getLine(0).contains("Pick Class:"))
-					fail = true;
-				else if (event.getLine(0).contains("Teleport:"))
-					fail = true;
-				else if (event.getLine(0).contains("Refill Mana!"))
-					fail = true;
-				else if (event.getLine(1).contains("Dungeon"))
-					fail = true;
-			}
-
-			// If they tried to change a sign without the proper permission, then ...
-			if (fail == true)
 			{
 				msgLib.standardMessage("Key words detected on signs, edit cancelled.");
 				event.setCancelled(true);
 			}
+			else
+				event.setLine(0, FC_Rpg.cl.parse(newLine));
 		}
 	}
 
@@ -1034,7 +1044,7 @@ public class FC_Rpg extends JavaPlugin
 			// Don't perform this event in non-rpg worlds.
 			if (!worldConfig.getIsRpgWorld(event.getEntity().getWorld().getName()))
 				return;
-
+			
 			// Variable Declarations
 			final Arrow arrow = (Arrow) event.getProjectile();
 			Vector speed;
@@ -1050,7 +1060,27 @@ public class FC_Rpg extends JavaPlugin
 					arrow.remove();
 				}
 			}, 1200);
-
+			
+			// Prevent bow durability loss for players in survival.
+			if (event.getEntity() instanceof Player)
+			{
+				Player p = (Player) event.getEntity();
+				
+				if (p.getGameMode() == GameMode.SURVIVAL)
+				{
+					// Variable Declaration
+					Random rand = new Random();
+					
+					if (event.getBow().getType().equals(Material.BOW) && rand.nextInt(30) == 0)
+					{
+						if (event.getBow().getDurability() >= Material.BOW.getMaxDurability())
+							event.getBow().setType(Material.AIR);
+					}
+					else
+						event.getBow().setDurability((short) (event.getBow().getDurability() - 1));
+				}
+			}
+			
 			// Now we want to check if a player is casting a spell.
 			if (!(event.getEntity() instanceof Player))
 				return;
@@ -1151,38 +1181,6 @@ public class FC_Rpg extends JavaPlugin
 				if (enchantMap.containsKey(Enchantment.LOOT_BONUS_MOBS))
 					enchantMap.remove(Enchantment.LOOT_BONUS_MOBS);
 			}
-		}
-	}
-	
-	public class ItemEquipListener implements Listener
-	{
-		@EventHandler
-		public void onItemClick(InventoryClickEvent event)
-		{
-			// Only handle this in rpg worlds.
-			if (!FC_Rpg.worldConfig.getIsRpgWorld(event.getWhoClicked().getWorld().getName()))
-				return;
-			
-			// Variable Declarations
-			int slotNumber = event.getSlot();
-			Player playerClicker = Bukkit.getServer().getPlayer(event.getWhoClicked().getName());
-			
-			if (playerClicker.getGameMode() != GameMode.SURVIVAL)
-				return;
-			
-			if (slotNumber >= 36 && slotNumber <= 39 && (event.getSlotType() == SlotType.QUICKBAR) && playerClicker != null)
-				FC_Rpg.rpgEntityManager.getRpgPlayer(playerClicker).loadItemEnchant(playerClicker.getInventory().getItem(event.getSlot()));
-			else if (slotNumber >= 0 && slotNumber <= 9)
-				FC_Rpg.rpgEntityManager.getRpgPlayer(playerClicker).loadItemEnchant(playerClicker.getInventory().getItem(event.getSlot()));
-		}
-	}
-	
-	public class ItemChangeEvent implements Listener
-	{
-		@EventHandler
-		public void onItemSwitch(PlayerItemHeldEvent event)
-		{
-			FC_Rpg.rpgEntityManager.getRpgPlayer(event.getPlayer()).loadItemEnchant(event.getPlayer().getInventory().getItem(event.getNewSlot()));
 		}
 	}
 	

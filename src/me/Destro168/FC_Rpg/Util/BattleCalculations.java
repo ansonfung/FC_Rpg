@@ -22,37 +22,39 @@ public class BattleCalculations
 	public double getWeaponModifier(ItemStack weapon, int strength)
 	{
 		Material weaponType = weapon.getType();
-		double swordBonus = 0;
+		double weaponBonus = 0;
 		
 		// Get sword bonus based on sword type.
+		if (weaponType.equals(Material.BOW))
+			weaponBonus = FC_Rpg.balanceConfig.getBowMultiplier();
 		if (weaponType.equals(Material.WOOD_SWORD))
 		{
 			if (strength >= FC_Rpg.balanceConfig.getSwordAttackRequirementWood())
-				swordBonus = FC_Rpg.balanceConfig.getSwordMultiplierWood();
+				weaponBonus = FC_Rpg.balanceConfig.getSwordMultiplierWood();
 		}
 		else if (weaponType.equals(Material.STONE_SWORD))
 		{
 			if (strength >= FC_Rpg.balanceConfig.getSwordAttackRequirementStone())
-				swordBonus = FC_Rpg.balanceConfig.getSwordMultiplierStone();
+				weaponBonus = FC_Rpg.balanceConfig.getSwordMultiplierStone();
 		}
 		else if (weaponType.equals(Material.IRON_SWORD))
 		{
 			if (strength >= FC_Rpg.balanceConfig.getSwordAttackRequirementIron())
-				swordBonus = FC_Rpg.balanceConfig.getSwordMultiplierIron();
+				weaponBonus = FC_Rpg.balanceConfig.getSwordMultiplierIron();
 		}
 		else if (weaponType.equals(Material.DIAMOND_SWORD))
 		{
 			if (strength >= FC_Rpg.balanceConfig.getSwordAttackRequirementDiamond())
-				swordBonus = FC_Rpg.balanceConfig.getSwordMultiplierDiamond();
+				weaponBonus = FC_Rpg.balanceConfig.getSwordMultiplierDiamond();
 		}
 		else if (weaponType.equals(Material.GOLD_SWORD))
 		{
 			if (strength >= FC_Rpg.balanceConfig.getSwordAttackRequirementGold())
-				swordBonus = FC_Rpg.balanceConfig.getSwordMultiplierGold();
+				weaponBonus = FC_Rpg.balanceConfig.getSwordMultiplierGold();
 		}
 		
 		// Increase sword bonus basedo n item meta
-		if (swordBonus > 0)
+		if (weaponBonus > 0)
 		{
 			if (weapon.getItemMeta().getLore() != null && weapon.getItemMeta().getLore().size() >= 2)
 			{
@@ -60,18 +62,18 @@ public class BattleCalculations
 				String tier = iMeta.getLore().get(1);
 				
 				if (tier.toLowerCase().contains("common"))
-					swordBonus *= .8;
+					weaponBonus *= FC_Rpg.treasureConfig.getMultiplierCommon();
 				else if (tier.toLowerCase().contains("rare"))
-					swordBonus *= 1.1;
+					weaponBonus *= FC_Rpg.treasureConfig.getMultiplierRare();
 				else if (tier.toLowerCase().contains("unique"))
-					swordBonus *= 1.2;
+					weaponBonus *= FC_Rpg.treasureConfig.getMultiplierUnique();
 				else if (tier.toLowerCase().contains("mythical"))
-					swordBonus *= 1.3;
+					weaponBonus *= FC_Rpg.treasureConfig.getMultiplierMythical();
 				else if (tier.toLowerCase().contains("legendary"))
-					swordBonus *= 1.5;
+					weaponBonus *= FC_Rpg.treasureConfig.getMultiplierLegendary();
 			}
 			
-			return 1 + swordBonus;
+			return 1 + weaponBonus;
 		}
 		else
 			return 1;
@@ -96,7 +98,7 @@ public class BattleCalculations
 	{
 		EntityEquipment entityEquipment = rpgMonster.getEntity().getEquipment();
 		double armorBonus = 1;
-		int constitution = rpgMonster.getConstitution();
+		int constitution = 999999;
 		
 		armorBonus -= getArmorPieceBonus(entityEquipment.getHelmet(), constitution);
 		armorBonus -= getArmorPieceBonus(entityEquipment.getLeggings(), constitution);
@@ -105,15 +107,40 @@ public class BattleCalculations
 		
 		return armorBonus;
 	}
-
+	
 	public double getArmorPieceBonus(ItemStack armor, int constitution)
 	{
+		double armorMultiplier = 0;
+		
 		if (armor != null)
-			return getArmorMultiplier(armor.getType(), constitution);
-
-		return 0;
+			armorMultiplier = getArmorMultiplier(armor.getType(), constitution);
+		
+		// Increase sword bonus basedo n item meta
+		if (armorMultiplier > 0)
+		{
+			if (armor.getItemMeta().getLore() != null && armor.getItemMeta().getLore().size() >= 2)
+			{
+				ItemMeta iMeta = armor.getItemMeta();
+				String tier = iMeta.getLore().get(1);
+				
+				if (tier.toLowerCase().contains("common"))
+					armorMultiplier *= FC_Rpg.treasureConfig.getMultiplierCommon();
+				else if (tier.toLowerCase().contains("rare"))
+					armorMultiplier *= FC_Rpg.treasureConfig.getMultiplierRare();
+				else if (tier.toLowerCase().contains("unique"))
+					armorMultiplier *= FC_Rpg.treasureConfig.getMultiplierUnique();
+				else if (tier.toLowerCase().contains("mythical"))
+					armorMultiplier *= FC_Rpg.treasureConfig.getMultiplierMythical();
+				else if (tier.toLowerCase().contains("legendary"))
+					armorMultiplier *= FC_Rpg.treasureConfig.getMultiplierLegendary();
+			}
+			
+			return armorMultiplier;
+		}
+		else
+			return 0;
 	}
-
+	
 	public double getArmorMultiplier(Material armor, int constitution)
 	{
 		if (armor.equals(Material.LEATHER_BOOTS))

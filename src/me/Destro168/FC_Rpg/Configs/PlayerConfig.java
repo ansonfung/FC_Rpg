@@ -22,7 +22,7 @@ import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.LoadedObjects.RpgClass;
 import me.Destro168.FC_Rpg.LoadedObjects.Spell;
-import me.Destro168.FC_Rpg.Spells.EffectIDs;
+import me.Destro168.FC_Rpg.Spells.SpellEffect;
 import me.Destro168.FC_Suite_Shared.NameMatcher;
 import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 import me.Destro168.FC_Suite_Shared.TimeUtils.DateManager;
@@ -129,12 +129,11 @@ public class PlayerConfig extends ConfigGod
 	public List<Integer> getAllActiveBuffs()
 	{
 		List<Integer> activeBuffs = new ArrayList<Integer>();
-		EffectIDs eIDs = new EffectIDs();
 		
-		for (int i :  eIDs.effectIDList)
+		for (SpellEffect eID : SpellEffect.values())
 		{
-			if (getStatusActiveRpgPlayer(i))
-				activeBuffs.add(i);
+			if (getStatusActiveRpgPlayer(eID.getID()))
+				activeBuffs.add(eID.getID());
 		}
 		
 		return activeBuffs;
@@ -261,7 +260,7 @@ public class PlayerConfig extends ConfigGod
 		{
 			s = rpgClass.getSpellBook().get(j);
 			
-			if (s.effectID == EffectIDs.ALCHEMY)
+			if (s.effectID == SpellEffect.ALCHEMY.getID())
 			{
 				if (getSpellLevels().get(j) > 0)
 				{

@@ -7,6 +7,7 @@ import me.Destro168.FC_Rpg.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.Events.DungeonEvent;
 import me.Destro168.FC_Rpg.Util.FC_RpgPermissions;
 import me.Destro168.FC_Suite_Shared.ColorLib;
+import me.Destro168.FC_Suite_Shared.FC_Suite_Shared;
 import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 
 import org.bukkit.Material;
@@ -22,10 +23,20 @@ import org.bukkit.inventory.ItemStack;
 
 public class PlayerInteractionListener implements Listener
 {
-	PlayerInteractEvent event;
-	Player player;
-	MessageLib msgLib;
-	WorldConfig wm;
+	public static String signColor1 = FC_Suite_Shared.sc.primaryColor;
+	public static String signColor2 = "&0";
+	
+	public static String signTeleport = "[" + signColor1 + "Teleport" + signColor2 + "]";
+	public static String signFillMana = "[" + signColor1 + "Heal Mp" + signColor2 + "]";
+	public static String signFillHealth = "[" + signColor1 + "Heal Hp" + signColor2 + "]";
+	public static String signPickClass = "[" + signColor1 + "Class" + signColor2 + "]";
+	public static String signFinish = "[" + signColor1 + "Finish" + signColor2 + "]";
+	public static String signExit = "[" + signColor1 + "Exit" + signColor2 + "]";
+	
+	private PlayerInteractEvent event;
+	private Player player;
+	private MessageLib msgLib;
+	private WorldConfig wm;
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void teleportHandler(PlayerInteractEvent event_)
@@ -220,9 +231,10 @@ public class PlayerInteractionListener implements Listener
 	{
 		String pickedClass = "";
 		ColorLib cl = new ColorLib();
+		String rawLine = cl.removeColorCodes(sign.getLine(0));
 		
 		//If the player clicks a special pick class sign.
-		if (sign.getLine(0).contains("Pick Class:"))
+		if (rawLine.contains(cl.removeColorCodes(signPickClass)))
 		{
 			//Strip colors
 			pickedClass = cl.removeColors(cl.removeColorCodes(sign.getLine(1)));
@@ -253,8 +265,7 @@ public class PlayerInteractionListener implements Listener
 				}
 			}
 		}
-		
-		else if (sign.getLine(0).contains("Finish"))
+		else if (rawLine.contains(cl.removeColorCodes(signFinish)))
 		{
 			//If the player has picked both a class and job.
 			if (FC_Rpg.classSelection.containsKey(player))
@@ -278,17 +289,29 @@ public class PlayerInteractionListener implements Listener
 				return;
 			}
 		}
-		else if (sign.getLine(0).contains("Refill Mana!"))
+		else if (rawLine.contains(cl.removeColorCodes(signFillMana)))
 		{
 			if (FC_Rpg.rpgEntityManager.getRpgPlayer(player) != null)
-				FC_Rpg.rpgEntityManager.getRpgPlayer(player).healMana(99999);
+				FC_Rpg.rpgEntityManager.getRpgPlayer(player).healMana(99999999);
 			
 			msgLib.standardMessage("Refilled Mana!");
 		}
-		else if (sign.getLine(0).contains("Teleport:"))
+		else if (rawLine.contains(cl.removeColorCodes(signFillHealth)))
+		{
+			if (FC_Rpg.rpgEntityManager.getRpgPlayer(player) != null)
+				FC_Rpg.rpgEntityManager.getRpgPlayer(player).healHealth(99999999);
+			
+			msgLib.standardMessage("Refilled Health!");
+		}
+		else if (rawLine.contains(cl.removeColorCodes(signTeleport)))
 		{
 			if (FC_Rpg.rpgEntityManager.getRpgPlayer(player) != null)
 				teleportPlayer(FC_Rpg.rpgEntityManager.getRpgPlayer(player), sign.getLine(1));
+		}
+		else if (rawLine.contains(cl.removeColorCodes(signExit)))
+		{
+			if (FC_Rpg.rpgEntityManager.getRpgPlayer(player) != null)
+				exitPlayer(sign.getLine(1));
 		}
 	}
 	
@@ -325,94 +348,103 @@ public class PlayerInteractionListener implements Listener
 		rpgPlayer = FC_Rpg.rpgEntityManager.getRpgPlayer(player);
 		FC_RpgPermissions perms = new FC_RpgPermissions(player);
 		WarpConfig warpConfig = FC_Rpg.warpConfig;
-		int breakLimit = 0;
 		
 		//Go through all potential warps.
-		for (int i = 0; i < 10000; i++)
+		for (int i : FC_Rpg.warpConfig.getWarpFieldList())
 		{
-			//If the sign contains the word dungeon, then..
-			if (text.contains("Dungeon " + i))
+			//If the name is contained on the sign
+			if (text.contains(warpConfig.getName(i)))
 			{
-				dungeonTeleport(text, FC_Rpg.trueDungeonNumbers.get(i - 1));
-				break;
-			}
-			
-			//If not null
-			else if (warpConfig.getName(i) != null)
-			{
-				//If the name is contained on the sign
-				if (text.contains(warpConfig.getName(i)))
+				//Attempt to pay the cost.
+				if (FC_Rpg.economy.has(player.getName(), warpConfig.getCost(i)) == true)
+					FC_Rpg.economy.withdrawPlayer(player.getName(), warpConfig.getCost(i));
+				else
 				{
-					//Attempt to pay the cost.
-					if (FC_Rpg.economy.has(player.getName(), warpConfig.getCost(i)) == true)
-						FC_Rpg.economy.withdrawPlayer(player.getName(), warpConfig.getCost(i));
-					else
-					{
-						msgLib.errorNotEnoughMoney();
-						break;
-					}
-					
-					//If it requires admin permission and the teleporter doesn't have perms.
-					if (warpConfig.getAdmin(i) == true && perms.isAdmin() == false)
-					{
-						 msgLib.errorNoPermission();
-						 break;
-					}
-					
-					//If the sign requres donator, if not donator/admin, return false.
-					if (warpConfig.getDonator(i) == true && (rpgPlayer.isDonatorOrAdmin() == false))
-					{
-						msgLib.standardError("Sorry but you can't use this warp because you aren't a donator.");
-						break;
-					}
-					
-					// Variable Declaration
-					int classRequirement = warpConfig.getClassRequirement(i);
-					int jobRankMinimum = warpConfig.getJobRankMinimum(i);
-					int levelMinimum = warpConfig.getLevelMinimum(i);
-					
-					if (classRequirement > -1 && rpgPlayer.playerConfig.getCombatClass() != classRequirement)
-					{
-						msgLib.standardError("Sorry but you aren't the proper class to use this warp.");
-						break;
-					}
-					
-					if (jobRankMinimum > -1 && rpgPlayer.playerConfig.getJobRank() < jobRankMinimum)
-					{
-						msgLib.standardError("Sorry but you need a higher job rank to use this warp.");
-						break;
-					}
-					
-					if (levelMinimum > -1 && rpgPlayer.playerConfig.getClassLevel() < jobRankMinimum)
-					{
-						msgLib.standardError("Sorry but you need a higher job rank to use this warp.");
-						break;
-					}
-					
-					//Give the person a teleport message.
-					teleportMessage(warpConfig.getWelcome(i),"");
-					
-					//Send the warp description to the player.
-					for (String descrip : warpConfig.getDescription(i))
-						msgLib.standardMessage(descrip);
-					
-					//Teleport the player.
-					player.teleport(warpConfig.getDestination(i));
-					
-					//Break to return.
+					msgLib.errorNotEnoughMoney();
 					break;
 				}
-			}
-			else
-			{
-				//Increase break limit
-				breakLimit++;
 				
-				//If a warp was failed to be found 50 times, break.
-				if (breakLimit == 50)
+				//If it requires admin permission and the teleporter doesn't have perms.
+				if (warpConfig.getAdmin(i) == true && perms.isAdmin() == false)
+				{
+					 msgLib.errorNoPermission();
+					 break;
+				}
+				
+				//If the sign requres donator, if not donator/admin, return false.
+				if (warpConfig.getDonator(i) == true && (rpgPlayer.isDonatorOrAdmin() == false))
+				{
+					msgLib.standardError("Sorry but you can't use this warp because you aren't a donator.");
 					break;
+				}
+				
+				// Variable Declaration
+				int classRequirement = warpConfig.getClassRequirement(i);
+				int jobRankMinimum = warpConfig.getJobRankMinimum(i);
+				int levelMinimum = warpConfig.getLevelMinimum(i);
+				
+				if (classRequirement > -1 && rpgPlayer.playerConfig.getCombatClass() != classRequirement)
+				{
+					msgLib.standardError("Sorry but you aren't the proper class to use this warp.");
+					break;
+				}
+				
+				if (jobRankMinimum > -1 && rpgPlayer.playerConfig.getJobRank() < jobRankMinimum)
+				{
+					msgLib.standardError("Sorry but you need a higher job rank to use this warp.");
+					break;
+				}
+				
+				if (levelMinimum > -1 && rpgPlayer.playerConfig.getClassLevel() < jobRankMinimum)
+				{
+					msgLib.standardError("Sorry but you need a higher job rank to use this warp.");
+					break;
+				}
+				
+				//Give the person a teleport message.
+				teleportMessage(warpConfig.getWelcome(i),"");
+				
+				//Send the warp description to the player.
+				for (String descrip : warpConfig.getDescription(i))
+					msgLib.standardMessage(descrip);
+				
+				//Teleport the player.
+				player.teleport(warpConfig.getDestination(i));
+				
+				// Return.
+				return;
 			}
 		}
+		
+		for (int i : FC_Rpg.trueDungeonNumbers.keySet())
+		{
+			if (text.equalsIgnoreCase(FC_Rpg.dungeonConfig.getName(i)))
+			{
+				dungeonTeleport(FC_Rpg.trueDungeonNumbers.get(i));
+				return;
+			}
+		}
+		
+		msgLib.standardError("This warp leads to nowhere.");
+	}
+	
+	public void exitPlayer(String signText)
+	{
+		for (int i : FC_Rpg.trueDungeonNumbers.keySet())
+		{
+			if (signText.equalsIgnoreCase(FC_Rpg.dungeonConfig.getName(i)))
+			{
+				// Exit message
+				teleportMessage("You Have Exited " + FC_Rpg.dungeonConfig.getName(i) + "!","");
+				FC_Rpg.dungeonEventArray[i].removeDungeoneer(player, player,true);
+				player.teleport(FC_Rpg.dungeonConfig.getExit(i));
+				
+				//Also return for exiting.
+				return;
+			}
+		}
+		
+		msgLib.standardError("This warp leads to nowhere.");
 	}
 	
 	private void teleportMessage(String msgP1, String msgP2)
@@ -425,19 +457,8 @@ public class PlayerInteractionListener implements Listener
 			msgLib.standardMessage("- " + msgP2 + " -");
 	}
 	
-	private void dungeonTeleport(String text, int dNumber)
+	private void dungeonTeleport(int dNumber)
 	{
-		//If we have a dungeon exit symbol, then,
-		if (text.contains("-"))
-		{
-			teleportMessage("You Have Exited The Dungeon " + FC_Rpg.dungeonConfig.getName(dNumber) + "!","");
-			FC_Rpg.dungeonEventArray[dNumber].removeDungeoneer(player, player,true);
-			player.teleport(FC_Rpg.dungeonConfig.getExit(dNumber));
-			
-			//Also return for exiting.
-			return;
-		}
-		
 		//If no dungeon was found, return
 		if (dNumber == -1)
 			return;

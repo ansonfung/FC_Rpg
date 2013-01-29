@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import me.Destro168.FC_Rpg.FC_Rpg;
-import me.Destro168.FC_Rpg.Enchantment.Enchantment;
+import me.Destro168.FC_Rpg.LoadedObjects.Enchantment;
 import me.Destro168.FC_Rpg.LoadedObjects.Spell;
-import me.Destro168.FC_Rpg.Spells.EffectIDs;
+import me.Destro168.FC_Rpg.Spells.SpellEffect;
 import me.Destro168.FC_Suite_Shared.ConfigManagers.ConfigGod;
 import me.Destro168.FC_Suite_Shared.ConfigManagers.ListGetter;
 
@@ -63,6 +63,7 @@ public class EnchantmentConfig extends ConfigGod
 	public boolean getIsArmor(int i) { return fcw.getBoolean(prefix + i + ".isArmor"); }
 	
 	public void setDefaultProcChance(int i) { setProcChance(i, 5); }
+	public void setDefaultBuffProcChance(int i) { setProcChance(i, 1); }
 	
 	//Constructor
 	public EnchantmentConfig()
@@ -77,17 +78,20 @@ public class EnchantmentConfig extends ConfigGod
 		weaponSuffixList = new ArrayList<Enchantment>();
 		armorSuffixList = new ArrayList<Enchantment>();
 		
-		prefixList.add(new Enchantment("Strong", "+Attack"));
-		prefixList.add(new Enchantment("Tough", "+Constitution"));
-		prefixList.add(new Enchantment("Wise", "+Intelligence"));
-		prefixList.add(new Enchantment("Magic", "+Magic"));
-		prefixList.add(new Enchantment("Burly", "+Attack, +Constitution"));
-		prefixList.add(new Enchantment("Magic Forged", "+Attack, +Intelligence"));
-		prefixList.add(new Enchantment("Brutal", "+Attack, +Magic"));
-		prefixList.add(new Enchantment("Fortified", "+Constitution, +Intelligence"));
-		prefixList.add(new Enchantment("Blessed", "+Constitution, +Magic"));
-		prefixList.add(new Enchantment("Arcane", "+Magic, +Intelligence"));
-		prefixList.add(new Enchantment("Elemental", "+Attack, +Constitution, +Magic, +Intelligence"));
+		prefixList.add(new Enchantment("Strong", "+Attack", true, false, false, false));
+		prefixList.add(new Enchantment("Tough", "+Constitution", false, true, false, false));
+		prefixList.add(new Enchantment("Wise", "+Intelligence", false, false, true, false));
+		prefixList.add(new Enchantment("Magic", "+Magic", false, false, false, true));
+		prefixList.add(new Enchantment("Burly", "+Attack, +Constitution", true, true, false, false));
+		prefixList.add(new Enchantment("Magic Forged", "+Attack, +Intelligence", true, false, true, false));
+		prefixList.add(new Enchantment("Brutal", "+Attack, +Magic", true, false, false, true));
+		prefixList.add(new Enchantment("Fortified", "+Constitution, +Intelligence", false, true, true, false));
+		prefixList.add(new Enchantment("Blessed", "+Constitution, +Magic", false, true, false, true));
+		prefixList.add(new Enchantment("Arcane", "+Magic, +Intelligence", false, false, true, true));
+		prefixList.add(new Enchantment("Elemental", "+Attack, +Constitution, +Magic, +Intelligence", true, true, true, true));
+		
+		// Load up spell config values.
+		loadSpellMap();
 		
 		// Load weapon and armor suffix's from config.
 		for (int i : getEnchantmentList())
@@ -110,15 +114,13 @@ public class EnchantmentConfig extends ConfigGod
 	
 	public Enchantment loadEnchant(int i)
 	{
-		loadConfigValues();
-		
 		return new Enchantment(spells.get(i), getProcChance(i));
 	}
 	
 	protected Map<Integer, Spell> spells;
 	
 	// Copy of load default config settings function.
-	public void loadConfigValues()
+	public void loadSpellMap()
 	{
 		//Variable Declarations and Initializations
 		spells = new HashMap<Integer, Spell>();
@@ -146,73 +148,73 @@ public class EnchantmentConfig extends ConfigGod
 		 * Weapon Enchantments
 		*******************************************/
 		
-		setEffectID(i, EffectIDs.DAMAGE_BONUS);
+		setEffectID(i, SpellEffect.DAMAGE_BONUS.getID());
 		setName(i, " Of Destruction");
-		setDescription(i, "Attacks have a chance to deal bonus damage.");
+		setDescription(i, "Chance to deal bonus damage.");
 		setConstantMagnitude(i, 4, 8, 12, 16, 20);
 		setDefaultProcChance(i);
 		setIsArmor(i, false);
 		
 		i++;
-		setEffectID(i, EffectIDs.FROST_STRIKE);
+		setEffectID(i, SpellEffect.FROST_STRIKE.getID());
 		setName(i, " Of Chilling");
-		setDescription(i, "Attacks have a chance to freeze target.");
+		setDescription(i, "Chance to freeze target.");
 		setConstantMagnitude(i, 1, 2, 3, 4, 5);
 		setDefaultProcChance(i);
 		setIsArmor(i, false);
 
 		i++;
-		setEffectID(i, EffectIDs.DISABLED);
+		setEffectID(i, SpellEffect.DISABLED.getID());
 		setName(i, " Of Malice");
-		setDescription(i, "Attacks have a chance to stop target from attacking.");
+		setDescription(i, "Chance to stop target from attacking.");
 		setConstantMagnitude(i, 500, 1000, 1500, 2000, 2500);
 		setDefaultProcChance(i);
 		setIsArmor(i, false);
 
 		i++;
-		setEffectID(i, EffectIDs.MANA_STEAL);
+		setEffectID(i, SpellEffect.MANA_STEAL.getID());
 		setName(i, " Of Mind Flaying");
-		setDescription(i, "Attacks have a chance to steal mana.");
+		setDescription(i, "Chance to steal mana.");
 		setConstantMagnitude(i, .008, .016, .024, .032, .04);
 		setDefaultProcChance(i);
 		setIsArmor(i, false);
 
 		i++;
-		setEffectID(i, EffectIDs.HEALTH_STEAL);
+		setEffectID(i, SpellEffect.HEALTH_STEAL.getID());
 		setName(i, " Of Viper");
-		setDescription(i, "Attacks have a chance to steal health.");
+		setDescription(i, "Chance to steal health.");
 		setConstantMagnitude(i, .008, .016, .024, .032, .04);
 		setDefaultProcChance(i);
 		setIsArmor(i, false);
 
 		i++;
-		setEffectID(i, EffectIDs.CRITICAL_DAMAGE_DOUBLE);
+		setEffectID(i, SpellEffect.CRITICAL_DAMAGE_DOUBLE.getID());
 		setName(i, " Of Splintering");
-		setDescription(i, "Attacks have a chance to crit for double damage.");
+		setDescription(i, "Chance to crit for double damage.");
 		setConstantMagnitude(i, 4, 8, 12, 16, 20);
 		setProcChance(i,100);
 		setIsArmor(i, false);
 
 		i++;
-		setEffectID(i, EffectIDs.IGNORE_ARMOR);
+		setEffectID(i, SpellEffect.IGNORE_ARMOR.getID());
 		setName(i, " Of Penetration");
-		setDescription(i, "Chance to apply a small buff to oneself so that target defense is ignored.");
-		setDuration(i, 200, 400, 600, 800, 1000);
-		setDefaultProcChance(i);
+		setDescription(i, "Chance to apply Ignore Armor buff.");
+		setDuration(i, 1000, 1500, 2000, 2500, 3000);
+		setDefaultBuffProcChance(i);
 		setIsArmor(i, false);
-
+		
 		i++;
-		setEffectID(i, EffectIDs.BONUS_GOLD);
+		setEffectID(i, SpellEffect.BONUS_GOLD.getID());
 		setName(i, " Of Greed");
-		setDescription(i, "Monsters have a chance to award bonus gold.");
+		setDescription(i, "Mobs may give extra gold.");
 		setConstantMagnitude(i, 1.05, 1.1, 1.15, 1.2, 1.25);
 		setDefaultProcChance(i);
 		setIsArmor(i, false);
 
 		i++;
-		setEffectID(i, EffectIDs.BONUS_EXPERIENCE);
+		setEffectID(i, SpellEffect.BONUS_EXPERIENCE.getID());
 		setName(i, " Of Traveling");
-		setDescription(i, "Monsters have a chance to award bonus exp.");
+		setDescription(i, "Mobs may give bonus exp.");
 		setConstantMagnitude(i, 1.05, 1.1, 1.15, 1.2, 1.25);
 		setDefaultProcChance(i);
 		setIsArmor(i, false);
@@ -222,38 +224,39 @@ public class EnchantmentConfig extends ConfigGod
 		*******************************************/
 
 		i++;
-		setEffectID(i, EffectIDs.HEAL_CHANCE);
+		setEffectID(i, SpellEffect.HEAL_CHANCE.getID());
 		setName(i, " Of Restoration");
-		setDescription(i, "Chance to heal when attacked");
+		setDescription(i, "Chance to heal when attacked.");
 		setConstantMagnitude(i, .01, .02, .03, .04, .05);
-		setProcChance(i,1);
+		setDefaultBuffProcChance(i);
 		setIsArmor(i, true);
-
+		
 		i++;
-		setEffectID(i, EffectIDs.DODGE);
+		setEffectID(i, SpellEffect.DODGE.getID());
 		setName(i, " Of Agility");
-		setDescription(i, "Chance to temporarily dodge all damage.");
-		setDuration(i, 200, 400, 600, 800, 1000);
-		setProcChance(i,1);
+		setDescription(i, "Chance to apply Dodge buff.");
+		setDuration(i,1000, 1500, 2000, 2500, 3000);
+		setConstantMagnitude(i, 100, 100, 100, 100, 100);
+		setDefaultBuffProcChance(i);
 		setIsArmor(i, true);
-
+		
 		i++;
-		setEffectID(i, EffectIDs.DEFENSE);
+		setEffectID(i, SpellEffect.DEFENSE.getID());
 		setName(i, " Of Blocking");
 		setDescription(i, "Chance to reduce incoming damage.");
 		setConstantMagnitude(i, .98, .96, .94, .92, .90);
-		setProcChance(i,1);
+		setDefaultBuffProcChance(i);
 		setIsArmor(i, true);
 	}
 	
-	public Enchantment getEnchantmentByID(int id)
+	public Enchantment getPrefixEnchantmentByID(int id)
 	{
-		Enchantment e = checkList(id, prefixList);
-		
-		if (e != null)
-			return e;
-		
-		e = checkList(id, weaponSuffixList);
+		return checkList(id, prefixList);
+	}
+	
+	public Enchantment getProcEnchantmentByID(int id)
+	{
+		Enchantment e = checkList(id, weaponSuffixList);
 		
 		if (e != null)
 			return e;
@@ -263,11 +266,8 @@ public class EnchantmentConfig extends ConfigGod
 	
 	private Enchantment checkList(int id, List<Enchantment> enchantList)
 	{
-		if (enchantList.contains(id))
-		{
-			for (Enchantment e : enchantList)
-				if (e.spell.effectID == id) return e;
-		}
+		for (Enchantment e : enchantList)
+			if (e.spell.effectID == id) return e;
 		
 		return null;
 	}

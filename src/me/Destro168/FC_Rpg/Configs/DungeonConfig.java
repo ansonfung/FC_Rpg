@@ -49,7 +49,7 @@ public class DungeonConfig extends ConfigGod
 	{
 		//Variable Declarations
 		World w1 = Bukkit.getServer().getWorlds().get(0);
-		Location empty  = new Location(w1,0,0,0,0,0);
+		Location empty  = new Location(w1,0,110,0,0,0);
 		
 		for (int i = 0; i < 1000; i++)
 		{

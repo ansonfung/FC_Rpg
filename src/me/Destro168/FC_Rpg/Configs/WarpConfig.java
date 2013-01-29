@@ -13,7 +13,7 @@ import org.bukkit.World;
 
 public class WarpConfig extends ConfigGod
 {
-	public List<Integer> getWarpList() { ListGetter lg = new ListGetter(fcw, prefix); return lg.getFieldIntegerList(); }
+	public List<Integer> getWarpFieldList() { ListGetter lg = new ListGetter(fcw, prefix); return lg.getFieldIntegerList(); }
 	
 	public void setName(int i, String x) { fcw.set(prefix + i + ".name", x); }
 	public void setDescription(int i, String x) { fcw.set(prefix + i + ".description", x); }
@@ -79,7 +79,7 @@ public class WarpConfig extends ConfigGod
 		
 		if (getVersion() < 0.2)
 		{
-			for (int i : getWarpList())
+			for (int i : getWarpFieldList())
 			{
 				setClassRequirement(i,-1);
 				setJobRankMinimum(i,-1);
@@ -90,7 +90,7 @@ public class WarpConfig extends ConfigGod
 	
 	public int getWarpIDByName(String name)
 	{
-		for (int i : getWarpList())
+		for (int i : getWarpFieldList())
 		{
 			if (getName(i).equalsIgnoreCase(name))
 				return i;

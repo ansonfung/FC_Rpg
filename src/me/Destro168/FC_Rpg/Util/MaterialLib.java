@@ -112,7 +112,7 @@ public class MaterialLib
 		}
 	}
 	
-	public static String getCleanMaterialName(String itemName)
+	public static String getCleanName(String itemName)
 	{
 		itemName = itemName.toLowerCase();
 		char[] c = itemName.toCharArray();

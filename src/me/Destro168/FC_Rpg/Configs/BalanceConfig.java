@@ -1,7 +1,10 @@
 package me.Destro168.FC_Rpg.Configs;
 
+import java.util.List;
+
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Suite_Shared.ConfigManagers.ConfigGod;
+import me.Destro168.FC_Suite_Shared.ConfigManagers.ListGetter;
 
 public class BalanceConfig extends ConfigGod
 {
@@ -44,6 +47,17 @@ public class BalanceConfig extends ConfigGod
 			fcw.setNull(prefix + "sword.multiplier.iron");
 			fcw.setNull(prefix + "sword.multiplier.diamond");
 			fcw.setNull(prefix + "sword.multiplier.gold");
+		}
+		
+		if (getVersion() < 1.09)
+		{
+			setVersion(1.09);
+			
+			setMobBonusType(0, "creeper");
+			setMobBonusAttack(0, 1.5);
+			setMobBonusConstitution(0, .5);
+			setMobBonusExp(0, .8);
+			setMobBonusGold(0, .8);
 		}
 		
 		getDefaultItemDrops();
@@ -104,13 +118,14 @@ public class BalanceConfig extends ConfigGod
 		getMobAttackMultiplier();
 		getMobConstitutionMultiplier();
 		getMobLootList();
-		
+
+		getBowMultiplier();
 		getSwordMultiplierWood();
 		getSwordMultiplierStone();
 		getSwordMultiplierIron();
 		getSwordMultiplierDiamond();
 		getSwordMultiplierGold();
-
+		
 		getSwordAttackRequirementWood();
 		getSwordAttackRequirementStone();
 		getSwordAttackRequirementIron();
@@ -228,6 +243,7 @@ public class BalanceConfig extends ConfigGod
 	public int getMobConstitutionMultiplier() { return fcw.getStaticInt(prefix + "mob.constitutionMultiplier", 100); }
 	public String getMobLootList() { return fcw.getStaticString(prefix + "mob.lootList", "default"); }
 	
+	public double getBowMultiplier() { return fcw.getStaticDouble(prefix + "bow.multiplier", .25); }
 	public double getSwordMultiplierWood() { return fcw.getStaticDouble(prefix + "sword.multiplier.wood", .25); }
 	public double getSwordMultiplierStone() { return fcw.getStaticDouble(prefix + "sword.multiplier.stone", .5); }
 	public double getSwordMultiplierIron() { return fcw.getStaticDouble(prefix + "sword.multiplier.iron", .75); }
@@ -278,6 +294,19 @@ public class BalanceConfig extends ConfigGod
 	public double getPassivesStrongerParry() { return fcw.getStaticDouble(prefix + "passives.strongerParry", .75); }
 	public double getPassivesBattleLust() { return fcw.getStaticDouble(prefix + "passives.battleLust", .4); }
 	public double getPassivesInnerFlame() { return fcw.getStaticDouble(prefix + "passives.innerFlame", .15); }
+	
+	public List<Integer> getMobBonusFieldList() { ListGetter lg = new ListGetter(fcw, prefix); return lg.getFieldIntegerList(); }
+	public void setMobBonusType(int i, String x) { fcw.set(prefix + "mob.bonus." + i + ".type", x); }
+	public void setMobBonusAttack(int i, double x) { fcw.set(prefix + "mob.bonus." + i + ".attack", x); }
+	public void setMobBonusConstitution(int i, double x) { fcw.set(prefix + "mob.bonus." + i + ".constitution", x); }
+	public void setMobBonusGold(int i, double x) { fcw.set(prefix + "mob.bonus." + i + ".gold", x); }
+	public void setMobBonusExp(int i, double x) { fcw.set(prefix + "mob.bonus." + i + ".exp", x); }
+	
+	public String getMobBonusType(int i) { return fcw.getString(prefix + "mob.bonus." + i + ".type"); }
+	public double getMobBonusAttack(int i) { if (fcw.isSet(prefix + "mob.bonus.attack")) return fcw.getDouble(prefix + "mob.bonus." + i + ".attack"); else return 1; }
+	public double getMobBonusConstitution(int i) { if (fcw.isSet(prefix + "mob.bonus.constitution")) return fcw.getDouble(prefix + "mob.bonus." + i + ".constitution"); else return 1; }
+	public double getMobBonusGold(int i) { if (fcw.isSet(prefix + "mob.bonus.gold")) return fcw.getDouble(prefix + "mob.bonus." + i + ".gold"); else return 1; }
+	public double getMobBonusExp(int i) { if (fcw.isSet(prefix + "mob.bonus.exp")) return fcw.getDouble(prefix + "mob.bonus." + i + ".exp"); else return 1; }
 }
 
 

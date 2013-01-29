@@ -181,11 +181,23 @@ public class RpgMonster extends RpgEntity
 		else
 			constitution = 1;
 		
-		setStartingHealth();
-		
 		// Set base cash and exp
 		baseCash = level * FC_Rpg.balanceConfig.getMobCashMultiplier();
 		baseExp = level * FC_Rpg.balanceConfig.getMobExpMultiplier();
+		
+		// Modify stats based on config values.
+		for (int field : FC_Rpg.balanceConfig.getMobBonusFieldList())
+		{
+			if (entity_.getType().toString().toLowerCase().equals(FC_Rpg.balanceConfig.getMobBonusType(field).toLowerCase()))
+			{
+				attack *= FC_Rpg.balanceConfig.getMobBonusAttack(field);
+				constitution *= FC_Rpg.balanceConfig.getMobBonusConstitution(field);
+				baseCash *= FC_Rpg.balanceConfig.getMobBonusGold(field);
+				baseExp *= FC_Rpg.balanceConfig.getMobBonusExp(field);
+			}
+		}
+		
+		setStartingHealth();
 	}
 	
 	private void setStartingHealth()
