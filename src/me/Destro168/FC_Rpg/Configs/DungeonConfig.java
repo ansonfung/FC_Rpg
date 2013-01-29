@@ -208,8 +208,8 @@ public class DungeonConfig extends ConfigGod
 	public int getStaticLevel(int dungeonNumber) { return fcw.getInt(getDungeonPrefix(dungeonNumber) + "staticLevel"); }
 	public String getLootList(int dungeonNumber) { return fcw.getString(getDungeonPrefix(dungeonNumber) + "lootList"); }
 	
-	public List<Location> getTreasureStart(int dungeonNumber) { ListGetter lg = new ListGetter(fcw, getDungeonPrefix(dungeonNumber) + "treasure.start"); return lg.getLocationList(); }
-	public List<Location> getTreasureEnd(int dungeonNumber) { ListGetter lg = new ListGetter(fcw, getDungeonPrefix(dungeonNumber) + "treasure.end"); return lg.getLocationList(); }
+	public List<Location> getTreasureStart(int dungeonNumber) { ListGetter lg = new ListGetter(fcw, getDungeonPrefix(dungeonNumber) + "treasure.start."); return lg.getLocationList(); }
+	public List<Location> getTreasureEnd(int dungeonNumber) { ListGetter lg = new ListGetter(fcw, getDungeonPrefix(dungeonNumber) + "treasure.end."); return lg.getLocationList(); }
 	
 	public Location getSpawnBox1(int dungeonNumber, int index) { return getLocation(dungeonNumber,"spawnBox.selection1." + index); }
 	public Location getSpawnBox2(int dungeonNumber, int index) { return getLocation(dungeonNumber,"spawnBox.selection2." + index); }

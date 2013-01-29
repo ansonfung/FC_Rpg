@@ -188,7 +188,7 @@ public class RpgMonster extends RpgEntity
 		// Modify stats based on config values.
 		for (int field : FC_Rpg.balanceConfig.getMobBonusFieldList())
 		{
-			if (entity_.getType().toString().toLowerCase().equals(FC_Rpg.balanceConfig.getMobBonusType(field).toLowerCase()))
+			if (entity_.getType().toString().equalsIgnoreCase(FC_Rpg.balanceConfig.getMobBonusType(field)))
 			{
 				attack *= FC_Rpg.balanceConfig.getMobBonusAttack(field);
 				constitution *= FC_Rpg.balanceConfig.getMobBonusConstitution(field);

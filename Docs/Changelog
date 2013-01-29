@@ -1,8 +1,15 @@
 ~ FC_Rpg Changelog ~
 
 -------------------------------------------------------------------
-Version 1.31 BETA:
+Version 1.32 BETA:
+-------------------------------------------------------------------
+General:
+- Fixed issue with the custom mob damages setting not properly being read from config.
+- Updated readme to reflect new front page description.
+- Made a few changes to some config data retreiving methods for new FC_Suite_Shared. This update doesn't require you to update FC_Suite_Shared though.
 
+-------------------------------------------------------------------
+Version 1.31 BETA:
 -------------------------------------------------------------------
 General:
 - Fixed issue with balance config setting. For some reason gets set to 0 for people, I don't know why. This will force it to be 4 for next update.
