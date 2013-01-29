@@ -22,9 +22,9 @@ public class GeneralConfig extends ConfigGod
 	public void handleUpdates()
 	{
 		// Handle version updates.
-		if (getVersion() < 1.3)
+		if (getVersion() < 1.31)
 		{
-			setVersion(1.3);
+			setVersion(1.31);
 			fcw.setNull(prefix + "commandKeyWord.world");
 		}
 		

@@ -60,6 +60,13 @@ public class BalanceConfig extends ConfigGod
 			setMobBonusGold(0, .8);
 		}
 		
+		if (getVersion() < 1.1)
+		{
+			setVersion(1.1);
+			
+			fcw.set(prefix + "player.levelsPerSpellPoint", 4);
+		}
+		
 		getDefaultItemDrops();
 		getArrowKnockback();
 		getSwordKnockback();
