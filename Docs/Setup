@@ -17,6 +17,7 @@
 I: Introduction
     a: Getting Started
     b: Configuration General
+    c. Warnings
     
 II: Very Important Configurations
     a: Configuring Groups.yml
@@ -85,6 +86,14 @@ IV: FAQs and Bonus Information
     This requires a bit of "common sense" but I commonly use a technique of requiring information filled in for only one thing, but under several fields. For example, you will see in the general config file the setting "timedItems" has four parts. Each one of those lines has two items by default and the information each of those items is spread over three lines. Make sure to fill empty fields in with 0 and that each field for the item has the same number of entries.
     
     Disclaimer: This tutorial assumes that the reader is a YAML expert. If you don't know how YAML works please go read some tutorials!
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~
+	c: Warnings
+~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    I just wanted to put this right here as a fast warning for server owners. During testing, item meta data was entirely wiped from items stored in enderchests during server reloads and restarts. This means that if a player puts an item in an enderchest and the server reloads/restarts, the item will have all of it's custom RPG properties removed and return to a vanilla state. It is STRONGLY recommended to test if item meta is wiped on your server from items stored in EnderChests during server restart and reloads. If it is, then again it is STRONGLY recommended that one gets an enderchest plugin or disable Enderchests altogether. This doesn't apply solely to FC_Rpg so it would be good to get one for other plugins in the event that you have some that change item lore. Testing shows that EnderChestPlus DOES NOT delete item meta on server restarts/reloads. Users are welcome to use their own plugin of choice. However, EnderChestPlus has been tested to preserve all item meta: http://dev.bukkit.org/server-mods/enderchestplus/.
 
 ~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
 ~*
