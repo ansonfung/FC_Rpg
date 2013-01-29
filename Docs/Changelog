@@ -8,7 +8,6 @@ FC_Suite_Shared Requirement: Version 2.55
 Configs you will have to update in this version:
 - ItemConfig.yml
 - SpellConfig.yml
-- TreasureConfig.yml (Will auto-update to add new settings)
 - Enchantments.yml (Brand new, recommended to review and update.)
 
 -------------------------------------------------------------------
@@ -60,6 +59,10 @@ Dungeons:
 -------------------------------------------------------------------
 Treasure:
 - Added a few new settings to control custom enchantment drop rates. Want all legendaries? GO FOR IT.
+
+-------------------------------------------------------------------
+Balance:
+- New settings to scale specific monsters attack, constitution, gold, and experience values under "mob" called "bonus". Check setup for information on how to use.
 
 -------------------------------------------------------------------
 Signs:

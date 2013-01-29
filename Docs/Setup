@@ -452,6 +452,13 @@ Configuration settings:
 	cashMultiplier: 0.8 <- Final cash amount given by monsters will be multiplied by this.
 	expMultiplier: 1.0 <- Final experience amount given by monsters will be multiplied by this.
 	lootList: default <- Set the loot file that will determine monster drops. (See Section III.e. for information on loot files)
+    bonus: <- Define custom stats for monsters.
+      '0': <- Numbering system. To add another use '1' for the next one, etc. etc., just like any other listing.
+        type: creeper <- Entity type. Case doesn't matter.
+        attack: 1.5 <- Multiplier for attack. The final damage of the entity will be multiplied by this.
+        constitution: 0.5 <- Multiplier for constitution, like 'attack'.
+        exp: 0.8 <- Multiplier for exp, like 'attack'.
+        gold: 0.8 <- Multiplier for gold, like 'attack'.
 - sword:
 	multiplier: <- Change the strength of swords based on the type.
 		wood: 1.25 <- Note that you HAVE to add the 1 or you will start dealing with losing damage for decimals.
@@ -595,22 +602,19 @@ WEAKEN = 17 | Percent to lower stats by. .03 = 3% reduction.
 LIGHTNING = 18 | Constant damage modifier. Stacks with MagicMagnitude.
 BOOST_STATS = 19 | Percent to raise stats by. .03 = 3% boost.
 DAMAGE_SCALED_BY_MISSING_HEALTH = 20 | Multiplier. Really intricate feature, not explaining here. Check code if you want to see the mechanics behind missing health calculations. Increase for more damage, lower for less.
-DAMAGE_BY_MISSING_HEALTH = 21 | Multiplier. Also intricate. Increase for more damage, lower for less.
-SACRIFICE_HEALTH_FOR_DAMAGE = 22 | Multiplier. 1.6 = 60% more damage.
-HEAL_SELF_OR_OTHER = 23 | Constant Modifier.
-HEAL_SELF_PERCENT = 24 | Constant Modifier.
+SACRIFICE_HEALTH_FOR_DAMAGE = 21 | Multiplier. 1.6 = 60% more damage.
+HEAL_SELF_OR_OTHER = 22 | Constant Modifier.
+HEAL_SELF_PERCENT = 23 | Constant Modifier.
+CRITICAL_DAMAGE_DOUBLE = 24 | Chance to crit. 0 = 0%, 100 = 100%.
+HEAL_CHANCE = 25 | Multiplier. 1.01 = Heal 1%. 1.05 = Heal 5%.
+FIRE_STRIKE = 26 | Number of charges. 5 = 5 uses.
+IGNORE_ARMOR = 27 | No effect. Recommended use as buff only.
+FROST_STRIKE = 28 | Strength of slowdown.
 
-CRITICAL_DAMAGE_DOUBLE = 25 | Chance to crit. 0 = 0%, 100 = 100%.
-HEAL_CHANCE = 26 | Multiplier. 1.01 = Heal 1%. 1.05 = Heal 5%.
-BONUS_STATS = 27 | ~TODO
-FIRE_STRIKE = 28 | Number of charges. 5 = 5 uses.
-IGNORE_ARMOR = 29 | No effect. Recommended use as buff only.
-FROST_STRIKE = 30 | Strength of slowdown.
+[1000 - 1999] Extremely Custom Effects / Specials.
 
-[1000 - 1999] Extremely Custom Effects
-
-BONUS_GOLD = 1000 | ~TODO
-BONUS_EXPERIENCE = 1001 | ~TODO
+BONUS_GOLD = 1000 | Mulitplier. 1.05 = 5% bonus gold.
+BONUS_EXPERIENCE = 1001 | Mulitplier. 1.05 = 5% bonus exp.
 TAUNT = 1003 | Strength of defense buff. See "DEFENSE" for info on defense buff.
 ALCHEMY = 1004 | Amount of arcanium to give during smelting. .125 = 12.5%.
-MANA_REGEN = 1005 | ~TODO
+MANA_REGEN = 1005 | ~TODO / Not implemented yet.
