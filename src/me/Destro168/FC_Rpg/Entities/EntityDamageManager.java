@@ -647,7 +647,7 @@ public class EntityDamageManager
 			if (rpgLooter.playerConfig.getStatusActiveRpgPlayer(SpellEffect.BONUS_GOLD.getID()))
 				exp *= rpgLooter.playerConfig.getStatusMagnitude(SpellEffect.BONUS_GOLD.getID());
 			
-			FC_Rpg.economy.depositPlayer(rpgLooter.getPlayer().getName(), cash);
+			rpgLooter.playerConfig.addGold(cash);
 			rpgLooter.addClassExperience(exp, true);
 			
 			// Send a message to the player showing experience and loot gains.

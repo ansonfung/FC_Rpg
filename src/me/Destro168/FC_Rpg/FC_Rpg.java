@@ -64,6 +64,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
+import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -82,6 +83,7 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -95,7 +97,7 @@ public class FC_Rpg extends JavaPlugin
 	public static final DecimalFormat df2 = new DecimalFormat("#.##");
 	public static final DecimalFormat df3 = new DecimalFormat("#.###");
 	public static final DecimalFormat df4 = new DecimalFormat("#.####");
-
+	
 	// Uncommon class globals.
 	public static FC_Rpg plugin;
 	public static RpgEntityManager rpgEntityManager;
@@ -112,13 +114,14 @@ public class FC_Rpg extends JavaPlugin
 	public static RpgBroadcast rpgBroadcast;
 	public static WorldConfig worldConfig;
 	public static EnchantmentConfig enchantmentConfig;
-	public static Economy economy = null;
 	public static DungeonEvent[] dungeonEventArray;
 	public static SelectionVector sv;
 	public static MaterialLib mLib;
 	public static BattleCalculations battleCalculations;
 	public static MobSpawnManager msm;
 	public static ColorLib cl = new ColorLib();
+	
+	public static Economy economy = null;
 	
 	// Common class globals.
 	public static Map<Player, String> classSelection = new HashMap<Player, String>();
@@ -238,10 +241,11 @@ public class FC_Rpg extends JavaPlugin
 		getServer().getPluginManager().registerEvents(new TeleportListener(), plugin);
 		getServer().getPluginManager().registerEvents(new PlayerTeleportListener(), plugin);
 		getServer().getPluginManager().registerEvents(new EnchantEventListener(), plugin);
+		getServer().getPluginManager().registerEvents(new EnchantTablePlaceListener(), plugin);
 		
 		// Register Commands
 		commandCE = new CommandGod();
-
+		
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordClass()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordDonator()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordDungeon()).setExecutor(commandCE);
@@ -265,6 +269,8 @@ public class FC_Rpg extends JavaPlugin
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordRealm()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordHead()).setExecutor(commandCE);
 		getCommand(FC_Rpg.generalConfig.getCommandKeyWordPlayers()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordForge()).setExecutor(commandCE);
+		getCommand(FC_Rpg.generalConfig.getCommandKeyWordGold()).setExecutor(commandCE);
 		
 		// Handle tasks that happen every 30 minutes. Delay'd by 5 seconds.
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable()
@@ -1152,34 +1158,101 @@ public class FC_Rpg extends JavaPlugin
 			if (!FC_Rpg.worldConfig.getIsRpgWorld(event.getEnchantBlock().getWorld().getName()))
 				return;
 			
-			Map<Enchantment, Integer> enchantMap = event.getEnchantsToAdd();
+			// Remove all vanilla enchants.
+			event.getEnchantsToAdd().clear();
 			
-			// Ban all fire enchants.
-			if (enchantMap.containsKey(Enchantment.FIRE_ASPECT))
-				enchantMap.remove(Enchantment.FIRE_ASPECT);
-
-			if (enchantMap.containsKey(Enchantment.ARROW_FIRE))
-				enchantMap.remove(Enchantment.ARROW_FIRE);
+			// Variable Declarations
+			Material item = event.getItem().getType();
+			Random rand = new Random();
+			ItemMeta iMeta;
+			int[] rolls = new int[6];	// 0 = common, 1 = normal, 2 = rare, 3 = unique, 4 = mythical, 5 = legendary.
+			int randValue = rand.nextInt(100);
+			int expCost = event.getExpLevelCost();
+			int max = 0;
+			int decimalToMax;
 			
-			// Remove arrow knockback if blocked.
-			if (!FC_Rpg.balanceConfig.getArrowKnockback())
+			if (FC_Rpg.mLib.t0.contains(item))
+				max = 24;
+			else if (FC_Rpg.mLib.t1.contains(item))
+				max = 30;
+			else if (FC_Rpg.mLib.t2.contains(item))
+				max = 36;
+			else if (FC_Rpg.mLib.t3.contains(item))
+				max = 42;
+			else if (FC_Rpg.mLib.t4.contains(item))
+				max = 50;
+			
+			decimalToMax = (int) (expCost / max); // Multiply by .01 to make into decimal.
+			
+			rolls[0] = 50 - (decimalToMax * 25);
+			rolls[1] = 25 - (decimalToMax * 5);
+			rolls[2] = 15 - (decimalToMax * -5);
+			rolls[3] = 7 - (decimalToMax * -13);
+			rolls[4] = 2 - (decimalToMax * -8);
+			rolls[5] = 1 - (decimalToMax * -4);
+			
+			for (int i = 1; i < rolls.length; i++)
+				rolls[i] += rolls[i-1];
+			
+			if (randValue <= rolls[0])
+				iMeta = FC_Rpg.treasureConfig.getRandomItemMeta(item, event.getItem().getItemMeta(), TreasureConfig.tierCommon);
+			else if (randValue <= rolls[1])
+				iMeta = FC_Rpg.treasureConfig.getRandomItemMeta(item, event.getItem().getItemMeta(), TreasureConfig.tierNormal);
+			else if (randValue <= rolls[2])
+				iMeta = FC_Rpg.treasureConfig.getRandomItemMeta(item, event.getItem().getItemMeta(), TreasureConfig.tierRare);
+			else if (randValue <= rolls[3])
+				iMeta = FC_Rpg.treasureConfig.getRandomItemMeta(item, event.getItem().getItemMeta(), TreasureConfig.tierUnique);
+			else if (randValue <= rolls[4])
+				iMeta = FC_Rpg.treasureConfig.getRandomItemMeta(item, event.getItem().getItemMeta(), TreasureConfig.tierMythical);
+			else
+				iMeta = FC_Rpg.treasureConfig.getRandomItemMeta(item, event.getItem().getItemMeta(), TreasureConfig.tierLegendary);
+			
+			event.getItem().setItemMeta(iMeta);
+		}
+	}
+	
+	public class EnchantTablePlaceListener implements Listener
+	{
+		@EventHandler
+		public void onItemPlace(PrepareItemEnchantEvent event)
+		{
+			if (!FC_Rpg.worldConfig.getIsRpgWorld(event.getEnchanter().getWorld().getName()))
+				return;
+			
+			// Variable Declarations
+			Material item = event.getItem().getType();
+			int [] offeredExp = event.getExpLevelCostsOffered();
+			
+			if (event.getItem().hasItemMeta())
 			{
-				if (enchantMap.containsKey(Enchantment.ARROW_KNOCKBACK))
-					enchantMap.remove(Enchantment.ARROW_KNOCKBACK);
+				event.setCancelled(true);
+				return;
 			}
-
-			// Remove sword knockback if blocked.
-			if (!FC_Rpg.balanceConfig.getSwordKnockback())
+			
+			if (FC_Rpg.mLib.t0.contains(item))
 			{
-				if (enchantMap.containsKey(Enchantment.KNOCKBACK))
-					enchantMap.remove(Enchantment.KNOCKBACK);
+				for (int i = 0; i < offeredExp.length; i++)
+					offeredExp[i] = (int) (offeredExp[i] * .81);
 			}
-
-			// Remove looting if blocked.
-			if (!FC_Rpg.balanceConfig.getDefaultItemDrops())
+			else if (FC_Rpg.mLib.t1.contains(item))
 			{
-				if (enchantMap.containsKey(Enchantment.LOOT_BONUS_MOBS))
-					enchantMap.remove(Enchantment.LOOT_BONUS_MOBS);
+				for (int i = 0; i < offeredExp.length; i++)
+					offeredExp[i] = (int) (offeredExp[i] * 1.01);
+			}
+			else if (FC_Rpg.mLib.t2.contains(item))
+			{
+				for (int i = 0; i < offeredExp.length; i++)
+					offeredExp[i] = (int) (offeredExp[i] * 1.22);
+			}
+			else if (FC_Rpg.mLib.t3.contains(item))
+			{
+				for (int i = 0; i < offeredExp.length; i++)
+					offeredExp[i] = (int) (offeredExp[i] * 1.43);
+			}
+			else if (FC_Rpg.mLib.t4.contains(item))
+			{
+				for (int i = 0; i < offeredExp.length; i++)
+					offeredExp[i] = (int) (offeredExp[i] * 1.6667);
 			}
 		}
 	}
@@ -1188,7 +1261,7 @@ public class FC_Rpg extends JavaPlugin
 	{
 		// Variable Declarations
 		RpgItem temp;
-
+		
 		rpgItemList = itemConfig.getLoadedRpgItemList();
 		buyList = new ArrayList<RpgItem>();
 

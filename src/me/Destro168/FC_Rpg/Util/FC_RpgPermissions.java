@@ -144,6 +144,16 @@ public class FC_RpgPermissions extends PermissionManager
 		return getCanUseCommand("FC_Rpg.command.buff");
 	}
 	
+	public boolean commandForge()
+	{
+		return getCanUseCommand("FC_Rpg.command.buff");
+	}
+	
+	public boolean commandGold()
+	{
+		return getCanUseCommand("FC_Rpg.command.gold");
+	}
+	
 	private boolean getCanUseCommand(String checkPerm)
 	{
 		if (isAdmin() == true)

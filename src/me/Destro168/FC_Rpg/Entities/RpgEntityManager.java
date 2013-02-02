@@ -8,8 +8,10 @@ import java.util.Map;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.Configs.PlayerConfig;
 import me.Destro168.FC_Rpg.FC_Rpg.CreatureSpawnListener;
+import me.Destro168.FC_Rpg.Util.DistanceModifierLib;
 import me.Destro168.FC_Suite_Shared.ColorLib;
 import me.Destro168.FC_Suite_Shared.Messaging.BroadcastLib;
+import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -29,6 +31,7 @@ public class RpgEntityManager
 		private RpgPlayer rpgPlayer;
 		private int manaTask;
 		private int updateTask;
+		private int zoneTask;
 		
 		public RpgPlayer getRpgPlayer() { return rpgPlayer; }
 		public int getManaTask() { return manaTask; }
@@ -63,15 +66,6 @@ public class RpgEntityManager
 					rpgPlayer.onlineSave(); // Save all player information every 60 seconds.
 				}
 			}, 0, 1200);
-		}
-		
-		private void startManaRegen()
-		{
-			//Cancel any past mana regenerations.
-			cancelManaRegen();
-			
-			if (rpgPlayer.playerConfig.getIsActive() == false)
-				return;
 			
 			//Start a new mana regeneration.
 			manaTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(FC_Rpg.plugin, new Runnable()
@@ -85,6 +79,29 @@ public class RpgEntityManager
 					catch (NullPointerException e) { }
 				}
 			}, 0, 100);
+			
+			// If zone notifications are on, then attempt them every 'x' ticks.
+			if (FC_Rpg.generalConfig.getZoneNotification())
+			{
+				final DistanceModifierLib dml = new DistanceModifierLib();
+				final MessageLib msgLib = new MessageLib(rpgPlayer.getPlayer());
+				
+				zoneTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(FC_Rpg.plugin, new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						dml.getWorldDML(rpgPlayer.getPlayer().getLocation());
+						int modifier = dml.getDistanceModifier();
+						
+						if (rpgPlayer.lastZoneLevel != modifier)
+						{
+							msgLib.standardMessage("Entering Realm Difficulty Level " + modifier + ".");
+							rpgPlayer.lastZoneLevel = modifier;
+						}
+					}
+				}, 0, FC_Rpg.generalConfig.getZoneNotificationInterval());
+			}
 		}
 		
 		private void stopPlayerUpdates()
@@ -93,23 +110,29 @@ public class RpgEntityManager
 				Bukkit.getScheduler().cancelTask(updateTask);
 		}
 		
-		private void cancelManaRegen()
+		private void stopManaRegen()
 		{
 			//Cancel all past mana regenerations.
 			if (manaTask != -1)
 				Bukkit.getScheduler().cancelTask(manaTask);
 		}
 		
+		private void stopZoneUpdates()
+		{
+			if (manaTask != -1)
+				Bukkit.getScheduler().cancelTask(zoneTask);
+		}
+		
 		public void startTasks()
 		{
 			startPlayerUpdates();
-			startManaRegen();
 		}
 		
 		public void stopTasks()
 		{
 			stopPlayerUpdates();
-			cancelManaRegen();
+			stopManaRegen();
+			stopZoneUpdates();
 		}
 	}
 

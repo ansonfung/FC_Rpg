@@ -55,7 +55,7 @@ public class PlayerConfig extends ConfigGod
 	public long getLastDungeonCompletion() { return fcw.getLong(prefix + "lastDungeonCompletion"); }
 	public long getLastRecievedHourlyItems() { return fcw.getLong(prefix + "lastRecievedHourlyItems"); }
 	public double getClassExperience() { return fcw.getDouble(prefix + "classExperience"); }
-	public double getArcanium() { return fcw.getDouble(prefix + "arcanium"); }
+	public double getGold() { return fcw.getDouble(prefix + "gold"); }
 	public double getCurManaFile() { return fcw.getDouble(prefix + "curMana"); }
 	public double getMaxManaFile() { return fcw.getDouble(prefix + "maxMana"); }
 	public double getCurHealthFile() { return fcw.getDouble(prefix + "curHealth"); }
@@ -88,7 +88,7 @@ public class PlayerConfig extends ConfigGod
 	public void setLastDungeonCompletion(long x) { fcw.set(prefix + "lastDungeonCompletion", x); }
 	public void setLastRecievedHourlyItems(long x) { fcw.set(prefix + "lastRecievedHourlyItems", x); }
 	public void setClassExperience(double x) { fcw.set(prefix + "classExperience", x); }
-	public void setArcanium(double x) { fcw.set(prefix + "arcanium",x); }
+	public void setGold(double x) { fcw.set(prefix + "gold",x); }
 	public void setCurManaFile(double x) { fcw.set(prefix + "curMana", x); }
 	public void setMaxManaFile(double x) { fcw.set(prefix + "maxMana", x); }
 	public void setCurHealthFile(double x) { fcw.set(prefix + "curHealth", x); }
@@ -164,8 +164,8 @@ public class PlayerConfig extends ConfigGod
 	public double getRequiredExpPercent() { return (getClassExperience() * 100) / getLevelUpAmount(); }
 	public int getLevelUpAmount() { return (int) (getClassLevel() * getClassLevel() * FC_Rpg.balanceConfig.getPlayerExpScaleRate() + FC_Rpg.balanceConfig.getPlayerExpScaleBase()); }
 	public void resetActiveSpell() { fcw.set(prefix + "activeSpell", "none"); }
-	public void subtractArcanium(double x) { setArcanium(getArcanium() - x); }
-	public void addArcanium(double x) { setArcanium(getArcanium() + x); }
+	public void subtractGold(double x) { setGold(getGold() - x); }
+	public void addGold(double x) { setGold(getGold() + x); }
 	public void adjustNewCombatclass(int x) { setCombatClass(x); refreshClass(); }
 	
 	public void updateSpellLevel(int spellID, int newVal)
@@ -230,6 +230,15 @@ public class PlayerConfig extends ConfigGod
 			setVersion(1.4);
 			
 			checkStatAndSpellPoints();
+		}
+		
+		if (getVersion() < 1.5)
+		{
+			setVersion (1.5);
+			
+			// Transfer arcanium to gold in this update.
+			if (fcw.isSet(prefix + "arcanium"))
+				setGold(fcw.getDouble(prefix + "arcanium"));
 		}
 	}
 	
@@ -385,6 +394,8 @@ public class PlayerConfig extends ConfigGod
 		setAutoCast(false);
 		
 		setLastDungeonCompletion(0);
+
+		setNick("");
 		
 		offlineSave();
 	}

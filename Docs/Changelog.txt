@@ -1,0 +1,38 @@
+~ FC_Rpg Changelog ~
+
+-------------------------------------------------------------------
+Version 1.33 BETA:
+-------------------------------------------------------------------
+FC_Suite_Shared Requirement: Version 2.56
+-------------------------------------------------------------------
+General:
+- Updated isAoE realm setting comptability for latest version of mcmmo.
+- Fixed issue with nick not being set for players during first run causing issues.
+- Did a bit of re-theming for mages /alchemy command to accomodate two new commands.
+
+-------------------------------------------------------------------
+Enchanting:
+- Recoded enchanting so that you now get custom RPG items from it.
+
+-------------------------------------------------------------------
+Commands:
+- Updated /radmin wall again. Now scales to fit all warps and classes. No longer can grief.
+- Removed debug line of text.
+- Dungeon commands now don't require a class to use.
+- Added two new commands, /gold, and /forge.
+- Forge can be used to repair items.
+- Added permissions check to /realm. Apparently it wasn't checking permissions. Who knew! At least nobody noticed this... I think.
+- Alchemy command now uses /alchemy transmute rather than smelt.
+- Updated the message lib a bit to fix some permission issues.
+- Updated the /rpg help and /rpg info into a merged all in one help command. All available in /rpg now.
+
+-------------------------------------------------------------------
+Balance:
+- Added balance config settings to manage ranged vs. melee damage multipliers. BETTER LOVE ME iVIP.
+
+-------------------------------------------------------------------
+Economy:
+- The entire economy of FC_Rpg has been moved to gold. Every instance of giving or taking money now works through gold.
+- Servers can customize a conversion rate between server currency and gold. This allows server owners to create an extremely isolated and controllable economy within FC_Rpg if desired. Conversely, the FC_Rpg economy can be free and open. If the conversation rate is set to 0 or lower it will disable the setting.
+
+-------------------------------------------------------------------

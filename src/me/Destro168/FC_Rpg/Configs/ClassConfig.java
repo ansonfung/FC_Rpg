@@ -3,6 +3,7 @@ package me.Destro168.FC_Rpg.Configs;
 import java.util.List;
 
 import me.Destro168.FC_Suite_Shared.ConfigManagers.ConfigGod;
+import me.Destro168.FC_Suite_Shared.ConfigManagers.ListGetter;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.LoadedObjects.RpgClass;
 
@@ -143,6 +144,8 @@ public class ClassConfig extends ConfigGod
 	 ^ Configuration Accessing Methods 
 	 - All Dynamically Accessed
 	****************************************************************/
+	
+	public List<Integer> getClassFieldList() { ListGetter lg = new ListGetter(fcw, prefix); return lg.getFieldIntegerList(); }
 	
 	private void setName(int i, String x) { fcw.set(prefix + i + ".name", x); }
 	private void setDescription(int i, String x) { fcw.set(prefix + i + ".description", x); }

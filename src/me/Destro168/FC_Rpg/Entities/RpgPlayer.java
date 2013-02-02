@@ -53,6 +53,7 @@ public class RpgPlayer extends RpgEntity
 	private int tempConstitution;
 	private int tempMagic;
 	private int tempIntelligence;
+	public int lastZoneLevel;
 	private Date lastDodgeNotification;
 	private Date lastThornsNotification;
 	private Date lastHealNotification;
@@ -101,6 +102,7 @@ public class RpgPlayer extends RpgEntity
 		tempConstitution = 0;
 		tempMagic = 0;
 		tempIntelligence = 0;
+		lastZoneLevel = 0;
 		lastDodgeNotification = new Date();
 		lastThornsNotification = new Date();
 		lastHealNotification = new Date();

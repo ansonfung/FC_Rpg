@@ -190,7 +190,11 @@ public class RpgMonster extends RpgEntity
 		{
 			if (entity_.getType().toString().equalsIgnoreCase(FC_Rpg.balanceConfig.getMobBonusType(field)))
 			{
-				attack *= FC_Rpg.balanceConfig.getMobBonusAttack(field);
+				if ((FC_Rpg.balanceConfig.getMobBonusAttackRanged(field) > 0) && (entity_.getEquipment().getItemInHand().getType() == Material.BOW))
+					attack *= FC_Rpg.balanceConfig.getMobBonusAttackRanged(field);
+				else
+					attack *= FC_Rpg.balanceConfig.getMobBonusAttackMelee(field);
+				
 				constitution *= FC_Rpg.balanceConfig.getMobBonusConstitution(field);
 				baseCash *= FC_Rpg.balanceConfig.getMobBonusGold(field);
 				baseExp *= FC_Rpg.balanceConfig.getMobBonusExp(field);
@@ -286,7 +290,7 @@ public class RpgMonster extends RpgEntity
 
 	public void handleHostileMobDrops(Location dropSpot)
 	{
-		List<ItemStack> drops = FC_Rpg.treasureConfig.getRandomItemStackList(level, FC_Rpg.treasureConfig.getLootList(FC_Rpg.balanceConfig.getMobLootList()));
+		List<ItemStack> drops = FC_Rpg.treasureConfig.getRandomLoot(level, FC_Rpg.treasureConfig.getLootList(FC_Rpg.balanceConfig.getMobLootList()), null);
 		
 		for (ItemStack drop : drops)
 			dropSpot.getWorld().dropItem(dropSpot, drop); // Drop the item.

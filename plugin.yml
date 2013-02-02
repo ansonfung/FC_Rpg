@@ -1,6 +1,6 @@
 name: FC_Rpg
 main: me.Destro168.FC_Rpg.FC_Rpg
-version: 1.32
+version: 1.33
 description: Handles RPG aspects of the server.
 commands:
    class:
@@ -49,5 +49,9 @@ commands:
       description: This command accesses buff commands.
    realm:
       description: This command accesses realm commands.
+   forge:
+      description: This command accesses forge commands.
+   gold:
+      description: This command accesses gold commands.
 softdepend: [Multiverse, mcMMO, qQuests]
 depend: [FC_Suite_Shared]

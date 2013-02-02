@@ -1,6 +1,7 @@
 package me.Destro168.FC_Rpg.Listeners;
 
 import me.Destro168.FC_Rpg.FC_Rpg;
+import me.Destro168.FC_Rpg.Configs.PlayerConfig;
 import me.Destro168.FC_Rpg.Configs.WarpConfig;
 import me.Destro168.FC_Rpg.Configs.WorldConfig;
 import me.Destro168.FC_Rpg.Entities.RpgPlayer;
@@ -356,8 +357,8 @@ public class PlayerInteractionListener implements Listener
 			if (text.contains(warpConfig.getName(i)))
 			{
 				//Attempt to pay the cost.
-				if (FC_Rpg.economy.has(player.getName(), warpConfig.getCost(i)) == true)
-					FC_Rpg.economy.withdrawPlayer(player.getName(), warpConfig.getCost(i));
+				if (rpgPlayer.playerConfig.getGold() >= warpConfig.getCost(i))
+					rpgPlayer.playerConfig.subtractGold(warpConfig.getCost(i));
 				else
 				{
 					msgLib.errorNotEnoughMoney();
@@ -510,15 +511,14 @@ public class PlayerInteractionListener implements Listener
 	
 	private boolean attemptPay(double amount)
 	{
-		if (FC_Rpg.economy.has(player.getName(), amount) == true)
-		{
-			FC_Rpg.economy.withdrawPlayer(player.getName(), amount);
-			return true;
-		}
-		else
-		{
+		PlayerConfig pc = new PlayerConfig(player.getName());
+		
+		if (!pc.getIsActive() || pc.getGold() < amount)
 			return false;
-		}
+		
+		pc.subtractGold(amount);
+		
+		return true;
 	}
 }
 

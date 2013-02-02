@@ -370,7 +370,7 @@ public class PvpEvent extends GeneralEvent
 				rbLib.rpgBroadcast(participantList.get(winnerSlot).getName() + " Is The New Pvp Champion And Has Won $" + rewardAmount + "!");
 				
 				//Give the reward
-				FC_Rpg.economy.depositPlayer(participantList.get(winnerSlot).getName(), rewardAmount);
+				FC_Rpg.rpgEntityManager.getRpgPlayer(participantList.get(winnerSlot)).playerConfig.addGold(rewardAmount);
 			}
 		}
 		

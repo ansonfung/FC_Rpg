@@ -93,8 +93,11 @@ public class BlockBreakListener implements Listener
 			
 			if (Bukkit.getServer().getPluginManager().isPluginEnabled("mcMMO"))
 			{
-				for (Block b : targetBlocks)
-					com.gmail.nossr50.skills.gathering.Mining.miningBlockCheck(player, b);
+				for (Block checkBlock : targetBlocks)
+				{
+					com.gmail.nossr50.skills.mining.MiningManager miningManager = new com.gmail.nossr50.skills.mining.MiningManager(player);
+					miningManager.miningBlockCheck(checkBlock);
+				}
 			}
 			
 			BlockBreakEvent e;

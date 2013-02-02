@@ -28,10 +28,8 @@ public class GeneralConfig extends ConfigGod
 			fcw.setNull(prefix + "commandKeyWord.world");
 		}
 		
-		if (getVersion() < 1.32)
-		{
-			setVersion(1.32);
-		}
+		if (getVersion() < 1.33)
+			setVersion(1.33);
 		
 		// Load static information
 		getCustomChatExclusions();
@@ -62,6 +60,8 @@ public class GeneralConfig extends ConfigGod
 		getCommandKeyWordBuff();
 		getCommandKeyWordRealm();
 		getCommandKeyWordPlayers();
+		getCommandKeyWordForge();
+		getCommandKeyWordGold();
 		getNickPrefix();
 		getTimedItemsInterval();
 		getInactivePlayerFileDeleteTime();
@@ -69,6 +69,7 @@ public class GeneralConfig extends ConfigGod
 		getDonatorBonusStatPercent();
 		getDonatorLootBonusPercent();
 		getBuffCommandCost();
+		getGoldConversionRate();
 		getLevelCap();
 		getNotifcationInterval();
 		getDungeonSelectionToolID();
@@ -84,6 +85,8 @@ public class GeneralConfig extends ConfigGod
 		getHardcoreItemLoss();
 		getCreativeControl();
 		getPerfectBirch();
+		getZoneNotification();
+		getZoneNotificationInterval();
 		
 		// Always load up static timed items.
 		loadTimedItems();
@@ -145,6 +148,8 @@ public class GeneralConfig extends ConfigGod
 	public String getCommandKeyWordBuff() { return fcw.getStaticString(prefix + "commandKeyWord.buff", "buff"); }
 	public String getCommandKeyWordRealm() { return fcw.getStaticString(prefix + "commandKeyWord.realm", "realm"); }
 	public String getCommandKeyWordPlayers() { return fcw.getStaticString(prefix + "commandKeyWord.players", "players"); }
+	public String getCommandKeyWordForge() { return fcw.getStaticString(prefix + "commandKeyWord.forge", "forge"); }
+	public String getCommandKeyWordGold() { return fcw.getStaticString(prefix + "commandKeyWord.gold", "gold"); }
 	public String getNickPrefix() { return fcw.getStaticString(prefix + "nickPrefix", "~"); }
 	public long getTimedItemsInterval() { return fcw.getStaticLong(prefix + "timedItems.interval", 3600000); }
 	public long getInactivePlayerFileDeleteTime() { return fcw.getStaticLong(prefix + "inactivePlayerFileDeleteTime", 1209600000); }
@@ -152,6 +157,7 @@ public class GeneralConfig extends ConfigGod
 	public double getDonatorBonusStatPercent() { return fcw.getStaticDouble(prefix + "donatorBonusStatPercent", .1); }
 	public double getDonatorLootBonusPercent() { return fcw.getStaticDouble(prefix + "donatorLootBonusPercent", .1); }
 	public double getBuffCommandCost() { return fcw.getStaticDouble(prefix + "buffCommandCost", 10); }
+	public double getGoldConversionRate() { return fcw.getStaticDouble(prefix + "goldConversionRate", 1); }
 	public int getLevelCap() { return fcw.getStaticInt(prefix + "levelCap", 100); }
 	public int getNotifcationInterval() { return fcw.getStaticInt(prefix + "notificationInterval", 2000); }
 	public int getDungeonSelectionToolID() { return fcw.getStaticInt(prefix + "dungeonSelectionToolID", 264); }
@@ -168,6 +174,8 @@ public class GeneralConfig extends ConfigGod
 	public boolean getCreativeControl() { return fcw.getStaticBoolean(prefix + "creativeControl", true); }
 	public boolean getPerfectBirch() { return fcw.getStaticBoolean(prefix + "perfectBirch", true); }
 	public boolean getPerfectWheat() { return fcw.getStaticBoolean(prefix + "perfectWheat", true); }
+	public boolean getZoneNotification() { return fcw.getStaticBoolean(prefix + "zoneNotification", true); }
+	public int getZoneNotificationInterval() { return fcw.getStaticInt(prefix + "zoneNotificationInterval", 20); }
 }
 
 

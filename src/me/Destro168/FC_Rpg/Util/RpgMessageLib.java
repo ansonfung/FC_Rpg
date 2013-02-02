@@ -3,6 +3,7 @@ package me.Destro168.FC_Rpg.Util;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.Configs.FaqConfig;
 import me.Destro168.FC_Rpg.Entities.RpgPlayer;
+import me.Destro168.FC_Suite_Shared.FC_Suite_Shared;
 import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 
 import org.bukkit.command.CommandSender;
@@ -90,162 +91,190 @@ public class RpgMessageLib extends MessageLib
 		return true;
 	}
 
-	public boolean helpRpg()
-	{
-		standardHeader("FC_Rpg Command Help!");
-		
-		standardMessage("/rpg help [page]", "View general help for FC_Rpg.");
-		
-		if (perms.commandFAQ())
-			standardMessage("/faq", "View Server Frequently Asked Questions.");
-		
-		if (perms.commandClass())
-			standardMessage("/class", "Help for classes.");
-
-		if (perms.commandJob())
-			standardMessage("/job", "Help for jobs.");
-
-		if (perms.commandGuild())
-			standardMessage("/guild", "Help for guilds.");
-
-		if (perms.commandSpell())
-			standardMessage("/spell", "Help for spells");
-
-		if (rpgPlayer != null)
-		{
-			if (rpgPlayer.playerConfig.getHasAlchemy())
-				standardMessage("/alchemy", "Help for alchemy");
-
-			if (rpgPlayer.isDonatorOrAdmin())
-				standardMessage("/donator", "Help for donators.");
-		}
-
-		if (perms.commandReset())
-			standardMessage("/reset", "Reset Your FC_RPG Character!");
-
-		if (perms.commandPvp())
-			standardMessage("/pvp", "Help for pvp events.");
-
-		if (perms.commandPlayers())
-			standardMessage("/players", "See who is online.");
-
-		if (perms.commandBuff())
-			standardMessage("/buff", "Help with buffs.");
-
-		if (perms.isAdmin())
-		{
-			standardMessage("[A] /w", "Help with warps.");
-			standardMessage("[A] /dungeon", "Help for dungeons.");
-			standardMessage("[A] /de", "Help for dungeon setup.");
-			standardMessage("[A] /modify", "Help for modify command.");
-			standardMessage("[A] /realm", "Help for realm command.");
-			standardMessage("[A] /radmin", "Admin Commands.");
-		}
-
-		return true;
-	}
-	
-	public boolean displayRpgHelp(String strPage)
+	public boolean helpRpg(String strPage)
 	{
 		int page;
+		int[] infoStart = new int[10];
+		
+		for (int i = 3; i < 13; i++)
+			infoStart[i - 3] = i;
 		
 		try { page = Integer.valueOf(strPage); } catch (NumberFormatException e) { page = 1; strPage = "1"; }
 		
-		switch (page)
+		if (page == 2)
 		{
-			case 1:
-				standardHeader("FC_Rpg Help Main ~ Page " + strPage);
-				standardMessage("These documents are here to help players explain how to use some of the features of FC_Rpg. FC_Rpg is an rpg plugin designed to bring an RPG experience to servers!" +
-						"The following is a list of the information contained on each page. Feel free to make suggestions to the help documentation in a ticket on the FC_Rpg plugin page.");
-				standardMessage("");
-				standardMessage("Page 1: This Page.");
-				standardMessage("Page 2: Basics");
-				standardMessage("Page 3: Combat");
-				standardMessage("Page 4: Combat 2");
-				standardMessage("Page 5: Spells");
-				standardMessage("Page 6: Alchemy (Alchemist Only)");
-				standardMessage("Page 7: Guilds");
-				standardMessage("Page 8: Guilds 2");
-				standardMessage("Page 9: Dungeons");
-				standardMessage("Page 10: Loot and Items");
-				break;
-			case 2:
-				standardHeader("Basics ~ Page " + strPage);
-				standardMessage("First and foremost, a disclaimer: FC_Rpg is an extremely customizable plugin. Thus, the information contained here will apply ONLY to default settings. " +
-						"If your server customizes settings, then this help may have innaccuracies. Use this help to get a better general idea of how FC_Rpg works and operates.");
-				secondaryMessage("To get started with FC_Rpg, you will need to find your servers class selection board. Right-Click the signs to select your class. After you select a class, find a finish " +
-						"sign nearby and right-click on that. All signs need to be right-click to be used with FC_Rpg.");
-				standardMessage("Now that you have a class, you should have access to the majority of the plugins commands.");
-				break;
-			case 3:
-				standardHeader("Combat ~ Page " + strPage);
-				standardMessage("Combat in FC_Rpg is simple. There are four stats for players and two stats for monsters. Killing monsters will grant gold and experience so that you become " +
-						"more rich and eventually will levelup. Higher level monsters wear stronger gear, drop better items, reward more gold, and reward more experience.");
-				secondaryMessage("To become powerful in FC_Rpg, slay monsters that you feel comfortable defeating until you levelup. As you level up you will be awarded stat and spell points to allocate " +
-						"into stats and spells.");
-				standardMessage("While it is recommended to fight monsters roughly your level, killing monsters above and below your level will still reward normal experience and loot. Thus, if you find a " +
-						"strategy to kill level 100 monsters at level 1's (cheater), then you will levelup significantly faster than somebody fighting level 1's.");
-				break;
-			case 4:
-				standardHeader("Combat 2 ~ Page " + strPage);
-				standardMessage("VERY IMPORTANT: FC_Rpg uses custom durabilities for swords and armor. Armors and weapons will appear to break but WILL NOT ACTUALLY BREAK! Gold swords have 150x normal" +
-						"durability while diamond has about 3x. Don't believe this help? Go attack a mob with a wood sword and notice that even when the sword appears to break, your damage won't change. Compare the" +
-						"damage you are dealing to what you do with your fists. Whenever a sword has very low real durability, it will appear to break more often until it actually breaks. Attacking faster causes" +
-						"your client to refresh durabilities more oftens so if you attack fast then your swords will break less often.");
-				break;
-			case 5:
-				standardHeader("Spells ~ Page " + strPage);
-				standardMessage("FC_Rpg has a diverse set of spells. There are five classes with five spells each. By using the /spell command, you can begin the process of using spells. When you aquire " +
-						"your first spell point at level four, use /spell list to pick a spell. Then upgrade it with /spell upgrade and the name or number of the spell you want to upgrade. After that, " +
-						"to case the spell you need to bind it to an item. Use /spell bind [name,num] to assign the spell to the item you are holding. Now right-click to ready a spell and left-click to cast it." +
-						"Some spells are able to be cast without a target while others require a target. The general trend for this is that offensive spells require targets with notable exceptions for spells like " +
-						"fireball which are ranged whereas defensive, buff, and utility spells will not require a target. Depending on your class, you might have to hold an item to cast spells. For example, the " +
-						"wizard requires a wand to cast spells. A wand can be a stick or a blaze rod <-- THIS IS REALLY BIG, BECAUSE IT LETS YOU BIND TWO SPELLS!!! Consider it a reward for reading the help! :D");
-				break;
-			case 6:
-				standardHeader("Alchemy ~ Page " + strPage);
-				standardMessage("Alchemy is a special mage spell that once invested into, allows access to the command /alchemy. The /alchemy command allows you to convert items into a raw material known by " +
-						"the arcane as arcanium. Arcanium can be extracted from items using magic power. Higher levels of the alchemy spell allow for greater amounts of arcanium to be harvested from items. As well, " +
-						"it is well known in the magic world that enchantments are made of solid arcanium and will grant major bonuses to the amount of arcanium given from items during extraction. The only downside to " +
-						"arcanium is that composing items with it (aka buying) requires significantly more arcanium when used with no raw materials. The greatest mages are break planets apart only to forge " +
-						"them into gold and diamonds.");
-				break;
-			case 7:
-				standardHeader("Guilds ~ Page " + strPage);
-				standardMessage("Guilds are a feature of FC_Rpg that allows players to group up. The main advantages of joining a guild is the experience share, party buffs get applied to members, and" +
-						"the experience bonus. The more online members of a guild there are, the greater the experience bonus that all members of the guild will recieve. The exp bonus caps at 20% with 50 members" +
-						"All experience sharing and bonuses will only take place between members that are nearby each other. Thus, if there are 8 members of a guild online, but only 3 are together killing " +
-						"monsters, then the three players will get a 1.2% exp boost for being near each other. The distance for this check is 50 blocks from monster slayer.");
-				secondaryMessage("Spells can also apply buffs to nearby guild members. Buffs will only apply to nearby guild members. Thus, if you have 50 guild members stacked on top of you and you cast a damage boosting, " +
-						"spell, all 50 members will recieve that damage boost. The distance that a buff applies varies per spell but the distance generally increases per level as well as strength and duration.");
-				break;
-			case 8:
-				standardHeader("Guilds 2 ~ Page " + strPage);
-				standardMessage("A final important note on guilds is that once you join them, you are subject to power leveling rules. Basically, these make it so that whenever you kill a monster, anybody " +
-						"that is significantly stronger or weaker than you will not recieve combat rewards. When fighting solo you will not have the rules applied to yourself but if " +
-						"another guild member is within 50 blocks, you will be subject to the power leveling rules yourself.");
-				break;
-			case 9:
-				standardHeader("Dungeons ~ Page " + strPage);
-				standardMessage("Dungeons are the final topic of this help. Dungeons are a way for players to go kill monsters and get tons of extra loot in the process. Simply find a dungeon, right-click the " +
-						"sign and enter it. After a delay, you will enter and be free to slay monsters. Dungeons are fully instanced, so feel free to loot all the treasure and items you find because they will " +
-						"be gone the next run! Every dungeon has a boss. This boss is placed by the server admin when designed and you should beware " +
-						"of him as he WILL be stronger than the rest of the mobs in the dungeon.");
-				break;
-			case 10:
-				standardHeader("Loot and Items ~ Page " + strPage);
-				standardMessage("Monsters drop custom items in the format of [Prefix] name [Suffix] [+x]. The prefix determines the stat boost enchantment the item will give. The name is the material: wood, " +
-						"diamond etc. The suffix will tell you the special enchantment the item has. The x will tell you the strength of the enchantments on the item. So for example +4 will grant you the 5th magnitude " +
-						"of an enchantments effect and/or stat boost.");
-				secondaryMessage("Items will also come in different tiers. The tier of an item simply determines the effectiveness of it. Legendary is the most valuable and grants a 50% bonus to the material bonus " +
-						"of an item. So for example wooden swords give 25% bonus attack by default. Gold swords give 150% by default. Legendary wood = 37.5% Legendary gold = 225%. These values are listed on " +
-						"the item for convenience.");
-				standardMessage("Lastly, suffix enchantments DON'T stack. However, the strongest + value of an item will always be applied. Basically, if you have a +1 and +3 boots of agility and you unequip " +
-						"the +3 boots, you need to equip the +1 boots again for them to take effect since the +3 overrode them before. However, if you remove the +1, the +3 will be active and you don't need to " +
-						"equip them again. Prefix enchantments stacks. Enchantment stat bonuses and effects are refreshed during combat.");
-				break;
+			standardHeader("FC_Rpg Command Help ~ Page 2");
+			
+			if (perms.commandPlayers())
+				standardMessage("/players", "See who is online.");
+
+			if (perms.commandBuff())
+				standardMessage("/buff", "Help with buffs.");
+			
+			if (perms.commandForge())
+				standardMessage("/forge", "Help for forging.");
+			
+			if (perms.commandGold())
+				standardMessage("/gold", "Help for gold.");
+			
+			if (perms.isAdmin())
+			{
+				standardMessage("[A] /w", "Help with warps.");
+				standardMessage("[A] /dungeon", "Help for dungeons.");
+				standardMessage("[A] /de", "Help for dungeon setup.");
+				standardMessage("[A] /modify", "Help for modify command.");
+				standardMessage("[A] /realm", "Help for realm command.");
+				standardMessage("[A] /radmin", "Admin Commands.");
+			}
+		}
+		else if (page == infoStart[0])
+		{
+			standardHeader("FC_Rpg Main Help ~ Page " + strPage);
+			standardMessage("The following pages are dedicated to explaining in-game features of FC_Rpg. FC_Rpg is an rpg plugin designed to bring an RPG experience to servers!" +
+					"The following is a table of contents of the upcoming pages.");
+			standardMessage("");
+			standardMessage("Page "+infoStart[0]+": This Page");
+			standardMessage("Page "+infoStart[1]+": Basics");
+			standardMessage("Page "+infoStart[2]+": Combat");
+			standardMessage("Page "+infoStart[3]+": Combat 2");
+			standardMessage("Page "+infoStart[4]+": Spells");
+			standardMessage("Page "+infoStart[5]+": Alchemy (Alchemist Only)");
+			standardMessage("Page "+infoStart[6]+": Guilds");
+			standardMessage("Page "+infoStart[7]+": Guilds 2");
+			standardMessage("Page "+infoStart[8]+": Dungeons");
+			standardMessage("Page "+infoStart[9]+": Loot and Items");
+		}
+		else if (page == infoStart[1])
+		{
+			standardHeader("Basics ~ Page " + infoStart[1]);
+			standardMessage("First and foremost, a disclaimer: FC_Rpg is an extremely customizable plugin. Thus, the information contained here will apply ONLY to default settings. " +
+					"If your server customizes settings, then this help may have innaccuracies. Use this help to get a better general idea of how FC_Rpg works and operates.");
+			secondaryMessage("To get started with FC_Rpg, you will need to find your servers class selection board. Right-Click the signs to select your class. After you select a class, find a finish " +
+					"sign nearby and right-click on that. All signs need to be right-click to be used with FC_Rpg.");
+			standardMessage("Now that you have a class, you should have access to the majority of the plugins commands.");
+		}
+		else if (page == infoStart[2])
+		{
+			standardHeader("Combat ~ Page " + infoStart[2]);
+			standardMessage("Combat in FC_Rpg is simple. There are four stats for players and two stats for monsters. Killing monsters will grant gold and experience so that you become " +
+					"more rich and eventually will levelup. Higher level monsters wear stronger gear, drop better items, reward more gold, and reward more experience.");
+			secondaryMessage("To become powerful in FC_Rpg, slay monsters that you feel comfortable defeating until you levelup. As you level up you will be awarded stat and spell points to allocate " +
+					"into stats and spells.");
+			standardMessage("While it is recommended to fight monsters roughly your level, killing monsters above and below your level will still reward normal experience and loot. Thus, if you find a " +
+					"strategy to kill level 100 monsters at level 1's (cheater), then you will levelup significantly faster than somebody fighting level 1's.");
+		}
+		else if (page == infoStart[3])
+		{
+			standardHeader("Combat 2 ~ Page " + infoStart[3]);
+			standardMessage("VERY IMPORTANT: FC_Rpg uses custom durabilities for swords and armor. Armors and weapons will appear to break but WILL NOT ACTUALLY BREAK! Gold swords have 150x normal" +
+					"durability while diamond has about 3x. Don't believe this help? Go attack a mob with a wood sword and notice that even when the sword appears to break, your damage won't change. Compare the" +
+					"damage you are dealing to what you do with your fists. Whenever a sword has very low real durability, it will appear to break more often until it actually breaks. Attacking faster causes" +
+					"your client to refresh durabilities more oftens so if you attack fast then your swords will break less often.");
+		}
+		else if (page == infoStart[4])
+		{
+			standardHeader("Spells ~ Page " + infoStart[4]);
+			standardMessage("FC_Rpg has a diverse set of spells. There are five classes with five spells each. By using the /spell command, you can begin the process of using spells. When you aquire " +
+					"your first spell point at level four, use /spell list to pick a spell. Then upgrade it with /spell upgrade and the name or number of the spell you want to upgrade. After that, " +
+					"to case the spell you need to bind it to an item. Use /spell bind [name,num] to assign the spell to the item you are holding. Now right-click to ready a spell and left-click to cast it." +
+					"Some spells are able to be cast without a target while others require a target. The general trend for this is that offensive spells require targets with notable exceptions for spells like " +
+					"fireball which are ranged whereas defensive, buff, and utility spells will not require a target. Depending on your class, you might have to hold an item to cast spells. For example, the " +
+					"wizard requires a wand to cast spells. A wand can be a stick or a blaze rod <-- THIS IS REALLY BIG, BECAUSE IT LETS YOU BIND TWO SPELLS!!! Consider it a reward for reading the help! :D");
+			
+		}
+		else if (page == infoStart[5])
+		{
+			standardHeader("Alchemy ~ Page " + infoStart[5]);
+			standardMessage("Alchemy is a special mage spell that once invested into, allows access to the command /alchemy. The /alchemy command allows you to convert items into the raw material gold. " +
+					"Gold can be extracted from items using magic power. Higher levels of the alchemy increase the transmutational power of the alchemist allowing for greater amounts of gold to be " +
+					"harvested from items. As well, it is well known in the magic world that the destruction of enchantments will strengthen transmutations causing greater gold yields. The only downside to " +
+					"gold is that composing items with it (aka buying) requires significantly more gold when used with no raw materials. The greatest mages break planets apart only to transmute " +
+					"them into gold and diamonds.");
+		}
+		else if (page == infoStart[6])
+		{
+			standardHeader("Guilds ~ Page " + infoStart[6]);
+			standardMessage("Guilds are a feature of FC_Rpg that allows players to group up. The main advantages of joining a guild is the experience share, party buffs get applied to members, and" +
+					"the experience bonus. The more online members of a guild there are, the greater the experience bonus that all members of the guild will recieve. The exp bonus caps at 20% with 50 members" +
+					"All experience sharing and bonuses will only take place between members that are nearby each other. Thus, if there are 8 members of a guild online, but only 3 are together killing " +
+					"monsters, then the three players will get a 1.2% exp boost for being near each other. The distance for this check is 50 blocks from monster slayer.");
+			secondaryMessage("Spells can also apply buffs to nearby guild members. Buffs will only apply to nearby guild members. Thus, if you have 50 guild members stacked on top of you and you cast a damage boosting, " +
+					"spell, all 50 members will recieve that damage boost. The distance that a buff applies varies per spell but the distance generally increases per level as well as strength and duration.");
+			
+		}
+		else if (page == infoStart[7])
+		{
+			standardHeader("Guilds 2 ~ Page " + infoStart[7]);
+			standardMessage("A final important note on guilds is that once you join them, you are subject to power leveling rules. Basically, these make it so that whenever you kill a monster, anybody " +
+					"that is significantly stronger or weaker than you will not recieve combat rewards. When fighting solo you will not have the rules applied to yourself but if " +
+					"another guild member is within 50 blocks, you will be subject to the power leveling rules yourself.");
+			
+		}
+		else if (page == infoStart[8])
+		{
+			standardHeader("Dungeons ~ Page " + infoStart[8]);
+			standardMessage("Dungeons are the final topic of this help. Dungeons are a way for players to go kill monsters and get tons of extra loot in the process. Simply find a dungeon, right-click the " +
+					"sign and enter it. After a delay, you will enter and be free to slay monsters. Dungeons are fully instanced, so feel free to loot all the treasure and items you find because they will " +
+					"be gone the next run! Every dungeon has a boss. This boss is placed by the server admin when designed and you should beware " +
+					"of him as he WILL be stronger than the rest of the mobs in the dungeon.");
+			
+		}
+		else if (page == infoStart[9])
+		{
+			standardHeader("Loot and Items ~ Page " + infoStart[9]);
+			standardMessage("Monsters drop custom items in the format of [Prefix] name [Suffix] [+x]. The prefix determines the stat boost enchantment the item will give. The name is the material: wood, " +
+					"diamond etc. The suffix will tell you the special enchantment the item has. The x will tell you the strength of the enchantments on the item. So for example +4 will grant you the 5th magnitude " +
+					"of an enchantments effect and/or stat boost.");
+			secondaryMessage("Items will also come in different tiers. The tier of an item simply determines the effectiveness of it. Legendary is the most valuable and grants a 50% bonus to the material bonus " +
+					"of an item. So for example wooden swords give 25% bonus attack by default. Gold swords give 150% by default. Legendary wood = 37.5% Legendary gold = 225%. These values are listed on " +
+					"the item for convenience.");
+			standardMessage("Lastly, suffix enchantments DON'T stack. However, the strongest + value of an item will always be applied. Basically, if you have a +1 and +3 boots of agility and you unequip " +
+					"the +3 boots, you need to equip the +1 boots again for them to take effect since the +3 overrode them before. However, if you remove the +1, the +3 will be active and you don't need to " +
+					"equip them again. Prefix enchantments stacks. Enchantment stat bonuses and effects are refreshed during combat.");
+			
+		}
+		else
+		{
+			standardHeader("FC_Rpg Command Help ~ Page 1");
+			
+			standardMessage("/rpg help [page: 1-12]", "View a page of help.");
+			
+			if (perms.commandFAQ())
+				standardMessage("/faq", "View Server Frequently Asked Questions.");
+			
+			if (perms.commandClass())
+				standardMessage("/class", "Help for classes.");
+			
+			if (perms.commandJob())
+				standardMessage("/job", "Help for jobs.");
+	
+			if (perms.commandGuild())
+				standardMessage("/guild", "Help for guilds.");
+	
+			if (perms.commandSpell())
+				standardMessage("/spell", "Help for spells");
+	
+			if (rpgPlayer != null)
+			{
+				if (rpgPlayer.playerConfig.getHasAlchemy())
+					standardMessage("/alchemy", "Help for alchemy");
+	
+				if (rpgPlayer.isDonatorOrAdmin())
+					standardMessage("/donator", "Help for donators.");
+			}
+	
+			if (perms.commandReset())
+				standardMessage("/reset", "Reset Your FC_RPG Character!");
+	
+			if (perms.commandPvp())
+				standardMessage("/pvp", "Help for pvp events.");
 		}
 		
+		return true;
+	}
+	
+	public boolean helpRpgInfo(String strPage)
+	{
 		return true;
 	}
 	
@@ -366,11 +395,11 @@ public class RpgMessageLib extends MessageLib
 
 		standardHeader("Alchemy Commands");
 		standardMessage("/alchemy", "Help for alchemy");
-		standardMessage("/alchemy [list] <startpoint>", "List items purchasable with Arcanium.");
-		standardMessage("/alchemy [buy] [num] [count]", "Buy items from the alchemy list.");
-		standardMessage("/alchemy [smelt] <all>", "Break down an item in your hand or all of your items into Arcanium.");
-		infiniteMessage("You currently have ", FC_Rpg.df.format(rpgPlayer.playerConfig.getArcanium()), " Arcanium.");
-
+		standardMessage("/alchemy list <startpoint>", "List items purchasable with gold.");
+		standardMessage("/alchemy buy [num] [count]", "Buy items from the alchemy list.");
+		standardMessage("/alchemy transmute <all>", "Break down an item in your hand or all of your items into gold.");
+		infiniteMessage("You currently have ", FC_Rpg.df.format(rpgPlayer.playerConfig.getGold()), " gold.");
+		
 		return true;
 	}
 
@@ -387,9 +416,13 @@ public class RpgMessageLib extends MessageLib
 		standardMessage("/guild leave", "Leave your guild.");
 		standardMessage("/guild [<open>,<close>]", "Open Or Close Your Guild.");
 		standardMessage("/guild info [guildName]", "See a guilds info.");
-		standardMessage("[A] /guild delete [guildName]", "Delete a guild.");
-		standardMessage("[A] /guild [<open>,<close>] [name]", "Open Or Close A Guild.");
-
+		
+		if (perms.isAdmin())
+		{
+			standardMessage("[A] /guild delete [guildName]", "Delete a guild.");
+			standardMessage("[A] /guild [<open>,<close>] [name]", "Open Or Close A Guild.");
+		}
+		
 		return true;
 	}
 
@@ -422,15 +455,42 @@ public class RpgMessageLib extends MessageLib
 
 		return true;
 	}
-
+	
+	public boolean helpForge(int repairCost)
+	{
+		standardHeader("Forge Commands");
+		standardMessage("/forge repair", "Repair an item in hand for money.");
+		
+		if (repairCost > 0)
+			infiniteMessage("The item you are holding costs ",repairCost + ""," levels to repair.");
+		else
+			infiniteMessage("The item you are holding can't be repaired by command.");
+		
+		return true;
+	}
+	
+	public boolean helpGold()
+	{
+		standardHeader("Gold");
+		infiniteMessage("/gold convert [amount]: ","Rate is 1 gold = " + FC_Suite_Shared.sc.moneyPrefix + FC_Rpg.generalConfig.getGoldConversionRate() + FC_Suite_Shared.sc.moneySuffix + ".");
+		
+		if (perms.isAdmin())
+			infiniteMessage("[A] /gold [[add],[sub],[set]] [amount] [name]"," Exert mastery over gold!");
+		
+		if (rpgPlayer != null)
+			infiniteMessage("You currently have ",FC_Rpg.df2.format(rpgPlayer.playerConfig.getGold())," gold.");
+		
+		return true;
+	}
+	
 	public boolean helpDonator()
 	{
 		if (rpgPlayer == null)
 			return errorCreateCharacter();
-
+		
 		if (!rpgPlayer.isDonatorOrAdmin())
 			return errorNoPermission();
-
+		
 		standardHeader("Donator Commands");
 
 		if (FC_Rpg.generalConfig.getDonatorsCanHat() || perms.commandHead())
@@ -441,7 +501,7 @@ public class RpgMessageLib extends MessageLib
 
 		return true;
 	}
-
+	
 	public boolean helpWarp()
 	{
 		if (!perms.isAdmin())
@@ -517,7 +577,7 @@ public class RpgMessageLib extends MessageLib
 		standardMessage("Levels/Exp", "level, addlevel, exp, addexp");
 		standardMessage("Donator", "donator, tickets");
 		standardMessage("Play Time", "seconds, addseconds");
-		standardMessage("Misc", "class, jobrank, spellPoint, prefix (use 'none' to reset'), arcanium");
+		standardMessage("Misc", "class, jobrank, spellPoint, prefix (use 'none' to reset'), gold");
 		secondaryMessage("Please note that most 's' characters can be ommited and there are many aliases for each modifiable.");
 
 		return true;
@@ -539,7 +599,7 @@ public class RpgMessageLib extends MessageLib
 		
 		return true;
 	}
-
+	
 	public boolean helpRAdmin()
 	{
 		if (!perms.isAdmin())

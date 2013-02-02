@@ -1,0 +1,20 @@
+~ FC_Rpg Permissions ~
+
+FC_Rpg.admin -> Admin permission, access to pretty much everything all almost all permissions.
+FC_Rpg.chatadmin -> Gives custom admin chat color. Not given by FC_Rpg.admin.
+FC_Rpg.infiniteTickets -> Ability to switch class infinitely.
+FC_Rpg.infiniteDonator -> Grants infinite donator time. Always adds a month of donator time if not a donator.
+FC_Rpg.command.rpg -> Permission to use /rpg.
+FC_Rpg.command.class -> Ability to use the /class command and sub-commands.
+FC_Rpg.command.class.viewOther -> Ability to view other people with /class view [name]
+FC_Rpg.command.faq -> Allows you to use the /faq command. Admins require the admin node to use the faq command.
+FC_Rpg.command.donator -> Allows you to use the /donator command.
+FC_Rpg.command.hat -> Permission to use /hat.
+FC_Rpg.command.job -> Permission to use /job.
+FC_Rpg.command.list -> Permission to use /list.
+FC_Rpg.command.reset -> Permission to use /reset.
+FC_Rpg.command.buff -> Permission to use /buff.
+FC_Rpg.command.guild -> Permission to use /guild.
+FC_Rpg.command.spell -> Permission to use /spell.
+FC_Rpg.command.forge -> Permission to use /forge.
+FC_Rpg.command.gold -> Permission to use /gold.

@@ -18,6 +18,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import me.Destro168.FC_Rpg.FC_Rpg;
+import me.Destro168.FC_Rpg.Configs.PlayerConfig;
 import me.Destro168.FC_Rpg.Util.MobAggressionCheck;
 import me.Destro168.FC_Suite_Shared.SuiteConfig;
 import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
@@ -315,15 +316,19 @@ public class DungeonEvent extends GeneralEvent
 		if (!isRpgDungeon)
 			return;
 		
+		PlayerConfig rPlayerConfig;
+		
 		//Change lowest level based on player levels.
 		for (Player player : participantList)
 		{
 			if (player != null)
 			{
-				if (FC_Rpg.rpgEntityManager.getRpgPlayer(player).playerConfig.getClassLevel() > lowestLevel + 5)
+				rPlayerConfig = FC_Rpg.rpgEntityManager.getRpgPlayer(player).playerConfig;
+				
+				if (rPlayerConfig.getClassLevel() > lowestLevel + FC_Rpg.balanceConfig.getPowerLevelPrevention())
 				{
 					//Refund players
-					FC_Rpg.economy.depositPlayer(player.getName(), FC_Rpg.dungeonConfig.getEntryFee(dungeonNumber));
+					rPlayerConfig.subtractGold(FC_Rpg.dungeonConfig.getEntryFee(dungeonNumber));
 					
 					//Remove the player
 					removeDungeoneer(player,player,true);
@@ -493,7 +498,7 @@ public class DungeonEvent extends GeneralEvent
 	{
 		//Variable Declarations
 		Random rand = new Random();
-		List<ItemStack> drops = FC_Rpg.treasureConfig.getRandomItemStackList(lowestLevel, rand.nextInt(5) + 1, FC_Rpg.treasureConfig.getLootList(FC_Rpg.dungeonConfig.getLootList(dungeonNumber))); // Get the list of random treasure.
+		List<ItemStack> drops = FC_Rpg.treasureConfig.getRandomItemStackList(lowestLevel, rand.nextInt(5) + 1, FC_Rpg.treasureConfig.getLootList(FC_Rpg.dungeonConfig.getLootList(dungeonNumber)), null); // Get the list of random treasure.
 		Block chestBlock;
 		Chest chest;
 		int x = (int) chestLocation.getX();

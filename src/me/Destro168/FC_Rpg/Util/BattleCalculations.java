@@ -1,6 +1,7 @@
 package me.Destro168.FC_Rpg.Util;
 
 import me.Destro168.FC_Rpg.FC_Rpg;
+import me.Destro168.FC_Rpg.Configs.TreasureConfig;
 import me.Destro168.FC_Rpg.Entities.RpgMonster;
 import me.Destro168.FC_Rpg.Entities.RpgPlayer;
 
@@ -10,7 +11,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -56,22 +56,18 @@ public class BattleCalculations
 		// Increase sword bonus basedo n item meta
 		if (weaponBonus > 0)
 		{
-			if (weapon.getItemMeta().getLore() != null && weapon.getItemMeta().getLore().size() >= 2)
-			{
-				ItemMeta iMeta = weapon.getItemMeta();
-				String tier = iMeta.getLore().get(1);
-				
-				if (tier.toLowerCase().contains("common"))
-					weaponBonus *= FC_Rpg.treasureConfig.getMultiplierCommon();
-				else if (tier.toLowerCase().contains("rare"))
-					weaponBonus *= FC_Rpg.treasureConfig.getMultiplierRare();
-				else if (tier.toLowerCase().contains("unique"))
-					weaponBonus *= FC_Rpg.treasureConfig.getMultiplierUnique();
-				else if (tier.toLowerCase().contains("mythical"))
-					weaponBonus *= FC_Rpg.treasureConfig.getMultiplierMythical();
-				else if (tier.toLowerCase().contains("legendary"))
-					weaponBonus *= FC_Rpg.treasureConfig.getMultiplierLegendary();
-			}
+			String tier = TreasureConfig.getItemTier(weapon);
+			
+			if (tier.equalsIgnoreCase(TreasureConfig.tierCommon))
+				weaponBonus *= FC_Rpg.treasureConfig.getMultiplierCommon();
+			else if (tier.equalsIgnoreCase(TreasureConfig.tierRare))
+				weaponBonus *= FC_Rpg.treasureConfig.getMultiplierRare();
+			else if (tier.equalsIgnoreCase(TreasureConfig.tierUnique))
+				weaponBonus *= FC_Rpg.treasureConfig.getMultiplierUnique();
+			else if (tier.equalsIgnoreCase(TreasureConfig.tierMythical))
+				weaponBonus *= FC_Rpg.treasureConfig.getMultiplierMythical();
+			else if (tier.equalsIgnoreCase(TreasureConfig.tierLegendary))
+				weaponBonus *= FC_Rpg.treasureConfig.getMultiplierLegendary();
 			
 			return 1 + weaponBonus;
 		}
@@ -118,22 +114,18 @@ public class BattleCalculations
 		// Increase sword bonus basedo n item meta
 		if (armorMultiplier > 0)
 		{
-			if (armor.getItemMeta().getLore() != null && armor.getItemMeta().getLore().size() >= 2)
-			{
-				ItemMeta iMeta = armor.getItemMeta();
-				String tier = iMeta.getLore().get(1);
-				
-				if (tier.toLowerCase().contains("common"))
-					armorMultiplier *= FC_Rpg.treasureConfig.getMultiplierCommon();
-				else if (tier.toLowerCase().contains("rare"))
-					armorMultiplier *= FC_Rpg.treasureConfig.getMultiplierRare();
-				else if (tier.toLowerCase().contains("unique"))
-					armorMultiplier *= FC_Rpg.treasureConfig.getMultiplierUnique();
-				else if (tier.toLowerCase().contains("mythical"))
-					armorMultiplier *= FC_Rpg.treasureConfig.getMultiplierMythical();
-				else if (tier.toLowerCase().contains("legendary"))
-					armorMultiplier *= FC_Rpg.treasureConfig.getMultiplierLegendary();
-			}
+			String tier = TreasureConfig.getItemTier(armor);
+			
+			if (tier.equalsIgnoreCase(TreasureConfig.tierCommon))
+				armorMultiplier *= FC_Rpg.treasureConfig.getMultiplierCommon();
+			else if (tier.equalsIgnoreCase(TreasureConfig.tierRare))
+				armorMultiplier *= FC_Rpg.treasureConfig.getMultiplierRare();
+			else if (tier.equalsIgnoreCase(TreasureConfig.tierUnique))
+				armorMultiplier *= FC_Rpg.treasureConfig.getMultiplierUnique();
+			else if (tier.equalsIgnoreCase(TreasureConfig.tierMythical))
+				armorMultiplier *= FC_Rpg.treasureConfig.getMultiplierMythical();
+			else if (tier.equalsIgnoreCase(TreasureConfig.tierLegendary))
+				armorMultiplier *= FC_Rpg.treasureConfig.getMultiplierLegendary();
 			
 			return armorMultiplier;
 		}

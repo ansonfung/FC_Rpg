@@ -53,8 +53,9 @@ public class BalanceConfig extends ConfigGod
 		{
 			setVersion(1.09);
 			
-			setMobBonusType(0, "creeper");
-			setMobBonusAttack(0, 1.5);
+			setMobBonusType(0, "skeleton");
+			setMobBonusAttackMelee(0, 1.5);
+			setMobBonusAttackRanged(0, 20);
 			setMobBonusConstitution(0, .5);
 			setMobBonusExp(0, .8);
 			setMobBonusGold(0, .8);
@@ -304,13 +305,15 @@ public class BalanceConfig extends ConfigGod
 	
 	public List<Integer> getMobBonusFieldList() { ListGetter lg = new ListGetter(fcw, prefix + "mob.bonus."); return lg.getFieldIntegerList(); }
 	public void setMobBonusType(int i, String x) { fcw.set(prefix + "mob.bonus." + i + ".type", x); }
-	public void setMobBonusAttack(int i, double x) { fcw.set(prefix + "mob.bonus." + i + ".attack", x); }
+	public void setMobBonusAttackMelee(int i, double x) { fcw.set(prefix + "mob.bonus." + i + ".attackMelee", x); }
+	public void setMobBonusAttackRanged(int i, double x) { fcw.set(prefix + "mob.bonus." + i + ".attackRanged", x); }
 	public void setMobBonusConstitution(int i, double x) { fcw.set(prefix + "mob.bonus." + i + ".constitution", x); }
 	public void setMobBonusGold(int i, double x) { fcw.set(prefix + "mob.bonus." + i + ".gold", x); }
 	public void setMobBonusExp(int i, double x) { fcw.set(prefix + "mob.bonus." + i + ".exp", x); }
 	
 	public String getMobBonusType(int i) { return fcw.getString(prefix + "mob.bonus." + i + ".type"); }
-	public double getMobBonusAttack(int i) { if (fcw.isSet(prefix + "mob.bonus." + i + ".attack")) return fcw.getDouble(prefix + "mob.bonus." + i + ".attack"); else return 1; }
+	public double getMobBonusAttackMelee(int i) { if (fcw.isSet(prefix + "mob.bonus." + i + ".attackMelee")) return fcw.getDouble(prefix + "mob.bonus." + i + ".attackMelee"); else return 1; }
+	public double getMobBonusAttackRanged(int i) { if (fcw.isSet(prefix + "mob.bonus." + i + ".attackRanged")) return fcw.getDouble(prefix + "mob.bonus." + i + ".attackRanged"); else return 1; }
 	public double getMobBonusConstitution(int i) { if (fcw.isSet(prefix + "mob.bonus." + i + ".constitution")) return fcw.getDouble(prefix + "mob.bonus." + i + ".constitution"); else return 1; }
 	public double getMobBonusGold(int i) { if (fcw.isSet(prefix + "mob.bonus." + i + ".gold")) return fcw.getDouble(prefix + "mob.bonus." + i + ".gold"); else return 1; }
 	public double getMobBonusExp(int i) { if (fcw.isSet(prefix + "mob.bonus." + i + ".exp")) return fcw.getDouble(prefix + "mob.bonus." + i + ".exp"); else return 1; }

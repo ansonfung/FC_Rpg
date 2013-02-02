@@ -8,6 +8,7 @@ import me.Destro168.FC_Suite_Shared.ConfigManagers.ConfigGod;
 import me.Destro168.FC_Suite_Shared.ConfigManagers.FileConfigurationWrapper;
 import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 import me.Destro168.FC_Rpg.FC_Rpg;
+import me.Destro168.FC_Rpg.Entities.RpgPlayer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -300,16 +301,24 @@ public class GuildConfig extends ConfigGod
     	
     	double creationCost = FC_Rpg.guildConfig.getCreationCost();
     	
-    	if (FC_Rpg.economy.getBalance(newLeaderName) < creationCost)
-    	{
-    		if (msgLib != null)
-    			msgLib.standardError("Command failed because you need " + creationCost + " to create a guild.");
-    		
-    		return;
-    	}
+    	Player playerNewLeader = Bukkit.getServer().getPlayer(newLeaderName);
     	
-    	// Remove money from player.
-    	FC_Rpg.economy.withdrawPlayer(newLeaderName, creationCost);
+    	if (playerNewLeader != null)
+    	{
+    		RpgPlayer rPlayer = FC_Rpg.rpgEntityManager.getRpgPlayer(playerNewLeader);
+        	
+        	if (rPlayer.playerConfig.getGold() < creationCost)
+        	{
+        		if (msgLib != null)
+        			msgLib.standardError("Command failed because you need " + creationCost + " to create a guild.");
+        		
+        		return;
+        	}
+        	
+        	// Remove money from player.
+        	rPlayer.playerConfig.subtractGold(creationCost);
+        	
+    	}
     	
     	updateGfcw(guildName);
     	
