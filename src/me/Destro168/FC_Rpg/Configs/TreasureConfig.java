@@ -335,27 +335,25 @@ public class TreasureConfig extends ConfigGod
 		itemName = MaterialLib.getCleanName(dropType.toString());
 		
 		// Begin setting item meta with settings.
-		ColorLib cl = new ColorLib();
-		
-		iMeta.setDisplayName(cl.parse(tierColor + prefix + " " + itemName + suffix + plusValueString));
+		iMeta.setDisplayName(ColorLib.parse(tierColor + prefix + " " + itemName + suffix + plusValueString));
 		
 		// Add spacer.
-		lore.add(cl.parse("&3-----------"));
+		lore.add(ColorLib.parse("&3-----------"));
 		
-		lore.add(cl.parse("&3Tier: " + tierColor + tier));
-		lore.add(cl.parse("&3" + magString + "&b" + FC_Rpg.df4.format(magnitude*100) + "&3%"));
+		lore.add(ColorLib.parse("&3Tier: " + tierColor + tier));
+		lore.add(ColorLib.parse("&3" + magString + "&b" + FC_Rpg.df4.format(magnitude*100) + "&3%"));
 		
 		int counter = 1;
 		
 		if (!prefix.equalsIgnoreCase(""))
 		{
-			lore.add(cl.parse("&3Enchant " + counter + ": &b" + prefixDescription));
+			lore.add(ColorLib.parse("&3Enchant " + counter + ": &b" + prefixDescription));
 			counter++;
 		}
 		
 		if (!suffix.equalsIgnoreCase(""))
 		{
-			lore.add(cl.parse("&3Enchant " + counter + ": &b" + suffixDescription));
+			lore.add(ColorLib.parse("&3Enchant " + counter + ": &b" + suffixDescription));
 			counter++;
 		}
 		

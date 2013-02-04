@@ -200,14 +200,13 @@ public class RpgPlayer extends RpgEntity
 	public String updatePrefix()
 	{
 		//Variable Declarations
-		ColorLib cl = new ColorLib();
 		FC_RpgPermissions perms = new FC_RpgPermissions(player);
 		GroupConfig gm = new GroupConfig();
 		
 		String[] playerGroups;
 		String customPrefix = playerConfig.getCustomPrefix();
 		String defaultPrefix = FC_Rpg.generalConfig.getDefaultPrefix();
-		String parsedDefault = cl.parse(defaultPrefix);
+		String parsedDefault = ColorLib.parse(defaultPrefix);
 		
 		//Check the customPrefix first.
 		if (customPrefix == null)
@@ -224,7 +223,7 @@ public class RpgPlayer extends RpgEntity
 		}
 		else if (!customPrefix.equals(defaultPrefix))
 		{
-			prefix = cl.parse(customPrefix);
+			prefix = ColorLib.parse(customPrefix);
 			return prefix;
 		}
 		
@@ -246,7 +245,7 @@ public class RpgPlayer extends RpgEntity
 		for (Group group : gm.getGroups())
 		{
 			if (group.getName().equals(playerGroups[0]))
-				return cl.parse(group.getDisplay());
+				return ColorLib.parse(group.getDisplay());
 		}
 		
 		//If a donator set them to donator tag.

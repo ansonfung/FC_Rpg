@@ -491,39 +491,35 @@ public class FC_Rpg extends JavaPlugin
 		{
 			// Variable Declarations and initializations
 			event = event_;
-			String rawEventLine = cl.removeColorCodes(event.getLine(0));
+			String rawEventLine = ColorLib.removeColorCodes(event.getLine(0));
 			perms = new FC_RpgPermissions(event.getPlayer());
 			msgLib = new MessageLib(event.getPlayer());
 			
-			FC_Rpg.plugin.getLogger().info("Test: " + rawEventLine + " Teleport: " + PlayerInteractionListener.signTeleport);
-			
-			if (rawEventLine.contains(cl.removeColorCodes(PlayerInteractionListener.signPickClass)))
+			if (rawEventLine.contains(ColorLib.removeColorCodes(PlayerInteractionListener.signPickClass)))
 				analyzeSign(PlayerInteractionListener.signPickClass);
 			
-			else if (rawEventLine.contains(cl.removeColorCodes(PlayerInteractionListener.signTeleport)))
+			else if (rawEventLine.contains(ColorLib.removeColorCodes(PlayerInteractionListener.signTeleport)))
 				analyzeSign(PlayerInteractionListener.signTeleport);
 			
-			else if (rawEventLine.contains(cl.removeColorCodes(PlayerInteractionListener.signFillMana)))
+			else if (rawEventLine.contains(ColorLib.removeColorCodes(PlayerInteractionListener.signFillMana)))
 				analyzeSign(PlayerInteractionListener.signFillMana);
 			
-			else if (event.getLine(0).contains(cl.removeColorCodes(PlayerInteractionListener.signFinish)))
+			else if (event.getLine(0).contains(ColorLib.removeColorCodes(PlayerInteractionListener.signFinish)))
 				analyzeSign(PlayerInteractionListener.signFinish);
 			
-			else if (event.getLine(0).contains(cl.removeColorCodes(PlayerInteractionListener.signExit)))
+			else if (event.getLine(0).contains(ColorLib.removeColorCodes(PlayerInteractionListener.signExit)))
 				analyzeSign(PlayerInteractionListener.signExit);
 		}
 		
 		private void analyzeSign(String newLine)
 		{
-			FC_Rpg.plugin.getLogger().info("Test 2");
-			
 			if (!perms.isAdmin())
 			{
 				msgLib.standardMessage("Key words detected on signs, edit cancelled.");
 				event.setCancelled(true);
 			}
 			else
-				event.setLine(0, FC_Rpg.cl.parse(newLine));
+				event.setLine(0, ColorLib.parse(newLine));
 		}
 	}
 
@@ -843,7 +839,7 @@ public class FC_Rpg extends JavaPlugin
 			if (perms.chatAdmin())
 			{
 				chatFormat = FC_Rpg.generalConfig.getChatFormatAdmin();
-				event.setMessage(cl.parse(event.getMessage()));
+				event.setMessage(ColorLib.parse(event.getMessage()));
 			}
 			else
 				chatFormat = FC_Rpg.generalConfig.getChatFormat();
@@ -861,11 +857,11 @@ public class FC_Rpg extends JavaPlugin
 			else
 				name = FC_Rpg.generalConfig.getNickPrefix() + rpgPlayer.playerConfig.getNick();
 			
-			chatFormat = chatFormat.replaceAll("%name%", cl.parse(name));
+			chatFormat = chatFormat.replaceAll("%name%", ColorLib.parse(name));
 			chatFormat = chatFormat.replaceAll("%chat%", "%2\\$s");
 			chatFormat = chatFormat.replaceAll("%level%", rpgPlayer.playerConfig.getClassLevel() + "");
 			
-			event.setFormat(FC_Rpg.cl.parse(chatFormat));
+			event.setFormat(ColorLib.parse(chatFormat));
 		}
 	}
 

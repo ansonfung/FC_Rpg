@@ -3,6 +3,7 @@ package me.Destro168.FC_Rpg.Util;
 import me.Destro168.FC_Rpg.FC_Rpg;
 import me.Destro168.FC_Rpg.Configs.FaqConfig;
 import me.Destro168.FC_Rpg.Entities.RpgPlayer;
+import me.Destro168.FC_Suite_Shared.ColorLib;
 import me.Destro168.FC_Suite_Shared.FC_Suite_Shared;
 import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 
@@ -472,10 +473,15 @@ public class RpgMessageLib extends MessageLib
 	public boolean helpGold()
 	{
 		standardHeader("Gold");
-		infiniteMessage("/gold convert [amount]: ","Rate is 1 gold = " + FC_Suite_Shared.sc.moneyPrefix + FC_Rpg.generalConfig.getGoldConversionRate() + FC_Suite_Shared.sc.moneySuffix + ".");
+		infiniteMessage("/gold convert [amount]: ", ColorLib.parseCustom("Rate is 1 gold = &q" + FC_Rpg.generalConfig.getGoldConversionRate() + "&q.", FC_Suite_Shared.sc.secondaryColor));
 		
 		if (perms.isAdmin())
-			infiniteMessage("[A] /gold [[add],[sub],[set]] [amount] [name]"," Exert mastery over gold!");
+		{
+			standardMessage("[A] /gold view [name]"," View how much gold a player has.");
+			standardMessage("[A] /gold add [name] [amount]"," Add gold to a player.");
+			standardMessage("[A] /gold sub [name] [amount]"," Subtract gold from a player.");
+			standardMessage("[A] /gold set [name] [amount]"," Set the gold of a player.");
+		}
 		
 		if (rpgPlayer != null)
 			infiniteMessage("You currently have ",FC_Rpg.df2.format(rpgPlayer.playerConfig.getGold())," gold.");

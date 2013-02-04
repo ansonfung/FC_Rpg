@@ -1,38 +1,21 @@
 ~ FC_Rpg Changelog ~
 
 -------------------------------------------------------------------
-Version 1.33 BETA:
+* Version 1.34:
 -------------------------------------------------------------------
-FC_Suite_Shared Requirement: Version 2.56
+FC_Suite_Shared Requirement: Version 2.57
 -------------------------------------------------------------------
 General:
-- Updated isAoE realm setting comptability for latest version of mcmmo.
-- Fixed issue with nick not being set for players during first run causing issues.
-- Did a bit of re-theming for mages /alchemy command to accomodate two new commands.
-
--------------------------------------------------------------------
-Enchanting:
-- Recoded enchanting so that you now get custom RPG items from it.
+- Fixed instance of double formatting which was causing /class view to break for certain people. Ticket-#60.
+- Removed some debug text that may or may not have slipped into beta 1.33.
+- Added new setting to be able to customize the sign change color when creating signs.
+- Added new error message for when signs are in the wrong format.
+- Not a beta version since 1.33 didn't get many bug reports and I've fixed a lot of stuff so this should be pretty stable.
+- Some internal stuff for new FC_Suite_Shared update.
 
 -------------------------------------------------------------------
 Commands:
-- Updated /radmin wall again. Now scales to fit all warps and classes. No longer can grief.
-- Removed debug line of text.
-- Dungeon commands now don't require a class to use.
-- Added two new commands, /gold, and /forge.
-- Forge can be used to repair items.
-- Added permissions check to /realm. Apparently it wasn't checking permissions. Who knew! At least nobody noticed this... I think.
-- Alchemy command now uses /alchemy transmute rather than smelt.
-- Updated the message lib a bit to fix some permission issues.
-- Updated the /rpg help and /rpg info into a merged all in one help command. All available in /rpg now.
-
--------------------------------------------------------------------
-Balance:
-- Added balance config settings to manage ranged vs. melee damage multipliers. BETTER LOVE ME iVIP.
-
--------------------------------------------------------------------
-Economy:
-- The entire economy of FC_Rpg has been moved to gold. Every instance of giving or taking money now works through gold.
-- Servers can customize a conversion rate between server currency and gold. This allows server owners to create an extremely isolated and controllable economy within FC_Rpg if desired. Conversely, the FC_Rpg economy can be free and open. If the conversation rate is set to 0 or lower it will disable the setting.
+- Reformated the /gold command a lot.
+- Added /gold view [name].
 
 -------------------------------------------------------------------

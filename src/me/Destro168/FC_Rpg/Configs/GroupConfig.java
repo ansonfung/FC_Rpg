@@ -32,14 +32,13 @@ public class GroupConfig extends ConfigGod
 			setVersion(0.23);
 			
 			//Variable Declarations
-			ColorLib cl = new ColorLib();
 			PermissionManager pm = new PermissionManager(true);
 			Permission permission = pm.getPermission();
 			
 			String[] groups = permission.getGroups();
 			
 			for (int i = 0; i < groups.length; i++)
-				fcw.set(prefix + "GroupString." + i, groups[i] + ",&f[" + cl.getRandomColor() + groups[i] + "&f] ,-1,-1");
+				fcw.set(prefix + "GroupString." + i, groups[i] + ",&f[" + ColorLib.getRandomColor() + groups[i] + "&f] ,-1,-1");
 			
 			//Save group defaults
 			FC_Rpg.plugin.saveConfig();

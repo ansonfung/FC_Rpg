@@ -28,8 +28,8 @@ public class GeneralConfig extends ConfigGod
 			fcw.setNull(prefix + "commandKeyWord.world");
 		}
 		
-		if (getVersion() < 1.33)
-			setVersion(1.33);
+		if (getVersion() < 1.34)
+			setVersion(1.34);
 		
 		// Load static information
 		getCustomChatExclusions();
@@ -87,6 +87,7 @@ public class GeneralConfig extends ConfigGod
 		getPerfectBirch();
 		getZoneNotification();
 		getZoneNotificationInterval();
+		getSignColorChangeColor();
 		
 		// Always load up static timed items.
 		loadTimedItems();
@@ -176,6 +177,7 @@ public class GeneralConfig extends ConfigGod
 	public boolean getPerfectWheat() { return fcw.getStaticBoolean(prefix + "perfectWheat", true); }
 	public boolean getZoneNotification() { return fcw.getStaticBoolean(prefix + "zoneNotification", true); }
 	public int getZoneNotificationInterval() { return fcw.getStaticInt(prefix + "zoneNotificationInterval", 20); }
+	public String getSignColorChangeColor() { return fcw.getStaticString(prefix + "signColorChangeColor", "&1"); }
 }
 
 

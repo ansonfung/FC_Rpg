@@ -8,7 +8,6 @@ import me.Destro168.FC_Rpg.Entities.RpgPlayer;
 import me.Destro168.FC_Rpg.Events.DungeonEvent;
 import me.Destro168.FC_Rpg.Util.FC_RpgPermissions;
 import me.Destro168.FC_Suite_Shared.ColorLib;
-import me.Destro168.FC_Suite_Shared.FC_Suite_Shared;
 import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 
 import org.bukkit.Material;
@@ -24,7 +23,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class PlayerInteractionListener implements Listener
 {
-	public static String signColor1 = FC_Suite_Shared.sc.primaryColor;
+	public static String signColor1 = FC_Rpg.generalConfig.getSignColorChangeColor();
 	public static String signColor2 = "&0";
 	
 	public static String signTeleport = "[" + signColor1 + "Teleport" + signColor2 + "]";
@@ -231,19 +230,18 @@ public class PlayerInteractionListener implements Listener
 	private void parseSignClick(Sign sign)
 	{
 		String pickedClass = "";
-		ColorLib cl = new ColorLib();
-		String rawLine = cl.removeColorCodes(sign.getLine(0));
+		String rawLine = ColorLib.removeColorCodes(sign.getLine(0));
 		
 		//If the player clicks a special pick class sign.
-		if (rawLine.contains(cl.removeColorCodes(signPickClass)))
+		if (rawLine.contains(ColorLib.removeColorCodes(signPickClass)))
 		{
 			//Strip colors
-			pickedClass = cl.removeColors(cl.removeColorCodes(sign.getLine(1)));
+			pickedClass = ColorLib.removeColors(ColorLib.removeColorCodes(sign.getLine(1)));
 			
 			//If the sign was proper, then 
 			for (int i = 0; i < FC_Rpg.classConfig.getRpgClasses().length; i++)
 			{
-				if (pickedClass.equalsIgnoreCase(cl.removeColorCodes(FC_Rpg.classConfig.getRpgClass(i).getName())))
+				if (pickedClass.equalsIgnoreCase(ColorLib.removeColorCodes(FC_Rpg.classConfig.getRpgClass(i).getName())))
 				{
 					//Prevent players from picking a job/class again without respecing.
 					if (FC_Rpg.rpgEntityManager.getRpgPlayer(player) != null)
@@ -261,12 +259,14 @@ public class PlayerInteractionListener implements Listener
 					
 					FC_Rpg.classSelection.put(player, pickedClass);
 					
-					//Break.
-					break;
+					// We want to return.
+					return;
 				}
 			}
+			
+			sendBadSignError();
 		}
-		else if (rawLine.contains(cl.removeColorCodes(signFinish)))
+		else if (rawLine.contains(ColorLib.removeColorCodes(signFinish)))
 		{
 			//If the player has picked both a class and job.
 			if (FC_Rpg.classSelection.containsKey(player))
@@ -276,13 +276,17 @@ public class PlayerInteractionListener implements Listener
 					//Store the player as a new player.
 					FC_Rpg.rpgEntityManager.setPlayerStart(FC_Rpg.classSelection.get(player), player, true);
 					FC_Rpg.classSelection.remove(player);
+					return;
 				}
 				else if (sign.getLine(1).contains("Auto") || sign.getLine(2).contains("Auto") || sign.getLine(3).contains("Auto"))
 				{
 					//Store the player as a new player.
 					FC_Rpg.rpgEntityManager.setPlayerStart(FC_Rpg.classSelection.get(player), player, false);
 					FC_Rpg.classSelection.remove(player);
+					return;
 				}
+				
+				sendBadSignError();
 			}
 			else
 			{
@@ -290,30 +294,47 @@ public class PlayerInteractionListener implements Listener
 				return;
 			}
 		}
-		else if (rawLine.contains(cl.removeColorCodes(signFillMana)))
+		else if (rawLine.contains(ColorLib.removeColorCodes(signFillMana)))
 		{
 			if (FC_Rpg.rpgEntityManager.getRpgPlayer(player) != null)
 				FC_Rpg.rpgEntityManager.getRpgPlayer(player).healMana(99999999);
 			
 			msgLib.standardMessage("Refilled Mana!");
+			return;
 		}
-		else if (rawLine.contains(cl.removeColorCodes(signFillHealth)))
+		else if (rawLine.contains(ColorLib.removeColorCodes(signFillHealth)))
 		{
 			if (FC_Rpg.rpgEntityManager.getRpgPlayer(player) != null)
 				FC_Rpg.rpgEntityManager.getRpgPlayer(player).healHealth(99999999);
 			
 			msgLib.standardMessage("Refilled Health!");
+			return;
 		}
-		else if (rawLine.contains(cl.removeColorCodes(signTeleport)))
+		else if (rawLine.contains(ColorLib.removeColorCodes(signTeleport)))
 		{
 			if (FC_Rpg.rpgEntityManager.getRpgPlayer(player) != null)
+			{
 				teleportPlayer(FC_Rpg.rpgEntityManager.getRpgPlayer(player), sign.getLine(1));
+				return;
+			}
+			
+			sendBadSignError();
 		}
-		else if (rawLine.contains(cl.removeColorCodes(signExit)))
+		else if (rawLine.contains(ColorLib.removeColorCodes(signExit)))
 		{
 			if (FC_Rpg.rpgEntityManager.getRpgPlayer(player) != null)
+			{
 				exitPlayer(sign.getLine(1));
+				return;
+			}
+			
+			sendBadSignError();
 		}
+	}
+	
+	private void sendBadSignError()
+	{
+		msgLib.standardError("This sign is in the wrong format so it doesn't do anything.");
 	}
 	
 	private void spendRecord()

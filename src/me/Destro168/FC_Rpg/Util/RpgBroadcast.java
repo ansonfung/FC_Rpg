@@ -16,7 +16,6 @@ public class RpgBroadcast extends BroadcastLib
 	public boolean rpgBroadcast(String... msg)
 	{
 		List<World> rpgWorlds = FC_Rpg.worldConfig.getRpgWorlds();
-		ColorLib colorLib = new ColorLib();
 		
 		if (rpgWorlds == null || rpgWorlds.size() <= 0)
 			return true;
@@ -25,7 +24,7 @@ public class RpgBroadcast extends BroadcastLib
 		{
 			for (Player p : rpgWorld.getPlayers())
 			{
-				p.sendMessage(colorLib.parseCustom(cm.primaryColor, cm.broadcastTag + toString(msg)));
+				p.sendMessage(ColorLib.parseCustom(cm.primaryColor, cm.broadcastTag + toString(msg)));
 			}
 		}
 		
