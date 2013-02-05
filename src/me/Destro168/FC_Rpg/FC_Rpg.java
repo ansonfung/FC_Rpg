@@ -731,8 +731,13 @@ public class FC_Rpg extends JavaPlugin
 				event.setCancelled(true);
 
 				// Set the magnitude to heal by the players max health.
-				magnitudeModifier = rpgEntityManager.getRpgPlayer(player).playerConfig.maxHealth;
-
+				RpgPlayer rPlayer = rpgEntityManager.getRpgPlayer(player);
+				
+				if (rPlayer == null)
+					return;
+				
+				magnitudeModifier = rPlayer.playerConfig.maxHealth;
+				
 				// Heal the player different amounts for different things.
 				if (event.getRegainReason() == RegainReason.EATING)
 				{
@@ -756,11 +761,11 @@ public class FC_Rpg extends JavaPlugin
 					magnitudeModifier = 1;
 
 				// Restore health/mana to the player
-				rpgEntityManager.getRpgPlayer(player).healHealth(magnitudeModifier);
+				rPlayer.healHealth(magnitudeModifier);
 
 				// Update health
-				hc = new HealthConverter(rpgEntityManager.getRpgPlayer(player).playerConfig.maxHealth, rpgEntityManager.getRpgPlayer(player).playerConfig.curHealth);
-
+				hc = new HealthConverter(rPlayer.playerConfig.maxHealth, rPlayer.playerConfig.curHealth);
+				
 				player.setHealth(hc.getPlayerHearts());
 			}
 			else if (entity instanceof LivingEntity)
@@ -1153,6 +1158,15 @@ public class FC_Rpg extends JavaPlugin
 		{
 			if (!FC_Rpg.worldConfig.getIsRpgWorld(event.getEnchantBlock().getWorld().getName()))
 				return;
+			
+			if (event.getItem().getType() == Material.BOOK)
+			{
+				MessageLib msgLib = new MessageLib(event.getEnchanter());
+				msgLib.standardError("Books can't be enchanted with enchanting tables.");
+				
+				event.setCancelled(true);
+				return;
+			}
 			
 			// Remove all vanilla enchants.
 			event.getEnchantsToAdd().clear();

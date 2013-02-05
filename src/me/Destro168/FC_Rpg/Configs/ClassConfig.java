@@ -1,5 +1,6 @@
 package me.Destro168.FC_Rpg.Configs;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import me.Destro168.FC_Suite_Shared.ConfigManagers.ConfigGod;
@@ -9,13 +10,7 @@ import me.Destro168.FC_Rpg.LoadedObjects.RpgClass;
 
 public class ClassConfig extends ConfigGod
 {
-	private final int CLASS_COUNT_MAX = 100;
-	
-	private int classCount;
-	private RpgClass[] rpgClass;
-	
-	public RpgClass[] getRpgClasses() { return rpgClass; }
-	public RpgClass getRpgClass(int i) { return rpgClass[i]; }
+	public List<RpgClass> rpgClassList;
 	
 	public ClassConfig()
 	{
@@ -77,6 +72,18 @@ public class ClassConfig extends ConfigGod
 			setStatGrowth(4,8,1,0,1);
 			setStatGrowth(5,999,999,999,999);
 		}
+		
+		// Add in promotion groups for classes.
+		if (getVersion() < 1.1)
+		{
+			setVersion(1.1);
+			
+			for (int i : getClassFieldList())
+			{
+				setGroupPromotion(i, "Member");
+				setGroupDemotion(i, "Guest");
+			}
+		}
 	}
 	
 	private String getDebugClassString()
@@ -91,49 +98,29 @@ public class ClassConfig extends ConfigGod
 	
 	private void loadConfig()
 	{
+		rpgClassList = new ArrayList<RpgClass>();
+		
 		//We load data from configuration files now.
-		classCount = countClasses();
-		
-		rpgClass = new RpgClass[classCount];
-		
-		for (int i = 0; i < classCount; i++)
-			rpgClass[i] = new RpgClass(i, getName(i), getDescription(i), getPassiveID(i), setRestrictionID(i), getStatGrowth(i), getSpells(i));
+		for (int i : getClassFieldList())
+			rpgClassList.add(new RpgClass(i, getName(i), getDescription(i), getPassiveID(i), getRestrictionID(i), getStatGrowth(i), getSpells(i)));
 	}
 	
-	private int countClasses()
+	public RpgClass getRpgClass(String className)
 	{
-		//Variable Declarations
-		int count = 0;
-		
-		//Count up the classes based on having a name.
-		for (int i = 0; i < CLASS_COUNT_MAX; i++)
+		for (RpgClass currentClass : rpgClassList)
 		{
-			if (getName(i) != null)
-			{
-				if (!getName(i).equals(""))
-					count++;
-			}
-		}
-		
-		return count;
-	}
-	
-	public RpgClass getClassByName(String className)
-	{
-		for (RpgClass currentClass : rpgClass)
-		{
-			if (currentClass.getName() == className)
+			if (currentClass.getName().equalsIgnoreCase(className))
 				return currentClass;
 		}
 		
 		return null;
 	}
 	
-	public RpgClass getClassByID(int classID)
+	public RpgClass getRpgClass(int classNumber)
 	{
-		for (RpgClass currentClass : rpgClass)
+		for (RpgClass currentClass : rpgClassList)
 		{
-			if (currentClass.getID() == classID)
+			if (currentClass.getID() == classNumber)
 				return currentClass;
 		}
 		
@@ -149,6 +136,8 @@ public class ClassConfig extends ConfigGod
 	
 	private void setName(int i, String x) { fcw.set(prefix + i + ".name", x); }
 	private void setDescription(int i, String x) { fcw.set(prefix + i + ".description", x); }
+	private void setGroupPromotion(int i, String x) { fcw.set(prefix + i + ".group.promotion", x); }
+	private void setGroupDemotion(int i, String x) { fcw.set(prefix + i + ".group.demotion", x); }
 	private void setPassiveID(int i, int x) { fcw.set(prefix + i + ".passiveID", x); }
 	private void setRestrictionID(int i, int x) { fcw.set(prefix + i + ".restrictionID", x); }
 	private void setStatGrowth(int i, int a, int b, int c, int d) { fcw.set(prefix + i + ".statGrowth", a + "," + b + "," + c + "," + d); }
@@ -156,8 +145,10 @@ public class ClassConfig extends ConfigGod
 	
 	private String getName(int i) { return fcw.getString(prefix + i + ".name");  }
 	private String getDescription(int i) { return fcw.getString(prefix + i + ".description"); }
-	private int getPassiveID(int i) { return fcw.getInt(prefix + i + ".passiveID"); }
-	private int setRestrictionID(int i) { return fcw.getInt(prefix + i + ".restrictionID"); }
+	public String getGroupPromotion(int i) { return fcw.getString(prefix + i + ".group.promotion"); }
+	public String getGroupDemotion(int i) { return fcw.getString(prefix + i + ".group.demotion"); }
+	private int getPassiveID(int i) { if (fcw.isSet(prefix + i + ".passiveID")) return fcw.getInt(prefix + i + ".passiveID"); else return -1; }
+	private int getRestrictionID(int i) { if (fcw.isSet(prefix + i + ".restrictionID")) return fcw.getInt(prefix + i + ".restrictionID"); else return -1; }
 	private List<Integer> getStatGrowth(int i) { return fcw.getCustomIntegerList(prefix + i + ".statGrowth"); }
 	private List<Integer> getSpells(int i) { return fcw.getCustomIntegerList(prefix + i + ".spellIDs"); }
 }

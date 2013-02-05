@@ -13,6 +13,7 @@ import me.Destro168.FC_Rpg.Spells.SpellEffect;
 import me.Destro168.FC_Rpg.Spells.SpellCaster;
 import me.Destro168.FC_Rpg.Util.DistanceModifierLib;
 import me.Destro168.FC_Rpg.Util.MobAggressionCheck;
+import me.Destro168.FC_Suite_Shared.Messaging.MessageLib;
 
 import org.bukkit.GameMode;
 import org.bukkit.enchantments.Enchantment;
@@ -227,7 +228,15 @@ public class DamageListener implements Listener
 
 		// If we are canceling rpg damage, then return.
 		if (cancelRpgDamage == true)
+		{
+			if (playerAttacker != null && playerDefender != null)
+			{
+				MessageLib msgLib = new MessageLib(playerAttacker);
+				msgLib.standardMessage("This player can't be attacked currently.");
+			}
+			
 			return;
+		}
 		
 		if (customDamage > -1)
 			damage = customDamage;
@@ -335,6 +344,13 @@ public class DamageListener implements Listener
 		{
 			playerDefender = (Player) entityDefender;
 			rpgDefender = FC_Rpg.rpgEntityManager.getRpgPlayer(playerDefender);
+			
+			if (rpgDefender == null || rpgDefender.playerConfig.getIsActive() == false)
+			{
+				MessageLib msgLib = new MessageLib(playerDefender);
+				msgLib.standardMessage("You need to pick a class before you can get hit.");
+				cancelRpgDamage = true;
+			}
 		}
 		else if (entityDefender instanceof LivingEntity)
 		{
@@ -418,7 +434,7 @@ public class DamageListener implements Listener
 				return 0;
 			}
 		}
-
+		
 		else if (e.getDamager() instanceof Arrow)
 		{
 			// Set damage type to arrow
@@ -430,17 +446,9 @@ public class DamageListener implements Listener
 			// If the player shot the arrow, set damage to player stuff.
 			if (arrow.getShooter() instanceof Player)
 			{
-				// Store player
-				playerAttacker = (Player) arrow.getShooter();
-
 				// Store the attacker
+				playerAttacker = (Player) arrow.getShooter();
 				rpgAttacker = FC_Rpg.rpgEntityManager.getRpgPlayer(playerAttacker);
-
-				// Set damage of arrows.
-				damage = rpgAttacker.getTotalAttack() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeAttack();
-				
-				// Add weapon Bonus
-				damage *= FC_Rpg.battleCalculations.getWeaponModifier(playerAttacker.getItemInHand(), rpgAttacker.getTotalAttack());
 			}
 			else
 			{
@@ -470,19 +478,9 @@ public class DamageListener implements Listener
 		// Melee player attacks
 		else if (e.getDamager() instanceof Player)
 		{
-			playerAttacker = (Player) e.getDamager();
-			
 			// Store the attacker
+			playerAttacker = (Player) e.getDamager();
 			rpgAttacker = FC_Rpg.rpgEntityManager.getRpgPlayer(playerAttacker);
-			
-			if (rpgAttacker == null)
-				return -1;
-			
-			// Get base damage.
-			damage = rpgAttacker.getTotalAttack() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeAttack();
-			
-			// Add weapon Bonus
-			damage *= FC_Rpg.battleCalculations.getWeaponModifier(playerAttacker.getItemInHand(), rpgAttacker.getTotalAttack());
 		}
 		
 		// If the entity is a living entity we want to store it.
@@ -510,7 +508,7 @@ public class DamageListener implements Listener
 			
 			damage = rpgMobAttacker.getAttack() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeAttack();
 		}
-
+		
 		// Cancel damage for stunned stuff.
 		if (rpgAttacker != null)
 		{
@@ -520,6 +518,16 @@ public class DamageListener implements Listener
 				cancelRpgDamage = true;
 				return 0;
 			}
+			
+			// Set damage of arrows.
+			damage = rpgAttacker.getTotalAttack() * FC_Rpg.balanceConfig.getPlayerStatMagnitudeAttack();
+			
+			// Add weapon Bonus
+			damage *= FC_Rpg.battleCalculations.getWeaponModifier(playerAttacker.getItemInHand(), rpgAttacker.getTotalAttack());
+			
+			// If the player has the attack buff, then...
+			if (rpgAttacker.playerConfig.getStatusActiveRpgPlayer(SpellEffect.DAMAGE_BONUS.getID()))
+				damage *= rpgAttacker.playerConfig.getStatusMagnitude(SpellEffect.DAMAGE_BONUS.getID());
 		}
 		else if (rpgMobAttacker != null)
 		{
@@ -528,6 +536,14 @@ public class DamageListener implements Listener
 				cancelRpgDamage = true;
 				return 0;
 			}
+		}
+		else if (rpgAttacker == null)
+		{
+			MessageLib msgLib = new MessageLib(playerAttacker);
+			msgLib.standardMessage("You need to pick a class before you can fight.");
+			
+			cancelRpgDamage = true;
+			return 0;
 		}
 		
 		return damage;

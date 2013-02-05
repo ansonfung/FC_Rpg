@@ -77,9 +77,7 @@ public class PlayerConfig extends ConfigGod
 	public boolean getAutoCast() { return fcw.getBoolean(prefix + "autoCast"); }
 	
 	// Sets
-	public void setSpellLevels(int x) { fcw.set(prefix + "spell.levels", x); }
 	public void setSpellLevels(List<Integer> x) { fcw.setCustomList(prefix + "spell.levels", x); }
-	public void setSpellBinds(int x) { fcw.set(prefix + "spell.binds", x); }
 	public void setSpellBinds(List<Integer> x) { fcw.setCustomList(prefix + "spell.binds", x); }
 	public void setCustomPrefix(String x) { fcw.set(prefix + "customPrefix", x); }
 	public void setActiveSpell(String x) { fcw.set(prefix + "activeSpell", x); }
@@ -284,12 +282,12 @@ public class PlayerConfig extends ConfigGod
 	
 	private void refreshClass()
 	{
-		rpgClass = FC_Rpg.classConfig.getClassByID(getCombatClass());
+		rpgClass = FC_Rpg.classConfig.getRpgClass(getCombatClass());
 		
 		//Automatically detect missing levels and binds for spells and fill them into the players config. Null = player isn't active yet or upgraded
 		//If the player isn't upgraded to 0.2, then the handleUpdates function will udpate rather than this instance.
 		int playerStoredSpellLevels = 0;
-		try { playerStoredSpellLevels = this.getSpellLevels().size(); } catch (NullPointerException e) { return; }
+		try { playerStoredSpellLevels = getSpellLevels().size(); } catch (NullPointerException e) { return; }
 		
 		//Check if the player needs more default level slots for spells.
 		if (playerStoredSpellLevels < rpgClass.getSpellBook().size())
@@ -298,7 +296,7 @@ public class PlayerConfig extends ConfigGod
 			List<Integer> spellLevels = new ArrayList<Integer>();
 			List<Integer> spellBinds = new ArrayList<Integer>();
 			
-			for (int i = playerStoredSpellLevels; i < rpgClass.getSpellBook().size(); i++)
+			for (int i = 0; i < rpgClass.getSpellBook().size(); i++)
 			{
 				spellLevels.add(0);
 				spellBinds.add(999);
@@ -365,7 +363,7 @@ public class PlayerConfig extends ConfigGod
 		setMaxManaFile(0);
 		setCurHealthFile(0);
 		setMaxHealthFile(0);
-
+		
 		setLifetimeMobKills(0);
 		setAutomaticAllocation(true);
 		setLastRecievedHourlyItems(System.currentTimeMillis());
@@ -375,7 +373,7 @@ public class PlayerConfig extends ConfigGod
 			setSecondsPlayed(0);
 		
 		//Use a temporary rpgClass.
-		RpgClass tempClass = FC_Rpg.classConfig.getClassByID(getCombatClass());
+		RpgClass tempClass = FC_Rpg.classConfig.getRpgClass(getCombatClass());
 
 		//Set the spell level and binds for spells.
 		List<Integer> levels = new ArrayList<Integer>();
@@ -562,7 +560,7 @@ public class PlayerConfig extends ConfigGod
     	List<Integer> statGrowth = rpgClass.getStatGrowth();
     	
     	//Assign stat points based on class.
-    	for (RpgClass rpgClass : FC_Rpg.classConfig.getRpgClasses())
+    	for (RpgClass rpgClass : FC_Rpg.classConfig.rpgClassList)
     	{
     		if (rpgClass.getID() == getCombatClass())
     		{

@@ -223,7 +223,7 @@ public class RpgEntityManager
     		{
     			//If they aren't active, then we want to make them active by creating their rpg player.
         		if (rpgPlayer.playerConfig.getIsActive() == false)
-        			setPlayerStart("Swordsman", player, false);	//Store the player as a new player.
+        			setPlayerStart(FC_Rpg.classConfig.rpgClassList.get(0).getName(), player, false);	//Store the player as a new player.
         		
         		piMap.get(player).startTasks();
     		}
@@ -323,7 +323,7 @@ public class RpgEntityManager
     	FC_Rpg.rpgBroadcast.rpgBroadcast(player.getName() + " has picked " + classSelection + "!");
 		
     	//Convert stringClass to real class number.
-    	for (int i = 0; i < FC_Rpg.classConfig.getRpgClasses().length; i++)
+    	for (int i = 0; i < FC_Rpg.classConfig.rpgClassList.size(); i++)
     	{
     		if (classSelection.equals(ColorLib.removeColorCodes(FC_Rpg.classConfig.getRpgClass(i).getName())))
     		{

@@ -5,6 +5,10 @@
 -------------------------------------------------------------------
 FC_Suite_Shared Requirement: Version 2.57
 -------------------------------------------------------------------
+Configs you will have to update in this version:
+- Classes.yml
+
+-------------------------------------------------------------------
 General:
 - Fixed instance of double formatting which was causing /class view to break for certain people. Ticket-#60.
 - Removed some debug text that may or may not have slipped into beta 1.33.
@@ -12,6 +16,13 @@ General:
 - Added new error message for when signs are in the wrong format.
 - Not a beta version since 1.33 didn't get many bug reports and I've fixed a lot of stuff so this should be pretty stable.
 - Some internal stuff for new FC_Suite_Shared update.
+- Disabled books being enchantable. Fixes bug and removes another way to get vanilla enchants.
+- Fixed issue where class was always resetting.
+
+-------------------------------------------------------------------
+Classes:
+- Can now give a group to players whenever they pick a class. Can also move them out of a group as well. See setup.txt for more information.
+- Fixed not being able to have more than 5 spells.
 
 -------------------------------------------------------------------
 Commands:

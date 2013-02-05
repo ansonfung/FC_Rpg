@@ -129,7 +129,7 @@ public class SpellCaster
 		if (spell.classRestricted)
 		{
 			//Restricted spells also require a target.
-			for (RpgClass rpgClass : FC_Rpg.classConfig.getRpgClasses())
+			for (RpgClass rpgClass : FC_Rpg.classConfig.rpgClassList)
 			{
 				if (rpgClass.getID() == rpgCaster.playerConfig.getCombatClass())
 				{
@@ -284,7 +284,7 @@ public class SpellCaster
 		
 		else if (x == SpellEffect.BLEED.getID())
 			effect_Bleed();
-
+		
 		else if (x == SpellEffect.AOE.getID())
 			effect_AoE();
 		

@@ -254,6 +254,9 @@ Happy Casting!
 - passiveID: Give the class some unique feature. Passive IDs are explained below. Classes can only have one.
 - restrictionID: This makes it so that the player has to have a specific item to cast restricted spells. Restirction IDs are listed below. Classes can only have one.
 - statGrowth: Put down attack, constitution, magic, intelligence stat growths for this class each level.
+- group:
+    promotion: Member <- Group that a player will be promoted to when they pick a class. 
+    demotion: Guest <- Group that a player will be demoted to when they pick a class. Set to '' if you don't want to enable this feature (same for promotion).
 
 passiveIDs - Can be customized in balance config.
 - 1 - ScalingArrows - Higher level = faster arrows.

@@ -175,6 +175,16 @@ public class RpgPlayer extends RpgEntity
 		//Set the files defaults.
 		playerConfig.setPlayerDefaults(pickedClass, manualDistribution);
 		
+		// Change player group if they aren't an op.
+		if (player_.isOp() == false)
+		{
+			FC_RpgPermissions perms = new FC_RpgPermissions(player_);
+			String newGroup = FC_Rpg.classConfig.getGroupPromotion(pickedClass);
+			
+			if (newGroup != null && !newGroup.equals(""))
+				perms.setPlayerGroup(newGroup);
+		}
+		
 		//Update health and mana based on stats.
 		calculateHealthAndMana();
 		
@@ -341,11 +351,11 @@ public class RpgPlayer extends RpgEntity
 		catch (NumberFormatException e)
 		{
 			//Attempt to get class by word entry.
-			RpgClass[] c = FC_Rpg.classConfig.getRpgClasses();
+			List<RpgClass> c = FC_Rpg.classConfig.rpgClassList;
 			
-			for (int i = 0; i < c.length; i++)
+			for (int i = 0; i < c.size(); i++)
 			{
-				if (x.equalsIgnoreCase(c[i].getName()))
+				if (x.equalsIgnoreCase(c.get(i).getName()))
 				{
 					cNumber = i;
 					break;
@@ -365,7 +375,7 @@ public class RpgPlayer extends RpgEntity
 			return msgLib.standardError("You Can't Switch To The Class You Are Currently.");
 		
 		//Make sure that the user is only picking from proper classes.
-		if (cNumber < 0 || cNumber > FC_Rpg.classConfig.getRpgClasses().length)
+		if (cNumber < 0 || cNumber > FC_Rpg.classConfig.rpgClassList.size())
 			return msgLib.errorInvalidCommand();
 		
 		//Chance the combat class.

@@ -262,13 +262,6 @@ public class EntityDamageManager
 		// Update sword durabilities.
 		updateSwordDurabilities(playerAttacker);
 		
-		// If the player has the attack buff, then...
-		if (rpgAttacker.playerConfig.getStatusActiveRpgPlayer(SpellEffect.DAMAGE_BONUS.getID()))
-		{
-			// Increase attack damage by its magnitude.
-			damage *= rpgAttacker.playerConfig.getStatusMagnitude(SpellEffect.DAMAGE_BONUS.getID());
-		}
-		
 		if (rpgAttacker.playerConfig.getStatusActiveRpgPlayer(SpellEffect.CRITICAL_DAMAGE_DOUBLE.getID()))
 		{
 			Random rand = new Random();

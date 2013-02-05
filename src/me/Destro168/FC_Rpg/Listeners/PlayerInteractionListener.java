@@ -239,7 +239,7 @@ public class PlayerInteractionListener implements Listener
 			pickedClass = ColorLib.removeColors(ColorLib.removeColorCodes(sign.getLine(1)));
 			
 			//If the sign was proper, then 
-			for (int i = 0; i < FC_Rpg.classConfig.getRpgClasses().length; i++)
+			for (int i = 0; i < FC_Rpg.classConfig.rpgClassList.size(); i++)
 			{
 				if (pickedClass.equalsIgnoreCase(ColorLib.removeColorCodes(FC_Rpg.classConfig.getRpgClass(i).getName())))
 				{

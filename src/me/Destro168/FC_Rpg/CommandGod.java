@@ -578,12 +578,10 @@ public class CommandGod implements CommandExecutor
 		//Allow a player to list server classes.
 		private boolean listSubCommand()
 		{
-			RpgClass[] classes = FC_Rpg.classConfig.getRpgClasses();
-			
 			msgLib.standardHeader("Server Classes List");
 			
-			for (int i = 0; i < classes.length; i++)
-				msgLib.standardMessage("#" + (i+1),classes[i].getName());
+			for (int i = 0; i < FC_Rpg.classConfig.rpgClassList.size(); i++)
+				msgLib.standardMessage("#" + (i+1),FC_Rpg.classConfig.rpgClassList.get(i).getName());
 			
 			return true;
 		}
@@ -1874,9 +1872,18 @@ public class CommandGod implements CommandExecutor
 			//Set to inactive
 			rpgPlayer.playerConfig.setDefaults();
 			
-			//Unregister the player.
-			FC_Rpg.rpgEntityManager.unregisterRpgPlayer(player);
-			
+    		// Never demote ops.
+    		if (target.isOp() == false)
+    		{
+    			// Demote the player group if they use /reset.
+        		FC_RpgPermissions perms = new FC_RpgPermissions(target);
+        		
+    			String newGroup = FC_Rpg.classConfig.getGroupDemotion(rpgPlayer.playerConfig.getCombatClass());
+    			
+    			if (newGroup != null && !newGroup.equals(""))
+    				perms.setPlayerGroup(FC_Rpg.classConfig.getGroupDemotion(rpgPlayer.playerConfig.getCombatClass()));
+    		}
+    		
 			//Send confirmation message.
 			msgLib.standardMessage("The reset has been performed successfully.");
 			
@@ -1970,7 +1977,7 @@ public class CommandGod implements CommandExecutor
 					playerFile.addOfflineClassExperience(intArg2, true, null);
 				else if (modifable.equalsIgnoreCase("class"))
 				{
-					if (intArg2 >= 0 && intArg2 < FC_Rpg.classConfig.getRpgClasses().length)
+					if (intArg2 >= 0 && intArg2 < FC_Rpg.classConfig.rpgClassList.size())
 						playerFile.setCombatClass(intArg2 - 1);
 				}
 				else if (modifable.equalsIgnoreCase("jobRank"))
@@ -2210,7 +2217,7 @@ public class CommandGod implements CommandExecutor
 								try { warpName = FC_Rpg.warpConfig.getName(FC_Rpg.warpConfig.getWarpFieldList().get(i)); 
 									sign.setLine(0, ColorLib.parse(PlayerInteractionListener.signTeleport)); 
 									sign.setLine(1, warpName); 
-								} 
+								}
 								catch (NullPointerException e) { continue; }
 								catch (IndexOutOfBoundsException e) { continue; }
 							}
@@ -2270,6 +2277,7 @@ public class CommandGod implements CommandExecutor
 						}
 						catch (ClassCastException e)
 						{
+							FC_Rpg.plugin.getLogger().info("Class cast exception thrown.");
 							continue;
 						}
 					}

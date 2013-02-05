@@ -1,8 +1,6 @@
 ~ FC_Rpg, Developer Personal Notes ~
 
 ^Todo List^
-- Items with lore cost more to repair. <- should be done.
-- Test dungeons attempting to pay. <- don't care.
 - Spell list, spell info. <- Will add next version.
 
 Not as important todo:
